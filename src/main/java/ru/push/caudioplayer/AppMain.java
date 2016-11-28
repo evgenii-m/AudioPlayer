@@ -1,12 +1,16 @@
 package ru.push.caudioplayer;
 
-import javafx.scene.Scene;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Lazy;
+
+import java.net.URI;
+import java.nio.file.Paths;
 
 /**
  * @author push <mez.e.s@yandex.ru>
@@ -25,10 +29,14 @@ public class AppMain extends AbstractJavaFxApplicationSupport {
 
   @Override
   public void start(Stage stage) throws Exception {
-    stage.setTitle(windowTitle);
-    stage.setScene(new Scene(view.getView()));
-    stage.setResizable(true);
-    stage.centerOnScreen();
+    final URI resource = Paths.get("target/1. Just One Of Those Things.mp3").toUri();
+    final Media media = new Media(resource.toString());
+    final MediaPlayer mediaPlayer = new MediaPlayer(media);
+    mediaPlayer.play();
+
+    stage.setTitle("Audio Player 1");
+    stage.setWidth(200);
+    stage.setHeight(200);
     stage.show();
   }
 
