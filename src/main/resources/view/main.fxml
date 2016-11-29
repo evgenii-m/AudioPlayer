@@ -4,10 +4,8 @@
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 
-
-<AnchorPane prefHeight="53.0" prefWidth="132.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="ru.push.caudioplayer.controller.MainController">
-   <children>
-      <Label prefHeight="21.0" prefWidth="89.0" text="LabelMain" fx:id="labelMain"/>
-   </children>
-</AnchorPane>
+<BorderPane fx:id="root" prefHeight="140.0" prefWidth="319.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.push.caudioplayer.controller.MainController">
+   <center>
+      <Label fx:id="labelMain" prefHeight="21.0" prefWidth="89.0" text="LabelMain" />
+   </center>
+</BorderPane>

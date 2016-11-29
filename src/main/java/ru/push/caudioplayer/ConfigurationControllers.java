@@ -2,9 +2,12 @@ package ru.push.caudioplayer;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.push.caudioplayer.controller.MainController;
+import ru.push.caudioplayer.controller.MediaPlayerController;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,27 +19,36 @@ import java.io.InputStream;
 @Configuration
 public class ConfigurationControllers {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationControllers.class);
+
   @Bean(name = "mainView")
-  public View getMainView() throws IOException {
+  public View getMainView() {
     return loadView("view/main.fxml");
   }
 
   @Bean
-  public MainController getMainController() throws IOException {
+  public MainController getMainController() {
     return (MainController) getMainView().getController();
   }
 
-  protected View loadView(String url) throws IOException {
-    InputStream fxmlStream = null;
-    try {
-      fxmlStream = getClass().getClassLoader().getResourceAsStream(url);
+  @Bean(name = "mediaPlayerView")
+  public View getMediaPlayerView() {
+    return loadView("view/mediaplayer.fxml");
+  }
+
+  @Bean
+  public MediaPlayerController getMediaPlayerController() {
+    return (MediaPlayerController) getMediaPlayerView().getController();
+  }
+
+  protected View loadView(String url) {
+    try (InputStream fxmlStream = getClass().getClassLoader().getResourceAsStream(url)) {
       FXMLLoader loader = new FXMLLoader();
       loader.load(fxmlStream);
       return new View(loader.getRoot(), loader.getController());
-    } finally {
-      if (fxmlStream != null) {
-        fxmlStream.close();
-      }
+    } catch (IOException e) {
+      LOGGER.error("Load view fail", e);
+      throw new RuntimeException(e);
     }
   }
 

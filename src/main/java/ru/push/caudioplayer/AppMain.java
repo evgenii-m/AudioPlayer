@@ -1,16 +1,13 @@
 package ru.push.caudioplayer;
 
-import javafx.scene.media.Media;
-import javafx.scene.media.MediaPlayer;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Lazy;
+import uk.co.caprica.vlcj.discovery.NativeDiscovery;
 
-import java.net.URI;
-import java.nio.file.Paths;
+import javax.annotation.Resource;
 
 /**
  * @author push <mez.e.s@yandex.ru>
@@ -20,23 +17,23 @@ import java.nio.file.Paths;
 @SpringBootApplication
 public class AppMain extends AbstractJavaFxApplicationSupport {
 
-  @Value("${ui.title:JavaFX приложение}")//
+  private static final double DEFAULT_WIDTH  = 400;
+  private static final double DEFAULT_HEIGHT = 250;
+
+  @Value("${ui.title:JavaFX приложение}")
   private String windowTitle;
 
-  @Qualifier("mainView")
-  @Autowired
-  private ConfigurationControllers.View view;
+  @Resource(name = "mainView")
+  private ConfigurationControllers.View mainView;
 
   @Override
   public void start(Stage stage) throws Exception {
-    final URI resource = Paths.get("target/1. Just One Of Those Things.mp3").toUri();
-    final Media media = new Media(resource.toString());
-    final MediaPlayer mediaPlayer = new MediaPlayer(media);
-    mediaPlayer.play();
+    new NativeDiscovery().discover();     // discover libvlc native libraries
 
-    stage.setTitle("Audio Player 1");
-    stage.setWidth(200);
-    stage.setHeight(200);
+    stage.setTitle(windowTitle);
+    stage.setScene(new Scene(mainView.getView(), DEFAULT_WIDTH, DEFAULT_HEIGHT));
+    stage.setResizable(true);
+    stage.centerOnScreen();
     stage.show();
   }
 

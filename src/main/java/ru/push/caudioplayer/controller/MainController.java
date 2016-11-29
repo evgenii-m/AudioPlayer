@@ -2,10 +2,13 @@ package ru.push.caudioplayer.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.push.caudioplayer.ConfigurationControllers;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
 /**
  * @author push <mez.e.s@yandex.ru>
@@ -13,20 +16,27 @@ import javax.annotation.PostConstruct;
  */
 public class MainController {
 
-  private static final Logger LOG = LoggerFactory.getLogger(MainController.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(MainController.class);
 
+  @FXML
+  private BorderPane root;
   @FXML
   private Label labelMain;
 
   @FXML
+  @Resource(name = "mediaPlayerView")
+  private ConfigurationControllers.View mediaPlayerView;
+
+  @FXML
   public void initialize() {
-    LOG.debug("initialize()");
+    LOGGER.debug("initialize");
   }
 
   @PostConstruct
   public void init() {
-    LOG.debug("init()");
-    labelMain.setText("Hello world!");
+    LOGGER.debug("init");
+    labelMain.setText("MAIN COMPONENT CENTER");
+    root.getChildren().add(mediaPlayerView.getView());
   }
 
 }
