@@ -7,10 +7,20 @@
 
 
 <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="50.0"
-      prefWidth="400.0" stylesheets="@../css/mediaplayer.css" xmlns="http://javafx.com/javafx/8"
+      prefWidth="400.0" stylesheets="/css/mediaplayer.css" xmlns="http://javafx.com/javafx/8"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="ru.push.caudioplayer.controller.MediaPlayerController">
    <children>
-      <Button mnemonicParsing="false" text="Button"/>
+      <HBox id="media-buttons-control" fx:id="mediaButtonsControl" prefHeight="50.0" prefWidth="500.0" spacing="5.0"
+            BorderPane.alignment="CENTER_LEFT">
+         <padding>
+            <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
+         </padding>
+         <children>
+            <Button id="stopButton" fx:id="stopButton" mnemonicParsing="false" onAction="#stopAction" text="stop"/>
+            <Button id="playButton" fx:id="playButton" mnemonicParsing="false" onAction="#playAction" text="play"/>
+            <Button id="pauseButton" fx:id="pauseButton" mnemonicParsing="false" onAction="#pauseAction" text="pause"/>
+         </children>
+      </HBox>
    </children>
 </Pane>

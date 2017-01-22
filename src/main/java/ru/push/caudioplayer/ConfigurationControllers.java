@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.push.caudioplayer.controller.MainController;
 import ru.push.caudioplayer.controller.MediaPlayerController;
+import ru.push.caudioplayer.core.mediaplayer.CAudioMediaPlayerComponent;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -20,8 +20,6 @@ public class MainController {
 
   @FXML
   private BorderPane root;
-  @FXML
-  private Label labelMain;
 
   @FXML
   @Resource(name = "mediaPlayerView")
@@ -35,8 +33,7 @@ public class MainController {
   @PostConstruct
   public void init() {
     LOGGER.debug("init");
-    labelMain.setText("MAIN COMPONENT CENTER");
-    root.getChildren().add(mediaPlayerView.getView());
+    root.setTop(mediaPlayerView.getView());
   }
 
 }
