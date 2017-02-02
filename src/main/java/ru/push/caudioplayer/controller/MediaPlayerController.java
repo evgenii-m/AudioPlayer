@@ -3,6 +3,8 @@ package ru.push.caudioplayer.controller;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.Slider;
 import javafx.scene.layout.HBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,12 +15,15 @@ import javax.annotation.PostConstruct;
 import java.net.URI;
 import java.nio.file.Paths;
 
+import static ru.push.caudioplayer.core.mediaplayer.CAudioMediaPlayerComponent.VOLUME_DEFAULT_VALUE;
+import static ru.push.caudioplayer.core.mediaplayer.CAudioMediaPlayerComponent.VOLUME_MAX_VALUE;
+
 /**
  * @author push <mez.e.s@yandex.ru>
  * @date 23.11.16
  */
 public class MediaPlayerController {
-  private static final Logger LOGGER = LoggerFactory.getLogger(MediaPlayerController.class);
+  private static final Logger LOG = LoggerFactory.getLogger(MediaPlayerController.class);
 
   @FXML
   private HBox mediaButtonsControl;
@@ -28,34 +33,47 @@ public class MediaPlayerController {
   private Button playButton;
   @FXML
   private Button pauseButton;
+  @FXML
+  private ProgressBar seekBar;
+  @FXML
+  private Slider volumeSlider;
 
   @Autowired
-  private CAudioMediaPlayerComponent audioMediaPlayerComponent;
+  private CAudioMediaPlayerComponent mediaComponent;
 
   @FXML
   public void initialize() {
-    LOGGER.debug("initialize");
+    LOG.debug("initialize");
   }
 
   @PostConstruct
   public void init() {
-    LOGGER.debug("init");
-//    audioMediaPlayerComponent = new CAudioMediaPlayerComponent();
+    LOG.debug("init");
+    prepareMediaComponent();
+    prepareUI();
+  }
+
+  private void prepareMediaComponent() {
+  }
+
+  private void prepareUI() {
+    volumeSlider.setMax(VOLUME_MAX_VALUE);
+    volumeSlider.setValue(VOLUME_DEFAULT_VALUE);
   }
 
   @FXML
   void stopAction(ActionEvent event) {
-    audioMediaPlayerComponent.getMediaPlayer().stop();
+    mediaComponent.getMediaPlayer().stop();
   }
 
   @FXML
   void playAction(ActionEvent event) {
     final URI resource = Paths.get("target/1. Just One Of Those Things.mp3").toUri();
-    audioMediaPlayerComponent.getMediaPlayer().playMedia(resource.toString());
+    mediaComponent.getMediaPlayer().playMedia(resource.toString());
   }
 
   @FXML
   void pauseAction(ActionEvent event) {
-    audioMediaPlayerComponent.getMediaPlayer().pause();
+    mediaComponent.getMediaPlayer().pause();
   }
 }

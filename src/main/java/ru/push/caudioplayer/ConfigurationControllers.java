@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.push.caudioplayer.controller.MainController;
 import ru.push.caudioplayer.controller.MediaPlayerController;
-import ru.push.caudioplayer.core.mediaplayer.CAudioMediaPlayerComponent;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,7 +19,7 @@ import java.io.InputStream;
 @Configuration
 public class ConfigurationControllers {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationControllers.class);
+  private static final Logger LOG = LoggerFactory.getLogger(ConfigurationControllers.class);
 
   @Bean(name = "mainView")
   public View getMainView() {
@@ -48,7 +47,7 @@ public class ConfigurationControllers {
       loader.load(fxmlStream);
       return new View(loader.getRoot(), loader.getController());
     } catch (IOException e) {
-      LOGGER.error("Load view fail", e);
+      LOG.error("Load view fail", e);
       throw new RuntimeException(e);
     }
   }

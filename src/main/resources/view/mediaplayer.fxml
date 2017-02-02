@@ -5,21 +5,26 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="50.0"
-      prefWidth="400.0" stylesheets="/css/mediaplayer.css" xmlns="http://javafx.com/javafx/8"
-      xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="ru.push.caudioplayer.controller.MediaPlayerController">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" prefWidth="590.0" stylesheets="/css/mediaplayer.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.push.caudioplayer.controller.MediaPlayerController">
    <children>
-      <HBox id="media-buttons-control" fx:id="mediaButtonsControl" prefHeight="50.0" prefWidth="500.0" spacing="5.0"
-            BorderPane.alignment="CENTER_LEFT">
+      <HBox styleClass="media-buttons-control" fx:id="mediaButtonsControl" prefHeight="40.0" prefWidth="590.0" spacing="5.0" BorderPane.alignment="CENTER_LEFT">
          <padding>
             <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
          </padding>
          <children>
-            <Button id="stopButton" fx:id="stopButton" mnemonicParsing="false" onAction="#stopAction" text="stop"/>
-            <Button id="playButton" fx:id="playButton" mnemonicParsing="false" onAction="#playAction" text="play"/>
-            <Button id="pauseButton" fx:id="pauseButton" mnemonicParsing="false" onAction="#pauseAction" text="pause"/>
+            <Button fx:id="stopButton" mnemonicParsing="false" onAction="#stopAction" text="stop" />
+            <Button fx:id="playButton" mnemonicParsing="false" onAction="#playAction" text="play" />
+            <Button fx:id="pauseButton" mnemonicParsing="false" onAction="#pauseAction" text="pause" />
+            <ProgressBar fx:id="seekBar" prefHeight="20.0" prefWidth="230.0" progress="0.0">
+               <HBox.margin>
+                  <Insets left="5.0" right="5.0" top="3.0" />
+               </HBox.margin>
+            </ProgressBar>
+            <Slider fx:id="volumeSlider">
+               <HBox.margin>
+                  <Insets left="5.0" right="5.0" top="3.0" />
+               </HBox.margin>
+            </Slider>
          </children>
       </HBox>
    </children>
