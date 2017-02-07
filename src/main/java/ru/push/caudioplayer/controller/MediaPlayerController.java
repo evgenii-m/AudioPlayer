@@ -15,9 +15,6 @@ import javax.annotation.PostConstruct;
 import java.net.URI;
 import java.nio.file.Paths;
 
-import static ru.push.caudioplayer.core.mediaplayer.CAudioMediaPlayerComponent.VOLUME_DEFAULT_VALUE;
-import static ru.push.caudioplayer.core.mediaplayer.CAudioMediaPlayerComponent.VOLUME_MAX_VALUE;
-
 /**
  * @author push <mez.e.s@yandex.ru>
  * @date 23.11.16
@@ -57,8 +54,12 @@ public class MediaPlayerController {
   }
 
   private void prepareUI() {
-    volumeSlider.setMax(VOLUME_MAX_VALUE);
-    volumeSlider.setValue(VOLUME_DEFAULT_VALUE);
+    volumeSlider.setMax(mediaComponent.getMaxVolume());
+    volumeSlider.setValue(mediaComponent.getVolume());
+
+    volumeSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+      mediaComponent.setVolume(newValue.intValue());
+    });
   }
 
   @FXML

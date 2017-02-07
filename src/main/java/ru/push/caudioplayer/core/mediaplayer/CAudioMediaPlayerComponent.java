@@ -6,8 +6,6 @@ import uk.co.caprica.vlcj.component.AudioMediaPlayerComponent;
 import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * @author push <mez.e.s@yandex.ru>
  * @date 10.12.16
@@ -15,13 +13,12 @@ import java.util.concurrent.TimeUnit;
 public class CAudioMediaPlayerComponent extends AudioMediaPlayerComponent {
   private static final Logger LOG = LoggerFactory.getLogger(CAudioMediaPlayerComponent.class);
 
-  public static final int VOLUME_MAX_VALUE = 200;
-  public static final int VOLUME_DEFAULT_VALUE = 100;
+  private static final int VOLUME_MAX_VALUE = 200;
+  private static final int VOLUME_DEFAULT_VALUE = 100;
 
   private int volume;
 
-  public CAudioMediaPlayerComponent()
-  {
+  public CAudioMediaPlayerComponent() {
     super();
     volume = VOLUME_DEFAULT_VALUE;
     this.getMediaPlayer().addMediaPlayerEventListener(new CAudioMediaPlayerEventListener());
@@ -33,6 +30,11 @@ public class CAudioMediaPlayerComponent extends AudioMediaPlayerComponent {
 
   public void setVolume(int volume) {
     this.volume = volume;
+    this.getMediaPlayer().setVolume(volume);
+  }
+
+  public int getMaxVolume() {
+    return VOLUME_MAX_VALUE;
   }
 
   private class CAudioMediaPlayerEventListener extends MediaPlayerEventAdapter {
@@ -40,7 +42,7 @@ public class CAudioMediaPlayerComponent extends AudioMediaPlayerComponent {
     public void playing(MediaPlayer mediaPlayer) {
       LOG.debug("playing");
       try {
-        Thread.sleep(100);    // setting volume available oly after playback + delay
+        Thread.sleep(250);    // setting volume available only after playback + delay
         mediaPlayer.setVolume(volume);
       } catch (InterruptedException e) {
         LOG.error("InterruptedException whe set volume: " + e);
@@ -51,6 +53,7 @@ public class CAudioMediaPlayerComponent extends AudioMediaPlayerComponent {
     @Override
     public void paused(MediaPlayer mediaPlayer) {
       LOG.debug("paused");
+      LOG.debug("Volume: " + mediaPlayer.getVolume());
     }
 
     @Override
@@ -67,5 +70,6 @@ public class CAudioMediaPlayerComponent extends AudioMediaPlayerComponent {
     public void error(MediaPlayer mediaPlayer) {
       LOG.debug("error");
     }
+
   }
 }
