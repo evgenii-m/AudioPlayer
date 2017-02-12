@@ -2,8 +2,8 @@ package ru.push.caudioplayer.core.mediaplayer.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.push.caudioplayer.core.mediaplayer.CustomPlayerComponent;
-import uk.co.caprica.vlcj.component.AudioMediaPlayerComponent;
+import ru.push.caudioplayer.core.mediaplayer.CustomAudioPlayerComponent;
+import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
 import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
 
@@ -11,18 +11,23 @@ import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
  * @author push <mez.e.s@yandex.ru>
  * @date 10.12.16
  */
-public class DefaultCustomPlayerComponent extends AudioMediaPlayerComponent implements CustomPlayerComponent {
-  private static final Logger LOG = LoggerFactory.getLogger(DefaultCustomPlayerComponent.class);
+public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerComponent {
+  private static final Logger LOG = LoggerFactory.getLogger(DefaultCustomAudioPlayerComponent.class);
 
   private static final int VOLUME_MAX_VALUE = 200;
   private static final int VOLUME_DEFAULT_VALUE = 100;
 
+  private final CustomMediaPlayerFactory mediaPlayerFactory;
+  private final MediaPlayer mediaPlayer;
+
   private int volume;
 
-  public DefaultCustomPlayerComponent() {
-    super();
-    volume = VOLUME_DEFAULT_VALUE;
-    this.getMediaPlayer().addMediaPlayerEventListener(new CustomMediaPlayerEventListener());
+
+  public DefaultCustomAudioPlayerComponent(CustomMediaPlayerFactory mediaPlayerFactory) {
+    this.mediaPlayerFactory = mediaPlayerFactory;
+    this.mediaPlayer = mediaPlayerFactory.newHeadlessMediaPlayer();
+    this.volume = VOLUME_DEFAULT_VALUE;
+    this.mediaPlayer.addMediaPlayerEventListener(new CustomMediaPlayerEventListener());
   }
 
   @Override
@@ -36,24 +41,30 @@ public class DefaultCustomPlayerComponent extends AudioMediaPlayerComponent impl
   }
 
   @Override
-  public void setVolume(int volume) {
-    this.volume = volume;
-    this.getMediaPlayer().setVolume(volume);
+  public void setVolume(int newVolume) {
+    volume = newVolume;
+    mediaPlayer.setVolume(newVolume);
   }
 
   @Override
   public boolean playMedia(String resourceUri) {
-    return this.getMediaPlayer().playMedia(resourceUri);
+    return mediaPlayer.playMedia(resourceUri);
   }
 
   @Override
   public void stop() {
-    this.getMediaPlayer().stop();
+    mediaPlayer.stop();
   }
 
   @Override
   public void pause() {
-    this.getMediaPlayer().pause();
+    mediaPlayer.pause();
+  }
+
+  @Override
+  public void releaseComponent() {
+    LOG.debug("releaseComponent");
+    mediaPlayer.release();
   }
 
 

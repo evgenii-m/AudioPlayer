@@ -5,6 +5,7 @@ import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Lazy;
+import ru.push.caudioplayer.core.mediaplayer.NativePlayerComponent;
 import uk.co.caprica.vlcj.discovery.NativeDiscovery;
 
 import javax.annotation.Resource;
@@ -35,6 +36,13 @@ public class AppMain extends AbstractJavaFxApplicationSupport {
     stage.setResizable(true);
     stage.centerOnScreen();
     stage.show();
+  }
+
+  @Override
+  public void stop() throws Exception {
+    context.getBeansOfType(NativePlayerComponent.class).values()
+        .forEach(NativePlayerComponent::releaseComponent);
+    super.stop();
   }
 
   public static void main(String[] args) {

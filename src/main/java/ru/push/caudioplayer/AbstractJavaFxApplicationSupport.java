@@ -1,15 +1,22 @@
 package ru.push.caudioplayer;
 
-import javafx.application.Platform;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import javafx.application.Application;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 
 /**
  * @author push <mez.e.s@yandex.ru>
  * @date 22.11.16
  */
+@Configuration
+@ComponentScan
+@EnableAutoConfiguration
+@ImportResource("classpath:spring/application-context.xml")
 public abstract class AbstractJavaFxApplicationSupport extends Application {
 
   private static String[] savedArgs;
@@ -26,8 +33,6 @@ public abstract class AbstractJavaFxApplicationSupport extends Application {
   public void stop() throws Exception {
     super.stop();
     context.close();
-    Platform.exit();
-    System.exit(0);
   }
 
   protected static void launchApp(Class<? extends AbstractJavaFxApplicationSupport> appClass, String[] args) {

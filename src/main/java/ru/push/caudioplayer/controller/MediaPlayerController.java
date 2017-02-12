@@ -9,7 +9,7 @@ import javafx.scene.layout.HBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import ru.push.caudioplayer.core.mediaplayer.CustomPlayerComponent;
+import ru.push.caudioplayer.core.mediaplayer.CustomAudioPlayerComponent;
 
 import javax.annotation.PostConstruct;
 import java.net.URI;
@@ -36,7 +36,7 @@ public class MediaPlayerController {
   private Slider volumeSlider;
 
   @Autowired
-  private CustomPlayerComponent playerComponent;
+  private CustomAudioPlayerComponent playerComponent;
 
   @FXML
   public void initialize() {

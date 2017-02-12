@@ -1,14 +1,18 @@
 package ru.push.caudioplayer.controller;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.ConfigurationControllers;
+import ru.push.caudioplayer.core.mediaplayer.CustomAudioPlayerComponent;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * @author push <mez.e.s@yandex.ru>
@@ -21,6 +25,8 @@ public class MainController {
   @FXML
   private VBox root;
 
+  @Resource(name = "playerComponent")
+  private CustomAudioPlayerComponent playerComponent;
 
   @FXML
   @Resource(name = "mediaPlayerView")
@@ -37,4 +43,13 @@ public class MainController {
     root.getChildren().add(mediaPlayerView.getView());
   }
 
+  public void addLocation(ActionEvent actionEvent) {
+    String mediaLocation = "http://ice1.somafm.com/groovesalad-128.mp3";
+    try {
+      URL mediaUrl = new URL(mediaLocation);
+      playerComponent.playMedia(mediaUrl.toString());
+    } catch (MalformedURLException e) {
+      e.printStackTrace();
+    }
+  }
 }
