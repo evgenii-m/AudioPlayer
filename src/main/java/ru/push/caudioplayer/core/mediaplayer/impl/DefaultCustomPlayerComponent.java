@@ -1,7 +1,8 @@
-package ru.push.caudioplayer.core.mediaplayer;
+package ru.push.caudioplayer.core.mediaplayer.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.push.caudioplayer.core.mediaplayer.CustomPlayerComponent;
 import uk.co.caprica.vlcj.component.AudioMediaPlayerComponent;
 import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
@@ -10,34 +11,53 @@ import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
  * @author push <mez.e.s@yandex.ru>
  * @date 10.12.16
  */
-public class CAudioMediaPlayerComponent extends AudioMediaPlayerComponent {
-  private static final Logger LOG = LoggerFactory.getLogger(CAudioMediaPlayerComponent.class);
+public class DefaultCustomPlayerComponent extends AudioMediaPlayerComponent implements CustomPlayerComponent {
+  private static final Logger LOG = LoggerFactory.getLogger(DefaultCustomPlayerComponent.class);
 
   private static final int VOLUME_MAX_VALUE = 200;
   private static final int VOLUME_DEFAULT_VALUE = 100;
 
   private int volume;
 
-  public CAudioMediaPlayerComponent() {
+  public DefaultCustomPlayerComponent() {
     super();
     volume = VOLUME_DEFAULT_VALUE;
-    this.getMediaPlayer().addMediaPlayerEventListener(new CAudioMediaPlayerEventListener());
+    this.getMediaPlayer().addMediaPlayerEventListener(new CustomMediaPlayerEventListener());
   }
 
+  @Override
+  public int getMaxVolume() {
+    return VOLUME_MAX_VALUE;
+  }
+
+  @Override
   public int getVolume() {
     return volume;
   }
 
+  @Override
   public void setVolume(int volume) {
     this.volume = volume;
     this.getMediaPlayer().setVolume(volume);
   }
 
-  public int getMaxVolume() {
-    return VOLUME_MAX_VALUE;
+  @Override
+  public boolean playMedia(String resourceUri) {
+    return this.getMediaPlayer().playMedia(resourceUri);
   }
 
-  private class CAudioMediaPlayerEventListener extends MediaPlayerEventAdapter {
+  @Override
+  public void stop() {
+    this.getMediaPlayer().stop();
+  }
+
+  @Override
+  public void pause() {
+    this.getMediaPlayer().pause();
+  }
+
+
+  private class CustomMediaPlayerEventListener extends MediaPlayerEventAdapter {
     @Override
     public void playing(MediaPlayer mediaPlayer) {
       LOG.debug("playing");

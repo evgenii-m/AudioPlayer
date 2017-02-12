@@ -9,7 +9,7 @@ import javafx.scene.layout.HBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import ru.push.caudioplayer.core.mediaplayer.CAudioMediaPlayerComponent;
+import ru.push.caudioplayer.core.mediaplayer.CustomPlayerComponent;
 
 import javax.annotation.PostConstruct;
 import java.net.URI;
@@ -36,7 +36,7 @@ public class MediaPlayerController {
   private Slider volumeSlider;
 
   @Autowired
-  private CAudioMediaPlayerComponent mediaComponent;
+  private CustomPlayerComponent playerComponent;
 
   @FXML
   public void initialize() {
@@ -54,27 +54,27 @@ public class MediaPlayerController {
   }
 
   private void prepareUI() {
-    volumeSlider.setMax(mediaComponent.getMaxVolume());
-    volumeSlider.setValue(mediaComponent.getVolume());
+    volumeSlider.setMax(playerComponent.getMaxVolume());
+    volumeSlider.setValue(playerComponent.getVolume());
 
     volumeSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
-      mediaComponent.setVolume(newValue.intValue());
+      playerComponent.setVolume(newValue.intValue());
     });
   }
 
   @FXML
   void stopAction(ActionEvent event) {
-    mediaComponent.getMediaPlayer().stop();
+    playerComponent.stop();
   }
 
   @FXML
   void playAction(ActionEvent event) {
     final URI resource = Paths.get("target/1. Just One Of Those Things.mp3").toUri();
-    mediaComponent.getMediaPlayer().playMedia(resource.toString());
+    playerComponent.playMedia(resource.toString());
   }
 
   @FXML
   void pauseAction(ActionEvent event) {
-    mediaComponent.getMediaPlayer().pause();
+    playerComponent.pause();
   }
 }
