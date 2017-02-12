@@ -2,6 +2,7 @@ package ru.push.caudioplayer.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.push.caudioplayer.ConfigurationControllers;
@@ -18,7 +19,8 @@ public class MainController {
   private static final Logger LOG = LoggerFactory.getLogger(MainController.class);
 
   @FXML
-  private BorderPane root;
+  private VBox root;
+
 
   @FXML
   @Resource(name = "mediaPlayerView")
@@ -32,7 +34,7 @@ public class MainController {
   @PostConstruct
   public void init() {
     LOG.debug("init");
-    root.setTop(mediaPlayerView.getView());
+    root.getChildren().add(mediaPlayerView.getView());
   }
 
 }
