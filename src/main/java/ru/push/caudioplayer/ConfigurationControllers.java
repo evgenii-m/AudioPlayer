@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.push.caudioplayer.controller.MainController;
-import ru.push.caudioplayer.controller.MediaPlayerController;
+import ru.push.caudioplayer.controller.AudioPlayerController;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,14 +31,14 @@ public class ConfigurationControllers {
     return (MainController) getMainView().getController();
   }
 
-  @Bean(name = "mediaPlayerView")
-  public View getMediaPlayerView() {
-    return loadView("view/mediaplayer.fxml");
+  @Bean(name = "audioPlayerView")
+  public View audioPlayerView() {
+    return loadView("view/audioplayer-component.fxml");
   }
 
   @Bean
-  public MediaPlayerController getMediaPlayerController() {
-    return (MediaPlayerController) getMediaPlayerView().getController();
+  public AudioPlayerController getAudioPlayerController() {
+    return (AudioPlayerController) audioPlayerView().getController();
   }
 
   protected View loadView(String url) {

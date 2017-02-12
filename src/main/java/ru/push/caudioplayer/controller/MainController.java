@@ -5,7 +5,6 @@ import javafx.fxml.FXML;
 import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.ConfigurationControllers;
 import ru.push.caudioplayer.core.mediaplayer.CustomAudioPlayerComponent;
 
@@ -29,8 +28,8 @@ public class MainController {
   private CustomAudioPlayerComponent playerComponent;
 
   @FXML
-  @Resource(name = "mediaPlayerView")
-  private ConfigurationControllers.View mediaPlayerView;
+  @Resource(name = "audioPlayerView")
+  private ConfigurationControllers.View audioPlayerView;
 
   @FXML
   public void initialize() {
@@ -40,7 +39,7 @@ public class MainController {
   @PostConstruct
   public void init() {
     LOG.debug("init");
-    root.getChildren().add(mediaPlayerView.getView());
+    root.getChildren().add(audioPlayerView.getView());
   }
 
   public void addLocation(ActionEvent actionEvent) {

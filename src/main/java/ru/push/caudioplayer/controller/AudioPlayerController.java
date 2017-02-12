@@ -19,8 +19,8 @@ import java.nio.file.Paths;
  * @author push <mez.e.s@yandex.ru>
  * @date 23.11.16
  */
-public class MediaPlayerController {
-  private static final Logger LOG = LoggerFactory.getLogger(MediaPlayerController.class);
+public class AudioPlayerController {
+  private static final Logger LOG = LoggerFactory.getLogger(AudioPlayerController.class);
 
   @FXML
   private HBox mediaButtonsControl;
