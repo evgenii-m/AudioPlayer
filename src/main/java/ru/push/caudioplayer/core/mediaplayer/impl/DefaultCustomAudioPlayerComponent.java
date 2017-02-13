@@ -3,9 +3,14 @@ package ru.push.caudioplayer.core.mediaplayer.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.push.caudioplayer.core.mediaplayer.CustomAudioPlayerComponent;
+import ru.push.caudioplayer.core.mediaplayer.CustomAudioPlayerEventListener;
 import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
+import ru.push.caudioplayer.core.mediaplayer.dto.TrackInfoData;
 import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author push <mez.e.s@yandex.ru>
@@ -15,8 +20,9 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
   private static final Logger LOG = LoggerFactory.getLogger(DefaultCustomAudioPlayerComponent.class);
 
   private static final int VOLUME_MAX_VALUE = 200;
-  private static final int VOLUME_DEFAULT_VALUE = 100;
+  private static final int VOLUME_DEFAULT_VALUE = 10;
 
+  private final List<CustomAudioPlayerEventListener> audioPlayerEventListeners;
   private final CustomMediaPlayerFactory mediaPlayerFactory;
   private final MediaPlayer mediaPlayer;
 
@@ -27,7 +33,8 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
     this.mediaPlayerFactory = mediaPlayerFactory;
     this.mediaPlayer = mediaPlayerFactory.newHeadlessMediaPlayer();
     this.volume = VOLUME_DEFAULT_VALUE;
-    this.mediaPlayer.addMediaPlayerEventListener(new CustomMediaPlayerEventListener());
+    this.mediaPlayer.addMediaPlayerEventListener(new DefaultMediaPlayerEventListener());
+    audioPlayerEventListeners = new ArrayList<>();
   }
 
   @Override
@@ -62,29 +69,40 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
   }
 
   @Override
+  public TrackInfoData getCurrentTrackInfo() {
+    TrackInfoData trackInfoData = new TrackInfoData();
+    trackInfoData.setDuration(mediaPlayer.getLength());
+    return trackInfoData;
+  }
+
+  @Override
+  public void addEventListener(CustomAudioPlayerEventListener eventListener) {
+    audioPlayerEventListeners.add(eventListener);
+  }
+
+  @Override
   public void releaseComponent() {
     LOG.debug("releaseComponent");
     mediaPlayer.release();
   }
 
 
-  private class CustomMediaPlayerEventListener extends MediaPlayerEventAdapter {
+  private class DefaultMediaPlayerEventListener extends MediaPlayerEventAdapter {
     @Override
     public void playing(MediaPlayer mediaPlayer) {
       LOG.debug("playing");
       try {
+        audioPlayerEventListeners.forEach(eventListener -> eventListener.playbackStarts(getCurrentTrackInfo()));
         Thread.sleep(250);    // setting volume available only after playback + delay
         mediaPlayer.setVolume(volume);
       } catch (InterruptedException e) {
         LOG.error("InterruptedException whe set volume: " + e);
       }
-      LOG.debug("Volume: " + mediaPlayer.getVolume());
     }
 
     @Override
     public void paused(MediaPlayer mediaPlayer) {
       LOG.debug("paused");
-      LOG.debug("Volume: " + mediaPlayer.getVolume());
     }
 
     @Override
@@ -102,5 +120,11 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
       LOG.debug("error");
     }
 
+    @Override
+    public void positionChanged(MediaPlayer mediaPlayer, float newPosition) {
+      // TODO: think about reducing event period or uses another event for refresh track position indication,
+      // because this event triggered with long period (~270 ms), that leads to uneven progress indication in UI
+      audioPlayerEventListeners.forEach(eventListener -> eventListener.positionChanged(newPosition));
+    }
   }
 }

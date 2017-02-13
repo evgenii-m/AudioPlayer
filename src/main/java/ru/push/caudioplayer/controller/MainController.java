@@ -2,6 +2,7 @@ package ru.push.caudioplayer.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,14 +23,17 @@ public class MainController {
   private static final Logger LOG = LoggerFactory.getLogger(MainController.class);
 
   @FXML
-  private VBox root;
-
-  @Resource(name = "playerComponent")
-  private CustomAudioPlayerComponent playerComponent;
-
+  private VBox mainContainer;
   @FXML
   @Resource(name = "audioPlayerView")
   private ConfigurationControllers.View audioPlayerView;
+  @FXML
+  @Resource(name = "playlistView")
+  private ConfigurationControllers.View playlistView;
+
+  @Resource
+  private CustomAudioPlayerComponent playerComponent;
+
 
   @FXML
   public void initialize() {
@@ -39,7 +43,9 @@ public class MainController {
   @PostConstruct
   public void init() {
     LOG.debug("init");
-    root.getChildren().add(audioPlayerView.getView());
+
+    mainContainer.getChildren().add(audioPlayerView.getView());
+    mainContainer.getChildren().add(playlistView.getView());
   }
 
   public void addLocation(ActionEvent actionEvent) {

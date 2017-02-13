@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<ScrollPane fx:controller="ru.push.caudioplayer.controller.PlaylistController" stylesheets="/css/style.css" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8">
+   <content>
+      <VBox styleClass="playlist-container" fx:id="playlistContainer" prefHeight="298.0" prefWidth="798.0" />
+   </content>
+</ScrollPane>

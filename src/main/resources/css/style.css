@@ -1,3 +1,7 @@
 .media-buttons-control {
  -fx-background-color: #3E3E3E;
 }
+
+.playlist-container {
+ -fx-background-color: #6E6E6E;
+}

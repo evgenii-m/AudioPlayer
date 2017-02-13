@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.push.caudioplayer.controller.MainController;
 import ru.push.caudioplayer.controller.AudioPlayerController;
+import ru.push.caudioplayer.controller.PlaylistController;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,6 +40,16 @@ public class ConfigurationControllers {
   @Bean
   public AudioPlayerController getAudioPlayerController() {
     return (AudioPlayerController) audioPlayerView().getController();
+  }
+
+  @Bean(name = "playlistView")
+  public View playlistView() {
+    return loadView("view/playlist-component.fxml");
+  }
+
+  @Bean
+  public PlaylistController getPlaylistController() {
+    return (PlaylistController) playlistView().getController();
   }
 
   protected View loadView(String url) {
