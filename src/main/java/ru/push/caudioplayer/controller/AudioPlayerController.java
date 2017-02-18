@@ -2,10 +2,12 @@ package ru.push.caudioplayer.controller;
 
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +29,7 @@ public class AudioPlayerController {
   private static final Logger LOG = LoggerFactory.getLogger(AudioPlayerController.class);
 
   private static final double POSITION_SLIDER_MAX_VALUE = 100;  // track position determined in percentage
+  private static final float POSITION_SLIDER_SCALE_COEF = 100;
 
   @FXML
   private HBox mediaButtonsControl;
@@ -48,6 +51,7 @@ public class AudioPlayerController {
   @Autowired
   private TrackTimeLabelBuilder trackTimeLabelBuilder;
 
+  private boolean positionSliderMousePressed;
   private TrackInfoData currentTrackInfoData;
 
   @FXML
@@ -58,6 +62,7 @@ public class AudioPlayerController {
   @PostConstruct
   public void init() {
     LOG.debug("init");
+    positionSliderMousePressed = false;
 
     volumeSlider.setMax(playerComponent.getMaxVolume());
     volumeSlider.setValue(playerComponent.getVolume());
@@ -65,8 +70,17 @@ public class AudioPlayerController {
       playerComponent.setVolume(newValue.intValue());
     });
 
-    positionSlider.setMax(POSITION_SLIDER_MAX_VALUE);
     trackTimeLabel.setText(trackTimeLabelBuilder.buildTimeLabel(0, 0));
+    positionSlider.setMax(POSITION_SLIDER_MAX_VALUE);
+    positionSlider.addEventHandler(MouseEvent.MOUSE_PRESSED, event -> {
+      positionSliderMousePressed = true;
+    });
+    positionSlider.addEventHandler(MouseEvent.MOUSE_RELEASED, event -> {
+      // reduce to media component required range [0.0, 1.0]
+      float newPosition = positionSlider.valueProperty().floatValue() / POSITION_SLIDER_SCALE_COEF;
+      playerComponent.changePosition(newPosition);
+      positionSliderMousePressed = false;
+    });
 
     playerComponent.addEventListener(new DefaultCustomAudioPlayerEventListener());
   }
@@ -97,14 +111,16 @@ public class AudioPlayerController {
 
     @Override
     public void positionChanged(float newPosition) {
-      positionSlider.setValue(newPosition * 100);   // transform to percents scale
-      if (currentTrackInfoData != null) {
-        Platform.runLater(() -> {
+      Platform.runLater(() -> {
+        if (!positionSliderMousePressed) {
+          positionSlider.setValue(newPosition * POSITION_SLIDER_SCALE_COEF);  // transform to slider scale
+        }
+        if (currentTrackInfoData != null) {
           long trackEndTime = currentTrackInfoData.getDuration();
           long trackCurrentTime = (long) ((float) trackEndTime * newPosition);
           trackTimeLabel.setText(trackTimeLabelBuilder.buildTimeLabel(trackCurrentTime, trackEndTime));
-        });
-      }
+        }
+      });
     }
   }
 }

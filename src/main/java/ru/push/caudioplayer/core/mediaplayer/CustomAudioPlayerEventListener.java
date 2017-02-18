@@ -10,5 +10,10 @@ public interface CustomAudioPlayerEventListener {
 
   void playbackStarts(TrackInfoData trackInfo);
 
+  /**
+   * Playback position changed.
+   *
+   * @param newPosition   new playback position defined in range between 0.0 and 1.0
+   */
   void positionChanged(float newPosition);
 }

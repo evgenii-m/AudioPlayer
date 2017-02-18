@@ -27,12 +27,13 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
   private final MediaPlayer mediaPlayer;
 
   private int volume;
-
+  private float playbackPosition;
 
   public DefaultCustomAudioPlayerComponent(CustomMediaPlayerFactory mediaPlayerFactory) {
     this.mediaPlayerFactory = mediaPlayerFactory;
     this.mediaPlayer = mediaPlayerFactory.newHeadlessMediaPlayer();
     this.volume = VOLUME_DEFAULT_VALUE;
+    this.playbackPosition = 0;
     this.mediaPlayer.addMediaPlayerEventListener(new DefaultMediaPlayerEventListener());
     audioPlayerEventListeners = new ArrayList<>();
   }
@@ -50,7 +51,9 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
   @Override
   public void setVolume(int newVolume) {
     volume = newVolume;
-    mediaPlayer.setVolume(newVolume);
+    if (mediaPlayer.isPlaying()) {
+      mediaPlayer.setVolume(newVolume);
+    }
   }
 
   @Override
@@ -66,6 +69,27 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
   @Override
   public void pause() {
     mediaPlayer.pause();
+  }
+
+  @Override
+  public void resume() {
+    mediaPlayer.play();
+  }
+
+  @Override
+  public void changePosition(float newPosition) {
+    if (!mediaPlayer.isSeekable()) {
+      LOG.info("Media player not seekable");
+      return;
+    }
+
+    if (mediaPlayer.isPlaying()) {
+      if (newPosition < 0 || newPosition >= 1) {
+        throw new IllegalArgumentException("Position for playback must be define in range between 0.0 and 1.0 " +
+            "[newPosition = " + newPosition + "]");
+      }
+      mediaPlayer.setPosition(newPosition);
+    }
   }
 
   @Override
@@ -95,6 +119,7 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
         audioPlayerEventListeners.forEach(eventListener -> eventListener.playbackStarts(getCurrentTrackInfo()));
         Thread.sleep(250);    // setting volume available only after playback + delay
         mediaPlayer.setVolume(volume);
+        mediaPlayer.setPosition(playbackPosition);
       } catch (InterruptedException e) {
         LOG.error("InterruptedException whe set volume: " + e);
       }
@@ -124,6 +149,7 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
     public void positionChanged(MediaPlayer mediaPlayer, float newPosition) {
       // TODO: think about reducing event period or uses another event for refresh track position indication,
       // because this event triggered with long period (~270 ms), that leads to uneven progress indication in UI
+      playbackPosition = newPosition;
       audioPlayerEventListeners.forEach(eventListener -> eventListener.positionChanged(newPosition));
     }
   }

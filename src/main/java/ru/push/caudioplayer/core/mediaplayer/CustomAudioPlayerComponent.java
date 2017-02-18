@@ -7,6 +7,7 @@ import ru.push.caudioplayer.core.mediaplayer.dto.TrackInfoData;
  * @date 2/12/17
  */
 public interface CustomAudioPlayerComponent extends NativePlayerComponent {
+
   int getMaxVolume();
 
   int getVolume();
@@ -18,6 +19,10 @@ public interface CustomAudioPlayerComponent extends NativePlayerComponent {
   void stop();
 
   void pause();
+
+  void resume();
+
+  void changePosition(float newPosition);
 
   TrackInfoData getCurrentTrackInfo();
 
