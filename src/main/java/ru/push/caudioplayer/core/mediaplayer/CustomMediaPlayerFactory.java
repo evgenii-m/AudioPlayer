@@ -9,6 +9,10 @@ import uk.co.caprica.vlcj.player.MediaPlayerFactory;
 public class CustomMediaPlayerFactory extends MediaPlayerFactory {
 
   public CustomMediaPlayerFactory() {
-    super();
+    this(new String[0]);
+  }
+
+  public CustomMediaPlayerFactory(String ... args) {
+    super(args);
   }
 }
