@@ -5,6 +5,7 @@ import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Lazy;
+import ru.push.caudioplayer.controller.AudioPlayerController;
 import ru.push.caudioplayer.core.mediaplayer.NativePlayerComponent;
 import uk.co.caprica.vlcj.discovery.NativeDiscovery;
 
@@ -26,6 +27,8 @@ public class AppMain extends AbstractJavaFxApplicationSupport {
 
   @Resource(name = "mainView")
   private ConfigurationControllers.View mainView;
+  @Resource(name = "audioPlayerView")
+  private ConfigurationControllers.View audioPlayerView;
 
   @Override
   public void start(Stage stage) throws Exception {
@@ -42,6 +45,7 @@ public class AppMain extends AbstractJavaFxApplicationSupport {
   public void stop() throws Exception {
     context.getBeansOfType(NativePlayerComponent.class).values()
         .forEach(NativePlayerComponent::releaseComponent);
+    ((AudioPlayerController) audioPlayerView.getController()).stopScheduler();
     super.stop();
   }
 

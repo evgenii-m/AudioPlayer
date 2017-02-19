@@ -3,14 +3,10 @@ package ru.push.caudioplayer.core.mediaplayer.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.push.caudioplayer.core.mediaplayer.CustomAudioPlayerComponent;
-import ru.push.caudioplayer.core.mediaplayer.CustomAudioPlayerEventListener;
 import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
 import ru.push.caudioplayer.core.mediaplayer.dto.TrackInfoData;
 import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author push <mez.e.s@yandex.ru>
@@ -22,7 +18,6 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
   private static final int VOLUME_MAX_VALUE = 200;
   private static final int VOLUME_DEFAULT_VALUE = 10;
 
-  private final List<CustomAudioPlayerEventListener> audioPlayerEventListeners;
   private final CustomMediaPlayerFactory mediaPlayerFactory;
   private final MediaPlayer mediaPlayer;
 
@@ -35,7 +30,6 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
     this.volume = VOLUME_DEFAULT_VALUE;
     this.playbackPosition = 0;
     this.mediaPlayer.addMediaPlayerEventListener(new DefaultMediaPlayerEventListener());
-    audioPlayerEventListeners = new ArrayList<>();
   }
 
   @Override
@@ -77,19 +71,27 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
   }
 
   @Override
-  public void changePosition(float newPosition) {
+  public float getPlaybackPosition() {
+    return mediaPlayer.getPosition();
+  }
+
+  @Override
+  public void changePlaybackPosition(float newPosition) {
     if (!mediaPlayer.isSeekable()) {
       LOG.info("Media player not seekable");
       return;
     }
 
-    if (mediaPlayer.isPlaying()) {
-      if (newPosition < 0 || newPosition >= 1) {
-        throw new IllegalArgumentException("Position for playback must be define in range between 0.0 and 1.0 " +
-            "[newPosition = " + newPosition + "]");
-      }
-      mediaPlayer.setPosition(newPosition);
+    if (newPosition < 0 || newPosition >= 1) {
+      throw new IllegalArgumentException("Position for playback must be define in range between 0.0 and 1.0 " +
+          "[newPosition = " + newPosition + "]");
     }
+    mediaPlayer.setPosition(newPosition);
+  }
+
+  @Override
+  public boolean isPlaying() {
+    return mediaPlayer.isPlaying();
   }
 
   @Override
@@ -97,11 +99,6 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
     TrackInfoData trackInfoData = new TrackInfoData();
     trackInfoData.setDuration(mediaPlayer.getLength());
     return trackInfoData;
-  }
-
-  @Override
-  public void addEventListener(CustomAudioPlayerEventListener eventListener) {
-    audioPlayerEventListeners.add(eventListener);
   }
 
   @Override
@@ -116,10 +113,8 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
     public void playing(MediaPlayer mediaPlayer) {
       LOG.debug("playing");
       try {
-        audioPlayerEventListeners.forEach(eventListener -> eventListener.playbackStarts(getCurrentTrackInfo()));
         Thread.sleep(250);    // setting volume available only after playback + delay
         mediaPlayer.setVolume(volume);
-        mediaPlayer.setPosition(playbackPosition);
       } catch (InterruptedException e) {
         LOG.error("InterruptedException whe set volume: " + e);
       }
@@ -143,14 +138,6 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
     @Override
     public void error(MediaPlayer mediaPlayer) {
       LOG.debug("error");
-    }
-
-    @Override
-    public void positionChanged(MediaPlayer mediaPlayer, float newPosition) {
-      // TODO: think about reducing event period or uses another event for refresh track position indication,
-      // because this event triggered with long period (~270 ms), that leads to uneven progress indication in UI
-      playbackPosition = newPosition;
-      audioPlayerEventListeners.forEach(eventListener -> eventListener.positionChanged(newPosition));
     }
   }
 }

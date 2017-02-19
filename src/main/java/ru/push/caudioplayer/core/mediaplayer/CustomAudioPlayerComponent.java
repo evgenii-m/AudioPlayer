@@ -22,9 +22,12 @@ public interface CustomAudioPlayerComponent extends NativePlayerComponent {
 
   void resume();
 
-  void changePosition(float newPosition);
+  float getPlaybackPosition();
+
+  void changePlaybackPosition(float newPosition);
+
+  boolean isPlaying();
 
   TrackInfoData getCurrentTrackInfo();
 
-  void addEventListener(CustomAudioPlayerEventListener eventListener);
 }

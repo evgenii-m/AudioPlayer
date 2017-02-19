@@ -14,4 +14,5 @@ public class TrackInfoData {
   public void setDuration(long duration) {
     this.duration = duration;
   }
+
 }
