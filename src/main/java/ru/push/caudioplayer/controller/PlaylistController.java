@@ -87,21 +87,5 @@ public class PlaylistController {
               }
             }).collect(Collectors.toList())
     );
-//    playlistContainer.setItems(
-//        FXCollections.observableArrayList(
-//            playlistFullData.getTracks().stream()
-//                .map(mediaInfoData -> {
-//                  if ((mediaInfoData != null) && (mediaInfoData.getTitle() != null)) {
-//                    return new MediaTrackPlaylistItem(mediaInfoData.getTrackNumber(),
-//                        mediaInfoData.getArtist(), mediaInfoData.getAlbum(), mediaInfoData.getTitle(),
-//                        trackTimeLabelBuilder.buildTimeString(mediaInfoData.getLength()));
-//                  } else {
-//                    String trackPath = (mediaInfoData != null) ? mediaInfoData.getTrackPath() : "NULL";
-//                    LOG.info("Media info not loaded for track '" + trackPath + "'");
-//                    return new MediaTrackPlaylistItem("", "", "", trackPath, "");
-//                  }
-//                }).collect(Collectors.toList())
-//        )
-//    );
   }
 }
