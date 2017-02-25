@@ -1,13 +1,18 @@
 package ru.push.caudioplayer.controller;
 
 import javafx.collections.FXCollections;
+import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
 import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
 import ru.push.caudioplayer.core.mediaplayer.services.AppConfigurationService;
@@ -16,6 +21,7 @@ import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,6 +38,8 @@ public class PlaylistController {
 
   @Autowired
   private TrackTimeLabelBuilder trackTimeLabelBuilder;
+  @Autowired
+  private CustomAudioPlayerComponent playerComponent;
   @Autowired
   private CustomPlaylistComponent playlistComponent;
   @Autowired
@@ -68,6 +76,14 @@ public class PlaylistController {
     lengthCol.setCellValueFactory(new PropertyValueFactory<MediaTrackPlaylistItem, String>("length"));
     playlistContainer.getColumns().addAll(numberCol, artistCol, albumCol, titleCol, lengthCol);
     playlistContainer.setEditable(false);
+
+    playlistContainer.setOnMouseClicked(mouseEvent -> {
+      if (mouseEvent.getButton().equals(MouseButton.PRIMARY) && (mouseEvent.getClickCount() == 2)) {
+        int playlistPosition = playlistContainer.getFocusModel().getFocusedCell().getRow();
+        String trackPath = playlistComponent.getTrackPath(playlistPosition);
+        playerComponent.playMedia(Paths.get(trackPath).toUri().toString());
+      }
+    });
   }
 
   private void loadPlaylist(PlaylistData playlistData) {

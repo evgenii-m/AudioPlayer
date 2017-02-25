@@ -164,11 +164,7 @@ public class AudioPlayerController {
 
   @FXML
   void playAction(ActionEvent event) {
-    final URI resource = Paths.get(playlistComponent.getTrackPath()).toUri();
-    playerComponent.playMedia(resource.toString());
-    MediaInfoData mediaInfoData = playerComponent.getCurrentTrackInfo();
-    float playbackPosition = playerComponent.getPlaybackPosition();
-    updatePlaybackPosition(playbackPosition, mediaInfoData.getLength());
+    playerComponent.playMedia(Paths.get(playlistComponent.getTrackPath()).toUri().toString());
   }
 
   @FXML
