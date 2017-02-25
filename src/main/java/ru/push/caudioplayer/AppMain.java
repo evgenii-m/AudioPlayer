@@ -19,7 +19,7 @@ import javax.annotation.Resource;
 @SpringBootApplication
 public class AppMain extends AbstractJavaFxApplicationSupport {
 
-  private static final double DEFAULT_WIDTH  = 800;
+  private static final double DEFAULT_WIDTH  = 1000;
   private static final double DEFAULT_HEIGHT = 400;
 
   @Value("${ui.title:JavaFX приложение}")

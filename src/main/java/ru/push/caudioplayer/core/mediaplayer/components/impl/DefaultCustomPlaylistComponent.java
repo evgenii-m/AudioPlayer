@@ -72,13 +72,21 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
 
   @Override
   public String getNextTrackPath() {
-    playlistPosition++;
+    if (playlistPosition < (playlistData.getTracks().size() - 1)) {
+      playlistPosition++;
+    } else {
+      playlistPosition = 0;
+    }
     return getTrackPath();
   }
 
   @Override
   public String getPrevTrackPath() {
-    playlistPosition--;
+    if (playlistPosition > 0) {
+      playlistPosition--;
+    } else {
+      playlistPosition = playlistData.getTracks().size() - 1;
+    }
     return getTrackPath();
   }
 }

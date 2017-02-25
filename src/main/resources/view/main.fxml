@@ -7,7 +7,7 @@
 
 <Pane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.push.caudioplayer.controller.MainController">
    <children>
-      <VBox fx:id="mainContainer" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity">
+      <VBox fx:id="mainContainer" prefWidth="1000">
          <children>
             <MenuBar fx:id="mainMenuBar">
               <menus>

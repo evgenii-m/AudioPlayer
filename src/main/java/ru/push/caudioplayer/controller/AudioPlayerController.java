@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import org.slf4j.Logger;
@@ -43,6 +44,10 @@ public class AudioPlayerController {
   @FXML
   private Button pauseButton;
   @FXML
+  private Button prevButton;
+  @FXML
+  private Button nextButton;
+  @FXML
   private Slider positionSlider;
   @FXML
   private Label trackTimeLabel;
@@ -62,6 +67,12 @@ public class AudioPlayerController {
   @FXML
   public void initialize() {
     LOG.debug("initialize");
+
+    stopButton.setGraphic(new ImageView("content/icons/control_stop_blue.png"));
+    playButton.setGraphic(new ImageView("content/icons/control_play_blue.png"));
+    pauseButton.setGraphic(new ImageView("content/icons/control_pause_blue.png"));
+    prevButton.setGraphic(new ImageView("content/icons/control_rewind_blue.png"));
+    nextButton.setGraphic(new ImageView("content/icons/control_fastforward_blue.png"));
   }
 
   @PostConstruct
@@ -129,7 +140,6 @@ public class AudioPlayerController {
     updatePlaybackPosition(playbackPosition, mediaInfoData.getLength());
   }
 
-
   private final class UpdateUiRunnable implements Runnable {
     private final CustomAudioPlayerComponent playerComponent;
 
@@ -156,15 +166,23 @@ public class AudioPlayerController {
     positionSlider.setValue(playbackPosition * POSITION_SLIDER_SCALE_COEF);
   }
 
+  private void updatePlaybackPosition() {
+    MediaInfoData mediaInfoData = playerComponent.getCurrentTrackInfo();
+    float playbackPosition = playerComponent.getPlaybackPosition();
+    updatePlaybackPosition(playbackPosition, mediaInfoData.getLength());
+  }
+
 
   @FXML
   void stopAction(ActionEvent event) {
     playerComponent.stop();
+    updatePlaybackPosition();
   }
 
   @FXML
   void playAction(ActionEvent event) {
     playerComponent.playMedia(Paths.get(playlistComponent.getTrackPath()).toUri().toString());
+    updatePlaybackPosition();
   }
 
   @FXML
@@ -172,4 +190,15 @@ public class AudioPlayerController {
     playerComponent.pause();
   }
 
+  @FXML
+  public void prevAction(ActionEvent actionEvent) {
+    playerComponent.playMedia(Paths.get(playlistComponent.getPrevTrackPath()).toUri().toString());
+    updatePlaybackPosition();
+  }
+
+  @FXML
+  public void nextAction(ActionEvent actionEvent) {
+    playerComponent.playMedia(Paths.get(playlistComponent.getNextTrackPath()).toUri().toString());
+    updatePlaybackPosition();
+  }
 }

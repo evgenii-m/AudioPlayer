@@ -16,7 +16,7 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
   private static final Logger LOG = LoggerFactory.getLogger(DefaultCustomAudioPlayerComponent.class);
 
   private static final int VOLUME_MAX_VALUE = 200;
-  private static final int VOLUME_DEFAULT_VALUE = 10;
+  private static final int VOLUME_DEFAULT_VALUE = 70;
 
   private final CustomMediaPlayerFactory mediaPlayerFactory;
   private final MediaPlayer mediaPlayer;
