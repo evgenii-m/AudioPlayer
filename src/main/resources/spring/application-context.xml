@@ -15,12 +15,21 @@
   </bean>
 
   <bean name="playerComponent"
-        class="ru.push.caudioplayer.core.mediaplayer.impl.DefaultCustomAudioPlayerComponent">
+        class="ru.push.caudioplayer.core.mediaplayer.components.impl.DefaultCustomAudioPlayerComponent">
     <constructor-arg ref="mediaPlayerFactory"/>
   </bean>
 
   <bean name="playlistComponent"
-        class="ru.push.caudioplayer.core.mediaplayer.impl.DefaultCustomPlaylistComponent">
+        class="ru.push.caudioplayer.core.mediaplayer.components.impl.DefaultCustomPlaylistComponent">
+    <constructor-arg ref="mediaPlayerFactory"/>
+  </bean>
+
+  <bean name="appConfigurationService"
+        class="ru.push.caudioplayer.core.mediaplayer.services.impl.CommonsAppConfigurationService">
+  </bean>
+
+  <bean name="mediaInfoDataLoader"
+        class="ru.push.caudioplayer.core.mediaplayer.helpers.MediaInfoDataLoader">
     <constructor-arg ref="mediaPlayerFactory"/>
   </bean>
 

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <playlists>
+    <playlist name="first" position="0" active="">
+      <track>/home/push/Music/Bill Callahan/2007 - Woke On A Whaleheart/01_From The Rivers To The Ocean.mp3</track>
+      <track>/home/push/Music/Bill Callahan/2007 - Woke On A Whaleheart/02_Footprints.mp3</track>
+      <track>/home/push/Music/Bill Callahan/2007 - Woke On A Whaleheart/03_Diamond Dancer.mp3</track>
+      <track>/home/push/Music/Bill Callahan/2007 - Woke On A Whaleheart/04_Sycamore.mp3</track>
+    </playlist>
+  </playlists>
+</configuration>

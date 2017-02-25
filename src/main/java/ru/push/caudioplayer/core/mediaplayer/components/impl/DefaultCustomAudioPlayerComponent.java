@@ -1,10 +1,10 @@
-package ru.push.caudioplayer.core.mediaplayer.impl;
+package ru.push.caudioplayer.core.mediaplayer.components.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.push.caudioplayer.core.mediaplayer.CustomAudioPlayerComponent;
+import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
 import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
-import ru.push.caudioplayer.core.mediaplayer.dto.TrackInfoData;
+import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
 import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
 
@@ -95,10 +95,10 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
   }
 
   @Override
-  public TrackInfoData getCurrentTrackInfo() {
-    TrackInfoData trackInfoData = new TrackInfoData();
-    trackInfoData.setDuration(mediaPlayer.getLength());
-    return trackInfoData;
+  public MediaInfoData getCurrentTrackInfo() {
+    MediaInfoData mediaInfoData = new MediaInfoData();
+    mediaInfoData.setLength(mediaPlayer.getLength());
+    return mediaInfoData;
   }
 
   @Override

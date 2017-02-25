@@ -2,12 +2,11 @@ package ru.push.caudioplayer.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.push.caudioplayer.ConfigurationControllers;
-import ru.push.caudioplayer.core.mediaplayer.CustomAudioPlayerComponent;
+import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;

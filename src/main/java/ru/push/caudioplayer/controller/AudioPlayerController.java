@@ -11,8 +11,8 @@ import javafx.scene.layout.HBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import ru.push.caudioplayer.core.mediaplayer.CustomAudioPlayerComponent;
-import ru.push.caudioplayer.core.mediaplayer.dto.TrackInfoData;
+import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
+import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
 import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
 
 import javax.annotation.PostConstruct;
@@ -119,10 +119,10 @@ public class AudioPlayerController {
       }
     }
 
-    TrackInfoData trackInfoData = playerComponent.getCurrentTrackInfo();
+    MediaInfoData mediaInfoData = playerComponent.getCurrentTrackInfo();
     float playbackPosition = playerComponent.getPlaybackPosition();
 
-    updatePlaybackPosition(playbackPosition, trackInfoData.getDuration());
+    updatePlaybackPosition(playbackPosition, mediaInfoData.getLength());
   }
 
 
@@ -135,12 +135,12 @@ public class AudioPlayerController {
 
     @Override
     public void run() {
-      TrackInfoData trackInfoData = playerComponent.getCurrentTrackInfo();
+      MediaInfoData mediaInfoData = playerComponent.getCurrentTrackInfo();
       float playbackPosition = playerComponent.getPlaybackPosition();
 
       Platform.runLater(() -> {
         if (playerComponent.isPlaying()) {
-          updatePlaybackPosition(playbackPosition, trackInfoData.getDuration());
+          updatePlaybackPosition(playbackPosition, mediaInfoData.getLength());
         }
       });
     }

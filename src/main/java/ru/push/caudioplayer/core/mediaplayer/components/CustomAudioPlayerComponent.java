@@ -1,6 +1,6 @@
-package ru.push.caudioplayer.core.mediaplayer;
+package ru.push.caudioplayer.core.mediaplayer.components;
 
-import ru.push.caudioplayer.core.mediaplayer.dto.TrackInfoData;
+import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
 
 /**
  * @author push <mez.e.s@yandex.ru>
@@ -28,6 +28,6 @@ public interface CustomAudioPlayerComponent extends NativePlayerComponent {
 
   boolean isPlaying();
 
-  TrackInfoData getCurrentTrackInfo();
+  MediaInfoData getCurrentTrackInfo();
 
 }

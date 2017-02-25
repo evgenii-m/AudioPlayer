@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Lazy;
 import ru.push.caudioplayer.controller.AudioPlayerController;
-import ru.push.caudioplayer.core.mediaplayer.NativePlayerComponent;
+import ru.push.caudioplayer.core.mediaplayer.components.NativePlayerComponent;
 import uk.co.caprica.vlcj.discovery.NativeDiscovery;
 
 import javax.annotation.Resource;

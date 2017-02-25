@@ -1,6 +1,6 @@
 package ru.push.caudioplayer.core.mediaplayer;
 
-import ru.push.caudioplayer.core.mediaplayer.dto.TrackInfoData;
+import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
 
 /**
  * @author push <mez.e.s@yandex.ru>
@@ -8,7 +8,7 @@ import ru.push.caudioplayer.core.mediaplayer.dto.TrackInfoData;
  */
 public interface CustomAudioPlayerEventListener {
 
-  void playbackStarts(TrackInfoData trackInfo);
+  void playbackStarts(MediaInfoData trackInfo);
 
   /**
    * Playback position changed.

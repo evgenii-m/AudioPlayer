@@ -1,4 +1,4 @@
-package ru.push.caudioplayer.core.mediaplayer;
+package ru.push.caudioplayer.core.mediaplayer.components;
 
 /**
  * @author push <mez.e.s@yandex.ru>
