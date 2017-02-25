@@ -21,26 +21,20 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
   private static final Logger LOG = LoggerFactory.getLogger(DefaultCustomPlaylistComponent.class);
 
   private final CustomMediaPlayerFactory mediaPlayerFactory;
-  private final MediaList mediaList;
 
   @Resource
   private MediaInfoDataLoader mediaInfoDataLoader;
 
   private PlaylistData playlistData;
+  private Integer playlistPosition;
 
   public DefaultCustomPlaylistComponent(CustomMediaPlayerFactory mediaPlayerFactory) {
     this.mediaPlayerFactory = mediaPlayerFactory;
-    this.mediaList = mediaPlayerFactory.newMediaList();
-  }
-
-  public final MediaList getMediaList() {
-    return mediaList;
   }
 
   @Override
   public void releaseComponent() {
     LOG.debug("releaseComponent");
-    mediaList.release();
   }
 
   @Override
@@ -54,11 +48,37 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
                 .collect(Collectors.toList())
         )
     );
+    this.playlistPosition = 1;
     return this.playlistData;
   }
+
+
 
   @Override
   public PlaylistData getPlaylist() {
     return playlistData;
+  }
+
+  @Override
+  public String getTrackPath(int position) {
+    playlistPosition = position;
+    return getTrackPath();
+  }
+
+  @Override
+  public String getTrackPath() {
+    return playlistData.getTracks().get(playlistPosition).getTrackPath();
+  }
+
+  @Override
+  public String getNextTrackPath() {
+    playlistPosition++;
+    return getTrackPath();
+  }
+
+  @Override
+  public String getPrevTrackPath() {
+    playlistPosition--;
+    return getTrackPath();
   }
 }

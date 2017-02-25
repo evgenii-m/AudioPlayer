@@ -11,4 +11,12 @@ public interface CustomPlaylistComponent extends NativePlayerComponent {
   PlaylistData loadPlaylist(PlaylistData playlistData);
 
   PlaylistData getPlaylist();
+
+  String getTrackPath(int position);
+
+  String getTrackPath();
+
+  String getNextTrackPath();
+
+  String getPrevTrackPath();
 }

@@ -12,10 +12,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
+import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
 import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
 import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.util.concurrent.Executors;
@@ -49,6 +51,8 @@ public class AudioPlayerController {
 
   @Autowired
   private CustomAudioPlayerComponent playerComponent;
+  @Autowired
+  private CustomPlaylistComponent playlistComponent;
   @Autowired
   private TrackTimeLabelBuilder trackTimeLabelBuilder;
 
@@ -160,10 +164,11 @@ public class AudioPlayerController {
 
   @FXML
   void playAction(ActionEvent event) {
-    final URI resource = Paths.get("target/1. Just One Of Those Things.mp3").toUri();
+    final URI resource = Paths.get(playlistComponent.getTrackPath()).toUri();
     playerComponent.playMedia(resource.toString());
-    positionSlider.setValue(0);
-
+    MediaInfoData mediaInfoData = playerComponent.getCurrentTrackInfo();
+    float playbackPosition = playerComponent.getPlaybackPosition();
+    updatePlaybackPosition(playbackPosition, mediaInfoData.getLength());
   }
 
   @FXML

@@ -32,9 +32,9 @@ public class PlaylistController {
 
   @Autowired
   private TrackTimeLabelBuilder trackTimeLabelBuilder;
-  @Resource
+  @Autowired
   private CustomPlaylistComponent playlistComponent;
-  @Resource
+  @Autowired
   private AppConfigurationService appConfigurationService;
 
 
