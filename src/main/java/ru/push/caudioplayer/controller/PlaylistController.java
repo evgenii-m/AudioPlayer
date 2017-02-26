@@ -1,5 +1,8 @@
 package ru.push.caudioplayer.controller;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -65,6 +68,15 @@ public class PlaylistController {
         audioPlayerFacade.playTrack(activePlaylistName, trackPosition);
       }
     });
+
+    playlistBrowserContainer.getSelectionModel().selectedItemProperty().addListener(
+        new ChangeListener<String>() {
+          @Override
+          public void changed(ObservableValue observable, String oldValue, String newValue) {
+            PlaylistData playlist = audioPlayerFacade.getPlaylist(newValue);
+            setPlaylistContainerItems(playlist);
+          }
+        });
 
     List<PlaylistData> playlists = audioPlayerFacade.getPlaylists();
     fillPlaylistBrowserContainer(playlists);

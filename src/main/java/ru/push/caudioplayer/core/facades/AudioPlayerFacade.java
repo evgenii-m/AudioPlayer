@@ -19,6 +19,8 @@ public interface AudioPlayerFacade {
 
   PlaylistData getActivePlaylist();
 
+  PlaylistData getPlaylist(String playlistName);
+
   void createNewPlaylist();
 
   void playTrack(String playlistName, int trackPosition);

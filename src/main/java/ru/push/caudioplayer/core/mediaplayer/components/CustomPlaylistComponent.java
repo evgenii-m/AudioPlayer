@@ -18,6 +18,8 @@ public interface CustomPlaylistComponent extends NativePlayerComponent {
 
   PlaylistData getActivePlaylist();
 
+  PlaylistData getPlaylist(String playlistName);
+
   int getActiveTrackPosition();
 
   String playTrack(String playlistName, int trackPosition);

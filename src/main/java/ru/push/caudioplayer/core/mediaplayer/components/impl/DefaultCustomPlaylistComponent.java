@@ -1,5 +1,6 @@
 package ru.push.caudioplayer.core.mediaplayer.components.impl;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
@@ -9,6 +10,7 @@ import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
 import ru.push.caudioplayer.core.mediaplayer.helpers.MediaInfoDataLoader;
 
 import javax.annotation.Resource;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,7 +55,13 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
 
   @Override
   public void loadPlaylists(List<PlaylistData> playlists) {
-    this.playlists = playlists;
+    if (CollectionUtils.isNotEmpty(playlists)) {
+      this.playlists = playlists;
+    } else {
+      LOG.warn("Attempts to load an empty playlists!");
+      this.playlists = Collections.singletonList(createNewPlaylist());
+    }
+
     playlists.stream()
         .filter(PlaylistData::isActive).findFirst()
         .ifPresent(activePlaylist -> setActivePlaylist(activePlaylist, 0));
@@ -74,6 +82,13 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
   @Override
   public PlaylistData getActivePlaylist() {
     return activePlaylist;
+  }
+
+  @Override
+  public PlaylistData getPlaylist(String playlistName) {
+    return playlists.stream()
+        .filter(playlist -> playlist.getName().equals(playlistName)).findFirst()
+        .orElse(playlists.get(0));
   }
 
   @Override

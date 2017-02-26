@@ -65,6 +65,11 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   }
 
   @Override
+  public PlaylistData getPlaylist(String playlistName) {
+    return playlistComponent.getPlaylist(playlistName);
+  }
+
+  @Override
   public void createNewPlaylist() {
     PlaylistData newPlaylist = playlistComponent.createNewPlaylist();
     eventListeners.forEach(listener -> listener.createdNewPlaylist(newPlaylist));
