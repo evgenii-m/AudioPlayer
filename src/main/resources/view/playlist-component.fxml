@@ -9,8 +9,8 @@
    <children>
       <HBox fx:id="playlistBlockContainer" prefWidth="1000.0" spacing="5">
          <children>
-            <VBox fx:id="playlistBrowserContainer" prefHeight="300.0" prefWidth="250.0" styleClass="playlist-browser-container">
-            </VBox>
+            <ListView fx:id="playlistBrowserContainer" prefHeight="300.0" prefWidth="250.0" styleClass="playlist-browser-container">
+            </ListView>
             <TableView fx:id="playlistContainer" prefHeight="250.0" prefWidth="730.0">
                <columns>
                </columns>

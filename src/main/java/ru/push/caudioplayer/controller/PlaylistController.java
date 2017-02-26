@@ -1,14 +1,12 @@
 package ru.push.caudioplayer.controller;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.IterableUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +19,7 @@ import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
 
 import javax.annotation.PostConstruct;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,7 +32,7 @@ public class PlaylistController {
   private static final Logger LOG = LoggerFactory.getLogger(MainController.class);
 
   @FXML
-  private VBox playlistBrowserContainer;
+  private ListView playlistBrowserContainer;
   @FXML
   private TableView playlistContainer;
 
@@ -58,6 +57,7 @@ public class PlaylistController {
     LOG.debug("init");
 
     List<PlaylistData> playlists = appConfigurationService.getPlaylists();
+    playlistBrowserContainer.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
     fillPlaylistBrowserContainer(playlists);
     playlistContainer.setEditable(true);
     playlists.stream()
@@ -77,12 +77,16 @@ public class PlaylistController {
 
   private void fillPlaylistBrowserContainer(List<PlaylistData> playlists) {
     if (CollectionUtils.isNotEmpty(playlists)) {
-      playlistBrowserContainer.getChildren().addAll(
-          playlists.stream()
-              .map(PlaylistData::getName)
-              .map(Label::new)
-              .collect(Collectors.toList())
-      );
+      playlistBrowserContainer.getItems().clear();
+      boolean activeSelected = false;
+      Collections.sort(playlists, (p1, p2) -> Integer.compare(p1.getPosition(), p2.getPosition()));
+      for (PlaylistData playlist : playlists) {
+        playlistBrowserContainer.getItems().add(playlist.getName());
+        if (!activeSelected && playlist.isActive()) {
+          activeSelected = true;
+          playlistBrowserContainer.getSelectionModel().select(playlist.getName());
+        }
+      }
     }
   }
 
