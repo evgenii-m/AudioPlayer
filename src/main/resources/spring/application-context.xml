@@ -33,4 +33,8 @@
     <constructor-arg ref="mediaPlayerFactory"/>
   </bean>
 
+  <bean name="audioPlayerFacade"
+        class="ru.push.caudioplayer.core.facades.impl.DefaultAudioPlayerFacade">
+  </bean>
+
 </beans>

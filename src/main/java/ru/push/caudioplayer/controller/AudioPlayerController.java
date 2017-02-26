@@ -12,15 +12,18 @@ import javafx.scene.layout.HBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
+import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
 import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
+import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
 import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.net.URI;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -55,6 +58,8 @@ public class AudioPlayerController {
   private Slider volumeSlider;
 
   @Autowired
+  private AudioPlayerFacade audioPlayerFacade;
+  @Autowired
   private CustomAudioPlayerComponent playerComponent;
   @Autowired
   private CustomPlaylistComponent playlistComponent;
@@ -73,22 +78,26 @@ public class AudioPlayerController {
     pauseButton.setGraphic(new ImageView("content/icons/control_pause_blue.png"));
     prevButton.setGraphic(new ImageView("content/icons/control_rewind_blue.png"));
     nextButton.setGraphic(new ImageView("content/icons/control_fastforward_blue.png"));
+
+    positionSliderMousePressed = false;
+    positionSlider.setMax(POSITION_SLIDER_MAX_VALUE);
+
   }
 
   @PostConstruct
   public void init() {
     LOG.debug("init");
-    positionSliderMousePressed = false;
+
+    audioPlayerFacade.addListener(new AudioPlayerEventAdapter());
+
+    updatePlaybackPosition(0, 0);
+    addPositionSliderMouseListeners();
 
     volumeSlider.setMax(playerComponent.getMaxVolume());
     volumeSlider.setValue(playerComponent.getVolume());
     volumeSlider.valueProperty().addListener((observable, oldValue, newValue) -> {
       playerComponent.setVolume(newValue.intValue());
     });
-
-    positionSlider.setMax(POSITION_SLIDER_MAX_VALUE);
-    updatePlaybackPosition(0, 0);
-    addPositionSliderMouseListeners();
 
     playerScheduler.scheduleAtFixedRate(new UpdateUiRunnable(playerComponent), 0L, 1L, TimeUnit.SECONDS);
   }
@@ -138,6 +147,13 @@ public class AudioPlayerController {
     float playbackPosition = playerComponent.getPlaybackPosition();
 
     updatePlaybackPosition(playbackPosition, mediaInfoData.getLength());
+  }
+
+  private final class AudioPlayerEventAdapter implements AudioPlayerEventListener {
+
+    @Override
+    public void createdNewPlaylist(PlaylistData newPlaylist) {
+    }
   }
 
   private final class UpdateUiRunnable implements Runnable {

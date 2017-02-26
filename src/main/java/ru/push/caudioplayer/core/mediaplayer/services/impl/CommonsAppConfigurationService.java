@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 public class CommonsAppConfigurationService implements AppConfigurationService {
   private static final Logger LOG = LoggerFactory.getLogger(CommonsAppConfigurationService.class);
   private static final String DEFAULT_CONFIG_FILE_NAME = "mediaplayer-app-configuration.xml";
-  private static final String DEFAULT_PLAYLIST_NAME = "Untitled";
 
   private final XMLConfiguration configuration;
 
@@ -64,7 +63,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
       }
       return playlists;
     } else {
-      PlaylistData emptyPlaylist = new PlaylistData(DEFAULT_PLAYLIST_NAME, 0, true);
+      PlaylistData emptyPlaylist = new PlaylistData(0);
       return Collections.singletonList(emptyPlaylist);
     }
   }

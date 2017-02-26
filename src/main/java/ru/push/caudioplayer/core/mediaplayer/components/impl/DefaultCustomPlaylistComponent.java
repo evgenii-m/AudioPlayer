@@ -7,10 +7,8 @@ import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
 import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
 import ru.push.caudioplayer.core.mediaplayer.helpers.MediaInfoDataLoader;
-import uk.co.caprica.vlcj.medialist.MediaList;
 
 import javax.annotation.Resource;
-import java.util.List;
 import java.util.stream.Collectors;
 
 /**

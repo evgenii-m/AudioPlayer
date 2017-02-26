@@ -8,6 +8,7 @@ import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.push.caudioplayer.ConfigurationControllers;
+import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
 
 import javax.annotation.PostConstruct;
@@ -32,9 +33,12 @@ public class MainController {
   @Resource(name = "playlistView")
   private ConfigurationControllers.View playlistView;
 
+  // TODO: must be removed!
   @Resource
   private CustomAudioPlayerComponent playerComponent;
 
+  @Resource
+  private AudioPlayerFacade audioPlayerFacade;
 
   @FXML
   public void initialize() {
@@ -49,6 +53,7 @@ public class MainController {
     mainContainer.getChildren().add(playlistView.getView());
   }
 
+  @FXML
   public void addLocation(ActionEvent actionEvent) {
     String mediaLocation = "http://ice1.somafm.com/groovesalad-128.mp3";
     try {
@@ -57,5 +62,10 @@ public class MainController {
     } catch (MalformedURLException e) {
       e.printStackTrace();
     }
+  }
+
+  @FXML
+  public void createNewPlaylist(ActionEvent actionEvent) {
+    audioPlayerFacade.createNewPlaylist();
   }
 }
