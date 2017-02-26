@@ -1,14 +1,14 @@
 package ru.push.caudioplayer.controller;
 
-import javafx.collections.FXCollections;
-import javafx.event.EventHandler;
-import javafx.event.EventType;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +20,6 @@ import ru.push.caudioplayer.ui.MediaTrackPlaylistItem;
 import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,6 +32,8 @@ public class PlaylistController {
 
   private static final Logger LOG = LoggerFactory.getLogger(MainController.class);
 
+  @FXML
+  private VBox playlistBrowserContainer;
   @FXML
   private TableView playlistContainer;
 
@@ -56,13 +57,36 @@ public class PlaylistController {
   public void init() {
     LOG.debug("init");
 
-    playlistContainer.setEditable(true);
     List<PlaylistData> playlists = appConfigurationService.getPlaylists();
+    fillPlaylistBrowserContainer(playlists);
+    playlistContainer.setEditable(true);
     playlists.stream()
-        .filter(PlaylistData::isActive)
-        .findFirst()
-        .ifPresent(this::loadPlaylist);
+        .filter(PlaylistData::isActive).findFirst()
+        .ifPresent(this::setPlaylistContainerItems);
+    setPlaylistContainerColumns();
+    playlistContainer.setEditable(false);
 
+    playlistContainer.setOnMouseClicked(mouseEvent -> {
+      if (mouseEvent.getButton().equals(MouseButton.PRIMARY) && (mouseEvent.getClickCount() == 2)) {
+        int playlistPosition = playlistContainer.getFocusModel().getFocusedCell().getRow();
+        String trackPath = playlistComponent.getTrackPath(playlistPosition);
+        playerComponent.playMedia(Paths.get(trackPath).toUri().toString());
+      }
+    });
+  }
+
+  private void fillPlaylistBrowserContainer(List<PlaylistData> playlists) {
+    if (CollectionUtils.isNotEmpty(playlists)) {
+      playlistBrowserContainer.getChildren().addAll(
+          playlists.stream()
+              .map(PlaylistData::getName)
+              .map(Label::new)
+              .collect(Collectors.toList())
+      );
+    }
+  }
+
+  private void setPlaylistContainerColumns() {
     playlistContainer.getColumns().clear();
     TableColumn numberCol = new TableColumn("#");
     numberCol.setCellValueFactory(new PropertyValueFactory<MediaTrackPlaylistItem, String>("number"));
@@ -75,18 +99,9 @@ public class PlaylistController {
     TableColumn lengthCol = new TableColumn("Length");
     lengthCol.setCellValueFactory(new PropertyValueFactory<MediaTrackPlaylistItem, String>("length"));
     playlistContainer.getColumns().addAll(numberCol, artistCol, albumCol, titleCol, lengthCol);
-    playlistContainer.setEditable(false);
-
-    playlistContainer.setOnMouseClicked(mouseEvent -> {
-      if (mouseEvent.getButton().equals(MouseButton.PRIMARY) && (mouseEvent.getClickCount() == 2)) {
-        int playlistPosition = playlistContainer.getFocusModel().getFocusedCell().getRow();
-        String trackPath = playlistComponent.getTrackPath(playlistPosition);
-        playerComponent.playMedia(Paths.get(trackPath).toUri().toString());
-      }
-    });
   }
 
-  private void loadPlaylist(PlaylistData playlistData) {
+  private void setPlaylistContainerItems(PlaylistData playlistData) {
     PlaylistData playlistFullData = playlistComponent.loadPlaylist(playlistData);
     playlistContainer.getItems().clear();
     playlistContainer.getItems().addAll(

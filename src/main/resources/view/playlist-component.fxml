@@ -1,14 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<Pane fx:controller="ru.push.caudioplayer.controller.PlaylistController" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" stylesheets="/css/style.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" >
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" stylesheets="/css/style.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.push.caudioplayer.controller.PlaylistController">
    <children>
-      <TableView fx:id="playlistContainer" prefHeight="248.0" prefWidth="649.0">
-         <columns>
-         </columns>
-      </TableView>
+      <HBox fx:id="playlistBlockContainer" prefWidth="1000.0" spacing="5">
+         <children>
+            <VBox fx:id="playlistBrowserContainer" prefHeight="300.0" prefWidth="250.0" styleClass="playlist-browser-container">
+            </VBox>
+            <TableView fx:id="playlistContainer" prefHeight="250.0" prefWidth="730.0">
+               <columns>
+               </columns>
+            </TableView>
+         </children>
+         <padding>
+            <Insets bottom="0.0" left="5.0" right="5.0" top="0.0" />
+         </padding>
+      </HBox>
    </children>
 </Pane>

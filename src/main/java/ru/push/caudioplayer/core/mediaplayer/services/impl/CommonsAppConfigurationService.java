@@ -43,7 +43,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
     List<String> playlistNames = configuration.getList(String.class, "playlists.playlist[@name]");
 
     if (CollectionUtils.isNotEmpty(playlistNames)) {
-      return playlistNames.stream()
+      List<PlaylistData> playlists = playlistNames.stream()
           .map(playlistName -> {
             int playlistIndex = playlistNames.indexOf(playlistName);
             int playlistPosition = configuration.getInt("playlists.playlist(" + playlistIndex + ")[@position]");
@@ -57,6 +57,12 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
                     .collect(Collectors.toList());
             return new PlaylistData(playlistName, playlistPosition, playlistTracks, playlistActive);
           }).collect(Collectors.toList());
+      if (playlists.stream().noneMatch(PlaylistData::isActive)) {
+        playlists.stream()
+            .findFirst()
+            .ifPresent(firstPlaylist -> firstPlaylist.setActive(true));
+      }
+      return playlists;
     } else {
       PlaylistData emptyPlaylist = new PlaylistData(DEFAULT_PLAYLIST_NAME, 0, true);
       return Collections.singletonList(emptyPlaylist);
