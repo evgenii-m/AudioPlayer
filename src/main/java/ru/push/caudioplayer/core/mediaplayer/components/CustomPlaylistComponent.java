@@ -2,21 +2,29 @@ package ru.push.caudioplayer.core.mediaplayer.components;
 
 import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
 
+import java.util.List;
+
 /**
  * @author push <mez.e.s@yandex.ru>
  * @date 2/12/17
  */
 public interface CustomPlaylistComponent extends NativePlayerComponent {
 
-  PlaylistData loadPlaylist(PlaylistData playlistData);
+  void loadPlaylists(List<PlaylistData> playlists);
 
-  PlaylistData getPlaylist();
+  List<PlaylistData> getPlaylists();
 
-  String getTrackPath(int position);
+  PlaylistData createNewPlaylist();
 
-  String getTrackPath();
+  PlaylistData getActivePlaylist();
 
-  String getNextTrackPath();
+  int getActiveTrackPosition();
 
-  String getPrevTrackPath();
+  String playTrack(String playlistName, int trackPosition);
+
+  String playCurrentTrack();
+
+  String playNextTrack();
+
+  String playPrevTrack();
 }

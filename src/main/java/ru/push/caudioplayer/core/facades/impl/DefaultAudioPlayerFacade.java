@@ -1,6 +1,5 @@
 package ru.push.caudioplayer.core.facades.impl;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +25,6 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   private static final Logger LOG = LoggerFactory.getLogger(DefaultAudioPlayerFacade.class);
 
   private final List<AudioPlayerEventListener> eventListeners;
-  private List<PlaylistData> playlists;
 
   @Autowired
   private CustomAudioPlayerComponent playerComponent;
@@ -43,6 +41,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   @PostConstruct
   public void init() {
     LOG.debug("init");
+    playlistComponent.loadPlaylists(appConfigurationService.getPlaylists());
   }
 
   @Override
@@ -57,25 +56,49 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 
   @Override
   public List<PlaylistData> getPlaylists() {
-    if (CollectionUtils.isEmpty(playlists)) {
-      playlists = appConfigurationService.getPlaylists();
-      playlists.stream()
-          .filter(PlaylistData::isActive).findFirst()
-          .ifPresent(activePlaylist -> playlistComponent.loadPlaylist(activePlaylist));
-    }
-    return playlists;
+    return playlistComponent.getPlaylists();
+  }
+
+  @Override
+  public PlaylistData getActivePlaylist() {
+    return playlistComponent.getActivePlaylist();
   }
 
   @Override
   public void createNewPlaylist() {
-    PlaylistData newPlaylist = new PlaylistData(playlists.size());
-    playlists.add(newPlaylist);
+    PlaylistData newPlaylist = playlistComponent.createNewPlaylist();
     eventListeners.forEach(listener -> listener.createdNewPlaylist(newPlaylist));
   }
 
   @Override
-  public void playMedia(int trackPosition) {
-    String trackPath = playlistComponent.getTrackPath(trackPosition);
+  public void playTrack(String playlistName, int trackPosition) {
+    String trackPath = playlistComponent.playTrack(playlistName, trackPosition);
     playerComponent.playMedia(Paths.get(trackPath).toUri().toString());
+  }
+
+  @Override
+  public void playCurrentTrack() {
+    String trackPath = playlistComponent.playCurrentTrack();
+    playerComponent.playMedia(Paths.get(trackPath).toUri().toString());
+  }
+
+  @Override
+  public void playNextTrack() {
+    String trackPath = playlistComponent.playNextTrack();
+    playerComponent.playMedia(Paths.get(trackPath).toUri().toString());
+    eventListeners.forEach(listener ->
+        listener.changedTrackPosition(playlistComponent.getActivePlaylist().getName(),
+            playlistComponent.getActiveTrackPosition())
+    );
+  }
+
+  @Override
+  public void playPrevTrack() {
+    String trackPath = playlistComponent.playPrevTrack();
+    playerComponent.playMedia(Paths.get(trackPath).toUri().toString());
+    eventListeners.forEach(listener ->
+        listener.changedTrackPosition(playlistComponent.getActivePlaylist().getName(),
+            playlistComponent.getActiveTrackPosition())
+    );
   }
 }

@@ -17,7 +17,15 @@ public interface AudioPlayerFacade {
 
   List<PlaylistData> getPlaylists();
 
+  PlaylistData getActivePlaylist();
+
   void createNewPlaylist();
 
-  void playMedia(int trackPosition);
+  void playTrack(String playlistName, int trackPosition);
+
+  void playCurrentTrack();
+
+  void playNextTrack();
+
+  void playPrevTrack();
 }

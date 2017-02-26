@@ -13,17 +13,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
-import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
 import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
-import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
 import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import java.nio.file.Paths;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -88,8 +83,6 @@ public class AudioPlayerController {
   public void init() {
     LOG.debug("init");
 
-    audioPlayerFacade.addListener(new AudioPlayerEventAdapter());
-
     updatePlaybackPosition(0, 0);
     addPositionSliderMouseListeners();
 
@@ -149,13 +142,6 @@ public class AudioPlayerController {
     updatePlaybackPosition(playbackPosition, mediaInfoData.getLength());
   }
 
-  private final class AudioPlayerEventAdapter implements AudioPlayerEventListener {
-
-    @Override
-    public void createdNewPlaylist(PlaylistData newPlaylist) {
-    }
-  }
-
   private final class UpdateUiRunnable implements Runnable {
     private final CustomAudioPlayerComponent playerComponent;
 
@@ -197,7 +183,7 @@ public class AudioPlayerController {
 
   @FXML
   void playAction(ActionEvent event) {
-    playerComponent.playMedia(Paths.get(playlistComponent.getTrackPath()).toUri().toString());
+    audioPlayerFacade.playCurrentTrack();
     updatePlaybackPosition();
   }
 
@@ -208,13 +194,13 @@ public class AudioPlayerController {
 
   @FXML
   public void prevAction(ActionEvent actionEvent) {
-    playerComponent.playMedia(Paths.get(playlistComponent.getPrevTrackPath()).toUri().toString());
+    audioPlayerFacade.playPrevTrack();
     updatePlaybackPosition();
   }
 
   @FXML
   public void nextAction(ActionEvent actionEvent) {
-    playerComponent.playMedia(Paths.get(playlistComponent.getNextTrackPath()).toUri().toString());
+    audioPlayerFacade.playNextTrack();
     updatePlaybackPosition();
   }
 }

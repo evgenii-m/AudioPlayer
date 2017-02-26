@@ -9,6 +9,7 @@ import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
 import ru.push.caudioplayer.core.mediaplayer.helpers.MediaInfoDataLoader;
 
 import javax.annotation.Resource;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -23,8 +24,9 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
   @Resource
   private MediaInfoDataLoader mediaInfoDataLoader;
 
-  private PlaylistData playlistData;
-  private Integer playlistPosition;
+  private List<PlaylistData> playlists;
+  private PlaylistData activePlaylist;
+  private Integer trackPosition;
 
   public DefaultCustomPlaylistComponent(CustomMediaPlayerFactory mediaPlayerFactory) {
     this.mediaPlayerFactory = mediaPlayerFactory;
@@ -35,56 +37,81 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
     LOG.debug("releaseComponent");
   }
 
-  @Override
-  public PlaylistData loadPlaylist(PlaylistData playlistData) {
-    this.playlistData = playlistData;
+  private void setActivePlaylist(PlaylistData playlist, int trackPosition) {
+    this.activePlaylist = playlist;
 
-    this.playlistData.setTracks(
+    this.activePlaylist.setTracks(
         mediaInfoDataLoader.load(
-            playlistData.getTracks().stream()
+            activePlaylist.getTracks().stream()
                 .map(MediaInfoData::getTrackPath)
                 .collect(Collectors.toList())
         )
     );
-    this.playlistPosition = 1;
-    return this.playlistData;
+    this.trackPosition = trackPosition;
   }
 
 
-
   @Override
-  public PlaylistData getPlaylist() {
-    return playlistData;
+  public void loadPlaylists(List<PlaylistData> playlists) {
+    this.playlists = playlists;
+    playlists.stream()
+        .filter(PlaylistData::isActive).findFirst()
+        .ifPresent(activePlaylist -> setActivePlaylist(activePlaylist, 0));
   }
 
   @Override
-  public String getTrackPath(int position) {
-    playlistPosition = position;
-    return getTrackPath();
+  public List<PlaylistData> getPlaylists() {
+    return playlists;
   }
 
   @Override
-  public String getTrackPath() {
-    return playlistData.getTracks().get(playlistPosition).getTrackPath();
+  public PlaylistData createNewPlaylist() {
+    PlaylistData newPlaylist = new PlaylistData(playlists.size());
+    playlists.add(newPlaylist);
+    return newPlaylist;
   }
 
   @Override
-  public String getNextTrackPath() {
-    if (playlistPosition < (playlistData.getTracks().size() - 1)) {
-      playlistPosition++;
+  public PlaylistData getActivePlaylist() {
+    return activePlaylist;
+  }
+
+  @Override
+  public int getActiveTrackPosition() {
+    return trackPosition;
+  }
+
+  @Override
+  public String playTrack(String playlistName, int trackPosition) {
+    activePlaylist = playlists.stream()
+        .filter(playlist -> playlist.getName().equals(playlistName)).findFirst()
+        .orElse(activePlaylist);
+    this.trackPosition = trackPosition;
+    return playCurrentTrack();
+  }
+
+  @Override
+  public String playCurrentTrack() {
+    return activePlaylist.getTracks().get(trackPosition).getTrackPath();
+  }
+
+  @Override
+  public String playNextTrack() {
+    if (trackPosition < (activePlaylist.getTracks().size() - 1)) {
+      trackPosition++;
     } else {
-      playlistPosition = 0;
+      trackPosition = 0;
     }
-    return getTrackPath();
+    return playCurrentTrack();
   }
 
   @Override
-  public String getPrevTrackPath() {
-    if (playlistPosition > 0) {
-      playlistPosition--;
+  public String playPrevTrack() {
+    if (trackPosition > 0) {
+      trackPosition--;
     } else {
-      playlistPosition = playlistData.getTracks().size() - 1;
+      trackPosition = activePlaylist.getTracks().size() - 1;
     }
-    return getTrackPath();
+    return playCurrentTrack();
   }
 }

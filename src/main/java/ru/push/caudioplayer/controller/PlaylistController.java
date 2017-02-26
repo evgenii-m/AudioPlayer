@@ -60,8 +60,9 @@ public class PlaylistController {
 
     playlistContainer.setOnMouseClicked(mouseEvent -> {
       if (mouseEvent.getButton().equals(MouseButton.PRIMARY) && (mouseEvent.getClickCount() == 2)) {
+        String activePlaylistName = playlistBrowserContainer.getSelectionModel().getSelectedItem().toString();
         int trackPosition = playlistContainer.getFocusModel().getFocusedCell().getRow();
-        audioPlayerFacade.playMedia(trackPosition);
+        audioPlayerFacade.playTrack(activePlaylistName, trackPosition);
       }
     });
 
@@ -128,6 +129,13 @@ public class PlaylistController {
       playlistBrowserContainer.getItems().add(newPlaylist.getName());
       playlistBrowserContainer.getSelectionModel().select(newPlaylist.getName());
       setPlaylistContainerItems(newPlaylist);
+    }
+
+    @Override
+    public void changedTrackPosition(String playlistName, int trackPosition) {
+      if (playlistName.equals(playlistBrowserContainer.getSelectionModel().getSelectedItem())) {
+        playlistContainer.getSelectionModel().select(trackPosition);
+      }
     }
   }
 }
