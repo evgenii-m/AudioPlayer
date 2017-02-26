@@ -52,6 +52,11 @@ public class ConfigurationControllers {
     return (PlaylistController) playlistView().getController();
   }
 
+  @Bean(name = "playlistBrowserView")
+  public View playlistBrowserView() {
+    return loadView("view/playlist-browser.fxml");
+  }
+
   protected View loadView(String url) {
     try (InputStream fxmlStream = getClass().getClassLoader().getResourceAsStream(url)) {
       FXMLLoader loader = new FXMLLoader();

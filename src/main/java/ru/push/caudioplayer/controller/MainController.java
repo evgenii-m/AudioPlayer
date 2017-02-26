@@ -2,6 +2,8 @@ package ru.push.caudioplayer.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +31,9 @@ public class MainController {
   @FXML
   @Resource(name = "playlistView")
   private ConfigurationControllers.View playlistView;
+  @FXML
+  @Resource(name = "playlistBrowserView")
+  private ConfigurationControllers.View playlistBrowserView;
 
   @Resource
   private CustomAudioPlayerComponent playerComponent;
@@ -44,7 +49,14 @@ public class MainController {
     LOG.debug("init");
 
     mainContainer.getChildren().add(audioPlayerView.getView());
-    mainContainer.getChildren().add(playlistView.getView());
+
+    HBox playlistBlockContainer = new HBox();
+    // TODO: move view settings to CSS class or XML configurations
+    playlistBlockContainer.setPadding(new Insets(3.0));
+    playlistBlockContainer.setSpacing(5.0);
+    playlistBlockContainer.getChildren().add(playlistBrowserView.getView());
+    playlistBlockContainer.getChildren().add(playlistView.getView());
+    mainContainer.getChildren().add(playlistBlockContainer);
   }
 
   public void addLocation(ActionEvent actionEvent) {
