@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
+import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
 import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
@@ -83,6 +84,8 @@ public class AudioPlayerController {
   public void init() {
     LOG.debug("init");
 
+    audioPlayerFacade.addListener(new AudioPlayerEventAdapter());
+
     updatePlaybackPosition(0, 0);
     addPositionSliderMouseListeners();
 
@@ -93,10 +96,6 @@ public class AudioPlayerController {
     });
 
     playerScheduler.scheduleAtFixedRate(new UpdateUiRunnable(playerComponent), 0L, 1L, TimeUnit.SECONDS);
-  }
-
-  public void stopScheduler() {
-    playerScheduler.shutdown();
   }
 
   private void addPositionSliderMouseListeners() {
@@ -159,6 +158,14 @@ public class AudioPlayerController {
           updatePlaybackPosition(playbackPosition, mediaInfoData.getLength());
         }
       });
+    }
+  }
+
+  private final class AudioPlayerEventAdapter extends DefaultAudioPlayerEventAdapter {
+
+    @Override
+    public void stopAudioPlayer() {
+      playerScheduler.shutdown();
     }
   }
 

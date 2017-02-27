@@ -73,6 +73,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   public void createNewPlaylist() {
     PlaylistData newPlaylist = playlistComponent.createNewPlaylist();
     eventListeners.forEach(listener -> listener.createdNewPlaylist(newPlaylist));
+    appConfigurationService.savePlaylists(playlistComponent.getPlaylists());
   }
 
   @Override
@@ -105,5 +106,13 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
         listener.changedTrackPosition(playlistComponent.getActivePlaylist().getName(),
             playlistComponent.getActiveTrackPosition())
     );
+  }
+
+  @Override
+  public void stopApplication() {
+    appConfigurationService.savePlaylists(playlistComponent.getPlaylists());
+    playerComponent.releaseComponent();
+    playlistComponent.releaseComponent();
+    eventListeners.forEach(AudioPlayerEventListener::stopAudioPlayer);
   }
 }

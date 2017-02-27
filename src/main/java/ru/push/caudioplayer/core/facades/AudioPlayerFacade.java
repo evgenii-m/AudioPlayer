@@ -30,4 +30,6 @@ public interface AudioPlayerFacade {
   void playNextTrack();
 
   void playPrevTrack();
+
+  void stopApplication();
 }

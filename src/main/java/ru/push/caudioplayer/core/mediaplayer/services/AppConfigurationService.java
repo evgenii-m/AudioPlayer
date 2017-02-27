@@ -11,4 +11,6 @@ import java.util.List;
 public interface AppConfigurationService {
 
   List<PlaylistData> getPlaylists();
+
+  void savePlaylists(List<PlaylistData> playlists);
 }

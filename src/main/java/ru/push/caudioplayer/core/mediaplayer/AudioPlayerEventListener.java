@@ -11,4 +11,6 @@ public interface AudioPlayerEventListener {
   void createdNewPlaylist(PlaylistData newPlaylist);
 
   void changedTrackPosition(String playlistName, int trackPosition);
+
+  void stopAudioPlayer();
 }

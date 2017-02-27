@@ -2,7 +2,6 @@ package ru.push.caudioplayer.controller;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.EventType;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -13,16 +12,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
-import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
-import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
+import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
 import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
-import ru.push.caudioplayer.core.mediaplayer.services.AppConfigurationService;
 import ru.push.caudioplayer.ui.MediaTrackPlaylistItem;
 import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -134,7 +129,7 @@ public class PlaylistController {
   }
 
 
-  private final class AudioPlayerEventAdapter implements AudioPlayerEventListener {
+  private final class AudioPlayerEventAdapter extends DefaultAudioPlayerEventAdapter {
 
     @Override
     public void createdNewPlaylist(PlaylistData newPlaylist) {
@@ -148,6 +143,11 @@ public class PlaylistController {
       if (playlistName.equals(playlistBrowserContainer.getSelectionModel().getSelectedItem())) {
         playlistContainer.getSelectionModel().select(trackPosition);
       }
+    }
+
+    @Override
+    public void stopAudioPlayer() {
+
     }
   }
 }
