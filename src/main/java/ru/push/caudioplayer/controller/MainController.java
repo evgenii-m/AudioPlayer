@@ -2,9 +2,8 @@ package ru.push.caudioplayer.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.geometry.Insets;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.push.caudioplayer.ConfigurationControllers;
@@ -13,8 +12,10 @@ import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerCompone
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 
 /**
  * @author push <mez.e.s@yandex.ru>
@@ -67,5 +68,13 @@ public class MainController {
   @FXML
   public void createNewPlaylist(ActionEvent actionEvent) {
     audioPlayerFacade.createNewPlaylist();
+  }
+
+  @FXML
+  public void openFiles(ActionEvent actionEvent) {
+    FileChooser fileChooser = new FileChooser();
+    fileChooser.setTitle("Open file(s)");
+    // WARNING: if this code throws JVM crashing, add JVM option '-DVLCJ_INITX=no'
+    List<File> files = fileChooser.showOpenMultipleDialog(mainContainer.getScene().getWindow());
   }
 }

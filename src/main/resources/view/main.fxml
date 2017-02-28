@@ -14,6 +14,7 @@
                 <Menu mnemonicParsing="false" text="File">
                   <items>
                     <MenuItem mnemonicParsing="false" onAction="#createNewPlaylist" text="New playlist" />
+                    <MenuItem mnemonicParsing="false" onAction="#openFiles" text="Open file(s)" />
                     <MenuItem mnemonicParsing="false" onAction="#addLocation" text="Add location" />
                     <MenuItem mnemonicParsing="false" text="Close" />
                   </items>
