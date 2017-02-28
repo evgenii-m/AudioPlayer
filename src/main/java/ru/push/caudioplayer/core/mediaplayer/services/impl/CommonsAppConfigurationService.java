@@ -1,19 +1,17 @@
 package ru.push.caudioplayer.core.mediaplayer.services.impl;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.configuration2.FileBasedConfiguration;
-import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.apache.commons.configuration2.XMLConfiguration;
 import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
-import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
-import org.apache.commons.configuration2.io.FileHandler;
 import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
+import ru.push.caudioplayer.core.mediaplayer.helpers.MediaInfoDataLoader;
 import ru.push.caudioplayer.core.mediaplayer.services.AppConfigurationService;
 
 import java.util.Collections;
@@ -29,6 +27,9 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
   private static final Logger LOG = LoggerFactory.getLogger(CommonsAppConfigurationService.class);
   private static final String DEFAULT_CONFIG_FILE_NAME = "mediaplayer-app-configuration.xml";
   private static final String UNTITLED_PLAYLIST_NAME = "Untitled";
+
+  @Autowired
+  private MediaInfoDataLoader mediaInfoDataLoader;
 
   private final FileBasedConfigurationBuilder<XMLConfiguration> configurationBuilder;
   private XMLConfiguration configuration;
@@ -67,13 +68,11 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
             String playlistName = (playlistNode.getAttributes().get("name") != null) ?
                 (String) playlistNode.getAttributes().get("name") : UNTITLED_PLAYLIST_NAME;
             boolean playlistActive = Optional.ofNullable(playlistNode.getAttributes().get("active")).isPresent();
-            // when read playlists from configuration.xml, put to PlaylistData.tracks DTO with
-            // single filled field 'trackPath', others fields will be loaded if required
-            List<MediaInfoData> playlistTracks =
+            List<MediaInfoData> playlistTracks = mediaInfoDataLoader.load(
                 playlistNode.getChildren().stream()
                     .map(trackNode -> (String) trackNode.getValue())
-                    .map(MediaInfoData::new)
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toList())
+            );
             return new PlaylistData(playlistName, playlistPosition, playlistTracks, playlistActive);
           }).collect(Collectors.toList());
       if (playlists.stream().noneMatch(PlaylistData::isActive)) {
@@ -123,6 +122,8 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
     configuration.getNodeModel().setRootNode(rootNode);
     saveConfiguration();
   }
+
+  // TODO: make function for change individual playlist
 
   private void saveConfiguration() {
     try {

@@ -11,6 +11,7 @@ import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
 import ru.push.caudioplayer.core.mediaplayer.services.AppConfigurationService;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   private CustomPlaylistComponent playlistComponent;
   @Autowired
   private AppConfigurationService appConfigurationService;
+  private PlaylistData displayedPlaylist;
 
 
   public DefaultAudioPlayerFacade() {
@@ -70,10 +72,23 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   }
 
   @Override
+  public PlaylistData showPlaylist(String playlistName) {
+    displayedPlaylist = getPlaylist(playlistName);
+    return displayedPlaylist;
+  }
+
+  @Override
   public void createNewPlaylist() {
     PlaylistData newPlaylist = playlistComponent.createNewPlaylist();
     eventListeners.forEach(listener -> listener.createdNewPlaylist(newPlaylist));
     appConfigurationService.savePlaylists(playlistComponent.getPlaylists());
+  }
+
+  @Override
+  public void addFilesToPlaylist(List<File> files) {
+    List<PlaylistData> playlists = playlistComponent.addFilesToPlaylist(displayedPlaylist.getName(), files);
+    appConfigurationService.savePlaylists(playlists);
+    eventListeners.forEach(listener -> listener.changedPlaylist(displayedPlaylist));
   }
 
   @Override

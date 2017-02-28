@@ -10,6 +10,7 @@ import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
 import ru.push.caudioplayer.core.mediaplayer.helpers.MediaInfoDataLoader;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,14 +42,6 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
 
   private void setActivePlaylist(PlaylistData playlist, int trackPosition) {
     this.activePlaylist = playlist;
-
-    this.activePlaylist.setTracks(
-        mediaInfoDataLoader.load(
-            activePlaylist.getTracks().stream()
-                .map(MediaInfoData::getTrackPath)
-                .collect(Collectors.toList())
-        )
-    );
     this.trackPosition = trackPosition;
   }
 
@@ -128,5 +121,15 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
       trackPosition = activePlaylist.getTracks().size() - 1;
     }
     return playCurrentTrack();
+  }
+
+  @Override
+  public List<PlaylistData> addFilesToPlaylist(String playlistName, List<File> files) {
+    PlaylistData playlist = getPlaylist(playlistName);
+    List<MediaInfoData> mediaInfoList = mediaInfoDataLoader.load(
+        files.stream().map(File::getAbsolutePath).collect(Collectors.toList())
+    );
+    playlist.getTracks().addAll(mediaInfoList);
+    return getPlaylists();
   }
 }

@@ -9,6 +9,11 @@ import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
 public abstract class DefaultAudioPlayerEventAdapter implements AudioPlayerEventListener {
 
   @Override
+  public void changedPlaylist(PlaylistData playlist) {
+
+  }
+
+  @Override
   public void createdNewPlaylist(PlaylistData newPlaylist) {
   }
 

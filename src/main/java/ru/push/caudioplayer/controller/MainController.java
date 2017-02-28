@@ -76,5 +76,6 @@ public class MainController {
     fileChooser.setTitle("Open file(s)");
     // WARNING: if this code throws JVM crashing, add JVM option '-DVLCJ_INITX=no'
     List<File> files = fileChooser.showOpenMultipleDialog(mainContainer.getScene().getWindow());
+    audioPlayerFacade.addFilesToPlaylist(files);
   }
 }

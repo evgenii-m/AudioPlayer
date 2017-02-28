@@ -2,6 +2,7 @@ package ru.push.caudioplayer.core.mediaplayer.components;
 
 import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -29,4 +30,6 @@ public interface CustomPlaylistComponent extends NativePlayerComponent {
   String playNextTrack();
 
   String playPrevTrack();
+
+  List<PlaylistData> addFilesToPlaylist(String playlistName, List<File> files);
 }

@@ -68,16 +68,14 @@ public class PlaylistController {
         new ChangeListener<String>() {
           @Override
           public void changed(ObservableValue observable, String oldValue, String newValue) {
-            PlaylistData playlist = audioPlayerFacade.getPlaylist(newValue);
+            PlaylistData playlist = audioPlayerFacade.showPlaylist(newValue);
             setPlaylistContainerItems(playlist);
           }
         });
 
     List<PlaylistData> playlists = audioPlayerFacade.getPlaylists();
     fillPlaylistBrowserContainer(playlists);
-    playlists.stream()
-        .filter(PlaylistData::isActive).findFirst()
-        .ifPresent(this::setPlaylistContainerItems);
+    setPlaylistContainerItems(audioPlayerFacade.getActivePlaylist());
   }
 
   private void setPlaylistContainerColumns() {
@@ -132,6 +130,11 @@ public class PlaylistController {
   private final class AudioPlayerEventAdapter extends DefaultAudioPlayerEventAdapter {
 
     @Override
+    public void changedPlaylist(PlaylistData playlist) {
+      setPlaylistContainerItems(playlist);
+    }
+
+    @Override
     public void createdNewPlaylist(PlaylistData newPlaylist) {
       playlistBrowserContainer.getItems().add(newPlaylist.getName());
       playlistBrowserContainer.getSelectionModel().select(newPlaylist.getName());
@@ -147,7 +150,6 @@ public class PlaylistController {
 
     @Override
     public void stopAudioPlayer() {
-
     }
   }
 }

@@ -3,6 +3,7 @@ package ru.push.caudioplayer.core.facades;
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
 import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -21,7 +22,11 @@ public interface AudioPlayerFacade {
 
   PlaylistData getPlaylist(String playlistName);
 
+  PlaylistData showPlaylist(String playlistName);
+
   void createNewPlaylist();
+
+  void addFilesToPlaylist(List<File> files);
 
   void playTrack(String playlistName, int trackPosition);
 
@@ -32,4 +37,5 @@ public interface AudioPlayerFacade {
   void playPrevTrack();
 
   void stopApplication();
+
 }

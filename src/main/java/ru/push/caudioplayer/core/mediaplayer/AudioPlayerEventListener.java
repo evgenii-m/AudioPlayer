@@ -8,6 +8,8 @@ import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
  */
 public interface AudioPlayerEventListener {
 
+  void changedPlaylist(PlaylistData playlist);
+
   void createdNewPlaylist(PlaylistData newPlaylist);
 
   void changedTrackPosition(String playlistName, int trackPosition);
