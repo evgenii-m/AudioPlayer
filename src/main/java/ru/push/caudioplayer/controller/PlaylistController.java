@@ -2,6 +2,8 @@ package ru.push.caudioplayer.controller;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -11,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
-import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
 import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
 import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
 import ru.push.caudioplayer.ui.MediaTrackPlaylistItem;
@@ -48,6 +49,7 @@ public class PlaylistController {
     setPlaylistContainerColumns();
     playlistBrowserContainer.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
     playlistContainer.setEditable(false);
+    playlistContainer.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
   }
 
   @PostConstruct
@@ -76,6 +78,24 @@ public class PlaylistController {
     List<PlaylistData> playlists = audioPlayerFacade.getPlaylists();
     fillPlaylistBrowserContainer(playlists);
     setPlaylistContainerItems(audioPlayerFacade.getActivePlaylist());
+    preparePlaylistContextMenu();
+  }
+
+  private void preparePlaylistContextMenu() {
+    ContextMenu playlistContextMenu = new ContextMenu();
+    MenuItem lookupOnLastfmMenuItem = new MenuItem("Lookup on last.fm");
+
+    MenuItem removeMenuItem = new MenuItem("Delete");
+    removeMenuItem.setOnAction(event ->
+        audioPlayerFacade.deleteItemsFromPlaylist(playlistContainer.getSelectionModel().getSelectedIndices())
+    );
+
+    MenuItem propertiesMenuItem = new MenuItem("Properties");
+    MenuItem moveToNewMenuItem = new MenuItem("Move to new playlist");
+
+    playlistContextMenu.getItems().addAll(lookupOnLastfmMenuItem, removeMenuItem, propertiesMenuItem,
+        moveToNewMenuItem);
+    playlistContainer.setContextMenu(playlistContextMenu);
   }
 
   private void setPlaylistContainerColumns() {

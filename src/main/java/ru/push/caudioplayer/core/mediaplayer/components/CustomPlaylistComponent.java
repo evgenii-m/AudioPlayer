@@ -32,4 +32,6 @@ public interface CustomPlaylistComponent extends NativePlayerComponent {
   String playPrevTrack();
 
   List<PlaylistData> addFilesToPlaylist(String playlistName, List<File> files);
+
+  List<PlaylistData> deleteItemsFromPlaylist(String playlistName, List<Integer> itemsIndexes);
 }

@@ -28,6 +28,8 @@ public interface AudioPlayerFacade {
 
   void addFilesToPlaylist(List<File> files);
 
+  void deleteItemsFromPlaylist(List<Integer> itemsIndexes);
+
   void playTrack(String playlistName, int trackPosition);
 
   void playCurrentTrack();
