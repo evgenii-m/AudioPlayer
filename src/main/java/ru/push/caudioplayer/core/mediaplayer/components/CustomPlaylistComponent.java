@@ -38,4 +38,6 @@ public interface CustomPlaylistComponent extends NativePlayerComponent {
   List<PlaylistData> addFilesToPlaylist(String playlistName, List<File> files);
 
   List<PlaylistData> deleteItemsFromPlaylist(String playlistName, List<Integer> itemsIndexes);
+
+  List<PlaylistData> addLocationsToPlaylist(String playlistName, List<String> locations);
 }

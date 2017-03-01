@@ -116,6 +116,13 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   }
 
   @Override
+  public void addLocationsToPlaylist(List<String> locations) {
+    List<PlaylistData> playlists = playlistComponent.addLocationsToPlaylist(displayedPlaylist.getName(), locations);
+    appConfigurationService.savePlaylists(playlists);
+    eventListeners.forEach(listener -> listener.changedPlaylist(displayedPlaylist));
+  }
+
+  @Override
   public void playTrack(String playlistName, int trackPosition) {
     String trackPath = playlistComponent.playTrack(playlistName, trackPosition);
     playerComponent.playMedia(Paths.get(trackPath).toUri().toString());

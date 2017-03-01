@@ -15,6 +15,7 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -56,13 +57,7 @@ public class MainController {
 
   @FXML
   public void addLocation(ActionEvent actionEvent) {
-    String mediaLocation = "http://ice1.somafm.com/groovesalad-128.mp3";
-    try {
-      URL mediaUrl = new URL(mediaLocation);
-      playerComponent.playMedia(mediaUrl.toString());
-    } catch (MalformedURLException e) {
-      e.printStackTrace();
-    }
+    audioPlayerFacade.addLocationsToPlaylist(Collections.singletonList("http://ice1.somafm.com/groovesalad-128.mp3"));
   }
 
   @FXML

@@ -34,6 +34,8 @@ public interface AudioPlayerFacade {
 
   void deleteItemsFromPlaylist(List<Integer> itemsIndexes);
 
+  void addLocationsToPlaylist(List<String> locations);
+
   void playTrack(String playlistName, int trackPosition);
 
   void playCurrentTrack();

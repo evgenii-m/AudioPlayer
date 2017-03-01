@@ -12,8 +12,11 @@ import ru.push.caudioplayer.core.mediaplayer.helpers.MediaInfoDataLoader;
 
 import javax.annotation.Resource;
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -157,9 +160,10 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
   @Override
   public List<PlaylistData> addFilesToPlaylist(String playlistName, List<File> files) {
     PlaylistData playlist = getPlaylist(playlistName);
-    List<MediaInfoData> mediaInfoList = mediaInfoDataLoader.load(
-        files.stream().map(File::getAbsolutePath).collect(Collectors.toList())
-    );
+    List<String> mediaPaths = files.stream()
+        .map(File::getAbsolutePath)
+        .collect(Collectors.toList());
+    List<MediaInfoData> mediaInfoList = mediaInfoDataLoader.load(mediaPaths);
     playlist.getTracks().addAll(mediaInfoList);
     return getPlaylists();
   }
@@ -172,6 +176,26 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
         .map(itemIndex -> playlist.getTracks().get(itemIndex))
         .collect(Collectors.toList());
     playlist.getTracks().removeAll(deletedItems);
+    return getPlaylists();
+  }
+
+  @Override
+  public List<PlaylistData> addLocationsToPlaylist(String playlistName, List<String> locations) {
+    PlaylistData playlist = getPlaylist(playlistName);
+    List<String> mediaPaths = locations.stream()
+        .map(location -> {
+          URL locationUrl = null;
+          try {
+            locationUrl = new URL(location);
+          } catch (MalformedURLException e) {
+            LOG.info("Bad URL [" + location + "].", e);
+          }
+          return (locationUrl != null) ? locationUrl.toString() : null;
+        })
+        .filter(Objects::nonNull)
+        .collect(Collectors.toList());
+    List<MediaInfoData> mediaInfoList = mediaInfoDataLoader.load(mediaPaths);
+    playlist.getTracks().addAll(mediaInfoList);
     return getPlaylists();
   }
 
