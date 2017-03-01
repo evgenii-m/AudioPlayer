@@ -17,6 +17,10 @@ public interface CustomPlaylistComponent extends NativePlayerComponent {
 
   PlaylistData createNewPlaylist();
 
+  boolean deletePlaylist(String playlistName);
+
+  void renamePlaylist(String actualPlaylistName, String newPlaylistName);
+
   PlaylistData getActivePlaylist();
 
   PlaylistData getPlaylist(String playlistName);

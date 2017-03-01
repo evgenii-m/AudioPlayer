@@ -1,6 +1,7 @@
 package ru.push.caudioplayer.core.mediaplayer.components.impl;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.IterableUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
@@ -70,6 +71,36 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
     PlaylistData newPlaylist = new PlaylistData(playlists.size());
     playlists.add(newPlaylist);
     return newPlaylist;
+  }
+
+  @Override
+  public boolean deletePlaylist(String playlistName) {
+    PlaylistData playlistData = getPlaylist(playlistName);
+    if (playlistData != null) {
+      if (playlists.size() == 1) {
+        activePlaylist = createNewPlaylist();
+        playlists.add(activePlaylist);
+      }
+      if (playlistData.equals(activePlaylist)) {
+        activePlaylist = IterableUtils.find(
+            playlists, playlist -> playlist.getPosition() == (activePlaylist.getPosition() + 1)
+        );
+        if (activePlaylist == null) {
+          activePlaylist = playlists.get(0);
+        }
+        trackPosition = 0;
+      }
+      playlists.remove(playlistData);
+      return true;
+    } else {
+      LOG.debug("Try delete unknown playlist [playlistName: " + playlistName + "]");
+      return false;
+    }
+  }
+
+  @Override
+  public void renamePlaylist(String actualPlaylistName, String newPlaylistName) {
+
   }
 
   @Override

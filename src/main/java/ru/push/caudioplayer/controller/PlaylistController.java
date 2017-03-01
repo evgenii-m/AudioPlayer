@@ -1,5 +1,6 @@
 package ru.push.caudioplayer.controller;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -79,23 +80,69 @@ public class PlaylistController {
     fillPlaylistBrowserContainer(playlists);
     setPlaylistContainerItems(audioPlayerFacade.getActivePlaylist());
     preparePlaylistContextMenu();
+    preparePlaylistBrowserContextMenu();
+  }
+
+  private void preparePlaylistBrowserContextMenu() {
+    playlistBrowserContainer.setCellFactory(lv -> {
+      ListCell<String> cell = new ListCell<>();
+
+      ContextMenu contextMenu = new ContextMenu();
+
+      MenuItem removeMenuItem = new MenuItem();
+      removeMenuItem.textProperty().bind(Bindings.format("Delete"));
+      removeMenuItem.setOnAction(event -> {
+        String deletedPlaylistName = (String) playlistBrowserContainer.getSelectionModel().getSelectedItem();
+        if (audioPlayerFacade.deletePlaylist(deletedPlaylistName)) {
+          playlistBrowserContainer.getItems().remove(deletedPlaylistName);
+        }
+      });
+
+      MenuItem renameMenuItem = new MenuItem("Rename");
+//    removeMenuItem.setOnAction(event ->
+//        audioPlayerFacade.renamePlaylist());
+
+      contextMenu.getItems().addAll(removeMenuItem, renameMenuItem);
+
+      cell.textProperty().bind(cell.itemProperty());
+      cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
+        if (isNowEmpty) {
+          cell.setContextMenu(null);
+        } else {
+          cell.setContextMenu(contextMenu);
+        }
+      });
+      return cell;
+    });
   }
 
   private void preparePlaylistContextMenu() {
-    ContextMenu playlistContextMenu = new ContextMenu();
-    MenuItem lookupOnLastfmMenuItem = new MenuItem("Lookup on last.fm");
+    playlistContainer.setRowFactory(lv -> {
+      TableRow<MediaTrackPlaylistItem> tableRow = new TableRow<>();
 
-    MenuItem removeMenuItem = new MenuItem("Delete");
-    removeMenuItem.setOnAction(event ->
-        audioPlayerFacade.deleteItemsFromPlaylist(playlistContainer.getSelectionModel().getSelectedIndices())
-    );
+      ContextMenu contextMenu = new ContextMenu();
+      MenuItem lookupOnLastfmMenuItem = new MenuItem("Lookup on last.fm");
 
-    MenuItem propertiesMenuItem = new MenuItem("Properties");
-    MenuItem moveToNewMenuItem = new MenuItem("Move to new playlist");
+      MenuItem removeMenuItem = new MenuItem("Delete");
+      removeMenuItem.setOnAction(event ->
+          audioPlayerFacade.deleteItemsFromPlaylist(playlistContainer.getSelectionModel().getSelectedIndices())
+      );
 
-    playlistContextMenu.getItems().addAll(lookupOnLastfmMenuItem, removeMenuItem, propertiesMenuItem,
-        moveToNewMenuItem);
-    playlistContainer.setContextMenu(playlistContextMenu);
+      MenuItem propertiesMenuItem = new MenuItem("Properties");
+      MenuItem moveToNewMenuItem = new MenuItem("Move to new playlist");
+
+      contextMenu.getItems().addAll(lookupOnLastfmMenuItem, removeMenuItem, propertiesMenuItem,
+          moveToNewMenuItem);
+
+      tableRow.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
+        if (isNowEmpty) {
+          tableRow.setContextMenu(null);
+        } else {
+          tableRow.setContextMenu(contextMenu);
+        }
+      });
+      return tableRow;
+    });
   }
 
   private void setPlaylistContainerColumns() {

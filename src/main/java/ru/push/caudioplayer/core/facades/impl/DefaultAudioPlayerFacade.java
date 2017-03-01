@@ -85,6 +85,23 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   }
 
   @Override
+  public boolean deletePlaylist(String playlistName) {
+    PlaylistData playlist = getPlaylist(playlistName);
+    boolean deleteDisplayed = (displayedPlaylist.equals(playlist));
+    boolean deleteResult = playlistComponent.deletePlaylist(playlistName);
+    if (deleteDisplayed) {
+      displayedPlaylist = playlistComponent.getActivePlaylist();
+      eventListeners.forEach(listener -> listener.changedPlaylist(displayedPlaylist));
+    }
+    return deleteResult;
+  }
+
+  @Override
+  public void renamePlaylist(String actualPlaylistName, String newPlaylistName) {
+
+  }
+
+  @Override
   public void addFilesToPlaylist(List<File> files) {
     List<PlaylistData> playlists = playlistComponent.addFilesToPlaylist(displayedPlaylist.getName(), files);
     appConfigurationService.savePlaylists(playlists);

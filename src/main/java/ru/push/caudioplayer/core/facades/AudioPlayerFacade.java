@@ -26,6 +26,10 @@ public interface AudioPlayerFacade {
 
   void createNewPlaylist();
 
+  boolean deletePlaylist(String playlistName);
+
+  void renamePlaylist(String actualPlaylistName, String newPlaylistName);
+
   void addFilesToPlaylist(List<File> files);
 
   void deleteItemsFromPlaylist(List<Integer> itemsIndexes);
