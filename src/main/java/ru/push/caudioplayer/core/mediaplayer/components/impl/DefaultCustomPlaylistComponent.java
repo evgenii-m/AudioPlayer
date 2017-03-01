@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
 import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
+import ru.push.caudioplayer.core.mediaplayer.dto.MediaSourceType;
 import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
 import ru.push.caudioplayer.core.mediaplayer.helpers.MediaInfoDataLoader;
 
@@ -124,7 +125,7 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
   }
 
   @Override
-  public String playTrack(String playlistName, int trackPosition) {
+  public MediaInfoData playTrack(String playlistName, int trackPosition) {
     activePlaylist = playlists.stream()
         .filter(playlist -> playlist.getName().equals(playlistName)).findFirst()
         .orElse(activePlaylist);
@@ -133,12 +134,21 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
   }
 
   @Override
-  public String playCurrentTrack() {
-    return activePlaylist.getTracks().get(trackPosition).getTrackPath();
+  public MediaInfoData playCurrentTrack() {
+    if ((activePlaylist == null) || CollectionUtils.isEmpty(activePlaylist.getTracks())) {
+      LOG.info("Attempt to play empty or null playlist");
+      return new MediaInfoData();
+    }
+
+    if ((trackPosition < 0) || (trackPosition >= activePlaylist.getTracks().size())) {
+      LOG.error("Incorrect track position [" + trackPosition + "], will be reset to 0.");
+      trackPosition = 0;
+    }
+    return activePlaylist.getTracks().get(trackPosition);
   }
 
   @Override
-  public String playNextTrack() {
+  public MediaInfoData playNextTrack() {
     if (trackPosition < (activePlaylist.getTracks().size() - 1)) {
       trackPosition++;
     } else {
@@ -148,7 +158,7 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
   }
 
   @Override
-  public String playPrevTrack() {
+  public MediaInfoData playPrevTrack() {
     if (trackPosition > 0) {
       trackPosition--;
     } else {
@@ -195,6 +205,7 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
         .filter(Objects::nonNull)
         .collect(Collectors.toList());
     List<MediaInfoData> mediaInfoList = mediaInfoDataLoader.load(mediaPaths);
+    mediaInfoList.forEach(mediaInfo -> mediaInfo.setSourceType(MediaSourceType.HTTP_STREAM));
     playlist.getTracks().addAll(mediaInfoList);
     return getPlaylists();
   }

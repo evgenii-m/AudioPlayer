@@ -1,11 +1,14 @@
 package ru.push.caudioplayer.core.mediaplayer.dto;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * @author push <mez.e.s@yandex.ru>
  * @date 2/13/17
  */
 public class MediaInfoData {
   private String trackPath;
+  private MediaSourceType sourceType;
   private String artist;
   private String album;
   private String date;
@@ -14,10 +17,14 @@ public class MediaInfoData {
   private String trackNumber;
   private Long length;
 
-  public MediaInfoData() { }
+  public MediaInfoData() {
+    this.trackPath = StringUtils.EMPTY;
+    this.sourceType = MediaSourceType.FILE;
+  }
 
   public MediaInfoData(String trackPath) {
     this.trackPath = trackPath;
+    this.sourceType = MediaSourceType.FILE;
   }
 
   public String getTrackPath() {
@@ -84,4 +91,11 @@ public class MediaInfoData {
     this.length = length;
   }
 
+  public MediaSourceType getSourceType() {
+    return sourceType;
+  }
+
+  public void setSourceType(MediaSourceType sourceType) {
+    this.sourceType = sourceType;
+  }
 }

@@ -1,5 +1,6 @@
 package ru.push.caudioplayer.core.mediaplayer;
 
+import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
 
 /**
@@ -10,7 +11,6 @@ public abstract class DefaultAudioPlayerEventAdapter implements AudioPlayerEvent
 
   @Override
   public void changedPlaylist(PlaylistData playlist) {
-
   }
 
   @Override
@@ -19,5 +19,9 @@ public abstract class DefaultAudioPlayerEventAdapter implements AudioPlayerEvent
 
   @Override
   public void changedTrackPosition(String playlistName, int trackPosition) {
+  }
+
+  @Override
+  public void refreshTrackMediaInfo(int trackPosition, MediaInfoData mediaInfo) {
   }
 }

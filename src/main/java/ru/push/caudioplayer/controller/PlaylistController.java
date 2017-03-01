@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
+import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
 import ru.push.caudioplayer.ui.MediaTrackPlaylistItem;
 import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
  * @author push <mez.e.s@yandex.ru>
  * @date 2/12/17
  */
+@SuppressWarnings("unchecked")
 public class PlaylistController {
 
   private static final Logger LOG = LoggerFactory.getLogger(MainController.class);
@@ -213,6 +215,11 @@ public class PlaylistController {
       if (playlistName.equals(playlistBrowserContainer.getSelectionModel().getSelectedItem())) {
         playlistContainer.getSelectionModel().select(trackPosition);
       }
+    }
+
+    @Override
+    public void refreshTrackMediaInfo(int trackPosition, MediaInfoData mediaInfo) {
+//      playlistContainer.
     }
 
     @Override

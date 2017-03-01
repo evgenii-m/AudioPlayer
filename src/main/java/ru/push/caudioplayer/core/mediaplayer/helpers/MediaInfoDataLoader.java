@@ -24,21 +24,24 @@ public class MediaInfoDataLoader {
 
   public List<MediaInfoData> load(List<String> mediaPaths) {
     return mediaPaths.stream()
-        .map(mediaPath -> {
-          MediaInfoData mediaInfoData = new MediaInfoData();
-          MediaMeta mediaMeta = mediaPlayerFactory.getMediaMeta(mediaPath, true);
-          if (mediaMeta != null) {
-            mediaInfoData.setAlbum(mediaMeta.getAlbum());
-            mediaInfoData.setArtist(mediaMeta.getArtist());
-            mediaInfoData.setDate(mediaMeta.getDate());
-            mediaInfoData.setLength(mediaMeta.getLength());
-            mediaInfoData.setTitle(mediaMeta.getTitle());
-            mediaInfoData.setTrackId(mediaMeta.getTrackId());
-            mediaInfoData.setTrackNumber(mediaMeta.getTrackNumber());
-            mediaMeta.release();
-          }
-          mediaInfoData.setTrackPath(mediaPath);
-          return mediaInfoData;
-        }).collect(Collectors.toList());
+        .map(this::load)
+        .collect(Collectors.toList());
+  }
+
+  public MediaInfoData load(String mediaPath) {
+    MediaInfoData mediaInfoData = new MediaInfoData();
+    MediaMeta mediaMeta = mediaPlayerFactory.getMediaMeta(mediaPath, true);
+    if (mediaMeta != null) {
+      mediaInfoData.setAlbum(mediaMeta.getAlbum());
+      mediaInfoData.setArtist(mediaMeta.getArtist());
+      mediaInfoData.setDate(mediaMeta.getDate());
+      mediaInfoData.setLength(mediaMeta.getLength());
+      mediaInfoData.setTitle(mediaMeta.getTitle());
+      mediaInfoData.setTrackId(mediaMeta.getTrackId());
+      mediaInfoData.setTrackNumber(mediaMeta.getTrackNumber());
+      mediaMeta.release();
+    }
+    mediaInfoData.setTrackPath(mediaPath);
+    return mediaInfoData;
   }
 }

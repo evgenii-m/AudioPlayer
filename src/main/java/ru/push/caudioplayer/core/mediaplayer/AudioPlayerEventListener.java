@@ -1,5 +1,6 @@
 package ru.push.caudioplayer.core.mediaplayer;
 
+import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
 
 /**
@@ -13,6 +14,8 @@ public interface AudioPlayerEventListener {
   void createdNewPlaylist(PlaylistData newPlaylist);
 
   void changedTrackPosition(String playlistName, int trackPosition);
+
+  void refreshTrackMediaInfo(int trackPosition, MediaInfoData mediaInfo);
 
   void stopAudioPlayer();
 }

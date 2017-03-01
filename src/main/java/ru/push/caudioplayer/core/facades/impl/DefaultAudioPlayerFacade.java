@@ -7,6 +7,8 @@ import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
+import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
+import ru.push.caudioplayer.core.mediaplayer.dto.MediaSourceType;
 import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
 import ru.push.caudioplayer.core.mediaplayer.services.AppConfigurationService;
 
@@ -124,20 +126,20 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 
   @Override
   public void playTrack(String playlistName, int trackPosition) {
-    String trackPath = playlistComponent.playTrack(playlistName, trackPosition);
-    playerComponent.playMedia(Paths.get(trackPath).toUri().toString());
+    MediaInfoData trackInfo = playlistComponent.playTrack(playlistName, trackPosition);
+    playTrack(trackInfo);
   }
 
   @Override
   public void playCurrentTrack() {
-    String trackPath = playlistComponent.playCurrentTrack();
-    playerComponent.playMedia(Paths.get(trackPath).toUri().toString());
+    MediaInfoData trackInfo = playlistComponent.playCurrentTrack();
+    playTrack(trackInfo);
   }
 
   @Override
   public void playNextTrack() {
-    String trackPath = playlistComponent.playNextTrack();
-    playerComponent.playMedia(Paths.get(trackPath).toUri().toString());
+    MediaInfoData trackInfo = playlistComponent.playNextTrack();
+    playTrack(trackInfo);
     eventListeners.forEach(listener ->
         listener.changedTrackPosition(playlistComponent.getActivePlaylist().getName(),
             playlistComponent.getActiveTrackPosition())
@@ -146,12 +148,21 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 
   @Override
   public void playPrevTrack() {
-    String trackPath = playlistComponent.playPrevTrack();
-    playerComponent.playMedia(Paths.get(trackPath).toUri().toString());
+    MediaInfoData trackInfo = playlistComponent.playPrevTrack();
+    playTrack(trackInfo);
     eventListeners.forEach(listener ->
         listener.changedTrackPosition(playlistComponent.getActivePlaylist().getName(),
             playlistComponent.getActiveTrackPosition())
     );
+  }
+
+  private void playTrack(MediaInfoData trackInfo) {
+    String resourceUri = MediaSourceType.FILE.equals(trackInfo.getSourceType()) ?
+        Paths.get(trackInfo.getTrackPath()).toString() : trackInfo.getTrackPath();
+    playerComponent.playMedia(resourceUri);
+    int currentTrackPosition = playlistComponent.getActiveTrackPosition();
+    MediaInfoData currentTrackInfo = playerComponent.getCurrentTrackInfo();
+    eventListeners.forEach(listener -> listener.refreshTrackMediaInfo(currentTrackPosition, currentTrackInfo));
   }
 
   @Override

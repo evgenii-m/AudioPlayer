@@ -6,10 +6,12 @@ import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.configuration2.tree.ImmutableNode;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
+import ru.push.caudioplayer.core.mediaplayer.dto.MediaSourceType;
 import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
 import ru.push.caudioplayer.core.mediaplayer.helpers.MediaInfoDataLoader;
 import ru.push.caudioplayer.core.mediaplayer.services.AppConfigurationService;
@@ -68,11 +70,16 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
             String playlistName = (playlistNode.getAttributes().get("name") != null) ?
                 (String) playlistNode.getAttributes().get("name") : UNTITLED_PLAYLIST_NAME;
             boolean playlistActive = Optional.ofNullable(playlistNode.getAttributes().get("active")).isPresent();
-            List<MediaInfoData> playlistTracks = mediaInfoDataLoader.load(
-                playlistNode.getChildren().stream()
-                    .map(trackNode -> (String) trackNode.getValue())
-                    .collect(Collectors.toList())
-            );
+            List<MediaInfoData> playlistTracks = playlistNode.getChildren().stream()
+                .map(trackNode -> {
+                  String trackPath = (String) trackNode.getValue();
+                  MediaSourceType sourceType = MediaSourceType.valueOf(
+                      StringUtils.upperCase((String) trackNode.getAttributes().getOrDefault("sourceType", "FILE"))
+                  );
+                  MediaInfoData trackInfo = mediaInfoDataLoader.load(trackPath);
+                  trackInfo.setSourceType(sourceType);
+                  return trackInfo;
+                }).collect(Collectors.toList());
             return new PlaylistData(playlistName, playlistPosition, playlistTracks, playlistActive);
           }).collect(Collectors.toList());
       if (playlists.stream().noneMatch(PlaylistData::isActive)) {
@@ -113,6 +120,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
       playlistData.getTracks().forEach(trackData -> {
         ImmutableNode trackNode = new ImmutableNode.Builder()
             .name("track")
+            .addAttribute("sourceType", trackData.getSourceType().name())
             .value(trackData.getTrackPath()).create();
         playlistNodeBuilder.addChild(trackNode);
       });

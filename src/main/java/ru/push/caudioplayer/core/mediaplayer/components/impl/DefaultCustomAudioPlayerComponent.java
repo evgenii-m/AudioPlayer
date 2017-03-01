@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
 import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
 import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
+import uk.co.caprica.vlcj.player.MediaMeta;
 import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
 
@@ -23,12 +24,14 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
 
   private int volume;
   private float playbackPosition;
+  MediaInfoData currentTrackInfoData;
 
   public DefaultCustomAudioPlayerComponent(CustomMediaPlayerFactory mediaPlayerFactory) {
     this.mediaPlayerFactory = mediaPlayerFactory;
     this.mediaPlayer = mediaPlayerFactory.newHeadlessMediaPlayer();
     this.volume = VOLUME_DEFAULT_VALUE;
     this.playbackPosition = 0;
+    this.currentTrackInfoData = new MediaInfoData();
     this.mediaPlayer.addMediaPlayerEventListener(new DefaultMediaPlayerEventListener());
   }
 
@@ -52,7 +55,22 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
 
   @Override
   public boolean playMedia(String resourceUri) {
-    return mediaPlayer.playMedia(resourceUri);
+    boolean playMediaResult = mediaPlayer.playMedia(resourceUri);
+    if (playMediaResult) {
+      setCurrentTrackInfoData();
+    }
+    return playMediaResult;
+  }
+
+  private void setCurrentTrackInfoData() {
+    MediaMeta mediaMeta = mediaPlayer.getMediaMeta();
+    currentTrackInfoData.setAlbum(mediaMeta.getAlbum());
+    currentTrackInfoData.setArtist(mediaMeta.getArtist());
+    currentTrackInfoData.setDate(mediaMeta.getDate());
+    currentTrackInfoData.setLength(mediaMeta.getLength());
+    currentTrackInfoData.setTitle(mediaMeta.getTitle());
+    currentTrackInfoData.setTrackId(mediaMeta.getTrackId());
+    currentTrackInfoData.setTrackNumber(mediaMeta.getTrackNumber());
   }
 
   @Override
@@ -96,9 +114,7 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
 
   @Override
   public MediaInfoData getCurrentTrackInfo() {
-    MediaInfoData mediaInfoData = new MediaInfoData();
-    mediaInfoData.setLength(mediaPlayer.getLength());
-    return mediaInfoData;
+    return currentTrackInfoData;
   }
 
   @Override
