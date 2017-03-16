@@ -55,15 +55,10 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
 
   @Override
   public boolean playMedia(String resourceUri) {
-    boolean playMediaResult = mediaPlayer.playMedia(resourceUri);
-    if (playMediaResult) {
-      setCurrentTrackInfoData();
-    }
-    return playMediaResult;
+    return mediaPlayer.playMedia(resourceUri);
   }
 
-  private void setCurrentTrackInfoData() {
-    MediaMeta mediaMeta = mediaPlayer.getMediaMeta();
+  private void setCurrentTrackInfoData(MediaMeta mediaMeta) {
     currentTrackInfoData.setAlbum(mediaMeta.getAlbum());
     currentTrackInfoData.setArtist(mediaMeta.getArtist());
     currentTrackInfoData.setDate(mediaMeta.getDate());
@@ -154,6 +149,15 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
     @Override
     public void error(MediaPlayer mediaPlayer) {
       LOG.debug("error");
+    }
+
+    @Override
+    public void mediaMetaChanged(MediaPlayer mediaPlayer, int metaType) {
+      LOG.debug("mediaMetaChanged");
+      if (mediaPlayer.isPlaying()) {
+        MediaMeta mediaMeta = mediaPlayer.getMediaMeta();
+        setCurrentTrackInfoData(mediaMeta);
+      }
     }
   }
 }

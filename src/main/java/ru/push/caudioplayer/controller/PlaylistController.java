@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unchecked")
 public class PlaylistController {
 
-  private static final Logger LOG = LoggerFactory.getLogger(MainController.class);
+  private static final Logger LOG = LoggerFactory.getLogger(PlaylistController.class);
 
   @FXML
   private ListView playlistBrowserContainer;
@@ -69,6 +69,9 @@ public class PlaylistController {
       }
     });
 
+    List<PlaylistData> playlists = audioPlayerFacade.getPlaylists();
+    fillPlaylistBrowserContainer(playlists);
+
     playlistBrowserContainer.getSelectionModel().selectedItemProperty().addListener(
         new ChangeListener<String>() {
           @Override
@@ -78,8 +81,6 @@ public class PlaylistController {
           }
         });
 
-    List<PlaylistData> playlists = audioPlayerFacade.getPlaylists();
-    fillPlaylistBrowserContainer(playlists);
     setPlaylistContainerItems(audioPlayerFacade.getActivePlaylist());
     preparePlaylistContextMenu();
     preparePlaylistBrowserContextMenu();
@@ -189,7 +190,7 @@ public class PlaylistController {
               } else {
                 String trackPath = (mediaInfoData != null) ? mediaInfoData.getTrackPath() : "NULL";
                 LOG.info("Media info not loaded for track '" + trackPath + "'");
-                return new MediaTrackPlaylistItem("", "", "", trackPath, "");
+                return new MediaTrackPlaylistItem("", "", "", trackPath, trackTimeLabelBuilder.buildTimeString(0));
               }
             }).collect(Collectors.toList())
     );

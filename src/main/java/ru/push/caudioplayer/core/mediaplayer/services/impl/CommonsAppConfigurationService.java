@@ -66,28 +66,31 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
           .map(playlistNode -> {
             int playlistIndex = playlistNode.getChildren().indexOf(playlistNode);
             int playlistPosition = (playlistNode.getAttributes().get("position") != null) ?
-                Integer.valueOf((String) playlistNode.getAttributes().get("position")) : playlistIndex;
+                Integer.valueOf((String) playlistNode.getAttributes().get("position")) :
+                playlistIndex;
             String playlistName = (playlistNode.getAttributes().get("name") != null) ?
                 (String) playlistNode.getAttributes().get("name") : UNTITLED_PLAYLIST_NAME;
-            boolean playlistActive = Optional.ofNullable(playlistNode.getAttributes().get("active")).isPresent();
+            boolean playlistActive = Optional.ofNullable(playlistNode.getAttributes().get("active"))
+                .isPresent();
+
             List<MediaInfoData> playlistTracks = playlistNode.getChildren().stream()
                 .map(trackNode -> {
                   String trackPath = (String) trackNode.getValue();
                   MediaSourceType sourceType = MediaSourceType.valueOf(
                       StringUtils.upperCase((String) trackNode.getAttributes().getOrDefault("sourceType", "FILE"))
                   );
-                  MediaInfoData trackInfo = mediaInfoDataLoader.load(trackPath);
-                  trackInfo.setSourceType(sourceType);
-                  return trackInfo;
+                  return mediaInfoDataLoader.load(trackPath, sourceType);
                 }).collect(Collectors.toList());
             return new PlaylistData(playlistName, playlistPosition, playlistTracks, playlistActive);
           }).collect(Collectors.toList());
+
       if (playlists.stream().noneMatch(PlaylistData::isActive)) {
         playlists.stream()
             .findFirst()
             .ifPresent(firstPlaylist -> firstPlaylist.setActive(true));
       }
       return playlists;
+
     } else {
       LOG.warn("Playlists block not found or empty (load operation)!");
       PlaylistData emptyPlaylist = new PlaylistData(0);

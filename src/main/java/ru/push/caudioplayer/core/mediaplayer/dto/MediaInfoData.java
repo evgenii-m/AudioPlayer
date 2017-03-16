@@ -15,7 +15,7 @@ public class MediaInfoData {
   private String title;
   private String trackId;
   private String trackNumber;
-  private Long length;
+  private long length;
 
   public MediaInfoData() {
     this.trackPath = StringUtils.EMPTY;
@@ -83,11 +83,11 @@ public class MediaInfoData {
     this.trackNumber = trackNumber;
   }
 
-  public Long getLength() {
+  public long getLength() {
     return length;
   }
 
-  public void setLength(Long length) {
+  public void setLength(long length) {
     this.length = length;
   }
 

@@ -173,7 +173,7 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
     List<String> mediaPaths = files.stream()
         .map(File::getAbsolutePath)
         .collect(Collectors.toList());
-    List<MediaInfoData> mediaInfoList = mediaInfoDataLoader.load(mediaPaths);
+    List<MediaInfoData> mediaInfoList = mediaInfoDataLoader.load(mediaPaths, MediaSourceType.FILE);
     playlist.getTracks().addAll(mediaInfoList);
     return getPlaylists();
   }
@@ -204,8 +204,7 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
         })
         .filter(Objects::nonNull)
         .collect(Collectors.toList());
-    List<MediaInfoData> mediaInfoList = mediaInfoDataLoader.load(mediaPaths);
-    mediaInfoList.forEach(mediaInfo -> mediaInfo.setSourceType(MediaSourceType.HTTP_STREAM));
+    List<MediaInfoData> mediaInfoList = mediaInfoDataLoader.load(mediaPaths, MediaSourceType.HTTP_STREAM);
     playlist.getTracks().addAll(mediaInfoList);
     return getPlaylists();
   }
