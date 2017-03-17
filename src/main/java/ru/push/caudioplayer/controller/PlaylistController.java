@@ -220,7 +220,16 @@ public class PlaylistController {
 
     @Override
     public void refreshTrackMediaInfo(int trackPosition, MediaInfoData mediaInfo) {
-//      playlistContainer.
+      if ((trackPosition > 0) && (trackPosition < playlistContainer.getItems().size())) {
+        MediaTrackPlaylistItem playlistItem = (MediaTrackPlaylistItem) playlistContainer.getItems().get(trackPosition);
+        playlistItem.setNumber(mediaInfo.getTrackNumber());
+        playlistItem.setArtist(mediaInfo.getArtist());
+        playlistItem.setAlbum(mediaInfo.getAlbum());
+        playlistItem.setTitle(mediaInfo.getTitle());
+        playlistItem.setLength(trackTimeLabelBuilder.buildTimeString(mediaInfo.getLength()));
+      } else {
+        LOG.error("Invalid track position [trackPosition = " + trackPosition + "], refresh track media info skipped");
+      }
     }
 
     @Override

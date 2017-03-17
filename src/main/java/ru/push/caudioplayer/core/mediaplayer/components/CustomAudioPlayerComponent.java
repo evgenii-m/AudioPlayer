@@ -1,12 +1,14 @@
 package ru.push.caudioplayer.core.mediaplayer.components;
 
-import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
+import uk.co.caprica.vlcj.player.MediaPlayerEventListener;
 
 /**
  * @author push <mez.e.s@yandex.ru>
  * @date 2/12/17
  */
 public interface CustomAudioPlayerComponent extends NativePlayerComponent {
+
+  void addEventListener(MediaPlayerEventListener eventListener);
 
   int getMaxVolume();
 
@@ -24,10 +26,10 @@ public interface CustomAudioPlayerComponent extends NativePlayerComponent {
 
   float getPlaybackPosition();
 
+  long getCurrentTrackLength();
+
   void changePlaybackPosition(float newPosition);
 
   boolean isPlaying();
-
-  MediaInfoData getCurrentTrackInfo();
 
 }

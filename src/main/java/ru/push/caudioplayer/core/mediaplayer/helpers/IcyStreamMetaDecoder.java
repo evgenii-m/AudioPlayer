@@ -17,7 +17,6 @@ import java.util.regex.Pattern;
  * @date 3/16/17
  */
 class IcyStreamMetaDecoder {
-  private static final String STREAM_TITLE_SEPARATOR = " - ";
 
   private URL streamUrl;
   private Map<String, String> requestProperties;
@@ -74,52 +73,9 @@ class IcyStreamMetaDecoder {
     isError = false;
   }
 
-  /**
-   * Get artist using stream's title
-   *
-   * @return String
-   * @throws IOException
-   */
-  public String getArtist() throws IOException {
-    data = getMetadata();
-
-    if (!data.containsKey("StreamTitle")) {
-      return "";
-    }
-
-    String streamTitle = data.get("StreamTitle");
-    String title = streamTitle.substring(0, streamTitle.indexOf(STREAM_TITLE_SEPARATOR));
-    return title.trim();
-  }
-
-  /**
-   * Get streamTitle
-   *
-   * @return String
-   * @throws IOException
-   */
   public String getStreamTitle() throws IOException {
     data = getMetadata();
     return data.getOrDefault("StreamTitle", "");
-  }
-
-  /**
-   * Get title using stream's title
-   *
-   * @return String
-   * @throws IOException
-   */
-  public String getTitle() throws IOException {
-    data = getMetadata();
-
-    if (!data.containsKey("StreamTitle")) {
-      return "";
-    }
-
-    String streamTitle = data.get("StreamTitle");
-    String artist = streamTitle.substring(streamTitle.indexOf(STREAM_TITLE_SEPARATOR)
-        + STREAM_TITLE_SEPARATOR.length());
-    return artist.trim();
   }
 
   public String getStationName() throws IOException {

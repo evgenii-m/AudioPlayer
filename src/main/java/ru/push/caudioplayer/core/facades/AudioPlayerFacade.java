@@ -1,6 +1,7 @@
 package ru.push.caudioplayer.core.facades;
 
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
+import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
 
 import java.io.File;
@@ -43,6 +44,8 @@ public interface AudioPlayerFacade {
   void playNextTrack();
 
   void playPrevTrack();
+
+  MediaInfoData getCurrentTrackInfo();
 
   void stopApplication();
 

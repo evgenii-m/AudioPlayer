@@ -135,7 +135,7 @@ public class AudioPlayerController {
       }
     }
 
-    MediaInfoData mediaInfoData = playerComponent.getCurrentTrackInfo();
+    MediaInfoData mediaInfoData = audioPlayerFacade.getCurrentTrackInfo();
     float playbackPosition = playerComponent.getPlaybackPosition();
 
     updatePlaybackPosition(playbackPosition, mediaInfoData.getLength());
@@ -150,12 +150,12 @@ public class AudioPlayerController {
 
     @Override
     public void run() {
-      MediaInfoData mediaInfoData = playerComponent.getCurrentTrackInfo();
+      long currentTrackLength = playerComponent.getCurrentTrackLength();
       float playbackPosition = playerComponent.getPlaybackPosition();
 
       Platform.runLater(() -> {
         if (playerComponent.isPlaying()) {
-          updatePlaybackPosition(playbackPosition, mediaInfoData.getLength());
+          updatePlaybackPosition(playbackPosition, currentTrackLength);
         }
       });
     }
@@ -176,9 +176,9 @@ public class AudioPlayerController {
   }
 
   private void updatePlaybackPosition() {
-    MediaInfoData mediaInfoData = playerComponent.getCurrentTrackInfo();
+    long currentTrackLength = playerComponent.getCurrentTrackLength();
     float playbackPosition = playerComponent.getPlaybackPosition();
-    updatePlaybackPosition(playbackPosition, mediaInfoData.getLength());
+    updatePlaybackPosition(playbackPosition, currentTrackLength);
   }
 
 
