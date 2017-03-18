@@ -90,6 +90,12 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   }
 
   @Override
+  public PlaylistData showActivePlaylist() {
+    displayedPlaylist = getActivePlaylist();
+    return displayedPlaylist;
+  }
+
+  @Override
   public void createNewPlaylist() {
     PlaylistData newPlaylist = playlistComponent.createNewPlaylist();
     eventListeners.forEach(listener -> listener.createdNewPlaylist(newPlaylist));
@@ -191,8 +197,8 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 
     @Override
     public void mediaMetaChanged(MediaPlayer mediaPlayer, int metaType) {
-      LOG.debug("mediaMetaChanged");
-      if (mediaPlayer.isPlaying()) {
+      if (mediaPlayer.isPlaying()) {  // media changes actual only when playing media
+        LOG.debug("mediaMetaChanged");
         MediaMeta mediaMeta = mediaPlayer.getMediaMeta();
         if (mediaMeta != null) {
           MediaSourceType sourceType = (currentTrackInfoData.getSourceType() != null) ?

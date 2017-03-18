@@ -25,6 +25,8 @@ public interface AudioPlayerFacade {
 
   PlaylistData showPlaylist(String playlistName);
 
+  PlaylistData showActivePlaylist();
+
   void createNewPlaylist();
 
   boolean deletePlaylist(String playlistName);
