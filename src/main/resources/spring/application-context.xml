@@ -7,11 +7,17 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/context
-        http://www.springframework.org/schema/context/spring-context.xsd">
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/util
+        http://www.springframework.org/schema/util/spring-util-2.5.xsd">
 
   <bean name="mediaPlayerFactory"
         class="ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory">
-    <constructor-arg value="--quiet"/>
+    <constructor-arg>
+      <list>
+        <value>--quiet</value>
+      </list>
+    </constructor-arg>
   </bean>
 
   <bean name="playerComponent"
