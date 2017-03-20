@@ -7,9 +7,9 @@ import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
-import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
-import ru.push.caudioplayer.core.mediaplayer.dto.MediaSourceType;
-import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
+import ru.push.caudioplayer.core.mediaplayer.model.MediaInfoModel;
+import ru.push.caudioplayer.core.mediaplayer.model.MediaSourceType;
+import ru.push.caudioplayer.core.mediaplayer.model.PlaylistModel;
 import ru.push.caudioplayer.core.mediaplayer.helpers.MediaInfoDataLoader;
 import ru.push.caudioplayer.core.mediaplayer.services.AppConfigurationService;
 import uk.co.caprica.vlcj.player.MediaMeta;
@@ -42,12 +42,12 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   @Autowired
   private MediaInfoDataLoader mediaInfoDataLoader;
 
-  private PlaylistData displayedPlaylist;
-  private MediaInfoData currentTrackInfoData;
+  private PlaylistModel displayedPlaylist;
+  private MediaInfoModel currentTrackInfoData;
 
 
   public DefaultAudioPlayerFacade() {
-    currentTrackInfoData = new MediaInfoData();
+    currentTrackInfoData = new MediaInfoModel();
     eventListeners = new ArrayList<>();
   }
 
@@ -56,6 +56,22 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
     LOG.debug("init");
     playlistComponent.loadPlaylists(appConfigurationService.getPlaylists());
     playerComponent.addEventListener(new AudioPlayerFacadeEventListener());
+  }
+
+  public void setPlayerComponent(CustomAudioPlayerComponent playerComponent) {
+    this.playerComponent = playerComponent;
+  }
+
+  public void setPlaylistComponent(CustomPlaylistComponent playlistComponent) {
+    this.playlistComponent = playlistComponent;
+  }
+
+  public void setAppConfigurationService(AppConfigurationService appConfigurationService) {
+    this.appConfigurationService = appConfigurationService;
+  }
+
+  public void setMediaInfoDataLoader(MediaInfoDataLoader mediaInfoDataLoader) {
+    this.mediaInfoDataLoader = mediaInfoDataLoader;
   }
 
   @Override
@@ -69,42 +85,42 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   }
 
   @Override
-  public List<PlaylistData> getPlaylists() {
+  public List<PlaylistModel> getPlaylists() {
     return playlistComponent.getPlaylists();
   }
 
   @Override
-  public PlaylistData getActivePlaylist() {
+  public PlaylistModel getActivePlaylist() {
     return playlistComponent.getActivePlaylist();
   }
 
   @Override
-  public PlaylistData getPlaylist(String playlistName) {
+  public PlaylistModel getPlaylist(String playlistName) {
     return playlistComponent.getPlaylist(playlistName);
   }
 
   @Override
-  public PlaylistData showPlaylist(String playlistName) {
+  public PlaylistModel showPlaylist(String playlistName) {
     displayedPlaylist = getPlaylist(playlistName);
     return displayedPlaylist;
   }
 
   @Override
-  public PlaylistData showActivePlaylist() {
+  public PlaylistModel showActivePlaylist() {
     displayedPlaylist = getActivePlaylist();
     return displayedPlaylist;
   }
 
   @Override
   public void createNewPlaylist() {
-    PlaylistData newPlaylist = playlistComponent.createNewPlaylist();
+    PlaylistModel newPlaylist = playlistComponent.createNewPlaylist();
     eventListeners.forEach(listener -> listener.createdNewPlaylist(newPlaylist));
     appConfigurationService.savePlaylists(playlistComponent.getPlaylists());
   }
 
   @Override
   public boolean deletePlaylist(String playlistName) {
-    PlaylistData playlist = getPlaylist(playlistName);
+    PlaylistModel playlist = getPlaylist(playlistName);
     boolean deleteDisplayed = (displayedPlaylist.equals(playlist));
     boolean deleteResult = playlistComponent.deletePlaylist(playlistName);
     if (deleteDisplayed) {
@@ -121,40 +137,40 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 
   @Override
   public void addFilesToPlaylist(List<File> files) {
-    List<PlaylistData> playlists = playlistComponent.addFilesToPlaylist(displayedPlaylist.getName(), files);
+    List<PlaylistModel> playlists = playlistComponent.addFilesToPlaylist(displayedPlaylist.getName(), files);
     appConfigurationService.savePlaylists(playlists);
     eventListeners.forEach(listener -> listener.changedPlaylist(displayedPlaylist));
   }
 
   @Override
   public void deleteItemsFromPlaylist(List<Integer> itemsIndexes) {
-    List<PlaylistData> playlists = playlistComponent.deleteItemsFromPlaylist(displayedPlaylist.getName(), itemsIndexes);
+    List<PlaylistModel> playlists = playlistComponent.deleteItemsFromPlaylist(displayedPlaylist.getName(), itemsIndexes);
     appConfigurationService.savePlaylists(playlists);
     eventListeners.forEach(listener -> listener.changedPlaylist(displayedPlaylist));
   }
 
   @Override
   public void addLocationsToPlaylist(List<String> locations) {
-    List<PlaylistData> playlists = playlistComponent.addLocationsToPlaylist(displayedPlaylist.getName(), locations);
+    List<PlaylistModel> playlists = playlistComponent.addLocationsToPlaylist(displayedPlaylist.getName(), locations);
     appConfigurationService.savePlaylists(playlists);
     eventListeners.forEach(listener -> listener.changedPlaylist(displayedPlaylist));
   }
 
   @Override
   public void playTrack(String playlistName, int trackPosition) {
-    MediaInfoData trackInfo = playlistComponent.playTrack(playlistName, trackPosition);
+    MediaInfoModel trackInfo = playlistComponent.playTrack(playlistName, trackPosition);
     playTrack(trackInfo);
   }
 
   @Override
   public void playCurrentTrack() {
-    MediaInfoData trackInfo = playlistComponent.playCurrentTrack();
+    MediaInfoModel trackInfo = playlistComponent.playCurrentTrack();
     playTrack(trackInfo);
   }
 
   @Override
   public void playNextTrack() {
-    MediaInfoData trackInfo = playlistComponent.playNextTrack();
+    MediaInfoModel trackInfo = playlistComponent.playNextTrack();
     playTrack(trackInfo);
     eventListeners.forEach(listener ->
         listener.changedTrackPosition(playlistComponent.getActivePlaylist().getName(),
@@ -164,7 +180,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 
   @Override
   public void playPrevTrack() {
-    MediaInfoData trackInfo = playlistComponent.playPrevTrack();
+    MediaInfoModel trackInfo = playlistComponent.playPrevTrack();
     playTrack(trackInfo);
     eventListeners.forEach(listener ->
         listener.changedTrackPosition(playlistComponent.getActivePlaylist().getName(),
@@ -172,7 +188,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
     );
   }
 
-  private void playTrack(MediaInfoData trackInfo) {
+  private void playTrack(MediaInfoModel trackInfo) {
     String resourceUri = MediaSourceType.FILE.equals(trackInfo.getSourceType()) ?
         Paths.get(trackInfo.getTrackPath()).toString() : trackInfo.getTrackPath();
     playerComponent.playMedia(resourceUri);
@@ -180,7 +196,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   }
 
   @Override
-  public MediaInfoData getCurrentTrackInfo() {
+  public MediaInfoModel getCurrentTrackInfo() {
     return currentTrackInfoData;
   }
 

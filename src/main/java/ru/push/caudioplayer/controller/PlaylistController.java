@@ -3,8 +3,6 @@ package ru.push.caudioplayer.controller;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -15,8 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
-import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
-import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
+import ru.push.caudioplayer.core.mediaplayer.model.MediaInfoModel;
+import ru.push.caudioplayer.core.mediaplayer.model.PlaylistModel;
 import ru.push.caudioplayer.ui.MediaTrackPlaylistItem;
 import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
 
@@ -69,14 +67,14 @@ public class PlaylistController {
       }
     });
 
-    List<PlaylistData> playlists = audioPlayerFacade.getPlaylists();
+    List<PlaylistModel> playlists = audioPlayerFacade.getPlaylists();
     fillPlaylistBrowserContainer(playlists);
 
     playlistBrowserContainer.getSelectionModel().selectedItemProperty().addListener(
         new ChangeListener<String>() {
           @Override
           public void changed(ObservableValue observable, String oldValue, String newValue) {
-            PlaylistData playlist = audioPlayerFacade.showPlaylist(newValue);
+            PlaylistModel playlist = audioPlayerFacade.showPlaylist(newValue);
             setPlaylistContainerItems(playlist);
           }
         });
@@ -163,12 +161,12 @@ public class PlaylistController {
     playlistContainer.getColumns().addAll(numberCol, artistCol, albumCol, titleCol, lengthCol);
   }
 
-  private void fillPlaylistBrowserContainer(List<PlaylistData> playlists) {
+  private void fillPlaylistBrowserContainer(List<PlaylistModel> playlists) {
     if (CollectionUtils.isNotEmpty(playlists)) {
       playlistBrowserContainer.getItems().clear();
       boolean activeSelected = false;
       Collections.sort(playlists, (p1, p2) -> Integer.compare(p1.getPosition(), p2.getPosition()));
-      for (PlaylistData playlist : playlists) {
+      for (PlaylistModel playlist : playlists) {
         playlistBrowserContainer.getItems().add(playlist.getName());
         if (!activeSelected && playlist.isActive()) {
           activeSelected = true;
@@ -178,10 +176,10 @@ public class PlaylistController {
     }
   }
 
-  private void setPlaylistContainerItems(PlaylistData playlistData) {
+  private void setPlaylistContainerItems(PlaylistModel playlistModel) {
     playlistContainer.getItems().clear();
     playlistContainer.getItems().addAll(
-        playlistData.getTracks().stream()
+        playlistModel.getTracks().stream()
             .map(mediaInfoData -> {
               if ((mediaInfoData != null) && (mediaInfoData.getTitle() != null)) {
                 return new MediaTrackPlaylistItem(mediaInfoData.getTrackNumber(),
@@ -200,12 +198,12 @@ public class PlaylistController {
   private final class AudioPlayerEventAdapter extends DefaultAudioPlayerEventAdapter {
 
     @Override
-    public void changedPlaylist(PlaylistData playlist) {
+    public void changedPlaylist(PlaylistModel playlist) {
       setPlaylistContainerItems(playlist);
     }
 
     @Override
-    public void createdNewPlaylist(PlaylistData newPlaylist) {
+    public void createdNewPlaylist(PlaylistModel newPlaylist) {
       playlistBrowserContainer.getItems().add(newPlaylist.getName());
       playlistBrowserContainer.getSelectionModel().select(newPlaylist.getName());
       setPlaylistContainerItems(newPlaylist);
@@ -219,7 +217,7 @@ public class PlaylistController {
     }
 
     @Override
-    public void refreshTrackMediaInfo(int trackPosition, MediaInfoData mediaInfo) {
+    public void refreshTrackMediaInfo(int trackPosition, MediaInfoModel mediaInfo) {
       if ((trackPosition > 0) && (trackPosition < playlistContainer.getItems().size())) {
         MediaTrackPlaylistItem playlistItem = (MediaTrackPlaylistItem) playlistContainer.getItems().get(trackPosition);
         playlistItem.setNumber(mediaInfo.getTrackNumber());

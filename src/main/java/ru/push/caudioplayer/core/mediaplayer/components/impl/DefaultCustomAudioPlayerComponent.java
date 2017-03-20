@@ -2,13 +2,8 @@ package ru.push.caudioplayer.core.mediaplayer.components.impl;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
 import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
-import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
-import ru.push.caudioplayer.core.mediaplayer.dto.MediaSourceType;
-import ru.push.caudioplayer.core.mediaplayer.helpers.MediaInfoDataLoader;
-import uk.co.caprica.vlcj.player.MediaMeta;
 import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
 import uk.co.caprica.vlcj.player.MediaPlayerEventListener;

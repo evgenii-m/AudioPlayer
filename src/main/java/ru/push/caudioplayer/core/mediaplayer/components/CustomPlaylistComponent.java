@@ -1,7 +1,7 @@
 package ru.push.caudioplayer.core.mediaplayer.components;
 
-import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
-import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
+import ru.push.caudioplayer.core.mediaplayer.model.MediaInfoModel;
+import ru.push.caudioplayer.core.mediaplayer.model.PlaylistModel;
 
 import java.io.File;
 import java.util.List;
@@ -12,33 +12,33 @@ import java.util.List;
  */
 public interface CustomPlaylistComponent extends NativePlayerComponent {
 
-  void loadPlaylists(List<PlaylistData> playlists);
+  void loadPlaylists(List<PlaylistModel> playlists);
 
-  List<PlaylistData> getPlaylists();
+  List<PlaylistModel> getPlaylists();
 
-  PlaylistData createNewPlaylist();
+  PlaylistModel createNewPlaylist();
 
   boolean deletePlaylist(String playlistName);
 
   void renamePlaylist(String actualPlaylistName, String newPlaylistName);
 
-  PlaylistData getActivePlaylist();
+  PlaylistModel getActivePlaylist();
 
-  PlaylistData getPlaylist(String playlistName);
+  PlaylistModel getPlaylist(String playlistName);
 
   int getActiveTrackPosition();
 
-  MediaInfoData playTrack(String playlistName, int trackPosition);
+  MediaInfoModel playTrack(String playlistName, int trackPosition);
 
-  MediaInfoData playCurrentTrack();
+  MediaInfoModel playCurrentTrack();
 
-  MediaInfoData playNextTrack();
+  MediaInfoModel playNextTrack();
 
-  MediaInfoData playPrevTrack();
+  MediaInfoModel playPrevTrack();
 
-  List<PlaylistData> addFilesToPlaylist(String playlistName, List<File> files);
+  List<PlaylistModel> addFilesToPlaylist(String playlistName, List<File> files);
 
-  List<PlaylistData> deleteItemsFromPlaylist(String playlistName, List<Integer> itemsIndexes);
+  List<PlaylistModel> deleteItemsFromPlaylist(String playlistName, List<Integer> itemsIndexes);
 
-  List<PlaylistData> addLocationsToPlaylist(String playlistName, List<String> locations);
+  List<PlaylistModel> addLocationsToPlaylist(String playlistName, List<String> locations);
 }
