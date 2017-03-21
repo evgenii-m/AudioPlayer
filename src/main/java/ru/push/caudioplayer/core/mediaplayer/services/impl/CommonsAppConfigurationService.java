@@ -10,9 +10,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import ru.push.caudioplayer.core.mediaplayer.model.MediaInfoModel;
-import ru.push.caudioplayer.core.mediaplayer.model.MediaSourceType;
-import ru.push.caudioplayer.core.mediaplayer.model.PlaylistModel;
+import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
+import ru.push.caudioplayer.core.mediaplayer.pojo.MediaSourceType;
+import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 import ru.push.caudioplayer.core.mediaplayer.helpers.MediaInfoDataLoader;
 import ru.push.caudioplayer.core.mediaplayer.services.AppConfigurationService;
 
@@ -58,11 +58,11 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
   }
 
   @Override
-  public List<PlaylistModel> getPlaylists() {
+  public List<PlaylistData> getPlaylists() {
     ImmutableNode playlistsNode = getConfigurationRootChildNode("playlists");
 
     if (playlistsNode != null && CollectionUtils.isNotEmpty(playlistsNode.getChildren())) {
-      List<PlaylistModel> playlists = playlistsNode.getChildren().stream()
+      List<PlaylistData> playlists = playlistsNode.getChildren().stream()
           .map(playlistNode -> {
             int playlistIndex = playlistNode.getChildren().indexOf(playlistNode);
             int playlistPosition = (playlistNode.getAttributes().get("position") != null) ?
@@ -73,7 +73,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
             boolean playlistActive = Optional.ofNullable(playlistNode.getAttributes().get("active"))
                 .isPresent();
 
-            List<MediaInfoModel> playlistTracks = playlistNode.getChildren().stream()
+            List<MediaInfoData> playlistTracks = playlistNode.getChildren().stream()
                 .map(trackNode -> {
                   String trackPath = (String) trackNode.getValue();
                   MediaSourceType sourceType = MediaSourceType.valueOf(
@@ -81,10 +81,10 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
                   );
                   return mediaInfoDataLoader.load(trackPath, sourceType);
                 }).collect(Collectors.toList());
-            return new PlaylistModel(playlistName, playlistPosition, playlistTracks, playlistActive);
+            return new PlaylistData(playlistName, playlistPosition, playlistTracks, playlistActive);
           }).collect(Collectors.toList());
 
-      if (playlists.stream().noneMatch(PlaylistModel::isActive)) {
+      if (playlists.stream().noneMatch(PlaylistData::isActive)) {
         playlists.stream()
             .findFirst()
             .ifPresent(firstPlaylist -> firstPlaylist.setActive(true));
@@ -93,12 +93,12 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
 
     } else {
       LOG.warn("Playlists block not found or empty (load operation)!");
-      PlaylistModel emptyPlaylist = new PlaylistModel(0);
+      PlaylistData emptyPlaylist = new PlaylistData(0);
       return Collections.singletonList(emptyPlaylist);
     }
   }
 
-  public void savePlaylists(List<PlaylistModel> playlistsData) {
+  public void savePlaylists(List<PlaylistData> playlistsData) {
     ImmutableNode playlistsNode = getConfigurationRootChildNode("playlists");
     ImmutableNode rootNode = configuration.getNodeModel().getRootNode().removeChild(playlistsNode);
     if (playlistsNode != null) {
@@ -111,16 +111,16 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
       configuration.getNodeModel().getRootNode().addChild(playlistsNode);
     }
 
-    for (PlaylistModel playlistModel : playlistsData) {
+    for (PlaylistData playlistData : playlistsData) {
       ImmutableNode.Builder playlistNodeBuilder = new ImmutableNode.Builder();
       playlistNodeBuilder.name("playlist")
-          .addAttribute("name", playlistModel.getName())
-          .addAttribute("position", playlistModel.getPosition());
-      if (playlistModel.isActive()) {
+          .addAttribute("name", playlistData.getName())
+          .addAttribute("position", playlistData.getPosition());
+      if (playlistData.isActive()) {
         playlistNodeBuilder.addAttribute("active", true);
       }
 
-      playlistModel.getTracks().forEach(trackData -> {
+      playlistData.getTracks().forEach(trackData -> {
         ImmutableNode trackNode = new ImmutableNode.Builder()
             .name("track")
             .addAttribute("sourceType", trackData.getSourceType().name())

@@ -1,4 +1,4 @@
-package ru.push.caudioplayer.core.mediaplayer.model;
+package ru.push.caudioplayer.core.mediaplayer.pojo;
 
 /**
  * @author push <mez.e.s@yandex.ru>

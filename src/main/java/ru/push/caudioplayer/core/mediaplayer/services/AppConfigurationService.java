@@ -1,6 +1,6 @@
 package ru.push.caudioplayer.core.mediaplayer.services;
 
-import ru.push.caudioplayer.core.mediaplayer.model.PlaylistModel;
+import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ import java.util.List;
  */
 public interface AppConfigurationService {
 
-  List<PlaylistModel> getPlaylists();
+  List<PlaylistData> getPlaylists();
 
-  void savePlaylists(List<PlaylistModel> playlists);
+  void savePlaylists(List<PlaylistData> playlists);
 }

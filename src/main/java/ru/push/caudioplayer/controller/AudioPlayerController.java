@@ -16,7 +16,7 @@ import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
-import ru.push.caudioplayer.core.mediaplayer.model.MediaInfoModel;
+import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
 
 import javax.annotation.PostConstruct;
@@ -135,10 +135,10 @@ public class AudioPlayerController {
       }
     }
 
-    MediaInfoModel mediaInfoModel = audioPlayerFacade.getCurrentTrackInfo();
+    MediaInfoData mediaInfoData = audioPlayerFacade.getCurrentTrackInfo();
     float playbackPosition = playerComponent.getPlaybackPosition();
 
-    updatePlaybackPosition(playbackPosition, mediaInfoModel.getLength());
+    updatePlaybackPosition(playbackPosition, mediaInfoData.getLength());
   }
 
   private final class UpdateUiRunnable implements Runnable {

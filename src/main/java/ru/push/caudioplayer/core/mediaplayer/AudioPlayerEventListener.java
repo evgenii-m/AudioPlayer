@@ -1,7 +1,7 @@
 package ru.push.caudioplayer.core.mediaplayer;
 
-import ru.push.caudioplayer.core.mediaplayer.model.MediaInfoModel;
-import ru.push.caudioplayer.core.mediaplayer.model.PlaylistModel;
+import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
+import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 
 /**
  * @author push <mez.e.s@yandex.ru>
@@ -9,13 +9,13 @@ import ru.push.caudioplayer.core.mediaplayer.model.PlaylistModel;
  */
 public interface AudioPlayerEventListener {
 
-  void changedPlaylist(PlaylistModel playlist);
+  void changedPlaylist(PlaylistData playlist);
 
-  void createdNewPlaylist(PlaylistModel newPlaylist);
+  void createdNewPlaylist(PlaylistData newPlaylist);
 
   void changedTrackPosition(String playlistName, int trackPosition);
 
-  void refreshTrackMediaInfo(int trackPosition, MediaInfoModel mediaInfo);
+  void refreshTrackMediaInfo(int trackPosition, MediaInfoData mediaInfo);
 
   void stopAudioPlayer();
 }

@@ -9,7 +9,7 @@ import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
 import ru.push.caudioplayer.core.mediaplayer.components.impl.DefaultCustomAudioPlayerComponent;
 import ru.push.caudioplayer.core.mediaplayer.components.impl.DefaultCustomPlaylistComponent;
 import ru.push.caudioplayer.core.mediaplayer.helpers.MediaInfoDataLoader;
-import ru.push.caudioplayer.core.mediaplayer.model.PlaylistModel;
+import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 import ru.push.caudioplayer.core.mediaplayer.services.AppConfigurationService;
 import ru.push.caudioplayer.core.mediaplayer.services.impl.CommonsAppConfigurationService;
 
@@ -33,22 +33,22 @@ public class DefaultAudioPlayerFacadeTest {
 
   private static final int PLAYLISTS_COUNT = 2;
   private static final String PLAYLIST_FIRST_NAME = "first";
-  private static PlaylistModel playlistFirst;
+  private static PlaylistData playlistFirst;
   private static final String PLAYLIST_SECOND_NAME = "second";
-  private static PlaylistModel playlistSecond;
+  private static PlaylistData playlistSecond;
 
   @BeforeClass
   public static void setUpClass() {
-//    MediaInfoModel playlistFirstTrack0 = new MediaInfoModel.Builder()
+//    MediaInfoData playlistFirstTrack0 = new MediaInfoData.Builder()
 //        .artist("The Beatles")
 //        .album("Only A Northern Song")
 //        .title("Yellow Submarine")
 //        .build();
-//    List<MediaInfoModel> playlistFirstTracks = Lists.newArrayList(
+//    List<MediaInfoData> playlistFirstTracks = Lists.newArrayList(
 //
 //    );
 //
-//    playlistFirst = new PlaylistModel();
+//    playlistFirst = new PlaylistData();
   }
 
 
@@ -75,19 +75,19 @@ public class DefaultAudioPlayerFacadeTest {
 
   @Test
   public void shouldGetPlaylistsFromAppConfig() {
-    List<PlaylistModel> playlists = audioPlayerFacade.getPlaylists();
+    List<PlaylistData> playlists = audioPlayerFacade.getPlaylists();
 
     assertTrue(CollectionUtils.isNotEmpty(playlists),
         "Playlists collection null or empty.");
     assertEquals(playlists.size(), PLAYLISTS_COUNT,
         "Unexpected count of playlists.");
 
-    Map<Integer, List<PlaylistModel>> playlistsGroupedByPosition = playlists.stream()
-        .collect(Collectors.groupingBy(PlaylistModel::getPosition));
+    Map<Integer, List<PlaylistData>> playlistsGroupedByPosition = playlists.stream()
+        .collect(Collectors.groupingBy(PlaylistData::getPosition));
     assertEquals(playlistsGroupedByPosition.entrySet().size(), playlists.size(),
         "Each playlist must have unique position value.");
 
-    PlaylistModel
+    PlaylistData
   }
 
 }

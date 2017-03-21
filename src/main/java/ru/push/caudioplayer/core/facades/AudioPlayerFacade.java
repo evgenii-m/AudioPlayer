@@ -1,8 +1,8 @@
 package ru.push.caudioplayer.core.facades;
 
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
-import ru.push.caudioplayer.core.mediaplayer.model.MediaInfoModel;
-import ru.push.caudioplayer.core.mediaplayer.model.PlaylistModel;
+import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
+import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 
 import java.io.File;
 import java.util.List;
@@ -17,15 +17,15 @@ public interface AudioPlayerFacade {
 
   void removeListener(AudioPlayerEventListener listener);
 
-  List<PlaylistModel> getPlaylists();
+  List<PlaylistData> getPlaylists();
 
-  PlaylistModel getActivePlaylist();
+  PlaylistData getActivePlaylist();
 
-  PlaylistModel getPlaylist(String playlistName);
+  PlaylistData getPlaylist(String playlistName);
 
-  PlaylistModel showPlaylist(String playlistName);
+  PlaylistData showPlaylist(String playlistName);
 
-  PlaylistModel showActivePlaylist();
+  PlaylistData showActivePlaylist();
 
   void createNewPlaylist();
 
@@ -47,7 +47,7 @@ public interface AudioPlayerFacade {
 
   void playPrevTrack();
 
-  MediaInfoModel getCurrentTrackInfo();
+  MediaInfoData getCurrentTrackInfo();
 
   void stopApplication();
 

@@ -4,8 +4,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
-import ru.push.caudioplayer.core.mediaplayer.model.MediaInfoModel;
-import ru.push.caudioplayer.core.mediaplayer.model.MediaSourceType;
+import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
+import ru.push.caudioplayer.core.mediaplayer.pojo.MediaSourceType;
 import uk.co.caprica.vlcj.player.MediaMeta;
 
 import java.io.IOException;
@@ -27,20 +27,20 @@ public class MediaInfoDataLoader {
     this.mediaPlayerFactory = mediaPlayerFactory;
   }
 
-  public List<MediaInfoModel> load(List<String> mediaPaths, MediaSourceType sourceType) {
+  public List<MediaInfoData> load(List<String> mediaPaths, MediaSourceType sourceType) {
     return mediaPaths.stream()
         .map(mediaPath -> load(mediaPath, sourceType))
         .collect(Collectors.toList());
   }
 
-  public MediaInfoModel load(String mediaPath, MediaSourceType sourceType) {
-    MediaInfoModel mediaInfoModel = new MediaInfoModel();
+  public MediaInfoData load(String mediaPath, MediaSourceType sourceType) {
+    MediaInfoData mediaInfoData = new MediaInfoData();
 
     switch (sourceType) {
       case FILE:
         MediaMeta mediaMeta = mediaPlayerFactory.getMediaMeta(mediaPath, true);
         if (mediaMeta != null) {
-          fillMediaInfoFromFile(mediaInfoModel, mediaMeta);
+          fillMediaInfoFromFile(mediaInfoData, mediaMeta);
           mediaMeta.release();
         } else {
           LOG.error("Media info load fails!");
@@ -48,7 +48,7 @@ public class MediaInfoDataLoader {
         break;
 
       case HTTP_STREAM:
-        fillMediaInfoFromHttpStreamByDecoder(mediaInfoModel, mediaPath);
+        fillMediaInfoFromHttpStreamByDecoder(mediaInfoData, mediaPath);
         break;
 
       default:
@@ -56,20 +56,20 @@ public class MediaInfoDataLoader {
         break;
     }
 
-    mediaInfoModel.setTrackPath(mediaPath);
-    mediaInfoModel.setSourceType(sourceType);
-    return mediaInfoModel;
+    mediaInfoData.setTrackPath(mediaPath);
+    mediaInfoData.setSourceType(sourceType);
+    return mediaInfoData;
   }
 
-  public void fillMediaInfoFromMediaMeta(MediaInfoModel mediaInfoModel, MediaMeta mediaMeta,
+  public void fillMediaInfoFromMediaMeta(MediaInfoData mediaInfoData, MediaMeta mediaMeta,
                                          MediaSourceType sourceType) {
     switch (sourceType) {
       case FILE:
-        fillMediaInfoFromFile(mediaInfoModel, mediaMeta);
+        fillMediaInfoFromFile(mediaInfoData, mediaMeta);
         break;
 
       case HTTP_STREAM:
-        fillMediaInfoFromHttpStream(mediaInfoModel, mediaMeta);
+        fillMediaInfoFromHttpStream(mediaInfoData, mediaMeta);
         break;
 
       default:
@@ -78,45 +78,45 @@ public class MediaInfoDataLoader {
     }
   }
 
-  public void fillMediaInfoFromHttpStream(MediaInfoModel mediaInfoModel, MediaMeta mediaMeta) {
-    setMediaInfoFromStreamTitle(mediaInfoModel, mediaMeta.getNowPlaying(), mediaInfoModel.getTrackPath());
-    mediaInfoModel.setAlbum(mediaMeta.getTitle());
+  public void fillMediaInfoFromHttpStream(MediaInfoData mediaInfoData, MediaMeta mediaMeta) {
+    setMediaInfoFromStreamTitle(mediaInfoData, mediaMeta.getNowPlaying(), mediaInfoData.getTrackPath());
+    mediaInfoData.setAlbum(mediaMeta.getTitle());
   }
 
-  public void fillMediaInfoFromHttpStreamByDecoder(MediaInfoModel mediaInfoModel, String streamPath) {
+  public void fillMediaInfoFromHttpStreamByDecoder(MediaInfoData mediaInfoData, String streamPath) {
     try {
       IcyStreamMetaDecoder metaDecoder = new IcyStreamMetaDecoder(streamPath);
-      setMediaInfoFromStreamTitle(mediaInfoModel, metaDecoder.getStreamTitle(), streamPath);
-      mediaInfoModel.setAlbum(metaDecoder.getStationName());
+      setMediaInfoFromStreamTitle(mediaInfoData, metaDecoder.getStreamTitle(), streamPath);
+      mediaInfoData.setAlbum(metaDecoder.getStationName());
     } catch (IOException e) {
       LOG.error("Decode meta from Icy stream fails [streamPath = " + streamPath + "]", e);
     }
   }
 
-  public void fillMediaInfoFromFile(MediaInfoModel mediaInfoModel, MediaMeta mediaMeta) {
-    mediaInfoModel.setAlbum(mediaMeta.getAlbum());
-    mediaInfoModel.setArtist(mediaMeta.getArtist());
-    mediaInfoModel.setDate(mediaMeta.getDate());
-    mediaInfoModel.setLength(mediaMeta.getLength());
-    mediaInfoModel.setTitle(mediaMeta.getTitle());
-    mediaInfoModel.setTrackId(mediaMeta.getTrackId());
-    mediaInfoModel.setTrackNumber(mediaMeta.getTrackNumber());
+  public void fillMediaInfoFromFile(MediaInfoData mediaInfoData, MediaMeta mediaMeta) {
+    mediaInfoData.setAlbum(mediaMeta.getAlbum());
+    mediaInfoData.setArtist(mediaMeta.getArtist());
+    mediaInfoData.setDate(mediaMeta.getDate());
+    mediaInfoData.setLength(mediaMeta.getLength());
+    mediaInfoData.setTitle(mediaMeta.getTitle());
+    mediaInfoData.setTrackId(mediaMeta.getTrackId());
+    mediaInfoData.setTrackNumber(mediaMeta.getTrackNumber());
   }
 
-  private void setMediaInfoFromStreamTitle(MediaInfoModel mediaInfoModel, String streamTitle, String defaultTitle) {
+  private void setMediaInfoFromStreamTitle(MediaInfoData mediaInfoData, String streamTitle, String defaultTitle) {
     if (StringUtils.isNotEmpty(streamTitle)) {
       String[] ss = streamTitle.split(STREAM_TITLE_SEPARATOR);
       if (ss.length > 0) {
         if (ss.length < 1) {
-          mediaInfoModel.setTitle(ss[0]);
+          mediaInfoData.setTitle(ss[0]);
         } else {
-          mediaInfoModel.setArtist(ss[0]);
-          mediaInfoModel.setTitle(ss[1]);
+          mediaInfoData.setArtist(ss[0]);
+          mediaInfoData.setTitle(ss[1]);
         }
       }
     } else {
       LOG.info("Empty StreamTitle obtained.");
-      mediaInfoModel.setTitle(defaultTitle);
+      mediaInfoData.setTitle(defaultTitle);
     }
 
   }

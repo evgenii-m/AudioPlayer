@@ -1,7 +1,7 @@
 package ru.push.caudioplayer.core.mediaplayer;
 
-import ru.push.caudioplayer.core.mediaplayer.model.MediaInfoModel;
-import ru.push.caudioplayer.core.mediaplayer.model.PlaylistModel;
+import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
+import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 
 /**
  * @author push <mez.e.s@yandex.ru>
@@ -10,11 +10,11 @@ import ru.push.caudioplayer.core.mediaplayer.model.PlaylistModel;
 public abstract class DefaultAudioPlayerEventAdapter implements AudioPlayerEventListener {
 
   @Override
-  public void changedPlaylist(PlaylistModel playlist) {
+  public void changedPlaylist(PlaylistData playlist) {
   }
 
   @Override
-  public void createdNewPlaylist(PlaylistModel newPlaylist) {
+  public void createdNewPlaylist(PlaylistData newPlaylist) {
   }
 
   @Override
@@ -22,6 +22,6 @@ public abstract class DefaultAudioPlayerEventAdapter implements AudioPlayerEvent
   }
 
   @Override
-  public void refreshTrackMediaInfo(int trackPosition, MediaInfoModel mediaInfo) {
+  public void refreshTrackMediaInfo(int trackPosition, MediaInfoData mediaInfo) {
   }
 }
