@@ -21,6 +21,7 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -202,7 +203,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 
   @Override
   public void stopApplication() {
-    appConfigurationService.savePlaylists(playlistComponent.getPlaylists());
+    Optional.ofNullable(playlistComponent.getPlaylists()).ifPresent(appConfigurationService::savePlaylists);
     playerComponent.releaseComponent();
     playlistComponent.releaseComponent();
     eventListeners.forEach(AudioPlayerEventListener::stopAudioPlayer);

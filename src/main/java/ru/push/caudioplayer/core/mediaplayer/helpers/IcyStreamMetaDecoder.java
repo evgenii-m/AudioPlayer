@@ -92,11 +92,11 @@ class IcyStreamMetaDecoder {
     return metadata;
   }
 
-  synchronized public void refreshMeta() throws IOException {
+  public void refreshMeta() throws IOException {
     retrieveMetadata();
   }
 
-  synchronized private HttpURLConnection makeHttpUrlConnection(URL url) throws IOException {
+  private HttpURLConnection makeHttpUrlConnection(URL url) throws IOException {
     HttpURLConnection con = (HttpURLConnection) url.openConnection();
     requestProperties.entrySet().forEach(entry ->
         con.setRequestProperty(entry.getKey(), entry.getValue())
@@ -105,7 +105,7 @@ class IcyStreamMetaDecoder {
     return con;
   }
 
-  synchronized private void retrieveMetadata() throws IOException {
+  private void retrieveMetadata() throws IOException {
     HttpURLConnection con = makeHttpUrlConnection(streamUrl);
 
     // different servers may transfer the same header fields in different string cases,

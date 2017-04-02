@@ -16,6 +16,7 @@ import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 import ru.push.caudioplayer.core.mediaplayer.helpers.MediaInfoDataLoader;
 import ru.push.caudioplayer.core.mediaplayer.services.AppConfigurationService;
 
+import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -98,7 +99,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
     }
   }
 
-  public void savePlaylists(List<PlaylistData> playlistsData) {
+  public void savePlaylists(@NotNull List<PlaylistData> playlistsData) {
     ImmutableNode playlistsNode = getConfigurationRootChildNode("playlists");
     ImmutableNode rootNode = configuration.getNodeModel().getRootNode().removeChild(playlistsNode);
     if (playlistsNode != null) {
