@@ -10,6 +10,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * @author push <mez.e.s@yandex.ru>
@@ -106,6 +107,8 @@ class IcyStreamMetaDecoder {
   }
 
   private void retrieveMetadata() throws IOException {
+    metadata = new HashMap<>();
+
     HttpURLConnection con = makeHttpUrlConnection(streamUrl);
 
     // different servers may transfer the same header fields in different string cases,
@@ -119,6 +122,14 @@ class IcyStreamMetaDecoder {
     if (!headers.containsKey("content-type") || supportedContentTypes.retainAll(headers.get("content-type"))) {
       throw new IOException("Unsupported content type [contentType = " + headers.get("content-type"));
     }
+
+    metadata.putAll(
+        headers.entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> entry.getValue().stream().collect(Collectors.joining(", ")))
+            )
+    );
 
     InputStream stream = con.getInputStream();
     int metaDataOffset = 0;
@@ -158,7 +169,7 @@ class IcyStreamMetaDecoder {
     int count = 0;
     int metaDataLength = 4080; // 4080 is the max length
     boolean inData = false;
-    StringBuilder metaData = new StringBuilder();
+    StringBuilder metaDataStringBuilder = new StringBuilder();
     // Stream position should be either at the beginning or right after headers
     while ((b = stream.read()) != -1) {
       count++;
@@ -175,7 +186,7 @@ class IcyStreamMetaDecoder {
       }
       if (inData) {
         if (b != 0) {
-          metaData.append((char) b);
+          metaDataStringBuilder.append((char) b);
         }
       }
       if (count > (metaDataOffset + metaDataLength)) {
@@ -184,25 +195,22 @@ class IcyStreamMetaDecoder {
     }
 
     // Set the data
-    metadata = IcyStreamMetaDecoder.parseMetadata(metaData.toString());
+    parseMetadata(metadata, metaDataStringBuilder.toString());
 
     // Close
     stream.close();
 
   }
 
-  public static Map<String, String> parseMetadata(String metaString) {
-    Map<String, String> metadata = new HashMap();
+  public void parseMetadata(Map<String, String> metadata, String metaString) {
     String[] metaParts = metaString.split(";");
     Pattern p = Pattern.compile("^([a-zA-Z]+)=\\'([^\\']*)\\'$");
     Matcher m;
     for (int i = 0; i < metaParts.length; i++) {
       m = p.matcher(metaParts[i]);
       if (m.find()) {
-        metadata.put((String) m.group(1), (String) m.group(2));
+        metadata.put(m.group(1), m.group(2));
       }
     }
-
-    return metadata;
   }
 }

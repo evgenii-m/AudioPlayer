@@ -22,9 +22,9 @@ public class MediaInfoData {
     this.sourceType = MediaSourceType.FILE;
   }
 
-  public MediaInfoData(String trackPath) {
+  public MediaInfoData(String trackPath, MediaSourceType sourceType) {
     this.trackPath = trackPath;
-    this.sourceType = MediaSourceType.FILE;
+    this.sourceType = sourceType;
   }
 
   private MediaInfoData(Builder builder) {

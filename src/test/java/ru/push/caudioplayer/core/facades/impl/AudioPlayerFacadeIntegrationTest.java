@@ -1,7 +1,6 @@
 package ru.push.caudioplayer.core.facades.impl;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -11,7 +10,6 @@ import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -37,16 +35,6 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
 
   @BeforeClass
   public static void setUpClass() {
-//    MediaInfoData playlistFirstTrack0 = new MediaInfoData.Builder()
-//        .artist("The Beatles")
-//        .album("Only A Northern Song")
-//        .title("Yellow Submarine")
-//        .build();
-//    List<MediaInfoData> playlistFirstTracks = Lists.newArrayList(
-//
-//    );
-//
-//    playlistFirst = new PlaylistData();
   }
 
 
