@@ -13,9 +13,9 @@ import java.util.List;
  */
 public interface AudioPlayerFacade {
 
-  void addListener(AudioPlayerEventListener listener);
+  void addEventListener(AudioPlayerEventListener listener);
 
-  void removeListener(AudioPlayerEventListener listener);
+  void removeEventListener(AudioPlayerEventListener listener);
 
   List<PlaylistData> getPlaylists();
 

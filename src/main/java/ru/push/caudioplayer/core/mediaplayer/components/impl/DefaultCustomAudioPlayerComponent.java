@@ -36,6 +36,11 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
   }
 
   @Override
+  public synchronized void removeEventListener(MediaPlayerEventListener eventListener) {
+    mediaPlayer.removeMediaPlayerEventListener(eventListener);
+  }
+
+  @Override
   public int getMaxVolume() {
     return VOLUME_MAX_VALUE;
   }

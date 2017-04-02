@@ -4,14 +4,14 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IterableUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
+import ru.push.caudioplayer.core.mediaplayer.helpers.MediaInfoDataLoader;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaSourceType;
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
-import ru.push.caudioplayer.core.mediaplayer.helpers.MediaInfoDataLoader;
 
-import javax.annotation.Resource;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -29,7 +29,7 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
 
   private final CustomMediaPlayerFactory mediaPlayerFactory;
 
-  @Resource
+  @Autowired
   private MediaInfoDataLoader mediaInfoDataLoader;
 
   private List<PlaylistData> playlists;

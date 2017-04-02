@@ -1,0 +1,11 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="AllIntegrationTests">
+
+  <test name="facades">
+    <classes>
+      <class name="ru.push.caudioplayer.core.facades.impl.AudioPlayerFacadeIntegrationTest" />
+    </classes>
+  </test>
+
+</suite>

@@ -10,10 +10,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import ru.push.caudioplayer.core.mediaplayer.helpers.MediaInfoDataLoader;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaSourceType;
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
-import ru.push.caudioplayer.core.mediaplayer.helpers.MediaInfoDataLoader;
 import ru.push.caudioplayer.core.mediaplayer.services.AppConfigurationService;
 
 import javax.validation.constraints.NotNull;

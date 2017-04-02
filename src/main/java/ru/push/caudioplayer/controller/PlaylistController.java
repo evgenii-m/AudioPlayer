@@ -57,7 +57,7 @@ public class PlaylistController {
   public void init() {
     LOG.debug("init");
 
-    audioPlayerFacade.addListener(new AudioPlayerEventAdapter());
+    audioPlayerFacade.addEventListener(new AudioPlayerEventAdapter());
 
     playlistContainer.setOnMouseClicked(mouseEvent -> {
       if (mouseEvent.getButton().equals(MouseButton.PRIMARY) && (mouseEvent.getClickCount() == 2)) {

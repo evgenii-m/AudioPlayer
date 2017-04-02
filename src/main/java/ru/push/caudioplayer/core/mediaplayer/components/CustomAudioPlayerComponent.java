@@ -10,6 +10,8 @@ public interface CustomAudioPlayerComponent extends NativePlayerComponent {
 
   void addEventListener(MediaPlayerEventListener eventListener);
 
+  void removeEventListener(MediaPlayerEventListener eventListener);
+
   int getMaxVolume();
 
   int getVolume();

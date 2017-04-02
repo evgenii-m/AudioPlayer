@@ -84,7 +84,7 @@ public class AudioPlayerController {
   public void init() {
     LOG.debug("init");
 
-    audioPlayerFacade.addListener(new AudioPlayerEventAdapter());
+    audioPlayerFacade.addEventListener(new AudioPlayerEventAdapter());
 
     updatePlaybackPosition(0, 0);
     addPositionSliderMouseListeners();

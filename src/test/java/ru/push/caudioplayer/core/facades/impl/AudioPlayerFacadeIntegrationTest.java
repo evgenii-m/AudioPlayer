@@ -7,10 +7,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.*;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
+import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.testng.Assert.*;
@@ -23,7 +25,7 @@ import static org.testng.Assert.*;
 @ContextConfiguration(locations = {
     "classpath:spring/test-application-context.xml"
 })
-public class DefaultAudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContextTests {
+public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContextTests {
   @Autowired
   private AudioPlayerFacade audioPlayerFacade;
 
@@ -64,10 +66,10 @@ public class DefaultAudioPlayerFacadeIntegrationTest extends AbstractTestNGSprin
     assertTrue(CollectionUtils.isNotEmpty(playlists), "Playlists collection null or empty.");
     assertEquals(playlists.size(), PLAYLISTS_COUNT, "Unexpected count of playlists.");
 
-    Map<Integer, List<PlaylistData>> playlistsGroupedByPosition = playlists.stream()
-        .collect(Collectors.groupingBy(PlaylistData::getPosition));
-    assertEquals(playlistsGroupedByPosition.entrySet().size(), playlists.size(),
-        "Each playlist must have unique position value.");
+    Set<Integer> positionsSet = playlists.stream()
+        .map(PlaylistData::getPosition)
+        .collect(Collectors.toSet());
+    assertEquals(positionsSet.size(), playlists.size(), "Each playlist must have unique position value.");
 
     PlaylistData firstPlaylist = audioPlayerFacade.getPlaylist(PLAYLIST_FIRST_NAME);
     assertNotNull(firstPlaylist, "Playlist with name '" + PLAYLIST_FIRST_NAME + "' not found.");
@@ -75,6 +77,17 @@ public class DefaultAudioPlayerFacadeIntegrationTest extends AbstractTestNGSprin
 
     PlaylistData activePlaylist = audioPlayerFacade.getActivePlaylist();
     assertNotNull(activePlaylist, "Active playlist must be specified.");
+  }
+
+  @Test
+  public void shouldLoadAudioTracksInfo() {
+    PlaylistData firstPlaylist = audioPlayerFacade.getPlaylist(PLAYLIST_FIRST_NAME);
+
+    List<MediaInfoData> tracks = firstPlaylist.getTracks();
+    assertTrue(CollectionUtils.isNotEmpty(tracks), "Playlist tracks collection null or empty.");
+
+//    tracks.forEach(mediaInfoData -> );
+
   }
 
 }

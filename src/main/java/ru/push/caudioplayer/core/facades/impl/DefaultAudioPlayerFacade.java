@@ -7,10 +7,10 @@ import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
+import ru.push.caudioplayer.core.mediaplayer.helpers.MediaInfoDataLoader;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaSourceType;
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
-import ru.push.caudioplayer.core.mediaplayer.helpers.MediaInfoDataLoader;
 import ru.push.caudioplayer.core.mediaplayer.services.AppConfigurationService;
 import uk.co.caprica.vlcj.player.MediaMeta;
 import uk.co.caprica.vlcj.player.MediaPlayer;
@@ -76,12 +76,12 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   }
 
   @Override
-  public synchronized void addListener(AudioPlayerEventListener listener) {
+  public synchronized void addEventListener(AudioPlayerEventListener listener) {
     eventListeners.add(listener);
   }
 
   @Override
-  public synchronized void removeListener(AudioPlayerEventListener listener) {
+  public synchronized void removeEventListener(AudioPlayerEventListener listener) {
     eventListeners.remove(listener);
   }
 
