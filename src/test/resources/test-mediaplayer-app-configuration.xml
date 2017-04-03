@@ -7,9 +7,9 @@
       <track sourceType="HTTP_STREAM">http://ice1.somafm.com/spacestation-128.mp3</track>
     </playlist>
     <playlist active="true" name="second" position="1">
-      <track sourceType="FILE">audiotracks/01 Yellow Submarine.mp3</track>
-      <track sourceType="FILE">audiotracks/02 Hey Bulldog.mp3</track>
-      <track sourceType="FILE">audiotracks/03 Eleanor Rigby.mp3</track>
+      <track sourceType="FILE">/home/push/Development/idea_workspace/caudio_player/src/test/resources/audiotracks/01 Yellow Submarine.mp3</track>
+      <track sourceType="FILE">/home/push/Development/idea_workspace/caudio_player/src/test/resources/audiotracks/02 Hey Bulldog.mp3</track>
+      <track sourceType="FILE">/home/push/Development/idea_workspace/caudio_player/src/test/resources/audiotracks/03 Eleanor Rigby.mp3</track>
     </playlist>
   </playlists>
 </configuration>

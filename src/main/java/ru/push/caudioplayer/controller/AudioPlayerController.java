@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
-import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
 
@@ -57,8 +56,6 @@ public class AudioPlayerController {
   private AudioPlayerFacade audioPlayerFacade;
   @Autowired
   private CustomAudioPlayerComponent playerComponent;
-  @Autowired
-  private CustomPlaylistComponent playlistComponent;
   @Autowired
   private TrackTimeLabelBuilder trackTimeLabelBuilder;
 

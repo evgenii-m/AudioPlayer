@@ -11,6 +11,10 @@
         http://www.springframework.org/schema/util
         http://www.springframework.org/schema/util/spring-util-2.5.xsd">
 
+  <context:annotation-config />
+
+  <bean class="ru.push.caudioplayer.spring.SpyWrapperBeanPostProcessor"/>
+
   <bean name="mediaPlayerFactory"
         class="ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory">
     <constructor-arg>

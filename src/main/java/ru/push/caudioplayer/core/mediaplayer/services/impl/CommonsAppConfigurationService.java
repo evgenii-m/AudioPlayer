@@ -67,7 +67,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
           .map(playlistNode -> {
             int playlistIndex = playlistNode.getChildren().indexOf(playlistNode);
             int playlistPosition = (playlistNode.getAttributes().get("position") != null) ?
-                Integer.valueOf((String) playlistNode.getAttributes().get("position")) :
+                Integer.valueOf(String.valueOf(playlistNode.getAttributes().get("position"))) :
                 playlistIndex;
             String playlistName = (playlistNode.getAttributes().get("name") != null) ?
                 (String) playlistNode.getAttributes().get("name") : UNTITLED_PLAYLIST_NAME;

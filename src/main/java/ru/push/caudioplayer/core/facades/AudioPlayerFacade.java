@@ -31,7 +31,7 @@ public interface AudioPlayerFacade {
 
   boolean deletePlaylist(String playlistName);
 
-  void renamePlaylist(String actualPlaylistName, String newPlaylistName);
+  void  renamePlaylist(String actualPlaylistName, String newPlaylistName);
 
   void addFilesToPlaylist(List<File> files);
 
