@@ -13,8 +13,6 @@ import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerCompone
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 

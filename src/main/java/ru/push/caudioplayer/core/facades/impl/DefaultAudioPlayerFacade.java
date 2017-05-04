@@ -56,6 +56,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   public void init() {
     LOG.debug("init");
     playlistComponent.loadPlaylists(appConfigurationService.getPlaylists());
+    showActivePlaylist();
     playerComponent.addEventListener(new AudioPlayerFacadeEventListener());
   }
 

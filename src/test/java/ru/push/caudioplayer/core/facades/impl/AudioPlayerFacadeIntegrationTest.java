@@ -2,19 +2,25 @@ package ru.push.caudioplayer.core.facades.impl;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections4.IterableUtils;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.*;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
+import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
+import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 import ru.push.caudioplayer.core.mediaplayer.services.AppConfigurationService;
 
+import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
 
 /**
@@ -33,9 +39,19 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
   @Autowired
   private AppConfigurationService appConfigurationService;
 
+  private AudioPlayerEventListener eventListener;
+
   private static final int PLAYLISTS_COUNT = 2;
   private static final String FIRST_PLAYLIST_NAME = "first";
   private static final String SECOND_PLAYLIST_NAME = "second";
+  private static final String[] MEDIA_FILES_PATHS = {
+      "audiotracks/01 Yellow Submarine.mp3",
+      "audiotracks/02 Hey Bulldog.mp3"
+  };
+  private static final String[] MEDIA_LOCATIONS_PATHS = {
+      "http://ice1.somafm.com/groovesalad-128.mp3",
+      "http://ice1.somafm.com/secretagent-128.mp3"
+  };
 
   @BeforeClass
   public static void setUpClass() {
@@ -43,13 +59,29 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
 
   @BeforeMethod
   public void setUp() throws Exception {
+    eventListener = Mockito.spy(new TestAudioPlayerEventAdapter());
+    audioPlayerFacade.addEventListener(eventListener);
+    doNothing().when(appConfigurationService).savePlaylists(anyListOf(PlaylistData.class));
     // refresh playlist component after each test
     playlistComponent.loadPlaylists(appConfigurationService.getPlaylists());
+
+    reset(appConfigurationService);
   }
 
   @AfterMethod
   public void tearDown() throws Exception {
     audioPlayerFacade.stopApplication();
+
+    verify(appConfigurationService, atLeastOnce()).savePlaylists(anyListOf(PlaylistData.class));
+    verify(eventListener).stopAudioPlayer();
+
+    audioPlayerFacade.removeEventListener(eventListener);
+  }
+
+  private class TestAudioPlayerEventAdapter extends DefaultAudioPlayerEventAdapter {
+    @Override
+    public void stopAudioPlayer() {
+    }
   }
 
   /**
@@ -88,23 +120,41 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
 
   /**
    * This test affects:
-   *  ru.push.caudioplayer.core.facades.AudioPlayerFacade#showPlaylist(java.lang.String)
    *  ru.push.caudioplayer.core.facades.AudioPlayerFacade#renamePlaylist(java.lang.String, java.lang.String)
+   */
+  @Test
+  public void shouldRenamePlaylist() {
+    List<PlaylistData> playlists = audioPlayerFacade.getPlaylists();
+    assertTrue(CollectionUtils.isNotEmpty(playlists), "Playlists collection null or empty.");
+
+    PlaylistData firstPlaylist = playlists.get(0);
+    String newPlaylistName = "new playlist name";
+    audioPlayerFacade.renamePlaylist(firstPlaylist.getName(), newPlaylistName);
+    assertNotNull(audioPlayerFacade.getPlaylist(newPlaylistName), "Playlist with name '"
+        + newPlaylistName + "' not found.");
+    verify(appConfigurationService).savePlaylists(anyListOf(PlaylistData.class));
+  }
+
+  /**
+   * This test affects:
    *  ru.push.caudioplayer.core.facades.AudioPlayerFacade#addFilesToPlaylist(java.util.List)
    *  ru.push.caudioplayer.core.facades.AudioPlayerFacade#deleteItemsFromPlaylist(java.util.List)
    *  ru.push.caudioplayer.core.facades.AudioPlayerFacade#addLocationsToPlaylist(java.util.List)
    */
-//  @Test
-  public void shouldDisplayAndModifyPlaylists() {
-//    List<PlaylistData> playlists = audioPlayerFacade.getPlaylists();
-//    assertTrue(CollectionUtils.isNotEmpty(playlists), "Playlists collection null or empty.");
+  @Test
+  public void shouldChangePlaylistItems() {
+    List<PlaylistData> playlists = audioPlayerFacade.getPlaylists();
+    assertTrue(CollectionUtils.isNotEmpty(playlists), "Playlists collection null or empty.");
 
-//    PlaylistData inactivePlaylist = IterableUtils.find(
-//        playlists, playlist -> !playlist.isActive()
-//    );
-//    assertNotNull(inactivePlaylist, "Inactive playlist not found.");
+    PlaylistData displayedPlaylist = audioPlayerFacade.showActivePlaylist();
+    assertNotNull(displayedPlaylist, "Displayed playlist is null.");
 
-//    audioPlayerFacade.addFilesToPlaylist();
+    audioPlayerFacade.addFilesToPlaylist(Arrays.asList(MEDIA_FILES_PATHS).stream()
+        .map(File::new).collect(Collectors.toList()));
+    audioPlayerFacade.addLocationsToPlaylist(Arrays.asList(MEDIA_LOCATIONS_PATHS));
+
+    verify(appConfigurationService, times(2)).savePlaylists(anyListOf(PlaylistData.class));
+    verify(eventListener, times(2)).changedPlaylist(displayedPlaylist);
   }
 
 }
