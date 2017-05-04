@@ -104,7 +104,15 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
 
   @Override
   public void renamePlaylist(String actualPlaylistName, String newPlaylistName) {
-
+    PlaylistData playlistData = IterableUtils.find(
+        playlists, playlist -> actualPlaylistName.equals(playlist.getName())
+    );
+    if (playlistData == null) {
+      LOG.info("Playlist with name '" + actualPlaylistName + "' not found, rename failed.");
+      return;
+    }
+    // TODO: add validation for playlist name
+    playlistData.setName(newPlaylistName);
   }
 
   @Override

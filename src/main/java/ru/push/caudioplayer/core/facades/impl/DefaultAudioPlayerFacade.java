@@ -134,7 +134,8 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 
   @Override
   public void renamePlaylist(String actualPlaylistName, String newPlaylistName) {
-
+    playlistComponent.renamePlaylist(actualPlaylistName, newPlaylistName);
+    appConfigurationService.savePlaylists(playlistComponent.getPlaylists());
   }
 
   @Override
