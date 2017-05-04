@@ -143,18 +143,31 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
    */
   @Test
   public void shouldChangePlaylistItems() {
-    List<PlaylistData> playlists = audioPlayerFacade.getPlaylists();
-    assertTrue(CollectionUtils.isNotEmpty(playlists), "Playlists collection null or empty.");
-
     PlaylistData displayedPlaylist = audioPlayerFacade.showActivePlaylist();
     assertNotNull(displayedPlaylist, "Displayed playlist is null.");
 
+    int tracklistSize = displayedPlaylist.getTracks().size();
     audioPlayerFacade.addFilesToPlaylist(Arrays.asList(MEDIA_FILES_PATHS).stream()
         .map(File::new).collect(Collectors.toList()));
-    audioPlayerFacade.addLocationsToPlaylist(Arrays.asList(MEDIA_LOCATIONS_PATHS));
+    int expectedPlaylistSize = tracklistSize + MEDIA_FILES_PATHS.length;
+    int actualTracklistSize = displayedPlaylist.getTracks().size();
+    assertEquals(actualTracklistSize, expectedPlaylistSize, "Unexpected tracklist size after add files.");
 
-    verify(appConfigurationService, times(2)).savePlaylists(anyListOf(PlaylistData.class));
-    verify(eventListener, times(2)).changedPlaylist(displayedPlaylist);
+    tracklistSize = displayedPlaylist.getTracks().size();
+    audioPlayerFacade.addLocationsToPlaylist(Arrays.asList(MEDIA_LOCATIONS_PATHS));
+    expectedPlaylistSize = tracklistSize + MEDIA_LOCATIONS_PATHS.length;
+    actualTracklistSize = displayedPlaylist.getTracks().size();
+    assertEquals(actualTracklistSize, expectedPlaylistSize, "Unexpected tracklist size after add locations.");
+
+    tracklistSize = displayedPlaylist.getTracks().size();
+    List<Integer> deletedItemIndexes = Arrays.asList(0, 1);
+    audioPlayerFacade.deleteItemsFromPlaylist(deletedItemIndexes);
+    expectedPlaylistSize = tracklistSize - deletedItemIndexes.size();
+    actualTracklistSize = displayedPlaylist.getTracks().size();
+    assertEquals(actualTracklistSize, expectedPlaylistSize, "Unexpected tracklist size after delete items.");
+
+    verify(appConfigurationService, times(3)).savePlaylists(anyListOf(PlaylistData.class));
+    verify(eventListener, times(3)).changedPlaylist(displayedPlaylist);
   }
 
 }
