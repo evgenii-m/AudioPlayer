@@ -125,7 +125,7 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
    *  ru.push.caudioplayer.core.facades.AudioPlayerFacade#deletePlaylist(java.lang.String)
    */
   @Test
-  public void shouldChangesPlaylists() {
+  public void shouldCreateRenameAndDeletePlaylists() {
     List<PlaylistData> playlists = audioPlayerFacade.getPlaylists();
     assertTrue(CollectionUtils.isNotEmpty(playlists), "Playlists collection null or empty.");
 
@@ -175,7 +175,7 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
    *  ru.push.caudioplayer.core.facades.AudioPlayerFacade#addLocationsToPlaylist(java.util.List)
    */
   @Test
-  public void shouldChangesPlaylistItems() {
+  public void shouldAddAndDeletePlaylistItems() {
     PlaylistData displayedPlaylist = audioPlayerFacade.showActivePlaylist();
     assertNotNull(displayedPlaylist, "Displayed playlist is null.");
 
