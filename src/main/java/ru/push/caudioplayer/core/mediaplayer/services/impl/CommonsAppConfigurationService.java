@@ -100,6 +100,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
   }
 
   public void savePlaylists(@NotNull List<PlaylistData> playlistsData) {
+    LOG.debug("save playlists");
     ImmutableNode playlistsNode = getConfigurationRootChildNode("playlists");
     ImmutableNode rootNode = configuration.getNodeModel().getRootNode().removeChild(playlistsNode);
     if (playlistsNode != null) {

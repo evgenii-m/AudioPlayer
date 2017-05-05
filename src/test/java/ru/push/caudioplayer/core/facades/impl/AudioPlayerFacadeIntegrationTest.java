@@ -59,13 +59,13 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
 
   @BeforeMethod
   public void setUp() throws Exception {
+    reset(appConfigurationService);
     eventListener = Mockito.spy(new TestAudioPlayerEventAdapter());
+
     audioPlayerFacade.addEventListener(eventListener);
     doNothing().when(appConfigurationService).savePlaylists(anyListOf(PlaylistData.class));
     // refresh playlist component after each test
     playlistComponent.loadPlaylists(appConfigurationService.getPlaylists());
-
-    reset(appConfigurationService);
   }
 
   @AfterMethod
@@ -127,9 +127,9 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
     List<PlaylistData> playlists = audioPlayerFacade.getPlaylists();
     assertTrue(CollectionUtils.isNotEmpty(playlists), "Playlists collection null or empty.");
 
-    PlaylistData firstPlaylist = playlists.get(0);
+    String actualPlaylistName = playlists.get(0).getName();
     String newPlaylistName = "new playlist name";
-    audioPlayerFacade.renamePlaylist(firstPlaylist.getName(), newPlaylistName);
+    audioPlayerFacade.renamePlaylist(actualPlaylistName, newPlaylistName);
     assertNotNull(audioPlayerFacade.getPlaylist(newPlaylistName), "Playlist with name '"
         + newPlaylistName + "' not found.");
     verify(appConfigurationService).savePlaylists(anyListOf(PlaylistData.class));
