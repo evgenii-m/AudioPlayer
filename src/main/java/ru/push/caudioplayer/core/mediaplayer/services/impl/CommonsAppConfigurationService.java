@@ -71,8 +71,8 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
                 playlistIndex;
             String playlistName = (playlistNode.getAttributes().get("name") != null) ?
                 (String) playlistNode.getAttributes().get("name") : UNTITLED_PLAYLIST_NAME;
-            boolean playlistActive = Optional.ofNullable(playlistNode.getAttributes().get("active"))
-                .isPresent();
+            boolean playlistActive = (playlistNode.getAttributes().get("active") != null) ?
+                Boolean.valueOf((String) playlistNode.getAttributes().get("active")) : false;
 
             List<MediaInfoData> playlistTracks = playlistNode.getChildren().stream()
                 .map(trackNode -> {

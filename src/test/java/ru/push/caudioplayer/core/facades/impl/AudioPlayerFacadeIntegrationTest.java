@@ -112,6 +112,8 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
 
     PlaylistData activePlaylist = audioPlayerFacade.getActivePlaylist();
     assertNotNull(activePlaylist, "Active playlist must be specified.");
+    long activePlaylistsCount = playlists.stream().filter(PlaylistData::isActive).count();
+    assertEquals(activePlaylistsCount, 1, "Must be only one active playlist.");
   }
 
   /**
