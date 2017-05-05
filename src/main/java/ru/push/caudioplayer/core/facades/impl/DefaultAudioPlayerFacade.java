@@ -71,6 +71,12 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   }
 
   @Override
+  public void refreshPlaylists() {
+    playlistComponent.loadPlaylists(appConfigurationService.getPlaylists());
+    showActivePlaylist();
+  }
+
+  @Override
   public List<PlaylistData> getPlaylists() {
     return playlistComponent.getPlaylists();
   }

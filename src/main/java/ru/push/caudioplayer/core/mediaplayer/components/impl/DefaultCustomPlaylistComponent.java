@@ -83,7 +83,6 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
     if (playlistData != null) {
       if (playlists.size() == 1) {
         activePlaylist = createNewPlaylist();
-        playlists.add(activePlaylist);
       }
       if (playlistData.equals(activePlaylist)) {
         activePlaylist = IterableUtils.find(

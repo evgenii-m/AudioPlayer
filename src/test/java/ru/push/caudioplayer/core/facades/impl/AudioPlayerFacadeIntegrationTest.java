@@ -35,8 +35,6 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
   @Autowired
   private AudioPlayerFacade audioPlayerFacade;
   @Autowired
-  private CustomPlaylistComponent playlistComponent;
-  @Autowired
   private AppConfigurationService appConfigurationService;
 
   private AudioPlayerEventListener eventListener;
@@ -61,11 +59,9 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
   public void setUp() throws Exception {
     reset(appConfigurationService);
     eventListener = Mockito.spy(new TestAudioPlayerEventAdapter());
-
     audioPlayerFacade.addEventListener(eventListener);
+    audioPlayerFacade.refreshPlaylists(); // refresh playlist component after each test
     doNothing().when(appConfigurationService).savePlaylists(anyListOf(PlaylistData.class));
-    // refresh playlist component after each test
-    playlistComponent.loadPlaylists(appConfigurationService.getPlaylists());
   }
 
   @AfterMethod
@@ -165,7 +161,22 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
    */
   @Test
   public void shouldCreateNewPlaylistAfterDeleteLast() {
+    List<PlaylistData> playlists = audioPlayerFacade.getPlaylists();
+    assertTrue(CollectionUtils.isNotEmpty(playlists), "Playlists collection null or empty.");
 
+    Set<String> playlistsNames = playlists.stream().map(PlaylistData::getName).collect(Collectors.toSet());
+    playlistsNames.forEach(playlistName -> audioPlayerFacade.deletePlaylist(playlistName));
+
+    playlists = audioPlayerFacade.getPlaylists();
+    assertTrue(CollectionUtils.isNotEmpty(playlists), "New playlist not created after delete last!");
+    assertEquals(playlists.size(), 1, "Only one playlist must be created.");
+    PlaylistData createdPlaylist = playlists.get(0);
+    assertTrue(createdPlaylist.isActive(), "Created playlist must be active.");
+    PlaylistData displayedPlaylist = audioPlayerFacade.getDisplayedPlaylist();
+    assertEquals(displayedPlaylist, createdPlaylist, "Created playlist must be displayed.");
+
+    verify(appConfigurationService, atLeast(2)).savePlaylists(anyListOf(PlaylistData.class));
+    verify(eventListener, atLeastOnce()).changedPlaylist(any(PlaylistData.class));
   }
 
   /**

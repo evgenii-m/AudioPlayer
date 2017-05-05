@@ -17,6 +17,8 @@ public interface AudioPlayerFacade {
 
   void removeEventListener(AudioPlayerEventListener listener);
 
+  void refreshPlaylists();
+
   List<PlaylistData> getPlaylists();
 
   PlaylistData getActivePlaylist();
