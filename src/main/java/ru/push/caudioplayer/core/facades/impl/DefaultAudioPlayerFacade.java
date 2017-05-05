@@ -60,22 +60,6 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
     playerComponent.addEventListener(new AudioPlayerFacadeEventListener());
   }
 
-  public void setPlayerComponent(CustomAudioPlayerComponent playerComponent) {
-    this.playerComponent = playerComponent;
-  }
-
-  public void setPlaylistComponent(CustomPlaylistComponent playlistComponent) {
-    this.playlistComponent = playlistComponent;
-  }
-
-  public void setAppConfigurationService(AppConfigurationService appConfigurationService) {
-    this.appConfigurationService = appConfigurationService;
-  }
-
-  public void setMediaInfoDataLoader(MediaInfoDataLoader mediaInfoDataLoader) {
-    this.mediaInfoDataLoader = mediaInfoDataLoader;
-  }
-
   @Override
   public synchronized void addEventListener(AudioPlayerEventListener listener) {
     eventListeners.add(listener);
@@ -97,6 +81,11 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   }
 
   @Override
+  public PlaylistData getDisplayedPlaylist() {
+    return displayedPlaylist;
+  }
+
+  @Override
   public PlaylistData getPlaylist(String playlistName) {
     return playlistComponent.getPlaylist(playlistName);
   }
@@ -114,21 +103,24 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   }
 
   @Override
-  public void createNewPlaylist() {
+  public PlaylistData createNewPlaylist() {
     PlaylistData newPlaylist = playlistComponent.createNewPlaylist();
+    displayedPlaylist = newPlaylist;
     eventListeners.forEach(listener -> listener.createdNewPlaylist(newPlaylist));
     appConfigurationService.savePlaylists(playlistComponent.getPlaylists());
+    return newPlaylist;
   }
 
   @Override
   public boolean deletePlaylist(String playlistName) {
     PlaylistData playlist = getPlaylist(playlistName);
-    boolean deleteDisplayed = (displayedPlaylist.equals(playlist));
+    boolean deleteDisplayed = displayedPlaylist.equals(playlist);
     boolean deleteResult = playlistComponent.deletePlaylist(playlistName);
     if (deleteDisplayed) {
       displayedPlaylist = playlistComponent.getActivePlaylist();
       eventListeners.forEach(listener -> listener.changedPlaylist(displayedPlaylist));
     }
+    appConfigurationService.savePlaylists(playlistComponent.getPlaylists());
     return deleteResult;
   }
 

@@ -120,19 +120,52 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
 
   /**
    * This test affects:
+   *  ru.push.caudioplayer.core.facades.AudioPlayerFacade#createNewPlaylist()
    *  ru.push.caudioplayer.core.facades.AudioPlayerFacade#renamePlaylist(java.lang.String, java.lang.String)
+   *  ru.push.caudioplayer.core.facades.AudioPlayerFacade#deletePlaylist(java.lang.String)
    */
   @Test
-  public void shouldRenamePlaylist() {
+  public void shouldChangesPlaylists() {
     List<PlaylistData> playlists = audioPlayerFacade.getPlaylists();
     assertTrue(CollectionUtils.isNotEmpty(playlists), "Playlists collection null or empty.");
 
-    String actualPlaylistName = playlists.get(0).getName();
+    int originalPlaylistsSize = playlists.size();
+
+    PlaylistData newPlaylist = audioPlayerFacade.createNewPlaylist();
+    PlaylistData displayedPlaylist = audioPlayerFacade.getDisplayedPlaylist();
+    assertNotNull(newPlaylist, "New playlist is null.");
+    assertNotNull(displayedPlaylist, "Displayed playlist is null.");
+    assertEquals(newPlaylist, displayedPlaylist, "New playlist must be displayed!");
+    verify(eventListener).createdNewPlaylist(newPlaylist);
+    int actualPlaylistsSize = audioPlayerFacade.getPlaylists().size();
+    assertEquals(actualPlaylistsSize, originalPlaylistsSize + 1, "Expected increase in playlists size.");
+
+    String actualPlaylistName = newPlaylist.getName();
     String newPlaylistName = "new playlist name";
     audioPlayerFacade.renamePlaylist(actualPlaylistName, newPlaylistName);
     assertNotNull(audioPlayerFacade.getPlaylist(newPlaylistName), "Playlist with name '"
         + newPlaylistName + "' not found.");
-    verify(appConfigurationService).savePlaylists(anyListOf(PlaylistData.class));
+
+    boolean deletePlaylistResult = audioPlayerFacade.deletePlaylist(newPlaylistName);
+    assertTrue(deletePlaylistResult, "Unexpected delete playlist result.");
+    assertNull(audioPlayerFacade.getPlaylist(newPlaylistName),
+        "Playlist with name '" + newPlaylistName + "' must be deleted.");
+    displayedPlaylist = audioPlayerFacade.getDisplayedPlaylist();
+    assertNotNull(displayedPlaylist, "After delete displayed playlist must be changed.");
+    verify(eventListener).changedPlaylist(displayedPlaylist);
+    actualPlaylistsSize = audioPlayerFacade.getPlaylists().size();
+    assertEquals(actualPlaylistsSize, originalPlaylistsSize, "Expected decrease in playlists size.");
+
+    verify(appConfigurationService, times(3)).savePlaylists(anyListOf(PlaylistData.class));
+  }
+
+  /**
+   * This test affects:
+   *  ru.push.caudioplayer.core.facades.AudioPlayerFacade#deletePlaylist(java.lang.String)
+   */
+  @Test
+  public void shouldCreateNewPlaylistAfterDeleteLast() {
+
   }
 
   /**
@@ -142,7 +175,7 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
    *  ru.push.caudioplayer.core.facades.AudioPlayerFacade#addLocationsToPlaylist(java.util.List)
    */
   @Test
-  public void shouldChangePlaylistItems() {
+  public void shouldChangesPlaylistItems() {
     PlaylistData displayedPlaylist = audioPlayerFacade.showActivePlaylist();
     assertNotNull(displayedPlaylist, "Displayed playlist is null.");
 

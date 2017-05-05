@@ -21,13 +21,15 @@ public interface AudioPlayerFacade {
 
   PlaylistData getActivePlaylist();
 
+  PlaylistData getDisplayedPlaylist();
+
   PlaylistData getPlaylist(String playlistName);
 
   PlaylistData showPlaylist(String playlistName);
 
   PlaylistData showActivePlaylist();
 
-  void createNewPlaylist();
+  PlaylistData createNewPlaylist();
 
   boolean deletePlaylist(String playlistName);
 

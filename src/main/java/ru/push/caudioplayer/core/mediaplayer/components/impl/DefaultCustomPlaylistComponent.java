@@ -122,9 +122,9 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
 
   @Override
   public PlaylistData getPlaylist(String playlistName) {
-    return playlists.stream()
-        .filter(playlist -> playlist.getName().equals(playlistName)).findFirst()
-        .orElse(playlists.get(0));
+    return IterableUtils.find(
+        playlists, playlist -> playlist.getName().equals(playlistName)
+    );
   }
 
   @Override
