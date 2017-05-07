@@ -173,20 +173,12 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   public void playNextTrack() {
     MediaInfoData trackInfo = playlistComponent.playNextTrack();
     playTrack(trackInfo);
-    eventListeners.forEach(listener ->
-        listener.changedTrackPosition(playlistComponent.getActivePlaylist().getName(),
-            playlistComponent.getActiveTrackPosition())
-    );
   }
 
   @Override
   public void playPrevTrack() {
     MediaInfoData trackInfo = playlistComponent.playPrevTrack();
     playTrack(trackInfo);
-    eventListeners.forEach(listener ->
-        listener.changedTrackPosition(playlistComponent.getActivePlaylist().getName(),
-            playlistComponent.getActiveTrackPosition())
-    );
   }
 
   private void playTrack(MediaInfoData trackInfo) {
@@ -194,6 +186,10 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
         Paths.get(trackInfo.getTrackPath()).toString() : trackInfo.getTrackPath();
     playerComponent.playMedia(resourceUri);
     currentTrackInfoData = trackInfo;
+    eventListeners.forEach(listener ->
+        listener.changedTrackPosition(playlistComponent.getActivePlaylist().getName(),
+            playlistComponent.getActiveTrackPosition())
+    );
   }
 
   @Override

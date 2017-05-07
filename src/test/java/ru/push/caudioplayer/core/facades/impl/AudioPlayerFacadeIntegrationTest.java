@@ -10,7 +10,8 @@ import org.testng.annotations.*;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
 import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
-import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
+import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
+import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 import ru.push.caudioplayer.core.mediaplayer.services.AppConfigurationService;
 
@@ -35,6 +36,8 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
   @Autowired
   private AudioPlayerFacade audioPlayerFacade;
   @Autowired
+  private CustomAudioPlayerComponent playerComponent;
+  @Autowired
   private AppConfigurationService appConfigurationService;
 
   private AudioPlayerEventListener eventListener;
@@ -58,10 +61,15 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
   @BeforeMethod
   public void setUp() throws Exception {
     reset(appConfigurationService);
+    reset(playerComponent);
+
     eventListener = Mockito.spy(new TestAudioPlayerEventAdapter());
     audioPlayerFacade.addEventListener(eventListener);
     audioPlayerFacade.refreshPlaylists(); // refresh playlist component after each test
+
     doNothing().when(appConfigurationService).savePlaylists(anyListOf(PlaylistData.class));
+    doReturn(Boolean.TRUE).when(playerComponent).playMedia(anyString());
+//    when(playerComponent.playMedia(anyString())).thenReturn(true);
   }
 
   @AfterMethod
@@ -216,4 +224,65 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
     verify(eventListener, times(3)).changedPlaylist(displayedPlaylist);
   }
 
+  /**
+   * This test affects:
+   *  ru.push.caudioplayer.core.facades.AudioPlayerFacade#playTrack(java.lang.String, int)
+   *  ru.push.caudioplayer.core.facades.AudioPlayerFacade#playCurrentTrack()
+   *  ru.push.caudioplayer.core.facades.AudioPlayerFacade#playNextTrack()
+   *  ru.push.caudioplayer.core.facades.AudioPlayerFacade#playPrevTrack()
+   */
+  @Test
+  public void shouldPlayAndSwitchPlaylistTracks() {
+    List<PlaylistData> playlists = audioPlayerFacade.getPlaylists();
+    assertTrue(CollectionUtils.isNotEmpty(playlists), "Playlists collection null or empty.");
+
+    // tests must consider that active and displayed playlist may be different
+    PlaylistData activePlaylist = audioPlayerFacade.getActivePlaylist();
+    PlaylistData inactivePlaylist = IterableUtils.find(
+        playlists, playlistData -> !playlistData.isActive()
+    );
+    assertNotNull(inactivePlaylist, "There must be at least one inactive playlist.");
+    assertNotEquals(inactivePlaylist, activePlaylist, "Active and inactive playlist must be different!");
+    PlaylistData displayedPlaylist = audioPlayerFacade.showPlaylist(inactivePlaylist.getName());
+    assertEquals(displayedPlaylist, inactivePlaylist, "Inactive playlist must be displayed.");
+
+    // for this test, the tracks in playlist must be different and size of each playlist must be at least 2!
+    assertTrue((activePlaylist.getTracks().size() >= 2), "Playlist size must be at least 2!");
+    assertTrue((displayedPlaylist.getTracks().size() >= 2), "Playlist size must be at least 2!");
+    MediaInfoData currentTrackInfo = audioPlayerFacade.getCurrentTrackInfo();
+    assertNotNull(currentTrackInfo, "Facade must provide the current track info even before play media.");
+
+    audioPlayerFacade.playCurrentTrack();
+    currentTrackInfo = audioPlayerFacade.getCurrentTrackInfo();
+    verify(playerComponent).playMedia(currentTrackInfo.getTrackPath());
+
+    MediaInfoData prevTrackInfo = audioPlayerFacade.getCurrentTrackInfo();
+    audioPlayerFacade.playNextTrack();
+    currentTrackInfo = audioPlayerFacade.getCurrentTrackInfo();
+    assertNotEquals(prevTrackInfo, currentTrackInfo, "Media info data must be changed!");
+    verify(playerComponent).playMedia(currentTrackInfo.getTrackPath());
+
+    audioPlayerFacade.playPrevTrack();
+    currentTrackInfo = audioPlayerFacade.getCurrentTrackInfo();
+    assertEquals(currentTrackInfo, prevTrackInfo, "Media info data must be changed back to previous!");
+    verify(playerComponent, times(2)).playMedia(currentTrackInfo.getTrackPath());
+
+    // TODO: add checks for track position when verify changedTrackPosition methods
+    verify(eventListener, times(3)).changedTrackPosition(eq(activePlaylist.getName()), anyInt());
+
+    audioPlayerFacade.playTrack(displayedPlaylist.getName(), 0);
+    currentTrackInfo = audioPlayerFacade.getCurrentTrackInfo();
+    verify(playerComponent).playMedia(currentTrackInfo.getTrackPath());
+
+    audioPlayerFacade.playNextTrack();
+    final MediaInfoData trackInfo = audioPlayerFacade.getCurrentTrackInfo();
+    boolean trackInDisplayedPlaylist = displayedPlaylist.getTracks().stream()
+        .anyMatch(track -> track.equals(trackInfo));
+    assertTrue(trackInDisplayedPlaylist,
+        "When playlist changed switching tracks must be applied for actual playlist!");
+    verify(playerComponent).playMedia(currentTrackInfo.getTrackPath());
+
+    // TODO: add checks for track position when verify changedTrackPosition methods
+    verify(eventListener, times(2)).changedTrackPosition(eq(displayedPlaylist.getName()), anyInt());
+  }
 }

@@ -111,30 +111,55 @@ public class MediaInfoData {
     this.sourceType = sourceType;
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    MediaInfoData that = (MediaInfoData) o;
+
+    if (length != that.length) return false;
+    if (trackPath != null ? !trackPath.equals(that.trackPath) : that.trackPath != null) return false;
+    if (sourceType != that.sourceType) return false;
+    if (artist != null ? !artist.equals(that.artist) : that.artist != null) return false;
+    if (album != null ? !album.equals(that.album) : that.album != null) return false;
+    if (date != null ? !date.equals(that.date) : that.date != null) return false;
+    if (title != null ? !title.equals(that.title) : that.title != null) return false;
+    if (trackId != null ? !trackId.equals(that.trackId) : that.trackId != null) return false;
+    return trackNumber != null ? trackNumber.equals(that.trackNumber) : that.trackNumber == null;
+
+  }
+
+  @Override
+  public int hashCode() {
+    int result = trackPath != null ? trackPath.hashCode() : 0;
+    result = 31 * result + (sourceType != null ? sourceType.hashCode() : 0);
+    result = 31 * result + (artist != null ? artist.hashCode() : 0);
+    result = 31 * result + (album != null ? album.hashCode() : 0);
+    result = 31 * result + (date != null ? date.hashCode() : 0);
+    result = 31 * result + (title != null ? title.hashCode() : 0);
+    result = 31 * result + (trackId != null ? trackId.hashCode() : 0);
+    result = 31 * result + (trackNumber != null ? trackNumber.hashCode() : 0);
+    result = 31 * result + (int) (length ^ (length >>> 32));
+    return result;
+  }
+
   public static class Builder {
-    private String trackPath;
-    private MediaSourceType sourceType;
-    private String artist;
+    private final String trackPath;
+    private final MediaSourceType sourceType;
+    private final String artist;
     private String album;
     private String date;
-    private String title;
+    private final String title;
     private String trackId;
     private String trackNumber;
     private long length;
 
-    public Builder trackPath(String trackPath) {
+    public Builder(String trackPath, MediaSourceType sourceType, String artist, String title) {
       this.trackPath = trackPath;
-      return this;
-    }
-
-    public Builder sourceType(MediaSourceType sourceType) {
       this.sourceType = sourceType;
-      return this;
-    }
-
-    public Builder artist(String artist) {
       this.artist = artist;
-      return this;
+      this.title = title;
     }
 
     public Builder album(String album) {
@@ -144,11 +169,6 @@ public class MediaInfoData {
 
     public Builder date(String date) {
       this.date = date;
-      return this;
-    }
-
-    public Builder title(String title) {
-      this.title = title;
       return this;
     }
 
