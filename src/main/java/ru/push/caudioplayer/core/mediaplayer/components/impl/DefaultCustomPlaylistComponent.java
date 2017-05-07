@@ -188,11 +188,9 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
   @Override
   public List<PlaylistData> deleteItemsFromPlaylist(String playlistName, List<Integer> itemsIndexes) {
     PlaylistData playlist = getPlaylist(playlistName);
-    List<MediaInfoData> deletedItems = itemsIndexes.stream()
+    itemsIndexes.stream()
         .filter(itemIndex -> (itemIndex >= 0) && (itemIndex < playlist.getTracks().size()))
-        .map(itemIndex -> playlist.getTracks().get(itemIndex))
-        .collect(Collectors.toList());
-    playlist.getTracks().removeAll(deletedItems);
+        .forEach(itemIndex -> playlist.getTracks().remove(itemIndex.intValue()));
     return getPlaylists();
   }
 
