@@ -212,7 +212,8 @@ public class PlaylistController {
     @Override
     public void changedTrackPosition(String playlistName, int trackPosition) {
       if (playlistName.equals(playlistBrowserContainer.getSelectionModel().getSelectedItem())) {
-        playlistContainer.getSelectionModel().select(trackPosition);
+//        playlistContainer.getSelectionModel().select(trackPosition);
+        LOG.debug("Track position changed!");
       }
     }
 
