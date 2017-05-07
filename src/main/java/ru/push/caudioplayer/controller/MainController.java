@@ -33,10 +33,6 @@ public class MainController {
   @Resource(name = "playlistView")
   private ConfigurationControllers.View playlistView;
 
-  // TODO: must be removed!
-  @Resource
-  private CustomAudioPlayerComponent playerComponent;
-
   @Resource
   private AudioPlayerFacade audioPlayerFacade;
 
