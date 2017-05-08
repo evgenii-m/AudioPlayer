@@ -19,7 +19,6 @@ import ru.push.caudioplayer.core.mediaplayer.services.AppConfigurationService;
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -59,21 +58,36 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
   }
 
   @Override
+  public String getActivePlaylistName() {
+    ImmutableNode activePlaylistNode = getConfigurationRootChildNode("activePlaylist");
+    if (activePlaylistNode != null) {
+      return (String) activePlaylistNode.getValue();
+    } else {
+      LOG.warn("Active playlist not specified in configuration file!");
+      return null;
+    }
+  }
+
+  @Override
+  public String getDisplayedPlaylistName() {
+    ImmutableNode displayedPlaylistNode = getConfigurationRootChildNode("displayedPlaylist");
+    if (displayedPlaylistNode != null) {
+      return (String) displayedPlaylistNode.getValue();
+    } else {
+      LOG.warn("Displayed playlist not specified in configuration file!");
+      return null;
+    }
+  }
+
+  @Override
   public List<PlaylistData> getPlaylists() {
     ImmutableNode playlistsNode = getConfigurationRootChildNode("playlists");
 
     if (playlistsNode != null && CollectionUtils.isNotEmpty(playlistsNode.getChildren())) {
       List<PlaylistData> playlists = playlistsNode.getChildren().stream()
           .map(playlistNode -> {
-            int playlistIndex = playlistNode.getChildren().indexOf(playlistNode);
-            int playlistPosition = (playlistNode.getAttributes().get("position") != null) ?
-                Integer.valueOf(String.valueOf(playlistNode.getAttributes().get("position"))) :
-                playlistIndex;
             String playlistName = (playlistNode.getAttributes().get("name") != null) ?
                 (String) playlistNode.getAttributes().get("name") : UNTITLED_PLAYLIST_NAME;
-            boolean playlistActive = (playlistNode.getAttributes().get("active") != null) ?
-                Boolean.valueOf((String) playlistNode.getAttributes().get("active")) : false;
-
             List<MediaInfoData> playlistTracks = playlistNode.getChildren().stream()
                 .map(trackNode -> {
                   String trackPath = (String) trackNode.getValue();
@@ -82,25 +96,64 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
                   );
                   return mediaInfoDataLoader.load(trackPath, sourceType);
                 }).collect(Collectors.toList());
-            return new PlaylistData(playlistName, playlistPosition, playlistTracks, playlistActive);
+            return new PlaylistData(playlistName, playlistTracks);
           }).collect(Collectors.toList());
-
-      if (playlists.stream().noneMatch(PlaylistData::isActive)) {
-        playlists.stream()
-            .findFirst()
-            .ifPresent(firstPlaylist -> firstPlaylist.setActive(true));
-      }
       return playlists;
 
     } else {
       LOG.warn("Playlists block not found or empty (load operation)!");
-      PlaylistData emptyPlaylist = new PlaylistData(0);
+      PlaylistData emptyPlaylist = new PlaylistData();
       return Collections.singletonList(emptyPlaylist);
     }
   }
 
+  @Override
+  public void saveActivePlaylist(@NotNull String activePlaylistName) {
+    setActivePlaylistInConfiguration(activePlaylistName);
+    saveConfiguration();
+  }
+
+  private void setActivePlaylistInConfiguration(@NotNull String activePlaylistName) {
+    ImmutableNode activePlaylistNode = getConfigurationRootChildNode("activePlaylist");
+    if (activePlaylistNode != null) {
+      activePlaylistNode.setValue(activePlaylistName);
+    } else {
+      configuration.getNodeModel().getRootNode().addChild(
+          new ImmutableNode.Builder()
+              .name("activePlaylist")
+              .value(activePlaylistName)
+              .create()
+      );
+    }
+  }
+
+  @Override
+  public void saveDisplayedPlaylist(@NotNull String displayedPlaylistName) {
+    setDisplayedPlaylistInConfiguration(displayedPlaylistName);
+    saveConfiguration();
+  }
+
+  private void setDisplayedPlaylistInConfiguration(@NotNull String displayedPlaylistName) {
+    ImmutableNode displayedPlaylistNode = getConfigurationRootChildNode("displayedPlaylist");
+    if (displayedPlaylistNode != null) {
+      displayedPlaylistNode.setValue(displayedPlaylistName);
+    } else {
+      configuration.getNodeModel().getRootNode().addChild(
+          new ImmutableNode.Builder()
+              .name("displayedPlaylist")
+              .value(displayedPlaylistName)
+              .create()
+      );
+    }
+  }
+
+  @Override
   public void savePlaylists(@NotNull List<PlaylistData> playlistsData) {
-    LOG.debug("save playlists");
+    setPlaylistsInConfiguration(playlistsData);
+    saveConfiguration();
+  }
+
+  private void setPlaylistsInConfiguration(@NotNull List<PlaylistData> playlistsData) {
     ImmutableNode playlistsNode = getConfigurationRootChildNode("playlists");
     ImmutableNode rootNode = configuration.getNodeModel().getRootNode().removeChild(playlistsNode);
     if (playlistsNode != null) {
@@ -116,11 +169,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
     for (PlaylistData playlistData : playlistsData) {
       ImmutableNode.Builder playlistNodeBuilder = new ImmutableNode.Builder();
       playlistNodeBuilder.name("playlist")
-          .addAttribute("name", playlistData.getName())
-          .addAttribute("position", playlistData.getPosition());
-      if (playlistData.isActive()) {
-        playlistNodeBuilder.addAttribute("active", true);
-      }
+          .addAttribute("name", playlistData.getName());
 
       playlistData.getTracks().forEach(trackData -> {
         ImmutableNode trackNode = new ImmutableNode.Builder()
@@ -133,13 +182,21 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
     }
     rootNode = rootNode.addChild(playlistsNode);
     configuration.getNodeModel().setRootNode(rootNode);
-    saveConfiguration();
   }
 
   // TODO: make function for change individual playlist
+  public void savePlaylists(@NotNull List<PlaylistData> playlistsData, @NotNull String activePlaylistName,
+                            @NotNull String displayedPlaylistName)
+  {
+    setPlaylistsInConfiguration(playlistsData);
+    setActivePlaylistInConfiguration(activePlaylistName);
+    setDisplayedPlaylistInConfiguration(displayedPlaylistName);
+    saveConfiguration();
+  }
 
   private void saveConfiguration() {
     try {
+      LOG.debug("save configuration");
       configurationBuilder.save();
     } catch (ConfigurationException e) {
       LOG.error("Error when save configuration to file.", e);

@@ -68,7 +68,8 @@ public class PlaylistController {
     });
 
     List<PlaylistData> playlists = audioPlayerFacade.getPlaylists();
-    fillPlaylistBrowserContainer(playlists);
+    PlaylistData activePlaylist = audioPlayerFacade.getActivePlaylist();
+    fillPlaylistBrowserContainer(playlists, activePlaylist);
 
     playlistBrowserContainer.getSelectionModel().selectedItemProperty().addListener(
         new ChangeListener<String>() {
@@ -161,14 +162,13 @@ public class PlaylistController {
     playlistContainer.getColumns().addAll(numberCol, artistCol, albumCol, titleCol, lengthCol);
   }
 
-  private void fillPlaylistBrowserContainer(List<PlaylistData> playlists) {
+  private void fillPlaylistBrowserContainer(List<PlaylistData> playlists, PlaylistData activePlaylist) {
     if (CollectionUtils.isNotEmpty(playlists)) {
       playlistBrowserContainer.getItems().clear();
       boolean activeSelected = false;
-      Collections.sort(playlists, (p1, p2) -> Integer.compare(p1.getPosition(), p2.getPosition()));
       for (PlaylistData playlist : playlists) {
         playlistBrowserContainer.getItems().add(playlist.getName());
-        if (!activeSelected && playlist.isActive()) {
+        if (!activeSelected && activePlaylist.equals(playlist)) {
           activeSelected = true;
           playlistBrowserContainer.getSelectionModel().select(playlist.getName());
         }

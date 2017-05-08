@@ -33,6 +33,7 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
   private MediaInfoDataLoader mediaInfoDataLoader;
 
   private List<PlaylistData> playlists;
+  private PlaylistData displayedPlaylist;
   private PlaylistData activePlaylist;
   private Integer trackPosition;
 
@@ -45,24 +46,28 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
     LOG.debug("releaseComponent");
   }
 
-  private void setActivePlaylist(PlaylistData playlist, int trackPosition) {
-    this.activePlaylist = playlist;
-    this.trackPosition = trackPosition;
-  }
-
-
   @Override
-  public void loadPlaylists(List<PlaylistData> playlists) {
+  public void loadPlaylists(List<PlaylistData> playlists, String activePlaylistName, String displayedPlaylistName) {
     if (CollectionUtils.isNotEmpty(playlists)) {
       this.playlists = playlists;
+      boolean activeResult = setActivePlaylist(activePlaylistName, 0);
+      if (!activeResult) {
+        activePlaylist = playlists.get(0);
+        trackPosition = 0;
+      }
+      boolean displayedResult = setDisplayedPlaylist(displayedPlaylistName);
+      if (!displayedResult) {
+        displayedPlaylist = playlists.get(0);
+      }
+
     } else {
       LOG.warn("Attempts to load an empty playlists!");
-      this.playlists = Collections.singletonList(createNewPlaylist());
+      PlaylistData newPlaylist = createNewPlaylist();
+      this.playlists = Collections.singletonList(newPlaylist);
+      activePlaylist = newPlaylist;
+      trackPosition = 0;
+      displayedPlaylist = newPlaylist;
     }
-
-    playlists.stream()
-        .filter(PlaylistData::isActive).findFirst()
-        .ifPresent(activePlaylist -> setActivePlaylist(activePlaylist, 0));
   }
 
   @Override
@@ -72,8 +77,9 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
 
   @Override
   public PlaylistData createNewPlaylist() {
-    PlaylistData newPlaylist = new PlaylistData(playlists.size());
+    PlaylistData newPlaylist = new PlaylistData();
     playlists.add(newPlaylist);
+    displayedPlaylist = newPlaylist;
     return newPlaylist;
   }
 
@@ -85,13 +91,16 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
         activePlaylist = createNewPlaylist();
       }
       if (playlistData.equals(activePlaylist)) {
-        activePlaylist = IterableUtils.find(
-            playlists, playlist -> playlist.getPosition() == (activePlaylist.getPosition() + 1)
-        );
-        if (activePlaylist == null) {
+        int playlistIndex = playlists.indexOf(activePlaylist);
+        if (playlistIndex < (playlists.size() - 1)) {
+          activePlaylist = playlists.get(playlistIndex + 1);
+        } else {
           activePlaylist = playlists.get(0);
         }
         trackPosition = 0;
+      }
+      if (playlistData.equals(displayedPlaylist)) {
+        displayedPlaylist = activePlaylist;
       }
       playlists.remove(playlistData);
       return true;
@@ -120,10 +129,55 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
   }
 
   @Override
+  public PlaylistData getDisplayedPlaylist() {
+    return displayedPlaylist;
+  }
+
+  @Override
   public PlaylistData getPlaylist(String playlistName) {
     return IterableUtils.find(
         playlists, playlist -> playlist.getName().equals(playlistName)
     );
+  }
+
+  private boolean setActivePlaylist(String playlistName, int trackPosition) {
+    PlaylistData requiredPlaylist = IterableUtils.find(
+        playlists, playlist -> playlist.getName().equals(playlistName)
+    );
+    if (requiredPlaylist != null) {
+      int playlistSize = requiredPlaylist.getTracks().size();
+      if ((trackPosition >= 0) && (trackPosition < playlistSize)) {
+        activePlaylist = requiredPlaylist;
+        this.trackPosition = trackPosition;
+        return true;
+      } else {
+        LOG.error("Attempts to set invalid track position [trackPosition = " + trackPosition
+            + ", playlistSize = " + playlistSize + "]");
+        return false;
+      }
+    } else {
+      LOG.error("Attempts to activate a playlist that not found in component [playlistName = " + playlistName + "]");
+      return false;
+    }
+  }
+
+  @Override
+  public boolean setDisplayedPlaylist(String playlistName) {
+    PlaylistData requiredPlaylist = IterableUtils.find(
+        playlists, playlist -> playlist.getName().equals(playlistName)
+    );
+    if (requiredPlaylist != null) {
+      displayedPlaylist = requiredPlaylist;
+      return true;
+    } else {
+      LOG.error("Attempts to display a playlist that not found in component [playlistName = " + playlistName + "]");
+      return false;
+    }
+  }
+
+  @Override
+  public void setDisplayedPlaylist(PlaylistData playlist) {
+    displayedPlaylist = playlist;
   }
 
   @Override
@@ -132,11 +186,12 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
   }
 
   @Override
-  public MediaInfoData playTrack(String playlistName, int trackPosition) {
-    activePlaylist = playlists.stream()
-        .filter(playlist -> playlist.getName().equals(playlistName)).findFirst()
-        .orElse(activePlaylist);
-    this.trackPosition = trackPosition;
+  public MediaInfoData playTrack(String playlistName, int trackPosition) throws IllegalArgumentException {
+    boolean activeResult = setActivePlaylist(playlistName, trackPosition);
+    if (!activeResult) {
+      throw new IllegalArgumentException("Invalid arguments [playlistName = " + playlistName
+          + ", trackPosition = " + trackPosition + "]");
+    }
     return playCurrentTrack();
   }
 

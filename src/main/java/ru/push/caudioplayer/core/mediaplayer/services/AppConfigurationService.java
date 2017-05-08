@@ -2,6 +2,7 @@ package ru.push.caudioplayer.core.mediaplayer.services;
 
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -10,7 +11,18 @@ import java.util.List;
  */
 public interface AppConfigurationService {
 
+  String getActivePlaylistName();
+
+  String getDisplayedPlaylistName();
+
   List<PlaylistData> getPlaylists();
 
-  void savePlaylists(List<PlaylistData> playlists);
+  void saveActivePlaylist(@NotNull String activePlaylistName);
+
+  void saveDisplayedPlaylist(@NotNull String displayedPlaylistName);
+
+  void savePlaylists(@NotNull List<PlaylistData> playlistsData);
+
+  void savePlaylists(@NotNull List<PlaylistData> playlistsData, @NotNull String activePlaylistName,
+                     @NotNull String displayedPlaylistName);
 }

@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface CustomPlaylistComponent extends NativePlayerComponent {
 
-  void loadPlaylists(List<PlaylistData> playlists);
+  void loadPlaylists(List<PlaylistData> playlists, String activePlaylistName, String displayedPlaylistName);
 
   List<PlaylistData> getPlaylists();
 
@@ -24,11 +24,17 @@ public interface CustomPlaylistComponent extends NativePlayerComponent {
 
   PlaylistData getActivePlaylist();
 
+  PlaylistData getDisplayedPlaylist();
+
+  boolean setDisplayedPlaylist(String playlistName);
+
+  void setDisplayedPlaylist(PlaylistData playlist);
+
   PlaylistData getPlaylist(String playlistName);
 
   int getActiveTrackPosition();
 
-  MediaInfoData playTrack(String playlistName, int trackPosition);
+  MediaInfoData playTrack(String playlistName, int trackPosition) throws IllegalArgumentException;
 
   MediaInfoData playCurrentTrack();
 

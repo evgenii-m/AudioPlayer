@@ -13,8 +13,6 @@ public class PlaylistData {
   private static final String DEFAULT_PLAYLIST_NAME = "New playlist";
 
   private String name;
-  private int position;
-  private boolean active;
   private List<MediaInfoData> tracks;
 
   public static String getNewPlaylistName() {
@@ -22,21 +20,17 @@ public class PlaylistData {
     return DEFAULT_PLAYLIST_NAME + " " + currentTimeString;
   }
 
-  public PlaylistData(String name, int position, boolean active) {
-    this.name = name;
-    this.position = position;
-    this.active = active;
-    this.tracks = new ArrayList<>();
+  public PlaylistData() {
+    this(getNewPlaylistName());
   }
 
-  public PlaylistData(int position) {
-    this(getNewPlaylistName(), position, true);
+  public PlaylistData(String name) {
+    this(name, new ArrayList<>());
+    this.name = name;
   }
 
-  public PlaylistData(String name, int position, List<MediaInfoData> tracks, boolean active) {
+  public PlaylistData(String name, List<MediaInfoData> tracks) {
     this.name = name;
-    this.position = position;
-    this.active = active;
     this.tracks = tracks;
   }
 
@@ -46,22 +40,6 @@ public class PlaylistData {
 
   public void setName(String name) {
     this.name = name;
-  }
-
-  public int getPosition() {
-    return position;
-  }
-
-  public void setPosition(int position) {
-    this.position = position;
-  }
-
-  public boolean isActive() {
-    return active;
-  }
-
-  public void setActive(boolean active) {
-    this.active = active;
   }
 
   public List<MediaInfoData> getTracks() {
