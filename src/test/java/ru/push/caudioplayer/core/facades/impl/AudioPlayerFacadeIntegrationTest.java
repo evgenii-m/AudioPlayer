@@ -67,18 +67,17 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
     audioPlayerFacade.addEventListener(eventListener);
     audioPlayerFacade.refreshPlaylists(); // refresh playlist component after each test
 
+    doNothing().when(appConfigurationService).saveActivePlaylist(anyString());
+    doNothing().when(appConfigurationService).saveDisplayedPlaylist(anyString());
     doNothing().when(appConfigurationService).savePlaylists(anyListOf(PlaylistData.class));
+    doNothing().when(appConfigurationService).savePlaylists(anyListOf(PlaylistData.class), anyString(), anyString());
     doReturn(Boolean.TRUE).when(playerComponent).playMedia(anyString());
-//    when(playerComponent.playMedia(anyString())).thenReturn(true);
   }
 
   @AfterMethod
   public void tearDown() throws Exception {
     audioPlayerFacade.stopApplication();
-
-    verify(appConfigurationService, atLeastOnce()).savePlaylists(anyListOf(PlaylistData.class));
     verify(eventListener).stopAudioPlayer();
-
     audioPlayerFacade.removeEventListener(eventListener);
   }
 
@@ -101,11 +100,6 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
     assertTrue(CollectionUtils.isNotEmpty(playlists), "Playlists collection null or empty.");
     assertEquals(playlists.size(), PLAYLISTS_COUNT, "Unexpected count of playlists.");
 
-    Set<Integer> positionsSet = playlists.stream()
-        .map(PlaylistData::getPosition)
-        .collect(Collectors.toSet());
-    assertEquals(positionsSet.size(), playlists.size(), "Each playlist must have unique position value.");
-
     PlaylistData firstPlaylist = audioPlayerFacade.getPlaylist(FIRST_PLAYLIST_NAME);
     assertNotNull(firstPlaylist, "Playlist with name '" + FIRST_PLAYLIST_NAME + "' not found.");
     assertEquals(firstPlaylist.getName(), FIRST_PLAYLIST_NAME, "Unexpected playlist name.");
@@ -120,8 +114,6 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
 
     PlaylistData activePlaylist = audioPlayerFacade.getActivePlaylist();
     assertNotNull(activePlaylist, "Active playlist must be specified.");
-    long activePlaylistsCount = playlists.stream().filter(PlaylistData::isActive).count();
-    assertEquals(activePlaylistsCount, 1, "Must be only one active playlist.");
   }
 
   /**
@@ -162,7 +154,7 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
     actualPlaylistsSize = audioPlayerFacade.getPlaylists().size();
     assertEquals(actualPlaylistsSize, originalPlaylistsSize, "Expected decrease in playlists size.");
 
-    verify(appConfigurationService, times(3)).savePlaylists(anyListOf(PlaylistData.class));
+    verify(appConfigurationService, times(3)).savePlaylists(anyListOf(PlaylistData.class), anyString(), anyString());
   }
 
   /**
@@ -181,11 +173,12 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
     assertTrue(CollectionUtils.isNotEmpty(playlists), "New playlist not created after delete last!");
     assertEquals(playlists.size(), 1, "Only one playlist must be created.");
     PlaylistData createdPlaylist = playlists.get(0);
-    assertTrue(createdPlaylist.isActive(), "Created playlist must be active.");
+    PlaylistData activePlaylist = audioPlayerFacade.getActivePlaylist();
+    assertEquals(createdPlaylist, activePlaylist, "Created playlist must be active.");
     PlaylistData displayedPlaylist = audioPlayerFacade.getDisplayedPlaylist();
     assertEquals(displayedPlaylist, createdPlaylist, "Created playlist must be displayed.");
 
-    verify(appConfigurationService, atLeast(2)).savePlaylists(anyListOf(PlaylistData.class));
+    verify(appConfigurationService, atLeast(2)).savePlaylists(anyListOf(PlaylistData.class), anyString(), anyString());
     verify(eventListener, atLeastOnce()).changedPlaylist(any(PlaylistData.class));
   }
 
@@ -239,7 +232,7 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
     // tests must consider that active and displayed playlist may be different
     PlaylistData activePlaylist = audioPlayerFacade.getActivePlaylist();
     PlaylistData inactivePlaylist = IterableUtils.find(
-        playlists, playlistData -> !playlistData.isActive()
+        playlists, playlistData -> !playlistData.equals(activePlaylist)
     );
     assertNotNull(inactivePlaylist, "There must be at least one inactive playlist.");
     assertNotEquals(inactivePlaylist, activePlaylist, "Active and inactive playlist must be different!");

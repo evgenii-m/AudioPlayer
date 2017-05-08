@@ -126,8 +126,13 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 
   @Override
   public boolean deletePlaylist(String playlistName) {
+    PlaylistData requiredPlaylist = getPlaylist(playlistName);
+    boolean deleteDisplayed = playlistComponent.getDisplayedPlaylist().equals(requiredPlaylist);
     boolean deleteResult = playlistComponent.deletePlaylist(playlistName);
     if (deleteResult) {
+      if (deleteDisplayed) {
+        eventListeners.forEach(listener -> listener.changedPlaylist(playlistComponent.getDisplayedPlaylist()));
+      }
       appConfigurationService.savePlaylists(playlistComponent.getPlaylists(),
           playlistComponent.getActivePlaylist().getName(),
           playlistComponent.getDisplayedPlaylist().getName());
