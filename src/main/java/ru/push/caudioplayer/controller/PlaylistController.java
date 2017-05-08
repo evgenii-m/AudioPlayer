@@ -3,8 +3,6 @@ package ru.push.caudioplayer.controller;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -15,8 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
-import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
-import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
+import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
+import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 import ru.push.caudioplayer.ui.MediaTrackPlaylistItem;
 import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
 
@@ -59,7 +57,7 @@ public class PlaylistController {
   public void init() {
     LOG.debug("init");
 
-    audioPlayerFacade.addListener(new AudioPlayerEventAdapter());
+    audioPlayerFacade.addEventListener(new AudioPlayerEventAdapter());
 
     playlistContainer.setOnMouseClicked(mouseEvent -> {
       if (mouseEvent.getButton().equals(MouseButton.PRIMARY) && (mouseEvent.getClickCount() == 2)) {
@@ -81,7 +79,7 @@ public class PlaylistController {
           }
         });
 
-    setPlaylistContainerItems(audioPlayerFacade.getActivePlaylist());
+    setPlaylistContainerItems(audioPlayerFacade.showActivePlaylist());
     preparePlaylistContextMenu();
     preparePlaylistBrowserContextMenu();
   }
@@ -214,13 +212,23 @@ public class PlaylistController {
     @Override
     public void changedTrackPosition(String playlistName, int trackPosition) {
       if (playlistName.equals(playlistBrowserContainer.getSelectionModel().getSelectedItem())) {
-        playlistContainer.getSelectionModel().select(trackPosition);
+//        playlistContainer.getSelectionModel().select(trackPosition);
+        LOG.debug("Track position changed!");
       }
     }
 
     @Override
     public void refreshTrackMediaInfo(int trackPosition, MediaInfoData mediaInfo) {
-//      playlistContainer.
+      if ((trackPosition > 0) && (trackPosition < playlistContainer.getItems().size())) {
+        MediaTrackPlaylistItem playlistItem = (MediaTrackPlaylistItem) playlistContainer.getItems().get(trackPosition);
+        playlistItem.setNumber(mediaInfo.getTrackNumber());
+        playlistItem.setArtist(mediaInfo.getArtist());
+        playlistItem.setAlbum(mediaInfo.getAlbum());
+        playlistItem.setTitle(mediaInfo.getTitle());
+        playlistItem.setLength(trackTimeLabelBuilder.buildTimeString(mediaInfo.getLength()));
+      } else {
+        LOG.error("Invalid track position [trackPosition = " + trackPosition + "], refresh track media info skipped");
+      }
     }
 
     @Override

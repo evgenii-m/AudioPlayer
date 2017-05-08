@@ -4,14 +4,14 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IterableUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
-import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
-import ru.push.caudioplayer.core.mediaplayer.dto.MediaSourceType;
-import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
 import ru.push.caudioplayer.core.mediaplayer.helpers.MediaInfoDataLoader;
+import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
+import ru.push.caudioplayer.core.mediaplayer.pojo.MediaSourceType;
+import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 
-import javax.annotation.Resource;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -29,7 +29,7 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
 
   private final CustomMediaPlayerFactory mediaPlayerFactory;
 
-  @Resource
+  @Autowired
   private MediaInfoDataLoader mediaInfoDataLoader;
 
   private List<PlaylistData> playlists;
@@ -83,7 +83,6 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
     if (playlistData != null) {
       if (playlists.size() == 1) {
         activePlaylist = createNewPlaylist();
-        playlists.add(activePlaylist);
       }
       if (playlistData.equals(activePlaylist)) {
         activePlaylist = IterableUtils.find(
@@ -104,7 +103,15 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
 
   @Override
   public void renamePlaylist(String actualPlaylistName, String newPlaylistName) {
-
+    PlaylistData playlistData = IterableUtils.find(
+        playlists, playlist -> actualPlaylistName.equals(playlist.getName())
+    );
+    if (playlistData == null) {
+      LOG.info("Playlist with name '" + actualPlaylistName + "' not found, rename failed.");
+      return;
+    }
+    // TODO: add validation for playlist name
+    playlistData.setName(newPlaylistName);
   }
 
   @Override
@@ -114,9 +121,9 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
 
   @Override
   public PlaylistData getPlaylist(String playlistName) {
-    return playlists.stream()
-        .filter(playlist -> playlist.getName().equals(playlistName)).findFirst()
-        .orElse(playlists.get(0));
+    return IterableUtils.find(
+        playlists, playlist -> playlist.getName().equals(playlistName)
+    );
   }
 
   @Override
@@ -181,11 +188,9 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
   @Override
   public List<PlaylistData> deleteItemsFromPlaylist(String playlistName, List<Integer> itemsIndexes) {
     PlaylistData playlist = getPlaylist(playlistName);
-    List<MediaInfoData> deletedItems = itemsIndexes.stream()
+    itemsIndexes.stream()
         .filter(itemIndex -> (itemIndex >= 0) && (itemIndex < playlist.getTracks().size()))
-        .map(itemIndex -> playlist.getTracks().get(itemIndex))
-        .collect(Collectors.toList());
-    playlist.getTracks().removeAll(deletedItems);
+        .forEach(itemIndex -> playlist.getTracks().remove(itemIndex.intValue()));
     return getPlaylists();
   }
 

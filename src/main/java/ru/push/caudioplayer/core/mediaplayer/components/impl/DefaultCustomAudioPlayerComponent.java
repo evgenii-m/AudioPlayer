@@ -4,10 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
 import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
-import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
-import uk.co.caprica.vlcj.player.MediaMeta;
 import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
+import uk.co.caprica.vlcj.player.MediaPlayerEventListener;
 
 /**
  * @author push <mez.e.s@yandex.ru>
@@ -23,16 +22,22 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
   private final MediaPlayer mediaPlayer;
 
   private int volume;
-  private float playbackPosition;
-  MediaInfoData currentTrackInfoData;
 
   public DefaultCustomAudioPlayerComponent(CustomMediaPlayerFactory mediaPlayerFactory) {
     this.mediaPlayerFactory = mediaPlayerFactory;
-    this.mediaPlayer = mediaPlayerFactory.newHeadlessMediaPlayer();
-    this.volume = VOLUME_DEFAULT_VALUE;
-    this.playbackPosition = 0;
-    this.currentTrackInfoData = new MediaInfoData();
-    this.mediaPlayer.addMediaPlayerEventListener(new DefaultMediaPlayerEventListener());
+    mediaPlayer = mediaPlayerFactory.newHeadlessMediaPlayer();
+    volume = VOLUME_DEFAULT_VALUE;
+    mediaPlayer.addMediaPlayerEventListener(new DefaultMediaPlayerEventListener());
+  }
+
+  @Override
+  public synchronized void addEventListener(MediaPlayerEventListener eventListener) {
+    mediaPlayer.addMediaPlayerEventListener(eventListener);
+  }
+
+  @Override
+  public synchronized void removeEventListener(MediaPlayerEventListener eventListener) {
+    mediaPlayer.removeMediaPlayerEventListener(eventListener);
   }
 
   @Override
@@ -58,16 +63,6 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
     return mediaPlayer.playMedia(resourceUri);
   }
 
-  private void setCurrentTrackInfoData(MediaMeta mediaMeta) {
-    currentTrackInfoData.setAlbum(mediaMeta.getAlbum());
-    currentTrackInfoData.setArtist(mediaMeta.getArtist());
-    currentTrackInfoData.setDate(mediaMeta.getDate());
-    currentTrackInfoData.setLength(mediaMeta.getLength());
-    currentTrackInfoData.setTitle(mediaMeta.getTitle());
-    currentTrackInfoData.setTrackId(mediaMeta.getTrackId());
-    currentTrackInfoData.setTrackNumber(mediaMeta.getTrackNumber());
-  }
-
   @Override
   public void stop() {
     mediaPlayer.stop();
@@ -89,6 +84,11 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
   }
 
   @Override
+  public long getCurrentTrackLength() {
+    return mediaPlayer.getLength();
+  }
+
+  @Override
   public void changePlaybackPosition(float newPosition) {
     if (!mediaPlayer.isSeekable()) {
       LOG.info("Media player not seekable");
@@ -105,11 +105,6 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
   @Override
   public boolean isPlaying() {
     return mediaPlayer.isPlaying();
-  }
-
-  @Override
-  public MediaInfoData getCurrentTrackInfo() {
-    return currentTrackInfoData;
   }
 
   @Override
@@ -151,13 +146,5 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
       LOG.debug("error");
     }
 
-    @Override
-    public void mediaMetaChanged(MediaPlayer mediaPlayer, int metaType) {
-      LOG.debug("mediaMetaChanged");
-      if (mediaPlayer.isPlaying()) {
-        MediaMeta mediaMeta = mediaPlayer.getMediaMeta();
-        setCurrentTrackInfoData(mediaMeta);
-      }
-    }
   }
 }

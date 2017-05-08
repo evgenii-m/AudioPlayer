@@ -15,8 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
-import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
-import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
+import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
 
 import javax.annotation.PostConstruct;
@@ -58,8 +57,6 @@ public class AudioPlayerController {
   @Autowired
   private CustomAudioPlayerComponent playerComponent;
   @Autowired
-  private CustomPlaylistComponent playlistComponent;
-  @Autowired
   private TrackTimeLabelBuilder trackTimeLabelBuilder;
 
   private final ScheduledExecutorService playerScheduler = Executors.newSingleThreadScheduledExecutor();
@@ -84,7 +81,7 @@ public class AudioPlayerController {
   public void init() {
     LOG.debug("init");
 
-    audioPlayerFacade.addListener(new AudioPlayerEventAdapter());
+    audioPlayerFacade.addEventListener(new AudioPlayerEventAdapter());
 
     updatePlaybackPosition(0, 0);
     addPositionSliderMouseListeners();
@@ -135,7 +132,7 @@ public class AudioPlayerController {
       }
     }
 
-    MediaInfoData mediaInfoData = playerComponent.getCurrentTrackInfo();
+    MediaInfoData mediaInfoData = audioPlayerFacade.getCurrentTrackInfo();
     float playbackPosition = playerComponent.getPlaybackPosition();
 
     updatePlaybackPosition(playbackPosition, mediaInfoData.getLength());
@@ -150,12 +147,12 @@ public class AudioPlayerController {
 
     @Override
     public void run() {
-      MediaInfoData mediaInfoData = playerComponent.getCurrentTrackInfo();
+      long currentTrackLength = playerComponent.getCurrentTrackLength();
       float playbackPosition = playerComponent.getPlaybackPosition();
 
       Platform.runLater(() -> {
         if (playerComponent.isPlaying()) {
-          updatePlaybackPosition(playbackPosition, mediaInfoData.getLength());
+          updatePlaybackPosition(playbackPosition, currentTrackLength);
         }
       });
     }
@@ -176,9 +173,9 @@ public class AudioPlayerController {
   }
 
   private void updatePlaybackPosition() {
-    MediaInfoData mediaInfoData = playerComponent.getCurrentTrackInfo();
+    long currentTrackLength = playerComponent.getCurrentTrackLength();
     float playbackPosition = playerComponent.getPlaybackPosition();
-    updatePlaybackPosition(playbackPosition, mediaInfoData.getLength());
+    updatePlaybackPosition(playbackPosition, currentTrackLength);
   }
 
 

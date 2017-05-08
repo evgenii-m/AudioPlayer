@@ -1,6 +1,6 @@
 package ru.push.caudioplayer.core.mediaplayer.services;
 
-import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
+import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 
 import java.util.List;
 

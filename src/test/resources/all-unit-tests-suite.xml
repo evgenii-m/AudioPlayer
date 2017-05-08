@@ -1,0 +1,13 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="AllUnitTests">
+
+  <test name="mediaplayer">
+    <classes>
+      <class name="ru.push.caudioplayer.core.mediaplayer.helpers.MediaInfoDataLoaderUnitTest" />
+      <class name="ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponentUnitTest" />
+      <class name="ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponentUnitTest" />
+    </classes>
+  </test>
+
+</suite>

@@ -12,7 +12,7 @@ public class CustomMediaPlayerFactory extends MediaPlayerFactory {
     this(new String[0]);
   }
 
-  public CustomMediaPlayerFactory(String ... args) {
+  public CustomMediaPlayerFactory(String[] args) {
     super(args);
   }
 }

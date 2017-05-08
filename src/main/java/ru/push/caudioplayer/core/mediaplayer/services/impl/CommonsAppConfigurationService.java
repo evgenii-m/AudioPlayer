@@ -10,12 +10,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
-import ru.push.caudioplayer.core.mediaplayer.dto.MediaSourceType;
-import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
 import ru.push.caudioplayer.core.mediaplayer.helpers.MediaInfoDataLoader;
+import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
+import ru.push.caudioplayer.core.mediaplayer.pojo.MediaSourceType;
+import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 import ru.push.caudioplayer.core.mediaplayer.services.AppConfigurationService;
 
+import javax.validation.constraints.NotNull;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -66,12 +67,12 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
           .map(playlistNode -> {
             int playlistIndex = playlistNode.getChildren().indexOf(playlistNode);
             int playlistPosition = (playlistNode.getAttributes().get("position") != null) ?
-                Integer.valueOf((String) playlistNode.getAttributes().get("position")) :
+                Integer.valueOf(String.valueOf(playlistNode.getAttributes().get("position"))) :
                 playlistIndex;
             String playlistName = (playlistNode.getAttributes().get("name") != null) ?
                 (String) playlistNode.getAttributes().get("name") : UNTITLED_PLAYLIST_NAME;
-            boolean playlistActive = Optional.ofNullable(playlistNode.getAttributes().get("active"))
-                .isPresent();
+            boolean playlistActive = (playlistNode.getAttributes().get("active") != null) ?
+                Boolean.valueOf((String) playlistNode.getAttributes().get("active")) : false;
 
             List<MediaInfoData> playlistTracks = playlistNode.getChildren().stream()
                 .map(trackNode -> {
@@ -98,7 +99,8 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
     }
   }
 
-  public void savePlaylists(List<PlaylistData> playlistsData) {
+  public void savePlaylists(@NotNull List<PlaylistData> playlistsData) {
+    LOG.debug("save playlists");
     ImmutableNode playlistsNode = getConfigurationRootChildNode("playlists");
     ImmutableNode rootNode = configuration.getNodeModel().getRootNode().removeChild(playlistsNode);
     if (playlistsNode != null) {

@@ -13,8 +13,6 @@ import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerCompone
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 
@@ -34,10 +32,6 @@ public class MainController {
   @FXML
   @Resource(name = "playlistView")
   private ConfigurationControllers.View playlistView;
-
-  // TODO: must be removed!
-  @Resource
-  private CustomAudioPlayerComponent playerComponent;
 
   @Resource
   private AudioPlayerFacade audioPlayerFacade;

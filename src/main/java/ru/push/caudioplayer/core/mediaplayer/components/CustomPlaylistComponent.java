@@ -1,7 +1,7 @@
 package ru.push.caudioplayer.core.mediaplayer.components;
 
-import ru.push.caudioplayer.core.mediaplayer.dto.MediaInfoData;
-import ru.push.caudioplayer.core.mediaplayer.dto.PlaylistData;
+import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
+import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 
 import java.io.File;
 import java.util.List;
