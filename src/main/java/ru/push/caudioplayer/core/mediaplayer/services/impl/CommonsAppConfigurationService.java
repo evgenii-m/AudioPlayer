@@ -17,6 +17,8 @@ import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 import ru.push.caudioplayer.core.mediaplayer.services.AppConfigurationService;
 
 import javax.validation.constraints.NotNull;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,16 +41,28 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
   public CommonsAppConfigurationService(String configurationFileName) {
     Parameters params = new Parameters();
     configurationBuilder = new FileBasedConfigurationBuilder<>(XMLConfiguration.class)
-        .configure(params.xml().setFileName(configurationFileName));
+        .configure(
+            params.xml().setFileName(configurationFileName)
+        );
+
     try {
       configuration = configurationBuilder.getConfiguration();
     } catch (ConfigurationException ex) {
-      throw new IllegalStateException("Application configuration load failed.", ex);
+      LOG.error("Exception occurred when configuration load, will be created default configuration file.", ex);
+      createDefaultConfiguration();
     }
   }
 
   public CommonsAppConfigurationService() {
     this(DEFAULT_CONFIG_FILE_NAME);
+  }
+
+  private void createDefaultConfiguration() {
+    configuration = new XMLConfiguration();
+    configuration.getNodeModel().setRootNode(
+        new ImmutableNode.Builder().name("configuration").create()
+    );
+    saveConfiguration();
   }
 
   private ImmutableNode getConfigurationRootChildNode(String nodeName) {
