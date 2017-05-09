@@ -74,7 +74,6 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
     String activePlaylistName = appConfigurationService.getActivePlaylistName();
     String displayedPlaylistName = appConfigurationService.getDisplayedPlaylistName();
     playlistComponent.loadPlaylists(playlists, activePlaylistName, displayedPlaylistName);
-    showActivePlaylist();
   }
 
   @Override

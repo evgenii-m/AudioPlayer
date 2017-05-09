@@ -80,7 +80,7 @@ public class PlaylistController {
           }
         });
 
-    setPlaylistContainerItems(audioPlayerFacade.showActivePlaylist());
+    setPlaylistContainerItems(audioPlayerFacade.getDisplayedPlaylist());
     preparePlaylistContextMenu();
     preparePlaylistBrowserContextMenu();
   }
