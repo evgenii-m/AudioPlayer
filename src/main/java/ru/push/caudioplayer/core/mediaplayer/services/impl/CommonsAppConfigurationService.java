@@ -17,8 +17,6 @@ import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 import ru.push.caudioplayer.core.mediaplayer.services.AppConfigurationService;
 
 import javax.validation.constraints.NotNull;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -67,8 +65,12 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
 
   private ImmutableNode getConfigurationRootChildNode(String nodeName) {
     return configuration.getNodeModel().getRootNode().getChildren().stream()
-        .filter(node -> node.getNodeName().equals(nodeName))
-        .findFirst().orElse(null);
+        .filter(node -> node.getNodeName().equals(nodeName)).findFirst()
+        .orElse(null);
+  }
+
+  private ImmutableNode getRootNode() {
+    return configuration.getNodeModel().getRootNode();
   }
 
   @Override
@@ -129,16 +131,17 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
 
   private void setActivePlaylistInConfiguration(@NotNull String activePlaylistName) {
     ImmutableNode activePlaylistNode = getConfigurationRootChildNode("activePlaylist");
-    if (activePlaylistNode != null) {
-      activePlaylistNode.setValue(activePlaylistName);
-    } else {
-      configuration.getNodeModel().getRootNode().addChild(
-          new ImmutableNode.Builder()
-              .name("activePlaylist")
-              .value(activePlaylistName)
-              .create()
-      );
-    }
+    ImmutableNode rootNode = (activePlaylistNode != null) ?
+        getRootNode().replaceChild(
+            activePlaylistNode, activePlaylistNode.setValue(activePlaylistName)
+        ) :
+        getRootNode().addChild(
+            new ImmutableNode.Builder()
+                .name("activePlaylist")
+                .value(activePlaylistName)
+                .create()
+        );
+    configuration.getNodeModel().setRootNode(rootNode);
   }
 
   @Override
@@ -149,16 +152,17 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
 
   private void setDisplayedPlaylistInConfiguration(@NotNull String displayedPlaylistName) {
     ImmutableNode displayedPlaylistNode = getConfigurationRootChildNode("displayedPlaylist");
-    if (displayedPlaylistNode != null) {
-      displayedPlaylistNode.setValue(displayedPlaylistName);
-    } else {
-      configuration.getNodeModel().getRootNode().addChild(
-          new ImmutableNode.Builder()
-              .name("displayedPlaylist")
-              .value(displayedPlaylistName)
-              .create()
-      );
-    }
+    ImmutableNode rootNode = (displayedPlaylistNode != null) ?
+        getRootNode().replaceChild(
+            displayedPlaylistNode, displayedPlaylistNode.setValue(displayedPlaylistName)
+        ) :
+        getRootNode().addChild(
+            new ImmutableNode.Builder()
+                .name("displayedPlaylist")
+                .value(displayedPlaylistName)
+                .create()
+        );
+    configuration.getNodeModel().setRootNode(rootNode);
   }
 
   @Override
@@ -177,7 +181,6 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
     } else {
       LOG.warn("Playlists block not found (save operation)!");
       playlistsNode = new ImmutableNode.Builder().name("playlists").create();
-      configuration.getNodeModel().getRootNode().addChild(playlistsNode);
     }
 
     for (PlaylistData playlistData : playlistsData) {
