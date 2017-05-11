@@ -1,4 +1,4 @@
-package ru.push.caudioplayer.core.mediaplayer.services;
+package ru.push.caudioplayer.core.services;
 
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 

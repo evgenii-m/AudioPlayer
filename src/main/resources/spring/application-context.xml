@@ -31,7 +31,7 @@
   </bean>
 
   <bean name="appConfigurationService"
-        class="ru.push.caudioplayer.core.mediaplayer.services.impl.CommonsAppConfigurationService">
+        class="ru.push.caudioplayer.core.services.impl.CommonsAppConfigurationService">
   </bean>
 
   <bean name="mediaInfoDataLoader"

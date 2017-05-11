@@ -1,11 +1,11 @@
-package ru.push.caudioplayer.core.mediaplayer.services;
+package ru.push.caudioplayer.core.services;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaSourceType;
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
-import ru.push.caudioplayer.core.mediaplayer.services.impl.CommonsAppConfigurationService;
+import ru.push.caudioplayer.core.services.impl.CommonsAppConfigurationService;
 
 import java.util.Arrays;
 import java.util.List;

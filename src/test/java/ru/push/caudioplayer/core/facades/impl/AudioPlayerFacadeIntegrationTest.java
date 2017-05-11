@@ -13,7 +13,7 @@ import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
-import ru.push.caudioplayer.core.mediaplayer.services.AppConfigurationService;
+import ru.push.caudioplayer.core.services.AppConfigurationService;
 
 import java.io.File;
 import java.util.Arrays;

@@ -1,4 +1,4 @@
-package ru.push.caudioplayer.core.mediaplayer.services.impl;
+package ru.push.caudioplayer.core.services.impl;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.configuration2.XMLConfiguration;
@@ -14,7 +14,7 @@ import ru.push.caudioplayer.core.mediaplayer.helpers.MediaInfoDataLoader;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaSourceType;
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
-import ru.push.caudioplayer.core.mediaplayer.services.AppConfigurationService;
+import ru.push.caudioplayer.core.services.AppConfigurationService;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
