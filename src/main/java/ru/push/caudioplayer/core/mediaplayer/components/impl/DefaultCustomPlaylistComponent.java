@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
-import ru.push.caudioplayer.core.mediaplayer.helpers.MediaInfoDataLoader;
+import ru.push.caudioplayer.core.services.MediaInfoDataLoaderService;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaSourceType;
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
@@ -30,7 +30,7 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
   private final CustomMediaPlayerFactory mediaPlayerFactory;
 
   @Autowired
-  private MediaInfoDataLoader mediaInfoDataLoader;
+  private MediaInfoDataLoaderService mediaInfoDataLoaderService;
 
   private List<PlaylistData> playlists;
   private PlaylistData displayedPlaylist;
@@ -235,7 +235,7 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
     List<String> mediaPaths = files.stream()
         .map(File::getAbsolutePath)
         .collect(Collectors.toList());
-    List<MediaInfoData> mediaInfoList = mediaInfoDataLoader.load(mediaPaths, MediaSourceType.FILE);
+    List<MediaInfoData> mediaInfoList = mediaInfoDataLoaderService.load(mediaPaths, MediaSourceType.FILE);
     playlist.getTracks().addAll(mediaInfoList);
     return getPlaylists();
   }
@@ -264,7 +264,7 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
         })
         .filter(Objects::nonNull)
         .collect(Collectors.toList());
-    List<MediaInfoData> mediaInfoList = mediaInfoDataLoader.load(mediaPaths, MediaSourceType.HTTP_STREAM);
+    List<MediaInfoData> mediaInfoList = mediaInfoDataLoaderService.load(mediaPaths, MediaSourceType.HTTP_STREAM);
     playlist.getTracks().addAll(mediaInfoList);
     return getPlaylists();
   }

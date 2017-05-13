@@ -35,7 +35,7 @@
   </bean>
 
   <bean name="mediaInfoDataLoader"
-        class="ru.push.caudioplayer.core.mediaplayer.helpers.impl.DefaultMediaInfoDataLoader">
+        class="ru.push.caudioplayer.core.services.imploDataLoaderService">
     <constructor-arg ref="mediaPlayerFactory"/>
   </bean>
 

@@ -7,7 +7,7 @@ import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
-import ru.push.caudioplayer.core.mediaplayer.helpers.MediaInfoDataLoader;
+import ru.push.caudioplayer.core.services.MediaInfoDataLoaderService;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaSourceType;
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
@@ -41,7 +41,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   @Autowired
   private AppConfigurationService appConfigurationService;
   @Autowired
-  private MediaInfoDataLoader mediaInfoDataLoader;
+  private MediaInfoDataLoaderService mediaInfoDataLoaderService;
 
   private MediaInfoData currentTrackInfoData;
 
@@ -230,7 +230,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
         if (mediaMeta != null) {
           MediaSourceType sourceType = (currentTrackInfoData.getSourceType() != null) ?
               currentTrackInfoData.getSourceType() : MediaSourceType.FILE;
-          mediaInfoDataLoader.fillMediaInfoFromMediaMeta(currentTrackInfoData, mediaMeta, sourceType);
+          mediaInfoDataLoaderService.fillMediaInfoFromMediaMeta(currentTrackInfoData, mediaMeta, sourceType);
           mediaMeta.release();
         } else {
           LOG.error("Media info is null!");

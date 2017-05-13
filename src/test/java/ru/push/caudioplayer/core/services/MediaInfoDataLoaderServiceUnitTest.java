@@ -1,4 +1,4 @@
-package ru.push.caudioplayer.core.mediaplayer.helpers;
+package ru.push.caudioplayer.core.services;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.ClassPathResource;
@@ -7,9 +7,10 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
-import ru.push.caudioplayer.core.mediaplayer.helpers.impl.DefaultMediaInfoDataLoader;
+import ru.push.caudioplayer.core.services.impl.DefaultMediaInfoDataLoaderService;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaSourceType;
+import ru.push.caudioplayer.core.services.MediaInfoDataLoaderService;
 import uk.co.caprica.vlcj.discovery.NativeDiscovery;
 
 import java.io.IOException;
@@ -20,12 +21,12 @@ import static org.testng.Assert.*;
  * @author push <mez.e.s@yandex.ru>
  * @date 4/2/17
  */
-public class MediaInfoDataLoaderUnitTest {
+public class MediaInfoDataLoaderServiceUnitTest {
   private static final String[] MEDIA_PLAYER_FACTORY_ARGS = new String[] {
       "--quiet"
   };
 
-  private static MediaInfoDataLoader mediaInfoDataLoader;
+  private static MediaInfoDataLoaderService mediaInfoDataLoaderService;
   private static CustomMediaPlayerFactory mediaPlayerFactory;
 
   @DataProvider
@@ -59,7 +60,7 @@ public class MediaInfoDataLoaderUnitTest {
   @BeforeClass
   public static void setUpClass() {
     mediaPlayerFactory = new CustomMediaPlayerFactory(MEDIA_PLAYER_FACTORY_ARGS);
-    mediaInfoDataLoader = new DefaultMediaInfoDataLoader(mediaPlayerFactory);
+    mediaInfoDataLoaderService = new DefaultMediaInfoDataLoaderService(mediaPlayerFactory);
     new NativeDiscovery().discover();     // discover libvlc native libraries
   }
 
@@ -71,7 +72,7 @@ public class MediaInfoDataLoaderUnitTest {
   @Test(dataProvider = "correctMediaFilesData")
   public void testLoadFromFile(String mediaFilePath, String expectedArtist, String expectedAlbum,
                                String expectedTitle) throws Exception {
-    MediaInfoData mediaInfoData = mediaInfoDataLoader.load(mediaFilePath, MediaSourceType.FILE);
+    MediaInfoData mediaInfoData = mediaInfoDataLoaderService.load(mediaFilePath, MediaSourceType.FILE);
 
     assertEquals(mediaInfoData.getTrackPath(), mediaFilePath, "Unexpected track path.");
     assertEquals(mediaInfoData.getArtist(), expectedArtist, "Unexpected artist.");
@@ -82,7 +83,7 @@ public class MediaInfoDataLoaderUnitTest {
 
   @Test(dataProvider = "correctMediaHttpStreamsData")
   public void testLoadFromHttpStream(String mediaHttpStreamPath, String expectedStationName) throws Exception {
-    MediaInfoData mediaInfoData = mediaInfoDataLoader.load(mediaHttpStreamPath, MediaSourceType.HTTP_STREAM);
+    MediaInfoData mediaInfoData = mediaInfoDataLoaderService.load(mediaHttpStreamPath, MediaSourceType.HTTP_STREAM);
 
     assertEquals(mediaInfoData.getTrackPath(), mediaHttpStreamPath, "Unexpected track path.");
     assertTrue(StringUtils.isNotEmpty(mediaInfoData.getArtist()), "Artist field must not be empty.");

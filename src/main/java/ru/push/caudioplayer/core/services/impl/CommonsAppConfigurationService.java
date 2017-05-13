@@ -10,7 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import ru.push.caudioplayer.core.mediaplayer.helpers.MediaInfoDataLoader;
+import ru.push.caudioplayer.core.services.MediaInfoDataLoaderService;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaSourceType;
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
@@ -31,7 +31,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
   private static final String UNTITLED_PLAYLIST_NAME = "Untitled";
 
   @Autowired
-  private MediaInfoDataLoader mediaInfoDataLoader;
+  private MediaInfoDataLoaderService mediaInfoDataLoaderService;
 
   private final FileBasedConfigurationBuilder<XMLConfiguration> configurationBuilder;
   private XMLConfiguration configuration;
@@ -110,7 +110,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
                   MediaSourceType sourceType = MediaSourceType.valueOf(
                       StringUtils.upperCase((String) trackNode.getAttributes().getOrDefault("sourceType", "FILE"))
                   );
-                  return mediaInfoDataLoader.load(trackPath, sourceType);
+                  return mediaInfoDataLoaderService.load(trackPath, sourceType);
                 }).collect(Collectors.toList());
             return new PlaylistData(playlistName, playlistTracks);
           }).collect(Collectors.toList());

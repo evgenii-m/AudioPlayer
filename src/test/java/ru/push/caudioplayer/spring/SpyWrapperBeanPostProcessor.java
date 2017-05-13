@@ -10,7 +10,7 @@ import ru.push.caudioplayer.core.facades.impl.DefaultAudioPlayerFacade;
 import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
 import ru.push.caudioplayer.core.mediaplayer.components.impl.DefaultCustomAudioPlayerComponent;
 import ru.push.caudioplayer.core.mediaplayer.components.impl.DefaultCustomPlaylistComponent;
-import ru.push.caudioplayer.core.mediaplayer.helpers.impl.DefaultMediaInfoDataLoader;
+import ru.push.caudioplayer.core.services.impl.DefaultMediaInfoDataLoaderService;
 import ru.push.caudioplayer.core.services.impl.CommonsAppConfigurationService;
 
 import java.util.Arrays;
@@ -28,7 +28,7 @@ public class SpyWrapperBeanPostProcessor implements BeanPostProcessor {
       DefaultCustomAudioPlayerComponent.class,
       DefaultCustomPlaylistComponent.class,
       CommonsAppConfigurationService.class,
-      DefaultMediaInfoDataLoader.class,
+      DefaultMediaInfoDataLoaderService.class,
       DefaultAudioPlayerFacade.class
   );
 
