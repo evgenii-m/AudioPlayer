@@ -6,5 +6,5 @@ package ru.push.caudioplayer.core.mediaplayer.lastfm;
  */
 public interface LastFmService {
 
-  void updateNowPlaying();
+  void updateNowPlaying(String artistName, String trackName, LastFmUserData userData);
 }
