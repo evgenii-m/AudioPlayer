@@ -25,4 +25,6 @@ public interface AppConfigurationService {
 
   void savePlaylists(@NotNull List<PlaylistData> playlistsData, @NotNull String activePlaylistName,
                      @NotNull String displayedPlaylistName);
+
+  void saveLastFmUserData(@NotNull String username, @NotNull String password);
 }

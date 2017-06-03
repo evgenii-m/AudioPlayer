@@ -94,4 +94,11 @@ public class AppConfigurationServiceManuallyTest {
     appConfigurationService.savePlaylists(playlists, activePlaylist.getName(), displayedPlaylist.getName());
     assertTrue(true);
   }
+
+  @Test
+  public void testSaveLastFmUserData() {
+    String username = "testUsername";
+    String password = "testPassword";
+    appConfigurationService.saveLastFmUserData(username, password);
+  }
 }

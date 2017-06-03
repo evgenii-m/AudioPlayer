@@ -21,6 +21,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ru.push.caudioplayer.core.services.ServicesConstants.*;
+
 /**
  * @author push <mez.e.s@yandex.ru>
  * @date 2/23/17
@@ -45,8 +47,8 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
 
     try {
       configuration = configurationBuilder.getConfiguration();
-    } catch (ConfigurationException ex) {
-      LOG.error("Exception occurred when configuration load, will be created default configuration file.", ex);
+    } catch (ConfigurationException e) {
+      LOG.error("Exception occurred when configuration load, will be created default configuration file.", e);
       createDefaultConfiguration();
     }
   }
@@ -57,20 +59,19 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
 
   private void createDefaultConfiguration() {
     configuration = new XMLConfiguration();
-    configuration.getNodeModel().setRootNode(
-        new ImmutableNode.Builder().name("configuration").create()
-    );
-    saveConfiguration();
+    configuration.addProperty(CONF_ROOT_NODE, new Object());
+    try {
+      configurationBuilder.save();
+      configuration = configurationBuilder.getConfiguration();
+    } catch (ConfigurationException e) {
+      LOG.error("Exception occurred when create default configuration.", e);
+    }
   }
 
   private ImmutableNode getConfigurationRootChildNode(String nodeName) {
     return configuration.getNodeModel().getRootNode().getChildren().stream()
         .filter(node -> node.getNodeName().equals(nodeName)).findFirst()
         .orElse(null);
-  }
-
-  private ImmutableNode getRootNode() {
-    return configuration.getNodeModel().getRootNode();
   }
 
   @Override
@@ -125,44 +126,14 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
 
   @Override
   public void saveActivePlaylist(@NotNull String activePlaylistName) {
-    setActivePlaylistInConfiguration(activePlaylistName);
+    configuration.setProperty(ACTIVE_PLAYLIST_NAME_NODE, activePlaylistName);
     saveConfiguration();
-  }
-
-  private void setActivePlaylistInConfiguration(@NotNull String activePlaylistName) {
-    ImmutableNode activePlaylistNode = getConfigurationRootChildNode("activePlaylist");
-    ImmutableNode rootNode = (activePlaylistNode != null) ?
-        getRootNode().replaceChild(
-            activePlaylistNode, activePlaylistNode.setValue(activePlaylistName)
-        ) :
-        getRootNode().addChild(
-            new ImmutableNode.Builder()
-                .name("activePlaylist")
-                .value(activePlaylistName)
-                .create()
-        );
-    configuration.getNodeModel().setRootNode(rootNode);
   }
 
   @Override
   public void saveDisplayedPlaylist(@NotNull String displayedPlaylistName) {
-    setDisplayedPlaylistInConfiguration(displayedPlaylistName);
+    configuration.setProperty(DISPLAYED_PLAYLIST_NAME_NODE, displayedPlaylistName);
     saveConfiguration();
-  }
-
-  private void setDisplayedPlaylistInConfiguration(@NotNull String displayedPlaylistName) {
-    ImmutableNode displayedPlaylistNode = getConfigurationRootChildNode("displayedPlaylist");
-    ImmutableNode rootNode = (displayedPlaylistNode != null) ?
-        getRootNode().replaceChild(
-            displayedPlaylistNode, displayedPlaylistNode.setValue(displayedPlaylistName)
-        ) :
-        getRootNode().addChild(
-            new ImmutableNode.Builder()
-                .name("displayedPlaylist")
-                .value(displayedPlaylistName)
-                .create()
-        );
-    configuration.getNodeModel().setRootNode(rootNode);
   }
 
   @Override
@@ -206,8 +177,15 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
                             @NotNull String displayedPlaylistName)
   {
     setPlaylistsInConfiguration(playlistsData);
-    setActivePlaylistInConfiguration(activePlaylistName);
-    setDisplayedPlaylistInConfiguration(displayedPlaylistName);
+    configuration.setProperty(ACTIVE_PLAYLIST_NAME_NODE, activePlaylistName);
+    configuration.setProperty(DISPLAYED_PLAYLIST_NAME_NODE, displayedPlaylistName);
+    saveConfiguration();
+  }
+
+  @Override
+  public void saveLastFmUserData(@NotNull String username, @NotNull String password) {
+    configuration.setProperty(LASTFM_USERNAME_NODE, username);
+    configuration.setProperty(LASTFM_PASSWORD_NODE, password);
     saveConfiguration();
   }
 
