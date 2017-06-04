@@ -1,12 +1,16 @@
 package ru.push.caudioplayer.core.services;
 
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaSourceType;
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 import ru.push.caudioplayer.core.services.impl.CommonsAppConfigurationService;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,19 +30,16 @@ public class AppConfigurationServiceManuallyTest {
   private static final String PLAYLIST_1_NAME = "playlist1";
   private static final String PLAYLIST_2_NAME = "playlist2";
   private static final String PLAYLIST_3_NAME = "playlist3";
+  private static final String LASTFM_USERNAME = "testUsername";
+  private static final String LASTFM_PASSWORD = "testPassword";
 
-  private final AppConfigurationService appConfigurationService;
+  private static AppConfigurationService appConfigurationService;
+  private static PlaylistData displayedPlaylist;
+  private static PlaylistData activePlaylist;
+  private static List<PlaylistData> playlists;
 
-  private PlaylistData displayedPlaylist;
-  private PlaylistData activePlaylist;
-  private List<PlaylistData> playlists;
-
-  AppConfigurationServiceManuallyTest() {
-    appConfigurationService = new CommonsAppConfigurationService(CONFIGURATION_FILE_NAME);
-  }
-
-  @BeforeMethod
-  public void setUp() throws Exception {
+  @BeforeClass
+  public static void setUpClass() throws Exception {
     PlaylistData playlist1 = new PlaylistData();
     playlist1.setName(PLAYLIST_1_NAME);
     playlist1.setTracks(
@@ -69,36 +70,45 @@ public class AppConfigurationServiceManuallyTest {
     playlists = Arrays.asList(playlist1, playlist2, playlist3);
     activePlaylist = playlist1;
     displayedPlaylist = playlist3;
+
+    try {
+      Files.delete(Paths.get(CONFIGURATION_FILE_NAME));
+    } catch (NoSuchFileException e) {
+      // correct situation - continue
+    } catch (IOException e) {
+      fail("Exception when delete test configuration file", e);
+    }
+
+    appConfigurationService = new CommonsAppConfigurationService(CONFIGURATION_FILE_NAME);
   }
 
   @Test
   public void testSaveActivePlaylist() {
-    appConfigurationService.saveActivePlaylist(activePlaylist.getName());
+    appConfigurationService.saveActivePlaylist(activePlaylist);
     assertTrue(true);
   }
 
   @Test
   public void testSaveDisplayedPlaylist() {
-    appConfigurationService.saveDisplayedPlaylist(displayedPlaylist.getName());
+    appConfigurationService.saveDisplayedPlaylist(displayedPlaylist);
     assertTrue(true);
   }
 
   @Test
-  public void testSavePlaylists() {
-    appConfigurationService.savePlaylists(playlists);
+  public void testSaveNewPlaylist() {
+    appConfigurationService.saveNewPlaylist(activePlaylist);
     assertTrue(true);
   }
 
   @Test
   public void testSaveAllPlaylists() {
-    appConfigurationService.savePlaylists(playlists, activePlaylist.getName(), displayedPlaylist.getName());
+    appConfigurationService.saveAllPlaylists(playlists, activePlaylist, displayedPlaylist);
     assertTrue(true);
   }
 
   @Test
   public void testSaveLastFmUserData() {
-    String username = "testUsername";
-    String password = "testPassword";
-    appConfigurationService.saveLastFmUserData(username, password);
+    appConfigurationService.saveLastFmUserData(LASTFM_USERNAME, LASTFM_PASSWORD);
+    assertTrue(true);
   }
 }

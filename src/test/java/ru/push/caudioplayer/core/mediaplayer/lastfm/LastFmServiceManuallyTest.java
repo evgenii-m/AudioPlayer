@@ -14,16 +14,18 @@ import ru.push.caudioplayer.core.mediaplayer.lastfm.impl.DefaultLastFmService;
 public class LastFmServiceManuallyTest {
 
   private final LastFmService lastFmService;
+//  private final LastFmUserData userData;
 
   LastFmServiceManuallyTest() {
     lastFmService = new DefaultLastFmService();
+//    userData = new LastFmUserData();
   }
 
   @Test
   public void testUpdateNowPlaying() {
     String artistName = "The Beatles";
-//    String trackTitle =
-    lastFmService.updateNowPlaying();
+    String trackTitle = "Yellow Submarine";
+//    lastFmService.updateNowPlaying();
   }
 
 }

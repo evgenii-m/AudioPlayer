@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface CustomPlaylistComponent extends NativePlayerComponent {
 
-  void loadPlaylists(List<PlaylistData> playlists, String activePlaylistName, String displayedPlaylistName);
+  boolean loadPlaylists(List<PlaylistData> playlists, String activePlaylistName, String displayedPlaylistName);
 
   List<PlaylistData> getPlaylists();
 
@@ -20,7 +20,7 @@ public interface CustomPlaylistComponent extends NativePlayerComponent {
 
   boolean deletePlaylist(String playlistName);
 
-  void renamePlaylist(String actualPlaylistName, String newPlaylistName);
+  PlaylistData renamePlaylist(String actualPlaylistName, String newPlaylistName);
 
   PlaylistData getActivePlaylist();
 
@@ -42,9 +42,9 @@ public interface CustomPlaylistComponent extends NativePlayerComponent {
 
   MediaInfoData playPrevTrack();
 
-  List<PlaylistData> addFilesToPlaylist(String playlistName, List<File> files);
+  PlaylistData addFilesToPlaylist(String playlistName, List<File> files);
 
-  List<PlaylistData> deleteItemsFromPlaylist(String playlistName, List<Integer> itemsIndexes);
+  PlaylistData deleteItemsFromPlaylist(String playlistName, List<Integer> itemsIndexes);
 
-  List<PlaylistData> addLocationsToPlaylist(String playlistName, List<String> locations);
+  PlaylistData addLocationsToPlaylist(String playlistName, List<String> locations);
 }

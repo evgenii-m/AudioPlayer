@@ -17,14 +17,14 @@ public interface AppConfigurationService {
 
   List<PlaylistData> getPlaylists();
 
-  void saveActivePlaylist(@NotNull String activePlaylistName);
+  void saveActivePlaylist(PlaylistData activePlaylist) throws IllegalArgumentException;
 
-  void saveDisplayedPlaylist(@NotNull String displayedPlaylistName);
+  void saveDisplayedPlaylist(PlaylistData displayedPlaylist) throws IllegalArgumentException;
 
-  void savePlaylists(@NotNull List<PlaylistData> playlistsData);
+  void saveNewPlaylist(PlaylistData playlistData) throws IllegalArgumentException;
 
-  void savePlaylists(@NotNull List<PlaylistData> playlistsData, @NotNull String activePlaylistName,
-                     @NotNull String displayedPlaylistName);
+  void saveAllPlaylists(List<PlaylistData> playlistsData, PlaylistData activePlaylist, PlaylistData displayedPlaylist)
+      throws IllegalArgumentException;
 
-  void saveLastFmUserData(@NotNull String username, @NotNull String password);
+  void saveLastFmUserData(@NotNull String username, @NotNull String password)  throws IllegalArgumentException;
 }

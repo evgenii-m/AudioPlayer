@@ -47,7 +47,9 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
   }
 
   @Override
-  public void loadPlaylists(List<PlaylistData> playlists, String activePlaylistName, String displayedPlaylistName) {
+  public boolean loadPlaylists(List<PlaylistData> playlists, String activePlaylistName, String displayedPlaylistName) {
+    boolean loadStatus;   // if true - all right, if false - with errors and need refresh config file
+
     if (CollectionUtils.isNotEmpty(playlists)) {
       this.playlists = playlists;
       boolean activeResult = setActivePlaylist(activePlaylistName, 0);
@@ -59,6 +61,7 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
       if (!displayedResult) {
         displayedPlaylist = playlists.get(0);
       }
+      loadStatus = activeResult && displayedResult;
 
     } else {
       LOG.warn("Attempts to load an empty playlists!");
@@ -67,7 +70,10 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
       activePlaylist = newPlaylist;
       trackPosition = 0;
       displayedPlaylist = newPlaylist;
+      loadStatus = false;
     }
+
+    return loadStatus;
   }
 
   @Override
@@ -111,16 +117,17 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
   }
 
   @Override
-  public void renamePlaylist(String actualPlaylistName, String newPlaylistName) {
+  public PlaylistData renamePlaylist(String actualPlaylistName, String newPlaylistName) {
     PlaylistData playlistData = IterableUtils.find(
         playlists, playlist -> actualPlaylistName.equals(playlist.getName())
     );
     if (playlistData == null) {
       LOG.info("Playlist with name '" + actualPlaylistName + "' not found, rename failed.");
-      return;
+      return null;
     }
     // TODO: add validation for playlist name
     playlistData.setName(newPlaylistName);
+    return playlistData;
   }
 
   @Override
@@ -230,27 +237,27 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
   }
 
   @Override
-  public List<PlaylistData> addFilesToPlaylist(String playlistName, List<File> files) {
+  public PlaylistData addFilesToPlaylist(String playlistName, List<File> files) {
     PlaylistData playlist = getPlaylist(playlistName);
     List<String> mediaPaths = files.stream()
         .map(File::getAbsolutePath)
         .collect(Collectors.toList());
     List<MediaInfoData> mediaInfoList = mediaInfoDataLoaderService.load(mediaPaths, MediaSourceType.FILE);
     playlist.getTracks().addAll(mediaInfoList);
-    return getPlaylists();
+    return playlist;
   }
 
   @Override
-  public List<PlaylistData> deleteItemsFromPlaylist(String playlistName, List<Integer> itemsIndexes) {
+  public PlaylistData deleteItemsFromPlaylist(String playlistName, List<Integer> itemsIndexes) {
     PlaylistData playlist = getPlaylist(playlistName);
     itemsIndexes.stream()
         .filter(itemIndex -> (itemIndex >= 0) && (itemIndex < playlist.getTracks().size()))
         .forEach(itemIndex -> playlist.getTracks().remove(itemIndex.intValue()));
-    return getPlaylists();
+    return playlist;
   }
 
   @Override
-  public List<PlaylistData> addLocationsToPlaylist(String playlistName, List<String> locations) {
+  public PlaylistData addLocationsToPlaylist(String playlistName, List<String> locations) {
     PlaylistData playlist = getPlaylist(playlistName);
     List<String> mediaPaths = locations.stream()
         .map(location -> {
@@ -266,7 +273,7 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
         .collect(Collectors.toList());
     List<MediaInfoData> mediaInfoList = mediaInfoDataLoaderService.load(mediaPaths, MediaSourceType.HTTP_STREAM);
     playlist.getTracks().addAll(mediaInfoList);
-    return getPlaylists();
+    return playlist;
   }
 
 }
