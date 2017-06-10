@@ -69,7 +69,7 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
 
     doNothing().when(appConfigurationService).saveActivePlaylist(any(PlaylistData.class));
     doNothing().when(appConfigurationService).saveDisplayedPlaylist(any(PlaylistData.class));
-    doNothing().when(appConfigurationService).saveNewPlaylist(any(PlaylistData.class));
+    doNothing().when(appConfigurationService).savePlaylist(any(PlaylistData.class));
     doNothing().when(appConfigurationService).saveAllPlaylists(anyListOf(PlaylistData.class),
         any(PlaylistData.class), any(PlaylistData.class));
     doReturn(Boolean.TRUE).when(playerComponent).playMedia(anyString());
@@ -155,7 +155,7 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
     actualPlaylistsSize = audioPlayerFacade.getPlaylists().size();
     assertEquals(actualPlaylistsSize, originalPlaylistsSize, "Expected decrease in playlists size.");
 
-    verify(appConfigurationService, times(2)).saveNewPlaylist(any(PlaylistData.class));
+    verify(appConfigurationService, times(2)).savePlaylist(any(PlaylistData.class));
     verify(appConfigurationService, times(1)).saveAllPlaylists(anyListOf(PlaylistData.class),
         any(PlaylistData.class), any(PlaylistData.class));
   }
@@ -217,7 +217,7 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
     actualTracklistSize = displayedPlaylist.getTracks().size();
     assertEquals(actualTracklistSize, expectedPlaylistSize, "Unexpected tracklist size after delete items.");
 
-    verify(appConfigurationService, times(3)).saveNewPlaylist(any(PlaylistData.class));
+    verify(appConfigurationService, times(3)).savePlaylist(any(PlaylistData.class));
     verify(eventListener, times(3)).changedPlaylist(displayedPlaylist);
   }
 

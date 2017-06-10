@@ -95,8 +95,17 @@ public class AppConfigurationServiceManuallyTest {
   }
 
   @Test
-  public void testSaveNewPlaylist() {
-    appConfigurationService.saveNewPlaylist(activePlaylist);
+  public void testAddPlaylist() {
+    appConfigurationService.savePlaylist(playlists.get(0));
+    assertTrue(true);
+  }
+
+  @Test
+  public void testUpdatePlaylist() {
+    appConfigurationService.savePlaylist(playlists.get(0));
+    appConfigurationService.savePlaylist(playlists.get(1));
+    playlists.get(0).setTracks(playlists.get(2).getTracks());
+    appConfigurationService.savePlaylist(playlists.get(0));
     assertTrue(true);
   }
 

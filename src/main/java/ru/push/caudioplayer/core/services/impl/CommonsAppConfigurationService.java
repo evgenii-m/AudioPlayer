@@ -2,7 +2,6 @@ package ru.push.caudioplayer.core.services.impl;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IterableUtils;
-import org.apache.commons.collections4.Predicate;
 import org.apache.commons.configuration2.XMLConfiguration;
 import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
@@ -12,14 +11,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.w3c.dom.Node;
 import ru.push.caudioplayer.core.services.MediaInfoDataLoaderService;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaSourceType;
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 import ru.push.caudioplayer.core.services.AppConfigurationService;
 
-import javax.validation.constraints.NotNull;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -138,8 +136,19 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
     saveConfiguration();
   }
 
+  private List<ImmutableNode> convertPlaylistTracksToNodes(List<MediaInfoData> tracks) {
+    return tracks.stream()
+        .map(trackData ->
+            new ImmutableNode.Builder()
+                .name(PLAYLIST_TRACK_NODE_NAME)
+                .addAttribute(PLAYLIST_TRACK_NODE_ATTR_SOURCE_TYPE, trackData.getSourceType().name())
+                .value(trackData.getTrackPath())
+                .create()
+        ).collect(Collectors.toList());
+  }
+
   @Override
-  public void saveNewPlaylist(PlaylistData playlistData) throws IllegalArgumentException {
+  public void savePlaylist(PlaylistData playlistData) throws IllegalArgumentException {
     if (playlistData == null) {
       throw new IllegalArgumentException("Playlist is null, saving aborted!");
     }
@@ -151,26 +160,33 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
           playlistNode -> playlistData.getName().equals(playlistNode.getAttributes().get(PLAYLIST_NODE_ATTR_NAME))
       );
 
-      if (playlistIndex >= 0) { // changing existing playlist
-        configuration.clearTree(PLAYLIST_NODE + "(" + playlistIndex + ")");
+      if (playlistIndex >= 0) {
+        // changing existing playlist
+        String playlistNode = PLAYLIST_NODE + "(" + playlistIndex + ")";
+        configuration.addNodes(playlistNode, convertPlaylistTracksToNodes(playlistData.getTracks()));
+        saveConfiguration();
+        return;
       }
     }
 
+    // creating new playlist
     ImmutableNode newPlaylistNode = new ImmutableNode.Builder()
         .name(PLAYLIST_NODE_NAME)
         .addAttribute(PLAYLIST_NODE_ATTR_NAME, playlistData.getName())
-        .addChildren(
-            playlistData.getTracks().stream()
-                .map(trackData ->
-                    new ImmutableNode.Builder()
-                        .name(PLAYLIST_TRACK_NODE_NAME)
-                        .addAttribute(PLAYLIST_TRACK_NODE_ATTR_SOURCE_TYPE, trackData.getSourceType().name())
-                        .value(trackData.getTrackPath())
-                        .create()
-                ).collect(Collectors.toList())
-        ).create();
+        .addChildren(convertPlaylistTracksToNodes(playlistData.getTracks()))
+        .create();
     configuration.addNodes(PLAYLISTS_SET_NODE, Collections.singletonList(newPlaylistNode));
     saveConfiguration();
+  }
+
+  @Override
+  public void renamePlaylist(PlaylistData playlistData) throws IllegalArgumentException {
+
+  }
+
+  @Override
+  public void deletePlaylist(PlaylistData playlistData) throws IllegalArgumentException {
+
   }
 
   private void setPlaylistsInConfiguration(List<PlaylistData> playlistsData) throws IllegalArgumentException {

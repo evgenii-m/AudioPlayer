@@ -21,7 +21,11 @@ public interface AppConfigurationService {
 
   void saveDisplayedPlaylist(PlaylistData displayedPlaylist) throws IllegalArgumentException;
 
-  void saveNewPlaylist(PlaylistData playlistData) throws IllegalArgumentException;
+  void savePlaylist(PlaylistData playlistData) throws IllegalArgumentException;
+
+  void renamePlaylist(PlaylistData playlistData) throws IllegalArgumentException;
+
+  void deletePlaylist(PlaylistData playlistData) throws IllegalArgumentException;
 
   void saveAllPlaylists(List<PlaylistData> playlistsData, PlaylistData activePlaylist, PlaylistData displayedPlaylist)
       throws IllegalArgumentException;

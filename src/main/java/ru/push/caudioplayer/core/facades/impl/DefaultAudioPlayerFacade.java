@@ -124,7 +124,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   public PlaylistData createNewPlaylist() {
     PlaylistData newPlaylist = playlistComponent.createNewPlaylist();
     eventListeners.forEach(listener -> listener.createdNewPlaylist(newPlaylist));
-    appConfigurationService.saveNewPlaylist(newPlaylist);
+    appConfigurationService.savePlaylist(newPlaylist);
     return newPlaylist;
   }
 
@@ -149,14 +149,14 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   @Override
   public void renamePlaylist(String actualPlaylistName, String newPlaylistName) {
     PlaylistData changedPlaylist = playlistComponent.renamePlaylist(actualPlaylistName, newPlaylistName);
-    appConfigurationService.saveNewPlaylist(changedPlaylist);
+    appConfigurationService.savePlaylist(changedPlaylist);
   }
 
   @Override
   public void addFilesToPlaylist(List<File> files) {
     PlaylistData displayedPlaylist = playlistComponent.getDisplayedPlaylist();
     PlaylistData changedPlaylist = playlistComponent.addFilesToPlaylist(displayedPlaylist.getName(), files);
-    appConfigurationService.saveNewPlaylist(changedPlaylist);
+    appConfigurationService.savePlaylist(changedPlaylist);
     eventListeners.forEach(listener -> listener.changedPlaylist(displayedPlaylist));
   }
 
@@ -164,7 +164,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   public void deleteItemsFromPlaylist(List<Integer> itemsIndexes) {
     PlaylistData displayedPlaylist = playlistComponent.getDisplayedPlaylist();
     PlaylistData changedPlaylist = playlistComponent.deleteItemsFromPlaylist(displayedPlaylist.getName(), itemsIndexes);
-    appConfigurationService.saveNewPlaylist(changedPlaylist);
+    appConfigurationService.savePlaylist(changedPlaylist);
     eventListeners.forEach(listener -> listener.changedPlaylist(displayedPlaylist));
   }
 
@@ -172,7 +172,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   public void addLocationsToPlaylist(List<String> locations) {
     PlaylistData displayedPlaylist = playlistComponent.getDisplayedPlaylist();
     PlaylistData changedPlaylist = playlistComponent.addLocationsToPlaylist(displayedPlaylist.getName(), locations);
-    appConfigurationService.saveNewPlaylist(changedPlaylist);
+    appConfigurationService.savePlaylist(changedPlaylist);
     eventListeners.forEach(listener -> listener.changedPlaylist(displayedPlaylist));
   }
 
