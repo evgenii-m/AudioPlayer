@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author push <mez.e.s@yandex.ru>
@@ -12,6 +13,7 @@ import java.util.List;
 public class PlaylistData {
   private static final String DEFAULT_PLAYLIST_NAME = "New playlist";
 
+  private final String uid;
   private String name;
   private List<MediaInfoData> tracks;
 
@@ -26,12 +28,23 @@ public class PlaylistData {
 
   public PlaylistData(String name) {
     this(name, new ArrayList<>());
-    this.name = name;
   }
 
   public PlaylistData(String name, List<MediaInfoData> tracks) {
+    this.uid = UUID.randomUUID().toString();
     this.name = name;
     this.tracks = tracks;
+  }
+
+
+  public PlaylistData(String uid, String name, List<MediaInfoData> tracks) {
+    this.uid = uid;
+    this.name = name;
+    this.tracks = tracks;
+  }
+
+  public String getUid() {
+    return uid;
   }
 
   public String getName() {

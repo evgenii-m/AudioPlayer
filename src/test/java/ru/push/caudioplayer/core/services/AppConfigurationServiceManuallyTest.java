@@ -110,6 +110,23 @@ public class AppConfigurationServiceManuallyTest {
   }
 
   @Test
+  public void testRenamePlaylist() {
+    appConfigurationService.savePlaylist(activePlaylist);
+    appConfigurationService.savePlaylist(displayedPlaylist);
+    appConfigurationService.renamePlaylist(activePlaylist, "new playlist name");
+    assertTrue(true);
+  }
+
+  @Test
+  public void testDeletePlaylist() {
+    appConfigurationService.savePlaylist(playlists.get(0));
+    appConfigurationService.savePlaylist(playlists.get(1));
+    appConfigurationService.savePlaylist(playlists.get(2));
+    appConfigurationService.deletePlaylist(playlists.get(1));
+    assertTrue(true);
+  }
+
+  @Test
   public void testSaveAllPlaylists() {
     appConfigurationService.saveAllPlaylists(playlists, activePlaylist, displayedPlaylist);
     assertTrue(true);

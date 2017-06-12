@@ -16,7 +16,9 @@ public class ServicesConstants {
   public static final String DISPLAYED_PLAYLIST_NAME_NODE = PLAYLISTS_SET_NODE + ".displayedName";
   public static final String PLAYLIST_NODE_NAME = "playlist";
   public static final String PLAYLIST_NODE = PLAYLISTS_SET_NODE + "." + PLAYLIST_NODE_NAME;
+  public static final String PLAYLIST_NODE_ATTR_UID = "uid";
   public static final String PLAYLIST_NODE_ATTR_NAME = "name";
+  public static final String PLAYLIST_NODE_ATTR_POSITION = "position";
   public static final String PLAYLIST_TRACK_NODE_NAME = "track";
   public static final String PLAYLIST_TRACK_NODE = PLAYLIST_NODE + "." + PLAYLIST_TRACK_NODE_NAME;
   public static final String PLAYLIST_TRACK_NODE_ATTR_SOURCE_TYPE = "sourceType";

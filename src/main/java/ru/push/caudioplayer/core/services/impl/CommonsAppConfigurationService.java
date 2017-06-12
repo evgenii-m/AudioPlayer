@@ -11,7 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.w3c.dom.Node;
+import org.springframework.util.Assert;
 import ru.push.caudioplayer.core.services.MediaInfoDataLoaderService;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaSourceType;
@@ -20,6 +20,7 @@ import ru.push.caudioplayer.core.services.AppConfigurationService;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static ru.push.caudioplayer.core.services.ServicesConstants.*;
@@ -93,6 +94,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
       List<PlaylistData> playlists = playlistsNode.getChildren().stream()
           .filter(playlistNode -> PLAYLIST_NODE_NAME.equals(playlistNode.getNodeName()))
           .map(playlistNode -> {
+            String playlistUid = (String) playlistNode.getAttributes().get(PLAYLIST_NODE_ATTR_UID);
             String playlistName = (String) playlistNode.getAttributes()
                 .getOrDefault(PLAYLIST_NODE_ATTR_NAME, UNTITLED_PLAYLIST_NAME);
             List<MediaInfoData> playlistTracks = playlistNode.getChildren().stream()
@@ -106,7 +108,10 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
                   );
                   return mediaInfoDataLoaderService.load(trackPath, sourceType);
                 }).collect(Collectors.toList());
-            return new PlaylistData(playlistName, playlistTracks);
+
+            return (playlistUid != null) ?
+                new PlaylistData(playlistUid, playlistName, playlistTracks) :
+                new PlaylistData(playlistName, playlistTracks);
           }).collect(Collectors.toList());
       return playlists;
 
@@ -117,26 +122,22 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
   }
 
   @Override
-  public void saveActivePlaylist(PlaylistData activePlaylist) throws IllegalArgumentException {
-    if (activePlaylist == null) {
-      throw new IllegalArgumentException("Active playlist is null, saving aborted!");
-    }
-
+  public void saveActivePlaylist(PlaylistData activePlaylist) {
+    Assert.notNull(activePlaylist);
     configuration.setProperty(ACTIVE_PLAYLIST_NAME_NODE, activePlaylist.getName());
     saveConfiguration();
   }
 
   @Override
-  public void saveDisplayedPlaylist(PlaylistData displayedPlaylist) throws IllegalArgumentException {
-    if (displayedPlaylist == null) {
-      throw new IllegalArgumentException("Displayed playlist is null, saving aborted!");
-    }
-
+  public void saveDisplayedPlaylist(PlaylistData displayedPlaylist) {
+    Assert.notNull(displayedPlaylist);
     configuration.setProperty(DISPLAYED_PLAYLIST_NAME_NODE, displayedPlaylist.getName());
     saveConfiguration();
   }
 
-  private List<ImmutableNode> convertPlaylistTracksToNodes(List<MediaInfoData> tracks) {
+  private List<ImmutableNode> createPlaylistTrackNodes(List<MediaInfoData> tracks) {
+    assert tracks != null;
+
     return tracks.stream()
         .map(trackData ->
             new ImmutableNode.Builder()
@@ -147,99 +148,142 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
         ).collect(Collectors.toList());
   }
 
+  private ImmutableNode createPlaylistNode(PlaylistData playlistData, int playlistPosition) {
+    assert playlistData != null;
+    assert playlistPosition >= 0;
+
+    return new ImmutableNode.Builder()
+        .name(PLAYLIST_NODE_NAME)
+        .addAttribute(PLAYLIST_NODE_ATTR_UID, playlistData.getUid())
+        .addAttribute(PLAYLIST_NODE_ATTR_NAME, playlistData.getName())
+        .addAttribute(PLAYLIST_NODE_ATTR_POSITION, playlistPosition)
+        .addChildren(createPlaylistTrackNodes(playlistData.getTracks()))
+        .create();
+  }
+
   @Override
-  public void savePlaylist(PlaylistData playlistData) throws IllegalArgumentException {
-    if (playlistData == null) {
-      throw new IllegalArgumentException("Playlist is null, saving aborted!");
-    }
+  public void savePlaylist(PlaylistData playlistData) {
+    Assert.notNull(playlistData);
 
     ImmutableNode playlistsNode = getConfigurationRootChildNode(PLAYLISTS_SET_NODE);
+    int playlistPosition = 0;
+
     if ((playlistsNode != null) && CollectionUtils.isNotEmpty(playlistsNode.getChildren())) {
-      int playlistIndex = IterableUtils.indexOf(
+      ImmutableNode playlistNode = IterableUtils.find(
           playlistsNode.getChildren(),
-          playlistNode -> playlistData.getName().equals(playlistNode.getAttributes().get(PLAYLIST_NODE_ATTR_NAME))
+          node -> playlistData.getUid().equals(node.getAttributes().get(PLAYLIST_NODE_ATTR_UID))
       );
 
-      if (playlistIndex >= 0) {
-        // changing existing playlist
-        String playlistNode = PLAYLIST_NODE + "(" + playlistIndex + ")";
-        configuration.addNodes(playlistNode, convertPlaylistTracksToNodes(playlistData.getTracks()));
-        saveConfiguration();
-        return;
+      if (playlistNode != null) {
+        // changing existing playlist - clear node before add new from playlist data and store position
+        playlistPosition = (int) playlistNode.getAttributes().getOrDefault(PLAYLIST_NODE_ATTR_POSITION, 0);
+        int playlistIndex = playlistsNode.getChildren().indexOf(playlistNode);
+        configuration.getNodeModel().clearTree(PLAYLIST_NODE + "(" + playlistIndex + ")", configuration);
+      } else {
+        // creating new playlist - placed on last position
+        playlistPosition = playlistsNode.getChildren().size();
       }
     }
 
-    // creating new playlist
-    ImmutableNode newPlaylistNode = new ImmutableNode.Builder()
-        .name(PLAYLIST_NODE_NAME)
-        .addAttribute(PLAYLIST_NODE_ATTR_NAME, playlistData.getName())
-        .addChildren(convertPlaylistTracksToNodes(playlistData.getTracks()))
-        .create();
+    ImmutableNode newPlaylistNode = createPlaylistNode(playlistData, playlistPosition);
     configuration.addNodes(PLAYLISTS_SET_NODE, Collections.singletonList(newPlaylistNode));
     saveConfiguration();
   }
 
   @Override
-  public void renamePlaylist(PlaylistData playlistData) throws IllegalArgumentException {
+  public void renamePlaylist(PlaylistData playlistData, String newPlaylistName) {
+    Assert.notNull(playlistData);
+    Assert.notNull(newPlaylistName);
 
+    ImmutableNode playlistsNode = getConfigurationRootChildNode(PLAYLISTS_SET_NODE);
+    if (playlistsNode == null) {
+      LOG.error("Playlists node is null");
+      return;
+    }
+
+    int playlistIndex = IterableUtils.indexOf(
+        playlistsNode.getChildren(),
+        node -> playlistData.getUid().equals(node.getAttributes().get(PLAYLIST_NODE_ATTR_UID))
+    );
+    if (playlistIndex < 0) {
+      LOG.warn("Playlist with UID '" + playlistData.getUid() + "' not found in set, renaming aborted.");
+      return;
+    }
+
+    configuration.setProperty(PLAYLIST_NODE + "(" + playlistIndex + ")[@" + PLAYLIST_NODE_ATTR_NAME + "]",
+        newPlaylistName);
+    saveConfiguration();
+  }
+
+  private void refreshPlaylistsPositions() {
+    LOG.debug("refreshPlaylistsPositions start");
+
+    final ImmutableNode playlistsNode = getConfigurationRootChildNode(PLAYLISTS_SET_NODE);
+    Map<Integer, Integer> nodeIdxPositionMap = playlistsNode.getChildren().stream()
+        .collect(Collectors.toMap(
+            node -> playlistsNode.getChildren().indexOf(node),
+            node -> (Integer) node.getAttributes().get(PLAYLIST_NODE_ATTR_POSITION),
+            (e1, e2) -> e1
+        ));
+    final List<Integer> nodeIdxList = nodeIdxPositionMap.entrySet().stream()
+        .sorted((e1, e2) -> Integer.compare(e1.getValue(), e2.getValue()))
+        .map(Map.Entry::getKey)
+        .collect(Collectors.toList());
+    for (int i = 0; i < nodeIdxList.size(); i++) {
+      configuration.setProperty(PLAYLIST_NODE + "(" + nodeIdxList.get(i) + ")[@" + PLAYLIST_NODE_ATTR_POSITION + "]", i);
+    }
+
+    LOG.debug("refreshPlaylistsPositions end");
   }
 
   @Override
-  public void deletePlaylist(PlaylistData playlistData) throws IllegalArgumentException {
+  public void deletePlaylist(PlaylistData playlistData) {
+    Assert.notNull(playlistData);
 
-  }
-
-  private void setPlaylistsInConfiguration(List<PlaylistData> playlistsData) throws IllegalArgumentException {
-    if (playlistsData == null) {
-      throw new IllegalArgumentException("Playlists is null, saving aborted!");
+    ImmutableNode playlistsNode = getConfigurationRootChildNode(PLAYLISTS_SET_NODE);
+    if (playlistsNode == null) {
+      LOG.error("Playlists node is null");
+      return;
     }
 
-    ImmutableNode playlistsNode = getConfigurationRootChildNode("playlists");
-    ImmutableNode rootNode = configuration.getNodeModel().getRootNode().removeChild(playlistsNode);
-    if (playlistsNode != null) {
-      for (ImmutableNode playlistChildNode : playlistsNode.getChildren()) {
-        playlistsNode = playlistsNode.removeChild(playlistChildNode);
-      }
-    } else {
-      LOG.warn("Playlists block not found (save operation)!");
-      playlistsNode = new ImmutableNode.Builder().name("playlists").create();
+    int playlistIndex = IterableUtils.indexOf(
+        playlistsNode.getChildren(),
+        node -> playlistData.getUid().equals(node.getAttributes().get(PLAYLIST_NODE_ATTR_UID))
+    );
+    if (playlistIndex < 0) {
+      LOG.warn("Playlist with UID '" + playlistData.getUid() + "' not found in set, renaming aborted.");
+      return;
     }
 
-    for (PlaylistData playlistData : playlistsData) {
-      ImmutableNode.Builder playlistNodeBuilder = new ImmutableNode.Builder();
-      playlistNodeBuilder.name("playlist")
-          .addAttribute("name", playlistData.getName());
-
-      playlistData.getTracks().forEach(trackData -> {
-        ImmutableNode trackNode = new ImmutableNode.Builder()
-            .name("track")
-            .addAttribute("sourceType", trackData.getSourceType().name())
-            .value(trackData.getTrackPath()).create();
-        playlistNodeBuilder.addChild(trackNode);
-      });
-      playlistsNode = playlistsNode.addChild(playlistNodeBuilder.create());
-    }
-    rootNode = rootNode.addChild(playlistsNode);
-    configuration.getNodeModel().setRootNode(rootNode);
-  }
-
-  public void saveAllPlaylists(List<PlaylistData> playlistsData, PlaylistData activePlaylist,
-                               PlaylistData displayedPlaylist) throws IllegalArgumentException {
-    if ((playlistsData == null) || (activePlaylist == null) || (displayedPlaylist == null)) {
-      throw new IllegalArgumentException("Playlists is invalid");
-    }
-
-    setPlaylistsInConfiguration(playlistsData);
-    configuration.setProperty(ACTIVE_PLAYLIST_NAME_NODE, activePlaylist.getName());
-    configuration.setProperty(DISPLAYED_PLAYLIST_NAME_NODE, displayedPlaylist.getName());
+    configuration.clearTree(PLAYLIST_NODE + "(" + playlistIndex + ")");
+    refreshPlaylistsPositions();  // refresh position attribute for playlist nodes to prevent gaps
     saveConfiguration();
   }
 
   @Override
-  public void saveLastFmUserData(String username, String password) throws IllegalArgumentException {
-    if ((username == null) || (password == null)) {
-      throw new IllegalArgumentException("User data is invalid");
-    }
+  public void saveAllPlaylists(List<PlaylistData> playlistsData, PlaylistData activePlaylist,
+                               PlaylistData displayedPlaylist) {
+    Assert.notNull(playlistsData);
+    Assert.notNull(activePlaylist);
+    Assert.notNull(displayedPlaylist);
+
+    configuration.clearTree(PLAYLISTS_SET_NODE);
+
+    List<ImmutableNode> playlistsNode = playlistsData.stream()
+        .map(playlistData -> createPlaylistNode(playlistData, playlistsData.indexOf(playlistData)))
+        .collect(Collectors.toList());
+    configuration.addNodes(PLAYLISTS_SET_NODE, playlistsNode);
+
+    configuration.setProperty(ACTIVE_PLAYLIST_NAME_NODE, activePlaylist.getName());
+    configuration.setProperty(DISPLAYED_PLAYLIST_NAME_NODE, displayedPlaylist.getName());
+
+    saveConfiguration();
+  }
+
+  @Override
+  public void saveLastFmUserData(String username, String password) {
+    Assert.notNull(username);
+    Assert.notNull(password);
 
     configuration.setProperty(LASTFM_USERNAME_NODE, username);
     configuration.setProperty(LASTFM_PASSWORD_NODE, password);
