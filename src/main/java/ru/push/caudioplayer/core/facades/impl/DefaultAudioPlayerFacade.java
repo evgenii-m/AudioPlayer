@@ -70,9 +70,9 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   @Override
   public void refreshPlaylists() {
     List<PlaylistData> playlists = appConfigurationService.getPlaylists();
-    String activePlaylistName = appConfigurationService.getActivePlaylistName();
-    String displayedPlaylistName = appConfigurationService.getDisplayedPlaylistName();
-    boolean loadStatus = playlistComponent.loadPlaylists(playlists, activePlaylistName, displayedPlaylistName);
+    String activePlaylistUid = appConfigurationService.getActivePlaylistUid();
+    String displayedPlaylistUid = appConfigurationService.getDisplayedPlaylistUid();
+    boolean loadStatus = playlistComponent.loadPlaylists(playlists, activePlaylistUid, displayedPlaylistUid);
 
     if (!loadStatus) {
       appConfigurationService.saveAllPlaylists(
@@ -99,13 +99,13 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   }
 
   @Override
-  public PlaylistData getPlaylist(String playlistName) {
-    return playlistComponent.getPlaylist(playlistName);
+  public PlaylistData getPlaylist(String playlistUid) {
+    return playlistComponent.getPlaylist(playlistUid);
   }
 
   @Override
-  public PlaylistData showPlaylist(String playlistName) {
-    boolean displayedResult = playlistComponent.setDisplayedPlaylist(playlistName);
+  public PlaylistData showPlaylist(String playlistUid) {
+    boolean displayedResult = playlistComponent.setDisplayedPlaylist(playlistUid);
     if (displayedResult) {
       appConfigurationService.saveDisplayedPlaylist(playlistComponent.getDisplayedPlaylist());
     }
@@ -129,33 +129,35 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   }
 
   @Override
-  public boolean deletePlaylist(String playlistName) {
-    PlaylistData requiredPlaylist = getPlaylist(playlistName);
+  public boolean deletePlaylist(String playlistUid) {
+    PlaylistData requiredPlaylist = getPlaylist(playlistUid);
     boolean deleteDisplayed = playlistComponent.getDisplayedPlaylist().equals(requiredPlaylist);
-    boolean deleteResult = playlistComponent.deletePlaylist(playlistName);
+
+    if (playlistComponent.getPlaylists().size() == 1) {
+      PlaylistData newPlaylist = playlistComponent.createNewPlaylist();
+      appConfigurationService.savePlaylist(newPlaylist);
+    }
+
+    boolean deleteResult = playlistComponent.deletePlaylist(playlistUid);
     if (deleteResult) {
       if (deleteDisplayed) {
         eventListeners.forEach(listener -> listener.changedPlaylist(playlistComponent.getDisplayedPlaylist()));
       }
-      appConfigurationService.saveAllPlaylists(
-          playlistComponent.getPlaylists(),
-          playlistComponent.getActivePlaylist(),
-          playlistComponent.getDisplayedPlaylist()
-      );
+      appConfigurationService.deletePlaylist(requiredPlaylist);
     }
     return deleteResult;
   }
 
   @Override
-  public void renamePlaylist(String actualPlaylistName, String newPlaylistName) {
-    PlaylistData changedPlaylist = playlistComponent.renamePlaylist(actualPlaylistName, newPlaylistName);
-    appConfigurationService.savePlaylist(changedPlaylist);
+  public void renamePlaylist(String playlistUid, String newPlaylistName) {
+    PlaylistData changedPlaylist = playlistComponent.renamePlaylist(playlistUid, newPlaylistName);
+    appConfigurationService.renamePlaylist(changedPlaylist);
   }
 
   @Override
   public void addFilesToPlaylist(List<File> files) {
     PlaylistData displayedPlaylist = playlistComponent.getDisplayedPlaylist();
-    PlaylistData changedPlaylist = playlistComponent.addFilesToPlaylist(displayedPlaylist.getName(), files);
+    PlaylistData changedPlaylist = playlistComponent.addFilesToPlaylist(displayedPlaylist.getUid(), files);
     appConfigurationService.savePlaylist(changedPlaylist);
     eventListeners.forEach(listener -> listener.changedPlaylist(displayedPlaylist));
   }
@@ -163,7 +165,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   @Override
   public void deleteItemsFromPlaylist(List<Integer> itemsIndexes) {
     PlaylistData displayedPlaylist = playlistComponent.getDisplayedPlaylist();
-    PlaylistData changedPlaylist = playlistComponent.deleteItemsFromPlaylist(displayedPlaylist.getName(), itemsIndexes);
+    PlaylistData changedPlaylist = playlistComponent.deleteItemsFromPlaylist(displayedPlaylist.getUid(), itemsIndexes);
     appConfigurationService.savePlaylist(changedPlaylist);
     eventListeners.forEach(listener -> listener.changedPlaylist(displayedPlaylist));
   }
@@ -171,14 +173,14 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   @Override
   public void addLocationsToPlaylist(List<String> locations) {
     PlaylistData displayedPlaylist = playlistComponent.getDisplayedPlaylist();
-    PlaylistData changedPlaylist = playlistComponent.addLocationsToPlaylist(displayedPlaylist.getName(), locations);
+    PlaylistData changedPlaylist = playlistComponent.addLocationsToPlaylist(displayedPlaylist.getUid(), locations);
     appConfigurationService.savePlaylist(changedPlaylist);
     eventListeners.forEach(listener -> listener.changedPlaylist(displayedPlaylist));
   }
 
   @Override
-  public void playTrack(String playlistName, int trackPosition) {
-    MediaInfoData trackInfo = playlistComponent.playTrack(playlistName, trackPosition);
+  public void playTrack(String playlistUid, int trackPosition) {
+    MediaInfoData trackInfo = playlistComponent.playTrack(playlistUid, trackPosition);
     playTrack(trackInfo);
   }
 
@@ -206,7 +208,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
     playerComponent.playMedia(resourceUri);
     currentTrackInfoData = trackInfo;
     eventListeners.forEach(listener ->
-        listener.changedTrackPosition(playlistComponent.getActivePlaylist().getName(),
+        listener.changedTrackPosition(playlistComponent.getActivePlaylist().getUid(),
             playlistComponent.getActiveTrackPosition())
     );
   }

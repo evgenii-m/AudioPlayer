@@ -25,17 +25,17 @@ public interface AudioPlayerFacade {
 
   PlaylistData getDisplayedPlaylist();
 
-  PlaylistData getPlaylist(String playlistName);
+  PlaylistData getPlaylist(String playlistUid);
 
-  PlaylistData showPlaylist(String playlistName);
+  PlaylistData showPlaylist(String playlistUid);
 
   PlaylistData showActivePlaylist();
 
   PlaylistData createNewPlaylist();
 
-  boolean deletePlaylist(String playlistName);
+  boolean deletePlaylist(String playlistUid);
 
-  void renamePlaylist(String actualPlaylistName, String newPlaylistName);
+  void renamePlaylist(String playlistUid, String newPlaylistName);
 
   void addFilesToPlaylist(List<File> files);
 
@@ -43,7 +43,7 @@ public interface AudioPlayerFacade {
 
   void addLocationsToPlaylist(List<String> locations);
 
-  void playTrack(String playlistName, int trackPosition);
+  void playTrack(String playlistUid, int trackPosition);
 
   void playCurrentTrack();
 

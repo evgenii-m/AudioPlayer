@@ -11,9 +11,9 @@ import java.util.List;
  */
 public interface AppConfigurationService {
 
-  String getActivePlaylistName();
+  String getActivePlaylistUid();
 
-  String getDisplayedPlaylistName();
+  String getDisplayedPlaylistUid();
 
   List<PlaylistData> getPlaylists();
 
@@ -23,7 +23,7 @@ public interface AppConfigurationService {
 
   void savePlaylist(PlaylistData playlistData);
 
-  void renamePlaylist(PlaylistData playlistData, String newPlaylistName);
+  void renamePlaylist(PlaylistData playlistData);
 
   void deletePlaylist(PlaylistData playlistData);
 

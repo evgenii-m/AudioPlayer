@@ -113,7 +113,8 @@ public class AppConfigurationServiceManuallyTest {
   public void testRenamePlaylist() {
     appConfigurationService.savePlaylist(activePlaylist);
     appConfigurationService.savePlaylist(displayedPlaylist);
-    appConfigurationService.renamePlaylist(activePlaylist, "new playlist name");
+    activePlaylist.setName("new playlist name");
+    appConfigurationService.renamePlaylist(activePlaylist);
     assertTrue(true);
   }
 

@@ -77,13 +77,13 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
   }
 
   @Override
-  public String getActivePlaylistName() {
-    return configuration.getString(ACTIVE_PLAYLIST_NAME_NODE);
+  public String getActivePlaylistUid() {
+    return configuration.getString(ACTIVE_PLAYLIST_UID_NODE);
   }
 
   @Override
-  public String getDisplayedPlaylistName() {
-    return configuration.getString(DISPLAYED_PLAYLIST_NAME_NODE);
+  public String getDisplayedPlaylistUid() {
+    return configuration.getString(DISPLAYED_PLAYLIST_UID_NODE);
   }
 
   @Override
@@ -124,14 +124,14 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
   @Override
   public void saveActivePlaylist(PlaylistData activePlaylist) {
     Assert.notNull(activePlaylist);
-    configuration.setProperty(ACTIVE_PLAYLIST_NAME_NODE, activePlaylist.getName());
+    configuration.setProperty(ACTIVE_PLAYLIST_UID_NODE, activePlaylist.getUid());
     saveConfiguration();
   }
 
   @Override
   public void saveDisplayedPlaylist(PlaylistData displayedPlaylist) {
     Assert.notNull(displayedPlaylist);
-    configuration.setProperty(DISPLAYED_PLAYLIST_NAME_NODE, displayedPlaylist.getName());
+    configuration.setProperty(DISPLAYED_PLAYLIST_UID_NODE, displayedPlaylist.getUid());
     saveConfiguration();
   }
 
@@ -191,9 +191,8 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
   }
 
   @Override
-  public void renamePlaylist(PlaylistData playlistData, String newPlaylistName) {
+  public void renamePlaylist(PlaylistData playlistData) {
     Assert.notNull(playlistData);
-    Assert.notNull(newPlaylistName);
 
     ImmutableNode playlistsNode = getConfigurationRootChildNode(PLAYLISTS_SET_NODE);
     if (playlistsNode == null) {
@@ -211,7 +210,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
     }
 
     configuration.setProperty(PLAYLIST_NODE + "(" + playlistIndex + ")[@" + PLAYLIST_NODE_ATTR_NAME + "]",
-        newPlaylistName);
+        playlistData.getName());
     saveConfiguration();
   }
 
@@ -274,8 +273,8 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
         .collect(Collectors.toList());
     configuration.addNodes(PLAYLISTS_SET_NODE, playlistsNode);
 
-    configuration.setProperty(ACTIVE_PLAYLIST_NAME_NODE, activePlaylist.getName());
-    configuration.setProperty(DISPLAYED_PLAYLIST_NAME_NODE, displayedPlaylist.getName());
+    configuration.setProperty(ACTIVE_PLAYLIST_UID_NODE, activePlaylist.getUid());
+    configuration.setProperty(DISPLAYED_PLAYLIST_UID_NODE, displayedPlaylist.getUid());
 
     saveConfiguration();
   }
