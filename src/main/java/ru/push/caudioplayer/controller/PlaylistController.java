@@ -1,14 +1,19 @@
 package ru.push.caudioplayer.controller;
 
-import javafx.beans.binding.Bindings;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
+import javafx.stage.Stage;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.IterableUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import ru.push.caudioplayer.ConfigurationControllers;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
@@ -17,6 +22,7 @@ import ru.push.caudioplayer.ui.MediaTrackPlaylistItem;
 import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +39,10 @@ public class PlaylistController {
   private ListView<PlaylistData> playlistBrowserContainer;
   @FXML
   private TableView playlistContainer;
+
+  @FXML
+  @Resource(name = "renamePopupView")
+  private ConfigurationControllers.View renamePopupView;
 
   @Autowired
   private AudioPlayerFacade audioPlayerFacade;
@@ -68,6 +78,12 @@ public class PlaylistController {
     PlaylistData displayedPlaylist = audioPlayerFacade.getDisplayedPlaylist();
     fillPlaylistBrowserContainer(playlists, displayedPlaylist);
 
+    playlistBrowserContainer.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
+      if (!event.isPrimaryButtonDown()) {
+        event.consume();
+      }
+    });
+
     playlistBrowserContainer.getSelectionModel().selectedItemProperty().addListener(
         (observable, oldValue, newValue) -> {
           PlaylistData playlist = audioPlayerFacade.showPlaylist(newValue.getUid());
@@ -75,17 +91,16 @@ public class PlaylistController {
         });
 
     setPlaylistContainerItems(audioPlayerFacade.getDisplayedPlaylist());
-    preparePlaylistContextMenu();
-    preparePlaylistBrowserContextMenu();
+    setPlaylistContainerRowFactory();
+    setPlaylistBrowserContainerCellFactory();
   }
 
-  private void preparePlaylistBrowserContextMenu() {
+  private void setPlaylistBrowserContainerCellFactory() {
     playlistBrowserContainer.setCellFactory(lv -> {
       ListCell<PlaylistData> cell = new ListCell<PlaylistData>() {
         @Override
         protected void updateItem(PlaylistData item, boolean empty) {
           super.updateItem(item, empty);
-
           if (empty || item == null || item.getName() == null) {
             setText(null);
           } else {
@@ -94,19 +109,14 @@ public class PlaylistController {
         }
       };
 
+      // prepare context menu
       ContextMenu contextMenu = new ContextMenu();
 
       MenuItem removeMenuItem = new MenuItem("Delete");
-      removeMenuItem.setOnAction(event -> {
-        PlaylistData deletedPlaylist = playlistBrowserContainer.getSelectionModel().getSelectedItem();
-        if (audioPlayerFacade.deletePlaylist(deletedPlaylist.getUid())) {
-          playlistBrowserContainer.getItems().remove(deletedPlaylist);
-        }
-      });
+      removeMenuItem.setOnAction(event -> removePlaylistAction(event, cell));
 
       MenuItem renameMenuItem = new MenuItem("Rename");
-//      removeMenuItem.setOnAction(event ->
-//          audioPlayerFacade.renamePlaylist());
+      renameMenuItem.setOnAction(event -> renamePlaylistAction(event, cell));
 
       contextMenu.getItems().addAll(removeMenuItem, renameMenuItem);
 
@@ -121,10 +131,26 @@ public class PlaylistController {
     });
   }
 
-  private void preparePlaylistContextMenu() {
+  private void renamePlaylistAction(ActionEvent event, ListCell<PlaylistData> cell) {
+    Stage popupStage = new Stage();
+    popupStage.setTitle("Rename");
+    popupStage.setResizable(false);
+    popupStage.setScene(new Scene(renamePopupView.getView()));
+    popupStage.show();
+  }
+
+  private void removePlaylistAction(ActionEvent event, ListCell<PlaylistData> cell) {
+    PlaylistData deletedPlaylist = cell.getItem();
+    if (audioPlayerFacade.deletePlaylist(deletedPlaylist.getUid())) {
+      playlistBrowserContainer.getItems().remove(deletedPlaylist);
+    }
+  }
+
+  private void setPlaylistContainerRowFactory() {
     playlistContainer.setRowFactory(lv -> {
       TableRow<MediaTrackPlaylistItem> tableRow = new TableRow<>();
 
+      // prepare context menu
       ContextMenu contextMenu = new ContextMenu();
       MenuItem lookupOnLastfmMenuItem = new MenuItem("Lookup on last.fm");
 

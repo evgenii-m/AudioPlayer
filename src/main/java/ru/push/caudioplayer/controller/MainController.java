@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.push.caudioplayer.ConfigurationControllers;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
-import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
