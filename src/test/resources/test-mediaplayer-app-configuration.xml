@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <configuration>
   <playlists>
-    <playlist active="true" name="first" position="0">
+    <playlist name="first" position="0" uid="ec1ed359-5344-4b5b-8262-a12c26c609c8">
       <track sourceType="HTTP_STREAM">http://ice1.somafm.com/groovesalad-128.mp3</track>
       <track sourceType="HTTP_STREAM">http://ice1.somafm.com/secretagent-128.mp3</track>
       <track sourceType="HTTP_STREAM">http://ice1.somafm.com/spacestation-128.mp3</track>
     </playlist>
-    <playlist active="false" name="second" position="1">
+    <playlist name="second" position="1" uid="b5c65f36-7a1c-4a22-9042-5ca05ff84abd">
       <track sourceType="FILE">/home/push/Development/idea_workspace/caudio_player/src/test/resources/audiotracks/01 Yellow Submarine.mp3</track>
       <track sourceType="FILE">/home/push/Development/idea_workspace/caudio_player/src/test/resources/audiotracks/02 Hey Bulldog.mp3</track>
       <track sourceType="FILE">/home/push/Development/idea_workspace/caudio_player/src/test/resources/audiotracks/03 Eleanor Rigby.mp3</track>
     </playlist>
+    <activeUid>ec1ed359-5344-4b5b-8262-a12c26c609c8</activeUid>
+    <displayedUid>ec1ed359-5344-4b5b-8262-a12c26c609c8</displayedUid>
   </playlists>
 </configuration>

@@ -13,7 +13,7 @@ import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
-import ru.push.caudioplayer.core.mediaplayer.services.AppConfigurationService;
+import ru.push.caudioplayer.core.services.AppConfigurationService;
 
 import java.io.File;
 import java.util.Arrays;
@@ -43,6 +43,8 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
   private AudioPlayerEventListener eventListener;
 
   private static final int PLAYLISTS_COUNT = 2;
+  private static final String FIRST_PLAYLIST_UID = "ec1ed359-5344-4b5b-8262-a12c26c609c8";
+  private static final String SECOND_PLAYLIST_UID = "b5c65f36-7a1c-4a22-9042-5ca05ff84abd";
   private static final String FIRST_PLAYLIST_NAME = "first";
   private static final String SECOND_PLAYLIST_NAME = "second";
   private static final String[] MEDIA_FILES_PATHS = {
@@ -67,18 +69,21 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
     audioPlayerFacade.addEventListener(eventListener);
     audioPlayerFacade.refreshPlaylists(); // refresh playlist component after each test
 
-    doNothing().when(appConfigurationService).savePlaylists(anyListOf(PlaylistData.class));
+    doNothing().when(appConfigurationService).saveActivePlaylist(any(PlaylistData.class));
+    doNothing().when(appConfigurationService).saveDisplayedPlaylist(any(PlaylistData.class));
+    doNothing().when(appConfigurationService).savePlaylist(any(PlaylistData.class));
+    doNothing().when(appConfigurationService).renamePlaylist(any(PlaylistData.class));
+    doNothing().when(appConfigurationService).deletePlaylist(any(PlaylistData.class));
+    doNothing().when(appConfigurationService).saveAllPlaylists(anyListOf(PlaylistData.class),
+        any(PlaylistData.class), any(PlaylistData.class));
+    doNothing().when(appConfigurationService).saveLastFmUserData(anyString(), anyString());
     doReturn(Boolean.TRUE).when(playerComponent).playMedia(anyString());
-//    when(playerComponent.playMedia(anyString())).thenReturn(true);
   }
 
   @AfterMethod
   public void tearDown() throws Exception {
     audioPlayerFacade.stopApplication();
-
-    verify(appConfigurationService, atLeastOnce()).savePlaylists(anyListOf(PlaylistData.class));
     verify(eventListener).stopAudioPlayer();
-
     audioPlayerFacade.removeEventListener(eventListener);
   }
 
@@ -92,6 +97,7 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
    * This test affects:
    *  ru.push.caudioplayer.core.facades.AudioPlayerFacade#getPlaylists()
    *  ru.push.caudioplayer.core.facades.AudioPlayerFacade#getActivePlaylist()
+   *  ru.push.caudioplayer.core.facades.AudioPlayerFacade#getDisplayedPlaylist()
    *  ru.push.caudioplayer.core.facades.AudioPlayerFacade#getPlaylist(java.lang.String)
    */
   @Test
@@ -101,27 +107,23 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
     assertTrue(CollectionUtils.isNotEmpty(playlists), "Playlists collection null or empty.");
     assertEquals(playlists.size(), PLAYLISTS_COUNT, "Unexpected count of playlists.");
 
-    Set<Integer> positionsSet = playlists.stream()
-        .map(PlaylistData::getPosition)
-        .collect(Collectors.toSet());
-    assertEquals(positionsSet.size(), playlists.size(), "Each playlist must have unique position value.");
-
-    PlaylistData firstPlaylist = audioPlayerFacade.getPlaylist(FIRST_PLAYLIST_NAME);
-    assertNotNull(firstPlaylist, "Playlist with name '" + FIRST_PLAYLIST_NAME + "' not found.");
+    PlaylistData firstPlaylist = audioPlayerFacade.getPlaylist(FIRST_PLAYLIST_UID);
+    assertNotNull(firstPlaylist, "Playlist with uid '" + FIRST_PLAYLIST_UID + "' not found.");
     assertEquals(firstPlaylist.getName(), FIRST_PLAYLIST_NAME, "Unexpected playlist name.");
     assertTrue(CollectionUtils.isNotEmpty(firstPlaylist.getTracks()),
-        "Tracks of playlist '" + FIRST_PLAYLIST_NAME + "' null or empty.");
+        "Tracks of playlist [" + FIRST_PLAYLIST_UID + "] null or empty.");
 
-    PlaylistData secondPlaylist = audioPlayerFacade.getPlaylist(SECOND_PLAYLIST_NAME);
-    assertNotNull(secondPlaylist, "Playlist with name '" + SECOND_PLAYLIST_NAME + "' not found.");
+    PlaylistData secondPlaylist = audioPlayerFacade.getPlaylist(SECOND_PLAYLIST_UID);
+    assertNotNull(secondPlaylist, "Playlist with uid '" + SECOND_PLAYLIST_UID + "' not found.");
     assertEquals(secondPlaylist.getName(), SECOND_PLAYLIST_NAME, "Unexpected playlist name.");
     assertTrue(CollectionUtils.isNotEmpty(secondPlaylist.getTracks()),
-        "Tracks of playlist '" + SECOND_PLAYLIST_NAME + "' null or empty.");
+        "Tracks of playlist [" + SECOND_PLAYLIST_UID + "] null or empty.");
 
     PlaylistData activePlaylist = audioPlayerFacade.getActivePlaylist();
     assertNotNull(activePlaylist, "Active playlist must be specified.");
-    long activePlaylistsCount = playlists.stream().filter(PlaylistData::isActive).count();
-    assertEquals(activePlaylistsCount, 1, "Must be only one active playlist.");
+
+    PlaylistData displayedPlaylist = audioPlayerFacade.getDisplayedPlaylist();
+    assertNotNull(displayedPlaylist, "Displayed playlist must be specified.");
   }
 
   /**
@@ -146,23 +148,24 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
     int actualPlaylistsSize = audioPlayerFacade.getPlaylists().size();
     assertEquals(actualPlaylistsSize, originalPlaylistsSize + 1, "Expected increase in playlists size.");
 
-    String actualPlaylistName = newPlaylist.getName();
+    String playlistUid = newPlaylist.getUid();
     String newPlaylistName = "new playlist name";
-    audioPlayerFacade.renamePlaylist(actualPlaylistName, newPlaylistName);
-    assertNotNull(audioPlayerFacade.getPlaylist(newPlaylistName), "Playlist with name '"
-        + newPlaylistName + "' not found.");
+    audioPlayerFacade.renamePlaylist(playlistUid, newPlaylistName);
+    assertEquals(audioPlayerFacade.getPlaylist(playlistUid).getName(), newPlaylistName,
+        "Unexpected playlist [" + playlistUid + "] name.");
 
-    boolean deletePlaylistResult = audioPlayerFacade.deletePlaylist(newPlaylistName);
+    boolean deletePlaylistResult = audioPlayerFacade.deletePlaylist(playlistUid);
     assertTrue(deletePlaylistResult, "Unexpected delete playlist result.");
-    assertNull(audioPlayerFacade.getPlaylist(newPlaylistName),
-        "Playlist with name '" + newPlaylistName + "' must be deleted.");
+    assertNull(audioPlayerFacade.getPlaylist(playlistUid), "Playlist [" + playlistUid + "] must be deleted.");
     displayedPlaylist = audioPlayerFacade.getDisplayedPlaylist();
     assertNotNull(displayedPlaylist, "After delete displayed playlist must be changed.");
     verify(eventListener).changedPlaylist(displayedPlaylist);
     actualPlaylistsSize = audioPlayerFacade.getPlaylists().size();
     assertEquals(actualPlaylistsSize, originalPlaylistsSize, "Expected decrease in playlists size.");
 
-    verify(appConfigurationService, times(3)).savePlaylists(anyListOf(PlaylistData.class));
+    verify(appConfigurationService, times(1)).savePlaylist(any(PlaylistData.class));
+    verify(appConfigurationService, times(1)).renamePlaylist(any(PlaylistData.class));
+    verify(appConfigurationService, times(1)).deletePlaylist(any(PlaylistData.class));
   }
 
   /**
@@ -174,18 +177,20 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
     List<PlaylistData> playlists = audioPlayerFacade.getPlaylists();
     assertTrue(CollectionUtils.isNotEmpty(playlists), "Playlists collection null or empty.");
 
-    Set<String> playlistsNames = playlists.stream().map(PlaylistData::getName).collect(Collectors.toSet());
-    playlistsNames.forEach(playlistName -> audioPlayerFacade.deletePlaylist(playlistName));
+    List<String> playlistsUid = playlists.stream().map(PlaylistData::getUid).collect(Collectors.toList());
+    playlistsUid.stream().forEach(playlistUid -> audioPlayerFacade.deletePlaylist(playlistUid));
 
     playlists = audioPlayerFacade.getPlaylists();
     assertTrue(CollectionUtils.isNotEmpty(playlists), "New playlist not created after delete last!");
     assertEquals(playlists.size(), 1, "Only one playlist must be created.");
     PlaylistData createdPlaylist = playlists.get(0);
-    assertTrue(createdPlaylist.isActive(), "Created playlist must be active.");
+    PlaylistData activePlaylist = audioPlayerFacade.getActivePlaylist();
+    assertEquals(createdPlaylist, activePlaylist, "Created playlist must be active.");
     PlaylistData displayedPlaylist = audioPlayerFacade.getDisplayedPlaylist();
     assertEquals(displayedPlaylist, createdPlaylist, "Created playlist must be displayed.");
 
-    verify(appConfigurationService, atLeast(2)).savePlaylists(anyListOf(PlaylistData.class));
+    verify(appConfigurationService, atLeastOnce()).deletePlaylist(any(PlaylistData.class));
+    verify(appConfigurationService, times(1)).savePlaylist(any(PlaylistData.class));
     verify(eventListener, atLeastOnce()).changedPlaylist(any(PlaylistData.class));
   }
 
@@ -201,8 +206,9 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
     assertNotNull(displayedPlaylist, "Displayed playlist is null.");
 
     int tracklistSize = displayedPlaylist.getTracks().size();
-    audioPlayerFacade.addFilesToPlaylist(Arrays.asList(MEDIA_FILES_PATHS).stream()
-        .map(File::new).collect(Collectors.toList()));
+    audioPlayerFacade.addFilesToPlaylist(
+        Arrays.asList(MEDIA_FILES_PATHS).stream().map(File::new).collect(Collectors.toList())
+    );
     int expectedPlaylistSize = tracklistSize + MEDIA_FILES_PATHS.length;
     int actualTracklistSize = displayedPlaylist.getTracks().size();
     assertEquals(actualTracklistSize, expectedPlaylistSize, "Unexpected tracklist size after add files.");
@@ -220,7 +226,7 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
     actualTracklistSize = displayedPlaylist.getTracks().size();
     assertEquals(actualTracklistSize, expectedPlaylistSize, "Unexpected tracklist size after delete items.");
 
-    verify(appConfigurationService, times(3)).savePlaylists(anyListOf(PlaylistData.class));
+    verify(appConfigurationService, times(3)).savePlaylist(any(PlaylistData.class));
     verify(eventListener, times(3)).changedPlaylist(displayedPlaylist);
   }
 
@@ -239,11 +245,11 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
     // tests must consider that active and displayed playlist may be different
     PlaylistData activePlaylist = audioPlayerFacade.getActivePlaylist();
     PlaylistData inactivePlaylist = IterableUtils.find(
-        playlists, playlistData -> !playlistData.isActive()
+        playlists, playlistData -> !playlistData.equals(activePlaylist)
     );
     assertNotNull(inactivePlaylist, "There must be at least one inactive playlist.");
     assertNotEquals(inactivePlaylist, activePlaylist, "Active and inactive playlist must be different!");
-    PlaylistData displayedPlaylist = audioPlayerFacade.showPlaylist(inactivePlaylist.getName());
+    PlaylistData displayedPlaylist = audioPlayerFacade.showPlaylist(inactivePlaylist.getUid());
     assertEquals(displayedPlaylist, inactivePlaylist, "Inactive playlist must be displayed.");
 
     // for this test, the tracks in playlist must be different and size of each playlist must be at least 2!
@@ -268,9 +274,9 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
     verify(playerComponent, times(2)).playMedia(currentTrackInfo.getTrackPath());
 
     // TODO: add checks for track position when verify changedTrackPosition methods
-    verify(eventListener, times(3)).changedTrackPosition(eq(activePlaylist.getName()), anyInt());
+    verify(eventListener, times(3)).changedTrackPosition(eq(activePlaylist), anyInt());
 
-    audioPlayerFacade.playTrack(displayedPlaylist.getName(), 0);
+    audioPlayerFacade.playTrack(displayedPlaylist.getUid(), 0);
     currentTrackInfo = audioPlayerFacade.getCurrentTrackInfo();
     verify(playerComponent).playMedia(currentTrackInfo.getTrackPath());
 
@@ -283,6 +289,6 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
     verify(playerComponent).playMedia(currentTrackInfo.getTrackPath());
 
     // TODO: add checks for track position when verify changedTrackPosition methods
-    verify(eventListener, times(2)).changedTrackPosition(eq(displayedPlaylist.getName()), anyInt());
+    verify(eventListener, times(2)).changedTrackPosition(eq(displayedPlaylist), anyInt());
   }
 }

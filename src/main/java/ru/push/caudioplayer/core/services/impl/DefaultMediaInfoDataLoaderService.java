@@ -1,12 +1,12 @@
-package ru.push.caudioplayer.core.mediaplayer.helpers.impl;
+package ru.push.caudioplayer.core.services.impl;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
-import ru.push.caudioplayer.core.mediaplayer.helpers.MediaInfoDataLoader;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaSourceType;
+import ru.push.caudioplayer.core.services.MediaInfoDataLoaderService;
 import uk.co.caprica.vlcj.player.MediaMeta;
 
 import java.io.IOException;
@@ -17,14 +17,14 @@ import java.util.stream.Collectors;
  * @author push <mez.e.s@yandex.ru>
  * @date 2/25/17
  */
-public class DefaultMediaInfoDataLoader implements MediaInfoDataLoader {
-  private static final Logger LOG = LoggerFactory.getLogger(DefaultMediaInfoDataLoader.class);
+public class DefaultMediaInfoDataLoaderService implements MediaInfoDataLoaderService {
+  private static final Logger LOG = LoggerFactory.getLogger(DefaultMediaInfoDataLoaderService.class);
 
   private static final String STREAM_TITLE_SEPARATOR = " - ";
 
   private final CustomMediaPlayerFactory mediaPlayerFactory;
 
-  public DefaultMediaInfoDataLoader(CustomMediaPlayerFactory mediaPlayerFactory) {
+  public DefaultMediaInfoDataLoaderService(CustomMediaPlayerFactory mediaPlayerFactory) {
     this.mediaPlayerFactory = mediaPlayerFactory;
   }
 

@@ -1,4 +1,4 @@
-package ru.push.caudioplayer.core.mediaplayer.helpers;
+package ru.push.caudioplayer.core.services;
 
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaSourceType;
@@ -10,7 +10,7 @@ import java.util.List;
  * @author push <mez.e.s@yandex.ru>
  * @date 4/2/17
  */
-public interface MediaInfoDataLoader {
+public interface MediaInfoDataLoaderService {
 
   List<MediaInfoData> load(List<String> mediaPaths, MediaSourceType sourceType);
 

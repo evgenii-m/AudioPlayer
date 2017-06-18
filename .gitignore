@@ -1,3 +1,5 @@
 target/*
 .idea/*
 mediaplayer-app-configuration.xml
+lastfm-api-account.info
+AppConfigurationServiceManuallyTestResult.xml

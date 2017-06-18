@@ -12,23 +12,29 @@ import java.util.List;
  */
 public interface CustomPlaylistComponent extends NativePlayerComponent {
 
-  void loadPlaylists(List<PlaylistData> playlists);
+  boolean loadPlaylists(List<PlaylistData> playlists, String activePlaylistUid, String displayedPlaylistUid);
 
   List<PlaylistData> getPlaylists();
 
   PlaylistData createNewPlaylist();
 
-  boolean deletePlaylist(String playlistName);
+  boolean deletePlaylist(String playlistUid);
 
-  void renamePlaylist(String actualPlaylistName, String newPlaylistName);
+  PlaylistData renamePlaylist(String playlistUid, String newPlaylistName);
 
   PlaylistData getActivePlaylist();
 
-  PlaylistData getPlaylist(String playlistName);
+  PlaylistData getDisplayedPlaylist();
+
+  boolean setDisplayedPlaylist(String playlistUid);
+
+  void setDisplayedPlaylist(PlaylistData playlist);
+
+  PlaylistData getPlaylist(String playlistUid);
 
   int getActiveTrackPosition();
 
-  MediaInfoData playTrack(String playlistName, int trackPosition);
+  MediaInfoData playTrack(String playlistUid, int trackPosition) throws IllegalArgumentException;
 
   MediaInfoData playCurrentTrack();
 
@@ -36,9 +42,9 @@ public interface CustomPlaylistComponent extends NativePlayerComponent {
 
   MediaInfoData playPrevTrack();
 
-  List<PlaylistData> addFilesToPlaylist(String playlistName, List<File> files);
+  PlaylistData addFilesToPlaylist(String playlistUid, List<File> files);
 
-  List<PlaylistData> deleteItemsFromPlaylist(String playlistName, List<Integer> itemsIndexes);
+  PlaylistData deleteItemsFromPlaylist(String playlistUid, List<Integer> itemsIndexes);
 
-  List<PlaylistData> addLocationsToPlaylist(String playlistName, List<String> locations);
+  PlaylistData addLocationsToPlaylist(String playlistUid, List<String> locations);
 }
