@@ -1,9 +1,6 @@
 package ru.push.caudioplayer.controller;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -20,10 +17,6 @@ import ru.push.caudioplayer.ui.MediaTrackPlaylistItem;
 import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
 
 import javax.annotation.PostConstruct;
-import java.text.FieldPosition;
-import java.text.Format;
-import java.text.ParsePosition;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -103,8 +96,7 @@ public class PlaylistController {
 
       ContextMenu contextMenu = new ContextMenu();
 
-      MenuItem removeMenuItem = new MenuItem();
-      removeMenuItem.textProperty().bind(Bindings.format("Delete"));
+      MenuItem removeMenuItem = new MenuItem("Delete");
       removeMenuItem.setOnAction(event -> {
         PlaylistData deletedPlaylist = playlistBrowserContainer.getSelectionModel().getSelectedItem();
         if (audioPlayerFacade.deletePlaylist(deletedPlaylist.getUid())) {
@@ -113,8 +105,8 @@ public class PlaylistController {
       });
 
       MenuItem renameMenuItem = new MenuItem("Rename");
-//    removeMenuItem.setOnAction(event ->
-//        audioPlayerFacade.renamePlaylist());
+//      removeMenuItem.setOnAction(event ->
+//          audioPlayerFacade.renamePlaylist());
 
       contextMenu.getItems().addAll(removeMenuItem, renameMenuItem);
 
