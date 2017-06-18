@@ -13,7 +13,7 @@ public interface AudioPlayerEventListener {
 
   void createdNewPlaylist(PlaylistData newPlaylist);
 
-  void changedTrackPosition(String playlistUid, int trackPosition);
+  void changedTrackPosition(PlaylistData playlist, int trackPosition);
 
   void refreshTrackMediaInfo(int trackPosition, MediaInfoData mediaInfo);
 

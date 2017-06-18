@@ -208,7 +208,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
     playerComponent.playMedia(resourceUri);
     currentTrackInfoData = trackInfo;
     eventListeners.forEach(listener ->
-        listener.changedTrackPosition(playlistComponent.getActivePlaylist().getUid(),
+        listener.changedTrackPosition(playlistComponent.getActivePlaylist(),
             playlistComponent.getActiveTrackPosition())
     );
   }

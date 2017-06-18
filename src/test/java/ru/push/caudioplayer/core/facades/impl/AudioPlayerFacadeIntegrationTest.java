@@ -274,7 +274,7 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
     verify(playerComponent, times(2)).playMedia(currentTrackInfo.getTrackPath());
 
     // TODO: add checks for track position when verify changedTrackPosition methods
-    verify(eventListener, times(3)).changedTrackPosition(eq(activePlaylist.getUid()), anyInt());
+    verify(eventListener, times(3)).changedTrackPosition(eq(activePlaylist), anyInt());
 
     audioPlayerFacade.playTrack(displayedPlaylist.getUid(), 0);
     currentTrackInfo = audioPlayerFacade.getCurrentTrackInfo();
@@ -289,6 +289,6 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
     verify(playerComponent).playMedia(currentTrackInfo.getTrackPath());
 
     // TODO: add checks for track position when verify changedTrackPosition methods
-    verify(eventListener, times(2)).changedTrackPosition(eq(displayedPlaylist.getUid()), anyInt());
+    verify(eventListener, times(2)).changedTrackPosition(eq(displayedPlaylist), anyInt());
   }
 }

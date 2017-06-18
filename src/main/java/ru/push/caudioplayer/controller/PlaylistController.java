@@ -3,6 +3,7 @@ package ru.push.caudioplayer.controller;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -19,6 +20,9 @@ import ru.push.caudioplayer.ui.MediaTrackPlaylistItem;
 import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
 
 import javax.annotation.PostConstruct;
+import java.text.FieldPosition;
+import java.text.Format;
+import java.text.ParsePosition;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,7 +37,7 @@ public class PlaylistController {
   private static final Logger LOG = LoggerFactory.getLogger(PlaylistController.class);
 
   @FXML
-  private ListView playlistBrowserContainer;
+  private ListView<PlaylistData> playlistBrowserContainer;
   @FXML
   private TableView playlistContainer;
 
@@ -61,23 +65,20 @@ public class PlaylistController {
 
     playlistContainer.setOnMouseClicked(mouseEvent -> {
       if (mouseEvent.getButton().equals(MouseButton.PRIMARY) && (mouseEvent.getClickCount() == 2)) {
-        String activePlaylistName = playlistBrowserContainer.getSelectionModel().getSelectedItem().toString();
+        PlaylistData displayedPlaylist = playlistBrowserContainer.getSelectionModel().getSelectedItem();
         int trackPosition = playlistContainer.getFocusModel().getFocusedCell().getRow();
-        audioPlayerFacade.playTrack(activePlaylistName, trackPosition);
+        audioPlayerFacade.playTrack(displayedPlaylist.getUid(), trackPosition);
       }
     });
 
     List<PlaylistData> playlists = audioPlayerFacade.getPlaylists();
-    PlaylistData activePlaylist = audioPlayerFacade.getActivePlaylist();
-    fillPlaylistBrowserContainer(playlists, activePlaylist);
+    PlaylistData displayedPlaylist = audioPlayerFacade.getDisplayedPlaylist();
+    fillPlaylistBrowserContainer(playlists, displayedPlaylist);
 
     playlistBrowserContainer.getSelectionModel().selectedItemProperty().addListener(
-        new ChangeListener<String>() {
-          @Override
-          public void changed(ObservableValue observable, String oldValue, String newValue) {
-            PlaylistData playlist = audioPlayerFacade.showPlaylist(newValue);
-            setPlaylistContainerItems(playlist);
-          }
+        (observable, oldValue, newValue) -> {
+          PlaylistData playlist = audioPlayerFacade.showPlaylist(newValue.getUid());
+          setPlaylistContainerItems(playlist);
         });
 
     setPlaylistContainerItems(audioPlayerFacade.getDisplayedPlaylist());
@@ -87,16 +88,27 @@ public class PlaylistController {
 
   private void preparePlaylistBrowserContextMenu() {
     playlistBrowserContainer.setCellFactory(lv -> {
-      ListCell<String> cell = new ListCell<>();
+      ListCell<PlaylistData> cell = new ListCell<PlaylistData>() {
+        @Override
+        protected void updateItem(PlaylistData item, boolean empty) {
+          super.updateItem(item, empty);
+
+          if (empty || item == null || item.getName() == null) {
+            setText(null);
+          } else {
+            setText(item.getName());
+          }
+        }
+      };
 
       ContextMenu contextMenu = new ContextMenu();
 
       MenuItem removeMenuItem = new MenuItem();
       removeMenuItem.textProperty().bind(Bindings.format("Delete"));
       removeMenuItem.setOnAction(event -> {
-        String deletedPlaylistName = (String) playlistBrowserContainer.getSelectionModel().getSelectedItem();
-        if (audioPlayerFacade.deletePlaylist(deletedPlaylistName)) {
-          playlistBrowserContainer.getItems().remove(deletedPlaylistName);
+        PlaylistData deletedPlaylist = playlistBrowserContainer.getSelectionModel().getSelectedItem();
+        if (audioPlayerFacade.deletePlaylist(deletedPlaylist.getUid())) {
+          playlistBrowserContainer.getItems().remove(deletedPlaylist);
         }
       });
 
@@ -106,7 +118,6 @@ public class PlaylistController {
 
       contextMenu.getItems().addAll(removeMenuItem, renameMenuItem);
 
-      cell.textProperty().bind(cell.itemProperty());
       cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
         if (isNowEmpty) {
           cell.setContextMenu(null);
@@ -162,15 +173,15 @@ public class PlaylistController {
     playlistContainer.getColumns().addAll(numberCol, artistCol, albumCol, titleCol, lengthCol);
   }
 
-  private void fillPlaylistBrowserContainer(List<PlaylistData> playlists, PlaylistData activePlaylist) {
+  private void fillPlaylistBrowserContainer(List<PlaylistData> playlists, PlaylistData displayedPlaylist) {
     if (CollectionUtils.isNotEmpty(playlists)) {
       playlistBrowserContainer.getItems().clear();
       boolean activeSelected = false;
       for (PlaylistData playlist : playlists) {
-        playlistBrowserContainer.getItems().add(playlist.getName());
-        if (!activeSelected && activePlaylist.equals(playlist)) {
+        playlistBrowserContainer.getItems().add(playlist);
+        if (!activeSelected && displayedPlaylist.equals(playlist)) {
           activeSelected = true;
-          playlistBrowserContainer.getSelectionModel().select(playlist.getName());
+          playlistBrowserContainer.getSelectionModel().select(playlist);
         }
       }
     }
@@ -204,14 +215,14 @@ public class PlaylistController {
 
     @Override
     public void createdNewPlaylist(PlaylistData newPlaylist) {
-      playlistBrowserContainer.getItems().add(newPlaylist.getName());
-      playlistBrowserContainer.getSelectionModel().select(newPlaylist.getName());
+      playlistBrowserContainer.getItems().add(newPlaylist);
+      playlistBrowserContainer.getSelectionModel().select(newPlaylist);
       setPlaylistContainerItems(newPlaylist);
     }
 
     @Override
-    public void changedTrackPosition(String playlistName, int trackPosition) {
-      if (playlistName.equals(playlistBrowserContainer.getSelectionModel().getSelectedItem())) {
+    public void changedTrackPosition(PlaylistData playlist, int trackPosition) {
+      if (playlist.equals(playlistBrowserContainer.getSelectionModel().getSelectedItem())) {
 //        playlistContainer.getSelectionModel().select(trackPosition);
         LOG.debug("Track position changed!");
       }
