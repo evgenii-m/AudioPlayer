@@ -7,6 +7,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IterableUtils;
@@ -140,9 +141,12 @@ public class PlaylistController {
     assert renamePopupView.getController() instanceof RenamePopupController;
 
     Stage popupStage = new Stage();
+    Stage primaryStage = (Stage) playlistBrowserContainer.getScene().getWindow();
     popupStage.setTitle("Rename");
     popupStage.setResizable(false);
     popupStage.setScene(renamePopupScene);
+    popupStage.initModality(Modality.WINDOW_MODAL);
+    popupStage.initOwner(primaryStage);
     ((RenamePopupController) renamePopupView.getController()).setRenamedPlaylist(cell.getItem());
     popupStage.show();
   }

@@ -62,7 +62,7 @@ public class RenamePopupController {
   }
 
   private void closePopup() {
-    Stage stage = (Stage) nameTextField.getScene().getWindow();
-    stage.close();
+    Stage popupStage = (Stage) nameTextField.getScene().getWindow();
+    popupStage.close();
   }
 }
