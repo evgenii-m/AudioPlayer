@@ -4,10 +4,11 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="100.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="100.0" prefWidth="300.0"
+      xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.push.caudioplayer.controller.RenamePopupController">
    <children>
       <TextField fx:id="nameTextField" layoutX="10.0" layoutY="14.0" prefHeight="26.0" prefWidth="280.0" />
-      <Button fx:id="cancelButton" layoutX="88.0" layoutY="53.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="90.0" text="Cancel" />
-      <Button fx:id="applyButton" layoutX="196.0" layoutY="53.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="90.0" text="Apply" />
+      <Button fx:id="cancelButton" onAction="#cancelRename" layoutX="88.0" layoutY="53.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="90.0" text="Cancel" />
+      <Button fx:id="applyButton" onAction="#applyRename" layoutX="196.0" layoutY="53.0" mnemonicParsing="false" prefHeight="26.0" prefWidth="90.0" text="Apply" />
    </children>
 </Pane>

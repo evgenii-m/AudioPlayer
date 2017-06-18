@@ -18,4 +18,6 @@ public interface AudioPlayerEventListener {
   void refreshTrackMediaInfo(int trackPosition, MediaInfoData mediaInfo);
 
   void stopAudioPlayer();
+
+  void renamedPlaylist(PlaylistData playlistData);
 }

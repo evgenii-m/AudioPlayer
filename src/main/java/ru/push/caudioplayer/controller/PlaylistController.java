@@ -24,6 +24,7 @@ import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -49,6 +50,8 @@ public class PlaylistController {
   @Autowired
   private TrackTimeLabelBuilder trackTimeLabelBuilder;
 
+  private Scene renamePopupScene;
+
 
   @FXML
   public void initialize() {
@@ -63,6 +66,8 @@ public class PlaylistController {
   @PostConstruct
   public void init() {
     LOG.debug("init");
+
+    renamePopupScene = new Scene(renamePopupView.getView());
 
     audioPlayerFacade.addEventListener(new AudioPlayerEventAdapter());
 
@@ -132,10 +137,13 @@ public class PlaylistController {
   }
 
   private void renamePlaylistAction(ActionEvent event, ListCell<PlaylistData> cell) {
+    assert renamePopupView.getController() instanceof RenamePopupController;
+
     Stage popupStage = new Stage();
     popupStage.setTitle("Rename");
     popupStage.setResizable(false);
-    popupStage.setScene(new Scene(renamePopupView.getView()));
+    popupStage.setScene(renamePopupScene);
+    ((RenamePopupController) renamePopupView.getController()).setRenamedPlaylist(cell.getItem());
     popupStage.show();
   }
 
@@ -258,6 +266,11 @@ public class PlaylistController {
       } else {
         LOG.error("Invalid track position [trackPosition = " + trackPosition + "], refresh track media info skipped");
       }
+    }
+
+    @Override
+    public void renamedPlaylist(PlaylistData playlistData) {
+      playlistBrowserContainer.refresh();
     }
 
     @Override

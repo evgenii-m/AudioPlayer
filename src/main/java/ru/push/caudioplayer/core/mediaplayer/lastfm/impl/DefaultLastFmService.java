@@ -10,7 +10,7 @@ import ru.push.caudioplayer.core.mediaplayer.lastfm.LastFmUserData;
 public class DefaultLastFmService implements LastFmService {
 
   @Override
-  public void updateNowPlaying(String artistName, String trackName, LastFmUserData userData) {
+  public void updateNowPlaying(String artistName, String trackTitle, LastFmUserData userData) {
 
   }
 }
