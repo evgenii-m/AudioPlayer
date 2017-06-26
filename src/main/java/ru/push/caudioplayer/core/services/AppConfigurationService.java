@@ -1,6 +1,7 @@
 package ru.push.caudioplayer.core.services;
 
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
+import ru.push.caudioplayer.ui.PlaylistContainerViewConfigurations;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -10,6 +11,8 @@ import java.util.List;
  * @date 2/23/17
  */
 public interface AppConfigurationService {
+
+  // playlists configuration methods
 
   String getActivePlaylistUid();
 
@@ -29,5 +32,17 @@ public interface AppConfigurationService {
 
   void saveAllPlaylists(List<PlaylistData> playlistsData, PlaylistData activePlaylist, PlaylistData displayedPlaylist);
 
+
+  // user configuration methods
+
   void saveLastFmUserData(String username, String password);
+
+  // TODO: add getLastFmUserData method
+
+
+  // view configuration methods
+
+  PlaylistContainerViewConfigurations getPlaylistContainerViewConfigurations();
+
+  // TODO: add savePlaylistContainerViewConfigurations method
 }

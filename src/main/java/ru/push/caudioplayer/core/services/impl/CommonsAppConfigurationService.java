@@ -2,6 +2,7 @@ package ru.push.caudioplayer.core.services.impl;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IterableUtils;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 import org.apache.commons.configuration2.XMLConfiguration;
 import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
@@ -17,13 +18,14 @@ import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaSourceType;
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 import ru.push.caudioplayer.core.services.AppConfigurationService;
+import ru.push.caudioplayer.ui.PlaylistContainerViewConfigurations;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static ru.push.caudioplayer.core.services.ServicesConstants.*;
+import static ru.push.caudioplayer.core.services.ConfigurationServiceConstants.*;
 
 /**
  * @author push <mez.e.s@yandex.ru>
@@ -39,6 +41,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
 
   private final FileBasedConfigurationBuilder<XMLConfiguration> configurationBuilder;
   private XMLConfiguration configuration;
+
 
   public CommonsAppConfigurationService(String configurationFileName) {
     Parameters params = new Parameters();
@@ -70,6 +73,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
     }
   }
 
+
   private ImmutableNode getConfigurationRootChildNode(String nodeName) {
     return configuration.getNodeModel().getRootNode().getChildren().stream()
         .filter(node -> node.getNodeName().equals(nodeName)).findFirst()
@@ -90,6 +94,16 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
 
     return (String) node.getAttributes().getOrDefault(attributeName, defaultValue);
   }
+
+  private void saveConfiguration() {
+    try {
+      LOG.debug("save configuration");
+      configurationBuilder.save();
+    } catch (ConfigurationException e) {
+      LOG.error("Error when save configuration to file.", e);
+    }
+  }
+
 
   @Override
   public String getActivePlaylistUid() {
@@ -319,6 +333,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
     saveConfiguration();
   }
 
+
   @Override
   public void saveLastFmUserData(String username, String password) {
     Assert.notNull(username);
@@ -329,12 +344,34 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
     saveConfiguration();
   }
 
-  private void saveConfiguration() {
-    try {
-      LOG.debug("save configuration");
-      configurationBuilder.save();
-    } catch (ConfigurationException e) {
-      LOG.error("Error when save configuration to file.", e);
+
+  @Override
+  public PlaylistContainerViewConfigurations getPlaylistContainerViewConfigurations() {
+    HierarchicalConfiguration<ImmutableNode> playlistContainerColumnsConfiguration =
+        configuration.configurationAt(PLAYLIST_CONTAINER_COLUMNS_SET_NODE);
+
+    if (playlistContainerColumnsConfiguration == null) {
+      // TODO: add handler
+      return null;
     }
+
+    List<PlaylistContainerViewConfigurations.PlaylistContainerColumn> playlistContainerColumns =
+        playlistContainerColumnsConfiguration.getNodeModel().getInMemoryRepresentation().getChildren().stream()
+            .map(node -> {
+              // TODO: add checks for column attributes
+              String name = getNodeAttribute(node, PLAYLIST_CONTAINER_COLUMN_NODE_ATTR_NAME);
+              String title = getNodeAttribute(node, PLAYLIST_CONTAINER_COLUMN_NODE_ATTR_TITLE);
+              int width = Integer.valueOf(getNodeAttribute(node, PLAYLIST_CONTAINER_COLUMN_NODE_ATTR_WIDTH));
+              return new PlaylistContainerViewConfigurations.PlaylistContainerColumn(
+                  name, title, width
+              );
+            })
+            .collect(Collectors.toList());
+
+    PlaylistContainerViewConfigurations configurationsData =
+        new PlaylistContainerViewConfigurations(playlistContainerColumns);
+
+    return configurationsData;
   }
+
 }

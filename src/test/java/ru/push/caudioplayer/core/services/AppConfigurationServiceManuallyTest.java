@@ -6,6 +6,7 @@ import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaSourceType;
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 import ru.push.caudioplayer.core.services.impl.CommonsAppConfigurationService;
+import ru.push.caudioplayer.ui.PlaylistContainerViewConfigurations;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,8 +18,8 @@ import java.util.List;
 import static org.testng.Assert.*;
 
 /**
- * This test class used only for calling service methods for writing in configuration file,
- * but the results are checked manually.
+ * This test class used only for calling service methods to write in configuration result file or read
+ * sample configuration file, but the results are checked manually.
  *
  * @author push <mez.e.s@yandex.ru>
  * @date 5/9/17
@@ -26,14 +27,18 @@ import static org.testng.Assert.*;
 @Test
 public class AppConfigurationServiceManuallyTest {
 
-  private static final String CONFIGURATION_FILE_NAME = "AppConfigurationServiceManuallyTestResult.xml";
+  private static final String RESULT_CONFIGURATION_FILE_NAME = "AppConfigurationServiceManuallyTestResult.xml";
+  private static final String SAMPLE_CONFIGURATION_FILE_NAME = "test-mediaplayer-app-configuration.xml";
+
   private static final String PLAYLIST_1_NAME = "playlist1";
   private static final String PLAYLIST_2_NAME = "playlist2";
   private static final String PLAYLIST_3_NAME = "playlist3";
   private static final String LASTFM_USERNAME = "testUsername";
   private static final String LASTFM_PASSWORD = "testPassword";
 
-  private static AppConfigurationService appConfigurationService;
+  private static AppConfigurationService appConfigurationServiceForWrite;
+  private static AppConfigurationService appConfigurationServiceForRead;
+
   private static PlaylistData displayedPlaylist;
   private static PlaylistData activePlaylist;
   private static List<PlaylistData> playlists;
@@ -72,70 +77,78 @@ public class AppConfigurationServiceManuallyTest {
     displayedPlaylist = playlist3;
 
     try {
-      Files.delete(Paths.get(CONFIGURATION_FILE_NAME));
+      Files.delete(Paths.get(RESULT_CONFIGURATION_FILE_NAME));
     } catch (NoSuchFileException e) {
       // correct situation - continue
     } catch (IOException e) {
       fail("Exception when delete test configuration file", e);
     }
 
-    appConfigurationService = new CommonsAppConfigurationService(CONFIGURATION_FILE_NAME);
+    appConfigurationServiceForWrite = new CommonsAppConfigurationService(RESULT_CONFIGURATION_FILE_NAME);
+    appConfigurationServiceForRead = new CommonsAppConfigurationService(SAMPLE_CONFIGURATION_FILE_NAME);
   }
 
   @Test
   public void testSaveActivePlaylist() {
-    appConfigurationService.saveActivePlaylist(activePlaylist);
+    appConfigurationServiceForWrite.saveActivePlaylist(activePlaylist);
     assertTrue(true);
   }
 
   @Test
   public void testSaveDisplayedPlaylist() {
-    appConfigurationService.saveDisplayedPlaylist(displayedPlaylist);
+    appConfigurationServiceForWrite.saveDisplayedPlaylist(displayedPlaylist);
     assertTrue(true);
   }
 
   @Test
   public void testAddPlaylist() {
-    appConfigurationService.savePlaylist(playlists.get(0));
+    appConfigurationServiceForWrite.savePlaylist(playlists.get(0));
     assertTrue(true);
   }
 
   @Test
   public void testUpdatePlaylist() {
-    appConfigurationService.savePlaylist(playlists.get(0));
-    appConfigurationService.savePlaylist(playlists.get(1));
+    appConfigurationServiceForWrite.savePlaylist(playlists.get(0));
+    appConfigurationServiceForWrite.savePlaylist(playlists.get(1));
     playlists.get(0).setTracks(playlists.get(2).getTracks());
-    appConfigurationService.savePlaylist(playlists.get(0));
+    appConfigurationServiceForWrite.savePlaylist(playlists.get(0));
     assertTrue(true);
   }
 
   @Test
   public void testRenamePlaylist() {
-    appConfigurationService.savePlaylist(activePlaylist);
-    appConfigurationService.savePlaylist(displayedPlaylist);
+    appConfigurationServiceForWrite.savePlaylist(activePlaylist);
+    appConfigurationServiceForWrite.savePlaylist(displayedPlaylist);
     activePlaylist.setName("new playlist name");
-    appConfigurationService.renamePlaylist(activePlaylist);
+    appConfigurationServiceForWrite.renamePlaylist(activePlaylist);
     assertTrue(true);
   }
 
   @Test
   public void testDeletePlaylist() {
-    appConfigurationService.savePlaylist(playlists.get(0));
-    appConfigurationService.savePlaylist(playlists.get(1));
-    appConfigurationService.savePlaylist(playlists.get(2));
-    appConfigurationService.deletePlaylist(playlists.get(1));
+    appConfigurationServiceForWrite.savePlaylist(playlists.get(0));
+    appConfigurationServiceForWrite.savePlaylist(playlists.get(1));
+    appConfigurationServiceForWrite.savePlaylist(playlists.get(2));
+    appConfigurationServiceForWrite.deletePlaylist(playlists.get(1));
     assertTrue(true);
   }
 
   @Test
   public void testSaveAllPlaylists() {
-    appConfigurationService.saveAllPlaylists(playlists, activePlaylist, displayedPlaylist);
+    appConfigurationServiceForWrite.saveAllPlaylists(playlists, activePlaylist, displayedPlaylist);
     assertTrue(true);
   }
 
   @Test
   public void testSaveLastFmUserData() {
-    appConfigurationService.saveLastFmUserData(LASTFM_USERNAME, LASTFM_PASSWORD);
+    appConfigurationServiceForWrite.saveLastFmUserData(LASTFM_USERNAME, LASTFM_PASSWORD);
     assertTrue(true);
+  }
+
+  @Test
+  public void testGetPlaylistContainerViewConfigurations() {
+    PlaylistContainerViewConfigurations playlistContainerViewConfigurations =
+        appConfigurationServiceForRead.getPlaylistContainerViewConfigurations();
+    assertNotNull(playlistContainerViewConfigurations);
   }
 }
