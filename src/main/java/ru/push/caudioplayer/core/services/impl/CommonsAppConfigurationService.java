@@ -76,6 +76,21 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
         .orElse(null);
   }
 
+  private String getNodeAttribute(ImmutableNode node, String attributeName) {
+    assert node != null;
+    assert StringUtils.isNoneEmpty(attributeName);
+
+    return (String) node.getAttributes().get(attributeName);
+  }
+
+  private String getNodeAttribute(ImmutableNode node, String attributeName, String defaultValue) {
+    assert node != null;
+    assert StringUtils.isNoneEmpty(attributeName);
+    assert defaultValue != null;
+
+    return (String) node.getAttributes().getOrDefault(attributeName, defaultValue);
+  }
+
   @Override
   public String getActivePlaylistUid() {
     return configuration.getString(ACTIVE_PLAYLIST_UID_NODE);
@@ -92,11 +107,10 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
     return playlistTrackNodes.stream()
         .map(trackNode -> {
           String trackPath = (String) trackNode.getValue();
-          String sourceTypeTitle = StringUtils.upperCase(
-              (String) trackNode.getAttributes().getOrDefault(PLAYLIST_TRACK_NODE_ATTR_SOURCE_TYPE,
-                  MediaSourceType.FILE.name())
+          String sourceTypeName = StringUtils.upperCase(
+              getNodeAttribute(trackNode, PLAYLIST_TRACK_NODE_ATTR_SOURCE_TYPE, MediaSourceType.FILE.name())
           );
-          MediaSourceType sourceType = MediaSourceType.valueOf(sourceTypeTitle);
+          MediaSourceType sourceType = MediaSourceType.valueOf(sourceTypeName);
           return mediaInfoDataLoaderService.load(trackPath, sourceType);
         }).collect(Collectors.toList());
   }
@@ -104,13 +118,13 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
   private PlaylistData createPlaylistData(ImmutableNode playlistNode) {
     assert playlistNode != null;
 
-    String playlistUid = (String) playlistNode.getAttributes().get(PLAYLIST_NODE_ATTR_UID);
+    String playlistUid = getNodeAttribute(playlistNode, PLAYLIST_NODE_ATTR_UID);
     if (StringUtils.isEmpty(playlistUid)) {
       LOG.error("Detected playlist with empty UID, new UID for this playlist will be generated.");
       // generating will be made at playlist object creation
     }
 
-    String playlistName = (String) playlistNode.getAttributes().get(PLAYLIST_NODE_ATTR_NAME);
+    String playlistName = getNodeAttribute(playlistNode, PLAYLIST_NODE_ATTR_NAME);
     if (StringUtils.isEmpty(playlistName)) {
       LOG.error("Detected playlist with empty name, default name for this playlist will be set.");
       playlistName = UNTITLED_PLAYLIST_NAME;
@@ -196,7 +210,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
     if ((playlistsNode != null) && CollectionUtils.isNotEmpty(playlistsNode.getChildren())) {
       ImmutableNode playlistNode = IterableUtils.find(
           playlistsNode.getChildren(),
-          node -> playlistData.getUid().equals(node.getAttributes().get(PLAYLIST_NODE_ATTR_UID))
+          node -> playlistData.getUid().equals(getNodeAttribute(node, PLAYLIST_NODE_ATTR_UID))
       );
 
       if (playlistNode != null) {
@@ -228,7 +242,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
 
     int playlistIndex = IterableUtils.indexOf(
         playlistsNode.getChildren(),
-        node -> playlistData.getUid().equals(node.getAttributes().get(PLAYLIST_NODE_ATTR_UID))
+        node -> playlistData.getUid().equals(getNodeAttribute(node, PLAYLIST_NODE_ATTR_UID))
     );
     if (playlistIndex < 0) {
       LOG.warn("Playlist with UID '" + playlistData.getUid() + "' not found in set, renaming aborted.");
@@ -247,7 +261,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
     Map<Integer, Integer> nodeIdxPositionMap = playlistsNode.getChildren().stream()
         .collect(Collectors.toMap(
             node -> playlistsNode.getChildren().indexOf(node),
-            node -> (Integer) node.getAttributes().get(PLAYLIST_NODE_ATTR_POSITION),
+            node -> Integer.valueOf(getNodeAttribute(node, PLAYLIST_NODE_ATTR_POSITION)),
             (e1, e2) -> e1
         ));
     final List<Integer> nodeIdxList = nodeIdxPositionMap.entrySet().stream()
@@ -273,7 +287,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
 
     int playlistIndex = IterableUtils.indexOf(
         playlistsNode.getChildren(),
-        node -> playlistData.getUid().equals(node.getAttributes().get(PLAYLIST_NODE_ATTR_UID))
+        node -> playlistData.getUid().equals(getNodeAttribute(node, PLAYLIST_NODE_ATTR_UID))
     );
     if (playlistIndex < 0) {
       LOG.warn("Playlist with UID '" + playlistData.getUid() + "' not found in set, renaming aborted.");
