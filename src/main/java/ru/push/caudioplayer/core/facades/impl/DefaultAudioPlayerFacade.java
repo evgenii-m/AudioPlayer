@@ -221,6 +221,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 
   @Override
   public void stopApplication() {
+    // TODO: think about remove this saving
     appConfigurationService.saveAllPlaylists(
         playlistComponent.getPlaylists(),
         playlistComponent.getActivePlaylist(),

@@ -86,34 +86,59 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
     return configuration.getString(DISPLAYED_PLAYLIST_UID_NODE);
   }
 
+  private List<MediaInfoData> createMediaInfoDataList(List<ImmutableNode> playlistTrackNodes) {
+    assert playlistTrackNodes != null;
+
+    return playlistTrackNodes.stream()
+        .map(trackNode -> {
+          String trackPath = (String) trackNode.getValue();
+          String sourceTypeTitle = StringUtils.upperCase(
+              (String) trackNode.getAttributes().getOrDefault(PLAYLIST_TRACK_NODE_ATTR_SOURCE_TYPE,
+                  MediaSourceType.FILE.name())
+          );
+          MediaSourceType sourceType = MediaSourceType.valueOf(sourceTypeTitle);
+          return mediaInfoDataLoaderService.load(trackPath, sourceType);
+        }).collect(Collectors.toList());
+  }
+
+  private PlaylistData createPlaylistData(ImmutableNode playlistNode) {
+    assert playlistNode != null;
+
+    String playlistUid = (String) playlistNode.getAttributes().get(PLAYLIST_NODE_ATTR_UID);
+    if (StringUtils.isEmpty(playlistUid)) {
+      LOG.error("Detected playlist with empty UID, new UID for this playlist will be generated.");
+      // generating will be made at playlist object creation
+    }
+
+    String playlistName = (String) playlistNode.getAttributes().get(PLAYLIST_NODE_ATTR_NAME);
+    if (StringUtils.isEmpty(playlistName)) {
+      LOG.error("Detected playlist with empty name, default name for this playlist will be set.");
+      playlistName = UNTITLED_PLAYLIST_NAME;
+    }
+
+    List<MediaInfoData> playlistTracks = createMediaInfoDataList(playlistNode.getChildren());
+
+    return (playlistUid != null) ?
+        new PlaylistData(playlistUid, playlistName, playlistTracks) :
+        new PlaylistData(playlistName, playlistTracks);
+  }
+
   @Override
   public List<PlaylistData> getPlaylists() {
     ImmutableNode playlistsNode = getConfigurationRootChildNode(PLAYLISTS_SET_NODE);
 
     if (playlistsNode != null && CollectionUtils.isNotEmpty(playlistsNode.getChildren())) {
-      List<PlaylistData> playlists = playlistsNode.getChildren().stream()
-          .filter(playlistNode -> PLAYLIST_NODE_NAME.equals(playlistNode.getNodeName()))
-          .map(playlistNode -> {
-            String playlistUid = (String) playlistNode.getAttributes().get(PLAYLIST_NODE_ATTR_UID);
-            String playlistName = (String) playlistNode.getAttributes()
-                .getOrDefault(PLAYLIST_NODE_ATTR_NAME, UNTITLED_PLAYLIST_NAME);
-            List<MediaInfoData> playlistTracks = playlistNode.getChildren().stream()
-                .map(trackNode -> {
-                  String trackPath = (String) trackNode.getValue();
-                  MediaSourceType sourceType = MediaSourceType.valueOf(
-                      StringUtils.upperCase(
-                          (String) trackNode.getAttributes()
-                              .getOrDefault(PLAYLIST_TRACK_NODE_ATTR_SOURCE_TYPE, MediaSourceType.FILE.name())
-                      )
-                  );
-                  return mediaInfoDataLoaderService.load(trackPath, sourceType);
-                }).collect(Collectors.toList());
-
-            return (playlistUid != null) ?
-                new PlaylistData(playlistUid, playlistName, playlistTracks) :
-                new PlaylistData(playlistName, playlistTracks);
-          }).collect(Collectors.toList());
-      return playlists;
+      return playlistsNode.getChildren().stream()
+          .filter(node -> PLAYLIST_NODE_NAME.equals(node.getNodeName()))
+          .sorted((node1, node2) -> {
+            int node1Position = Integer.valueOf((String) node1.getAttributes()
+                .getOrDefault(PLAYLIST_NODE_ATTR_POSITION, 0));
+            int node2Position = Integer.valueOf((String) node2.getAttributes()
+                .getOrDefault(PLAYLIST_NODE_ATTR_POSITION, 0));
+            return Integer.compare(node1Position, node2Position);
+          })
+          .map(this::createPlaylistData)
+          .collect(Collectors.toList());
 
     } else {
       LOG.warn("Playlists block not found or empty (load operation)!");
@@ -148,7 +173,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
         ).collect(Collectors.toList());
   }
 
-  private ImmutableNode createPlaylistNode(PlaylistData playlistData, int playlistPosition) {
+  private ImmutableNode createPlaylistNode(PlaylistData playlistData, Integer playlistPosition) {
     assert playlistData != null;
     assert playlistPosition >= 0;
 
@@ -156,7 +181,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
         .name(PLAYLIST_NODE_NAME)
         .addAttribute(PLAYLIST_NODE_ATTR_UID, playlistData.getUid())
         .addAttribute(PLAYLIST_NODE_ATTR_NAME, playlistData.getName())
-        .addAttribute(PLAYLIST_NODE_ATTR_POSITION, playlistPosition)
+        .addAttribute(PLAYLIST_NODE_ATTR_POSITION, playlistPosition.toString())
         .addChildren(createPlaylistTrackNodes(playlistData.getTracks()))
         .create();
   }
@@ -176,7 +201,8 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
 
       if (playlistNode != null) {
         // changing existing playlist - clear node before add new from playlist data and store position
-        playlistPosition = (int) playlistNode.getAttributes().getOrDefault(PLAYLIST_NODE_ATTR_POSITION, 0);
+        playlistPosition = Integer.valueOf((String) playlistNode.getAttributes()
+            .getOrDefault(PLAYLIST_NODE_ATTR_POSITION, 0));
         int playlistIndex = playlistsNode.getChildren().indexOf(playlistNode);
         configuration.getNodeModel().clearTree(PLAYLIST_NODE + "(" + playlistIndex + ")", configuration);
       } else {
