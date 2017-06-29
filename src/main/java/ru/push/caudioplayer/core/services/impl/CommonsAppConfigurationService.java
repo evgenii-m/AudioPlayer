@@ -346,13 +346,12 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
 
 
   @Override
-  public PlaylistContainerViewConfigurations getPlaylistContainerViewConfigurations() {
+  public PlaylistContainerViewConfigurations getPlaylistContainerViewConfigurations() throws ConfigurationException {
     HierarchicalConfiguration<ImmutableNode> playlistContainerColumnsConfiguration =
         configuration.configurationAt(PLAYLIST_CONTAINER_COLUMNS_SET_NODE);
 
     if (playlistContainerColumnsConfiguration == null) {
-      // TODO: add handler
-      return null;
+      throw new ConfigurationException("Invalid playlist container view configuration.");
     }
 
     List<PlaylistContainerViewConfigurations.PlaylistContainerColumn> playlistContainerColumns =

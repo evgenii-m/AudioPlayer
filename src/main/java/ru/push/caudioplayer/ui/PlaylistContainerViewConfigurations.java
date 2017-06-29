@@ -1,6 +1,5 @@
 package ru.push.caudioplayer.ui;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -8,6 +7,11 @@ import java.util.List;
  * @date 6/27/17
  */
 public class PlaylistContainerViewConfigurations {
+  public final static String COLUMN_NUMBER_NAME = "number";
+  public final static String COLUMN_ARTIST_NAME = "artist";
+  public final static String COLUMN_ALBUM_NAME = "album";
+  public final static String COLUMN_TITLE_NAME = "title";
+  public final static String COLUMN_LENGTH_NAME = "length";
 
   final private List<PlaylistContainerColumn> columns;
 

@@ -1,5 +1,6 @@
 package ru.push.caudioplayer.core.services;
 
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 import ru.push.caudioplayer.ui.PlaylistContainerViewConfigurations;
 
@@ -42,7 +43,7 @@ public interface AppConfigurationService {
 
   // view configuration methods
 
-  PlaylistContainerViewConfigurations getPlaylistContainerViewConfigurations();
+  PlaylistContainerViewConfigurations getPlaylistContainerViewConfigurations() throws ConfigurationException;
 
   // TODO: add savePlaylistContainerViewConfigurations method
 }
