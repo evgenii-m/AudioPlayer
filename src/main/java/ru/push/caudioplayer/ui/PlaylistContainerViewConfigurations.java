@@ -27,9 +27,9 @@ public class PlaylistContainerViewConfigurations {
   public static class PlaylistContainerColumn {
     private final String name;
     private final String title;
-    private final int width;
+    private final double width;
 
-    public PlaylistContainerColumn(String name, String title, int width) {
+    public PlaylistContainerColumn(String name, String title, double width) {
       this.name = name;
       this.title = title;
       this.width = width;
@@ -43,7 +43,7 @@ public class PlaylistContainerViewConfigurations {
       return title;
     }
 
-    public int getWidth() {
+    public double getWidth() {
       return width;
     }
   }

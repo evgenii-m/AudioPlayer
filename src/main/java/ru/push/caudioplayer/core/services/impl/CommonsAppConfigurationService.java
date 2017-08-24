@@ -360,7 +360,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
               // TODO: add checks for column attributes
               String name = getNodeAttribute(node, PLAYLIST_CONTAINER_COLUMN_NODE_ATTR_NAME);
               String title = getNodeAttribute(node, PLAYLIST_CONTAINER_COLUMN_NODE_ATTR_TITLE);
-              int width = Integer.valueOf(getNodeAttribute(node, PLAYLIST_CONTAINER_COLUMN_NODE_ATTR_WIDTH));
+              double width = Double.valueOf(getNodeAttribute(node, PLAYLIST_CONTAINER_COLUMN_NODE_ATTR_WIDTH));
               return new PlaylistContainerViewConfigurations.PlaylistContainerColumn(
                   name, title, width
               );

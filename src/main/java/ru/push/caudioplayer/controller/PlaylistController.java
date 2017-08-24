@@ -10,7 +10,6 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +28,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ru.push.caudioplayer.ui.PlaylistContainerViewConfigurations.*;
@@ -46,7 +44,7 @@ public class PlaylistController {
   @FXML
   private ListView<PlaylistData> playlistBrowserContainer;
   @FXML
-  private TableView playlistContainer;
+  private TableView<MediaTrackPlaylistItem> playlistContainer;
 
   @FXML
   @Resource(name = "renamePopupView")
@@ -201,40 +199,45 @@ public class PlaylistController {
     try {
       PlaylistContainerViewConfigurations viewConfigurations =
           appConfigurationService.getPlaylistContainerViewConfigurations();
-      Map<String, PlaylistContainerViewConfigurations.PlaylistContainerColumn> columnsConfigurations =
+      Map<String, PlaylistContainerColumn> columnsConfigurations =
           viewConfigurations.getColumns().stream()
               .collect(Collectors.toMap(
-                  PlaylistContainerViewConfigurations.PlaylistContainerColumn::getName,
+                  PlaylistContainerColumn::getName,
                   columnConf -> columnConf,
                   (e1, e2) -> e1
               ));
 
       playlistContainer.getColumns().clear();
 
-      PlaylistContainerViewConfigurations.PlaylistContainerColumn columnConfiguration;
+      PlaylistContainerColumn columnConfiguration;
 
       columnConfiguration = columnsConfigurations.get(COLUMN_NUMBER_NAME);
       TableColumn numberCol = new TableColumn(columnConfiguration.getTitle());
+      numberCol.setUserData(columnConfiguration.getName());
       numberCol.setPrefWidth(columnConfiguration.getWidth());
       numberCol.setCellValueFactory(new PropertyValueFactory<MediaTrackPlaylistItem, String>(columnConfiguration.getName()));
 
       columnConfiguration = columnsConfigurations.get(COLUMN_ARTIST_NAME);
       TableColumn artistCol = new TableColumn(columnConfiguration.getTitle());
+      artistCol.setUserData(columnConfiguration.getName());
       artistCol.setPrefWidth(columnConfiguration.getWidth());
       artistCol.setCellValueFactory(new PropertyValueFactory<MediaTrackPlaylistItem, String>(columnConfiguration.getName()));
 
       columnConfiguration = columnsConfigurations.get(COLUMN_ALBUM_NAME);
       TableColumn albumCol = new TableColumn(columnConfiguration.getTitle());
+      albumCol.setUserData(columnConfiguration.getName());
       albumCol.setPrefWidth(columnConfiguration.getWidth());
       albumCol.setCellValueFactory(new PropertyValueFactory<MediaTrackPlaylistItem, String>(columnConfiguration.getName()));
 
       columnConfiguration = columnsConfigurations.get(COLUMN_TITLE_NAME);
       TableColumn titleCol = new TableColumn(columnConfiguration.getTitle());
+      titleCol.setUserData(columnConfiguration.getName());
       titleCol.setPrefWidth(columnConfiguration.getWidth());
       titleCol.setCellValueFactory(new PropertyValueFactory<MediaTrackPlaylistItem, String>(columnConfiguration.getName()));
 
       columnConfiguration = columnsConfigurations.get(COLUMN_LENGTH_NAME);
       TableColumn lengthCol = new TableColumn(columnConfiguration.getTitle());
+      lengthCol.setUserData(columnConfiguration.getName());
       lengthCol.setPrefWidth(columnConfiguration.getWidth());
       lengthCol.setCellValueFactory(new PropertyValueFactory<MediaTrackPlaylistItem, String>(columnConfiguration.getName()));
 
@@ -275,6 +278,19 @@ public class PlaylistController {
               }
             }).collect(Collectors.toList())
     );
+  }
+
+  private void savePlaylistContainerViewConfiguration() {
+    List<PlaylistContainerColumn> columns = playlistContainer.getColumns().stream()
+        .map(tc ->
+            new PlaylistContainerColumn(
+                (String) tc.getUserData(),
+                tc.getText(),
+                tc.getWidth()
+            )
+        ).collect(Collectors.toList());
+    PlaylistContainerViewConfigurations viewConfigurations = new PlaylistContainerViewConfigurations(columns);
+    appConfigurationService.savePlaylistContainerViewConfigurations(viewConfigurations);
   }
 
 
@@ -321,6 +337,7 @@ public class PlaylistController {
 
     @Override
     public void stopAudioPlayer() {
+      savePlaylistContainerViewConfiguration();
     }
   }
 }
