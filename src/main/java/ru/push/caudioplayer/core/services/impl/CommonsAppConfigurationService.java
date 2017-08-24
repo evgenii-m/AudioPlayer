@@ -367,10 +367,28 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
             })
             .collect(Collectors.toList());
 
-    PlaylistContainerViewConfigurations configurationsData =
-        new PlaylistContainerViewConfigurations(playlistContainerColumns);
+    return new PlaylistContainerViewConfigurations(playlistContainerColumns);
+  }
 
-    return configurationsData;
+  @Override
+  public void savePlaylistContainerViewConfigurations(PlaylistContainerViewConfigurations viewConfigurations) {
+    Assert.notNull(viewConfigurations);
+
+    configuration.clearTree(PLAYLIST_CONTAINER_NODE);
+
+    List<ImmutableNode> columnsNodes = viewConfigurations.getColumns().stream()
+        .map(column ->
+            new ImmutableNode.Builder()
+                .name(PLAYLIST_CONTAINER_COLUMN_NODE_NAME)
+                .addAttribute(PLAYLIST_CONTAINER_COLUMN_NODE_ATTR_NAME, column.getName())
+                .addAttribute(PLAYLIST_CONTAINER_COLUMN_NODE_ATTR_TITLE, column.getTitle())
+                .addAttribute(PLAYLIST_CONTAINER_COLUMN_NODE_ATTR_WIDTH, column.getWidth())
+                .create()
+        ).collect(Collectors.toList());
+
+    configuration.addNodes(PLAYLIST_CONTAINER_COLUMNS_SET_NODE, columnsNodes);
+
+    saveConfiguration();
   }
 
 }

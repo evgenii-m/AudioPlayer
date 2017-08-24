@@ -1,5 +1,6 @@
 package ru.push.caudioplayer.core.services;
 
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
@@ -146,9 +147,17 @@ public class AppConfigurationServiceManuallyTest {
   }
 
   @Test
-  public void testGetPlaylistContainerViewConfigurations() {
+  public void testGetPlaylistContainerViewConfigurations() throws ConfigurationException {
     PlaylistContainerViewConfigurations playlistContainerViewConfigurations =
         appConfigurationServiceForRead.getPlaylistContainerViewConfigurations();
     assertNotNull(playlistContainerViewConfigurations);
+  }
+
+  @Test
+  public void testSavePlaylistContainerViewConfigurations() throws ConfigurationException {
+    PlaylistContainerViewConfigurations playlistContainerViewConfigurations =
+        appConfigurationServiceForRead.getPlaylistContainerViewConfigurations();
+    appConfigurationServiceForWrite.savePlaylistContainerViewConfigurations(playlistContainerViewConfigurations);
+    assertTrue(true);
   }
 }

@@ -45,5 +45,5 @@ public interface AppConfigurationService {
 
   PlaylistContainerViewConfigurations getPlaylistContainerViewConfigurations() throws ConfigurationException;
 
-  // TODO: add savePlaylistContainerViewConfigurations method
+  void savePlaylistContainerViewConfigurations(PlaylistContainerViewConfigurations viewConfigurations);
 }
