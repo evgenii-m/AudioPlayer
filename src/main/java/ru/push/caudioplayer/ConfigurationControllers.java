@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import ru.push.caudioplayer.controller.MainController;
 import ru.push.caudioplayer.controller.AudioPlayerController;
 import ru.push.caudioplayer.controller.PlaylistController;
+import ru.push.caudioplayer.controller.RenamePopupController;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,6 +51,16 @@ public class ConfigurationControllers {
   @Bean
   public PlaylistController getPlaylistController() {
     return (PlaylistController) playlistView().getController();
+  }
+
+  @Bean(name = "renamePopupView")
+  public View renamePopupView() {
+    return loadView("view/rename-popup.fxml");
+  }
+
+  @Bean
+  public RenamePopupController getRenamePopupController() {
+    return (RenamePopupController) renamePopupView().getController();
   }
 
   protected View loadView(String url) {

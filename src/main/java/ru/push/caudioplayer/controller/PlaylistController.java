@@ -1,31 +1,36 @@
 package ru.push.caudioplayer.controller;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ListChangeListener;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import ru.push.caudioplayer.ConfigurationControllers;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
+import ru.push.caudioplayer.core.services.AppConfigurationService;
 import ru.push.caudioplayer.ui.MediaTrackPlaylistItem;
+import ru.push.caudioplayer.ui.PlaylistContainerViewConfigurations;
 import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
 
 import javax.annotation.PostConstruct;
-import java.text.FieldPosition;
-import java.text.Format;
-import java.text.ParsePosition;
-import java.util.Collections;
+import javax.annotation.Resource;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import static ru.push.caudioplayer.ui.PlaylistContainerViewConfigurations.*;
 
 /**
  * @author push <mez.e.s@yandex.ru>
@@ -39,19 +44,26 @@ public class PlaylistController {
   @FXML
   private ListView<PlaylistData> playlistBrowserContainer;
   @FXML
-  private TableView playlistContainer;
+  private TableView<MediaTrackPlaylistItem> playlistContainer;
+
+  @FXML
+  @Resource(name = "renamePopupView")
+  private ConfigurationControllers.View renamePopupView;
 
   @Autowired
   private AudioPlayerFacade audioPlayerFacade;
   @Autowired
   private TrackTimeLabelBuilder trackTimeLabelBuilder;
+  @Autowired
+  private AppConfigurationService appConfigurationService;
+
+  private Scene renamePopupScene;
 
 
   @FXML
   public void initialize() {
     LOG.debug("initialize");
 
-    setPlaylistContainerColumns();
     playlistBrowserContainer.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
     playlistContainer.setEditable(false);
     playlistContainer.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -60,6 +72,10 @@ public class PlaylistController {
   @PostConstruct
   public void init() {
     LOG.debug("init");
+
+    setPlaylistContainerColumns();
+
+    renamePopupScene = new Scene(renamePopupView.getView());
 
     audioPlayerFacade.addEventListener(new AudioPlayerEventAdapter());
 
@@ -75,6 +91,12 @@ public class PlaylistController {
     PlaylistData displayedPlaylist = audioPlayerFacade.getDisplayedPlaylist();
     fillPlaylistBrowserContainer(playlists, displayedPlaylist);
 
+    playlistBrowserContainer.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
+      if (!event.isPrimaryButtonDown()) {
+        event.consume();
+      }
+    });
+
     playlistBrowserContainer.getSelectionModel().selectedItemProperty().addListener(
         (observable, oldValue, newValue) -> {
           PlaylistData playlist = audioPlayerFacade.showPlaylist(newValue.getUid());
@@ -82,17 +104,16 @@ public class PlaylistController {
         });
 
     setPlaylistContainerItems(audioPlayerFacade.getDisplayedPlaylist());
-    preparePlaylistContextMenu();
-    preparePlaylistBrowserContextMenu();
+    setPlaylistContainerRowFactory();
+    setPlaylistBrowserContainerCellFactory();
   }
 
-  private void preparePlaylistBrowserContextMenu() {
+  private void setPlaylistBrowserContainerCellFactory() {
     playlistBrowserContainer.setCellFactory(lv -> {
       ListCell<PlaylistData> cell = new ListCell<PlaylistData>() {
         @Override
         protected void updateItem(PlaylistData item, boolean empty) {
           super.updateItem(item, empty);
-
           if (empty || item == null || item.getName() == null) {
             setText(null);
           } else {
@@ -101,20 +122,14 @@ public class PlaylistController {
         }
       };
 
+      // prepare context menu
       ContextMenu contextMenu = new ContextMenu();
 
-      MenuItem removeMenuItem = new MenuItem();
-      removeMenuItem.textProperty().bind(Bindings.format("Delete"));
-      removeMenuItem.setOnAction(event -> {
-        PlaylistData deletedPlaylist = playlistBrowserContainer.getSelectionModel().getSelectedItem();
-        if (audioPlayerFacade.deletePlaylist(deletedPlaylist.getUid())) {
-          playlistBrowserContainer.getItems().remove(deletedPlaylist);
-        }
-      });
+      MenuItem removeMenuItem = new MenuItem("Delete");
+      removeMenuItem.setOnAction(event -> removePlaylistAction(event, cell));
 
       MenuItem renameMenuItem = new MenuItem("Rename");
-//    removeMenuItem.setOnAction(event ->
-//        audioPlayerFacade.renamePlaylist());
+      renameMenuItem.setOnAction(event -> renamePlaylistAction(event, cell));
 
       contextMenu.getItems().addAll(removeMenuItem, renameMenuItem);
 
@@ -129,10 +144,32 @@ public class PlaylistController {
     });
   }
 
-  private void preparePlaylistContextMenu() {
+  private void renamePlaylistAction(ActionEvent event, ListCell<PlaylistData> cell) {
+    assert renamePopupView.getController() instanceof RenamePopupController;
+
+    Stage popupStage = new Stage();
+    Stage primaryStage = (Stage) playlistBrowserContainer.getScene().getWindow();
+    popupStage.setTitle("Rename");
+    popupStage.setResizable(false);
+    popupStage.setScene(renamePopupScene);
+    popupStage.initModality(Modality.WINDOW_MODAL);
+    popupStage.initOwner(primaryStage);
+    ((RenamePopupController) renamePopupView.getController()).setRenamedPlaylist(cell.getItem());
+    popupStage.show();
+  }
+
+  private void removePlaylistAction(ActionEvent event, ListCell<PlaylistData> cell) {
+    PlaylistData deletedPlaylist = cell.getItem();
+    if (audioPlayerFacade.deletePlaylist(deletedPlaylist.getUid())) {
+      playlistBrowserContainer.getItems().remove(deletedPlaylist);
+    }
+  }
+
+  private void setPlaylistContainerRowFactory() {
     playlistContainer.setRowFactory(lv -> {
       TableRow<MediaTrackPlaylistItem> tableRow = new TableRow<>();
 
+      // prepare context menu
       ContextMenu contextMenu = new ContextMenu();
       MenuItem lookupOnLastfmMenuItem = new MenuItem("Lookup on last.fm");
 
@@ -159,18 +196,56 @@ public class PlaylistController {
   }
 
   private void setPlaylistContainerColumns() {
-    playlistContainer.getColumns().clear();
-    TableColumn numberCol = new TableColumn("#");
-    numberCol.setCellValueFactory(new PropertyValueFactory<MediaTrackPlaylistItem, String>("number"));
-    TableColumn artistCol = new TableColumn("Artist");
-    artistCol.setCellValueFactory(new PropertyValueFactory<MediaTrackPlaylistItem, String>("artist"));
-    TableColumn albumCol = new TableColumn("Album");
-    albumCol.setCellValueFactory(new PropertyValueFactory<MediaTrackPlaylistItem, String>("album"));
-    TableColumn titleCol = new TableColumn("Title");
-    titleCol.setCellValueFactory(new PropertyValueFactory<MediaTrackPlaylistItem, String>("title"));
-    TableColumn lengthCol = new TableColumn("Length");
-    lengthCol.setCellValueFactory(new PropertyValueFactory<MediaTrackPlaylistItem, String>("length"));
-    playlistContainer.getColumns().addAll(numberCol, artistCol, albumCol, titleCol, lengthCol);
+    try {
+      PlaylistContainerViewConfigurations viewConfigurations =
+          appConfigurationService.getPlaylistContainerViewConfigurations();
+      Map<String, PlaylistContainerColumn> columnsConfigurations =
+          viewConfigurations.getColumns().stream()
+              .collect(Collectors.toMap(
+                  PlaylistContainerColumn::getName,
+                  columnConf -> columnConf,
+                  (e1, e2) -> e1
+              ));
+
+      playlistContainer.getColumns().clear();
+
+      PlaylistContainerColumn columnConfiguration;
+
+      columnConfiguration = columnsConfigurations.get(COLUMN_NUMBER_NAME);
+      TableColumn numberCol = new TableColumn(columnConfiguration.getTitle());
+      numberCol.setUserData(columnConfiguration.getName());
+      numberCol.setPrefWidth(columnConfiguration.getWidth());
+      numberCol.setCellValueFactory(new PropertyValueFactory<MediaTrackPlaylistItem, String>(columnConfiguration.getName()));
+
+      columnConfiguration = columnsConfigurations.get(COLUMN_ARTIST_NAME);
+      TableColumn artistCol = new TableColumn(columnConfiguration.getTitle());
+      artistCol.setUserData(columnConfiguration.getName());
+      artistCol.setPrefWidth(columnConfiguration.getWidth());
+      artistCol.setCellValueFactory(new PropertyValueFactory<MediaTrackPlaylistItem, String>(columnConfiguration.getName()));
+
+      columnConfiguration = columnsConfigurations.get(COLUMN_ALBUM_NAME);
+      TableColumn albumCol = new TableColumn(columnConfiguration.getTitle());
+      albumCol.setUserData(columnConfiguration.getName());
+      albumCol.setPrefWidth(columnConfiguration.getWidth());
+      albumCol.setCellValueFactory(new PropertyValueFactory<MediaTrackPlaylistItem, String>(columnConfiguration.getName()));
+
+      columnConfiguration = columnsConfigurations.get(COLUMN_TITLE_NAME);
+      TableColumn titleCol = new TableColumn(columnConfiguration.getTitle());
+      titleCol.setUserData(columnConfiguration.getName());
+      titleCol.setPrefWidth(columnConfiguration.getWidth());
+      titleCol.setCellValueFactory(new PropertyValueFactory<MediaTrackPlaylistItem, String>(columnConfiguration.getName()));
+
+      columnConfiguration = columnsConfigurations.get(COLUMN_LENGTH_NAME);
+      TableColumn lengthCol = new TableColumn(columnConfiguration.getTitle());
+      lengthCol.setUserData(columnConfiguration.getName());
+      lengthCol.setPrefWidth(columnConfiguration.getWidth());
+      lengthCol.setCellValueFactory(new PropertyValueFactory<MediaTrackPlaylistItem, String>(columnConfiguration.getName()));
+
+      playlistContainer.getColumns().addAll(numberCol, artistCol, albumCol, titleCol, lengthCol);
+
+    } catch (ConfigurationException e) {
+      LOG.error(e.getMessage());
+    }
   }
 
   private void fillPlaylistBrowserContainer(List<PlaylistData> playlists, PlaylistData displayedPlaylist) {
@@ -203,6 +278,19 @@ public class PlaylistController {
               }
             }).collect(Collectors.toList())
     );
+  }
+
+  private void savePlaylistContainerViewConfiguration() {
+    List<PlaylistContainerColumn> columns = playlistContainer.getColumns().stream()
+        .map(tc ->
+            new PlaylistContainerColumn(
+                (String) tc.getUserData(),
+                tc.getText(),
+                tc.getWidth()
+            )
+        ).collect(Collectors.toList());
+    PlaylistContainerViewConfigurations viewConfigurations = new PlaylistContainerViewConfigurations(columns);
+    appConfigurationService.savePlaylistContainerViewConfigurations(viewConfigurations);
   }
 
 
@@ -243,7 +331,13 @@ public class PlaylistController {
     }
 
     @Override
+    public void renamedPlaylist(PlaylistData playlistData) {
+      playlistBrowserContainer.refresh();
+    }
+
+    @Override
     public void stopAudioPlayer() {
+      savePlaylistContainerViewConfiguration();
     }
   }
 }

@@ -32,6 +32,7 @@
 
   <bean name="appConfigurationService"
         class="ru.push.caudioplayer.core.services.impl.CommonsAppConfigurationService">
+    <constructor-arg value="mediaplayer-app-configuration.xml"/>
   </bean>
 
   <bean name="mediaInfoDataLoaderService"

@@ -2,6 +2,7 @@ package ru.push.caudioplayer.core.services.impl;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IterableUtils;
+import org.apache.commons.configuration2.HierarchicalConfiguration;
 import org.apache.commons.configuration2.XMLConfiguration;
 import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
@@ -17,13 +18,14 @@ import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaSourceType;
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 import ru.push.caudioplayer.core.services.AppConfigurationService;
+import ru.push.caudioplayer.ui.PlaylistContainerViewConfigurations;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static ru.push.caudioplayer.core.services.ServicesConstants.*;
+import static ru.push.caudioplayer.core.services.ConfigurationServiceConstants.*;
 
 /**
  * @author push <mez.e.s@yandex.ru>
@@ -39,6 +41,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
 
   private final FileBasedConfigurationBuilder<XMLConfiguration> configurationBuilder;
   private XMLConfiguration configuration;
+
 
   public CommonsAppConfigurationService(String configurationFileName) {
     Parameters params = new Parameters();
@@ -70,11 +73,37 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
     }
   }
 
+
   private ImmutableNode getConfigurationRootChildNode(String nodeName) {
     return configuration.getNodeModel().getRootNode().getChildren().stream()
         .filter(node -> node.getNodeName().equals(nodeName)).findFirst()
         .orElse(null);
   }
+
+  private String getNodeAttribute(ImmutableNode node, String attributeName) {
+    assert node != null;
+    assert StringUtils.isNoneEmpty(attributeName);
+
+    return (String) node.getAttributes().get(attributeName);
+  }
+
+  private String getNodeAttribute(ImmutableNode node, String attributeName, String defaultValue) {
+    assert node != null;
+    assert StringUtils.isNoneEmpty(attributeName);
+    assert defaultValue != null;
+
+    return (String) node.getAttributes().getOrDefault(attributeName, defaultValue);
+  }
+
+  private void saveConfiguration() {
+    try {
+      LOG.debug("save configuration");
+      configurationBuilder.save();
+    } catch (ConfigurationException e) {
+      LOG.error("Error when save configuration to file.", e);
+    }
+  }
+
 
   @Override
   public String getActivePlaylistUid() {
@@ -86,34 +115,58 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
     return configuration.getString(DISPLAYED_PLAYLIST_UID_NODE);
   }
 
+  private List<MediaInfoData> createMediaInfoDataList(List<ImmutableNode> playlistTrackNodes) {
+    assert playlistTrackNodes != null;
+
+    return playlistTrackNodes.stream()
+        .map(trackNode -> {
+          String trackPath = (String) trackNode.getValue();
+          String sourceTypeName = StringUtils.upperCase(
+              getNodeAttribute(trackNode, PLAYLIST_TRACK_NODE_ATTR_SOURCE_TYPE, MediaSourceType.FILE.name())
+          );
+          MediaSourceType sourceType = MediaSourceType.valueOf(sourceTypeName);
+          return mediaInfoDataLoaderService.load(trackPath, sourceType);
+        }).collect(Collectors.toList());
+  }
+
+  private PlaylistData createPlaylistData(ImmutableNode playlistNode) {
+    assert playlistNode != null;
+
+    String playlistUid = getNodeAttribute(playlistNode, PLAYLIST_NODE_ATTR_UID);
+    if (StringUtils.isEmpty(playlistUid)) {
+      LOG.error("Detected playlist with empty UID, new UID for this playlist will be generated.");
+      // generating will be made at playlist object creation
+    }
+
+    String playlistName = getNodeAttribute(playlistNode, PLAYLIST_NODE_ATTR_NAME);
+    if (StringUtils.isEmpty(playlistName)) {
+      LOG.error("Detected playlist with empty name, default name for this playlist will be set.");
+      playlistName = UNTITLED_PLAYLIST_NAME;
+    }
+
+    List<MediaInfoData> playlistTracks = createMediaInfoDataList(playlistNode.getChildren());
+
+    return (playlistUid != null) ?
+        new PlaylistData(playlistUid, playlistName, playlistTracks) :
+        new PlaylistData(playlistName, playlistTracks);
+  }
+
   @Override
   public List<PlaylistData> getPlaylists() {
     ImmutableNode playlistsNode = getConfigurationRootChildNode(PLAYLISTS_SET_NODE);
 
     if (playlistsNode != null && CollectionUtils.isNotEmpty(playlistsNode.getChildren())) {
-      List<PlaylistData> playlists = playlistsNode.getChildren().stream()
-          .filter(playlistNode -> PLAYLIST_NODE_NAME.equals(playlistNode.getNodeName()))
-          .map(playlistNode -> {
-            String playlistUid = (String) playlistNode.getAttributes().get(PLAYLIST_NODE_ATTR_UID);
-            String playlistName = (String) playlistNode.getAttributes()
-                .getOrDefault(PLAYLIST_NODE_ATTR_NAME, UNTITLED_PLAYLIST_NAME);
-            List<MediaInfoData> playlistTracks = playlistNode.getChildren().stream()
-                .map(trackNode -> {
-                  String trackPath = (String) trackNode.getValue();
-                  MediaSourceType sourceType = MediaSourceType.valueOf(
-                      StringUtils.upperCase(
-                          (String) trackNode.getAttributes()
-                              .getOrDefault(PLAYLIST_TRACK_NODE_ATTR_SOURCE_TYPE, MediaSourceType.FILE.name())
-                      )
-                  );
-                  return mediaInfoDataLoaderService.load(trackPath, sourceType);
-                }).collect(Collectors.toList());
-
-            return (playlistUid != null) ?
-                new PlaylistData(playlistUid, playlistName, playlistTracks) :
-                new PlaylistData(playlistName, playlistTracks);
-          }).collect(Collectors.toList());
-      return playlists;
+      return playlistsNode.getChildren().stream()
+          .filter(node -> PLAYLIST_NODE_NAME.equals(node.getNodeName()))
+          .sorted((node1, node2) -> {
+            int node1Position = Integer.valueOf((String) node1.getAttributes()
+                .getOrDefault(PLAYLIST_NODE_ATTR_POSITION, 0));
+            int node2Position = Integer.valueOf((String) node2.getAttributes()
+                .getOrDefault(PLAYLIST_NODE_ATTR_POSITION, 0));
+            return Integer.compare(node1Position, node2Position);
+          })
+          .map(this::createPlaylistData)
+          .collect(Collectors.toList());
 
     } else {
       LOG.warn("Playlists block not found or empty (load operation)!");
@@ -148,7 +201,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
         ).collect(Collectors.toList());
   }
 
-  private ImmutableNode createPlaylistNode(PlaylistData playlistData, int playlistPosition) {
+  private ImmutableNode createPlaylistNode(PlaylistData playlistData, Integer playlistPosition) {
     assert playlistData != null;
     assert playlistPosition >= 0;
 
@@ -156,7 +209,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
         .name(PLAYLIST_NODE_NAME)
         .addAttribute(PLAYLIST_NODE_ATTR_UID, playlistData.getUid())
         .addAttribute(PLAYLIST_NODE_ATTR_NAME, playlistData.getName())
-        .addAttribute(PLAYLIST_NODE_ATTR_POSITION, playlistPosition)
+        .addAttribute(PLAYLIST_NODE_ATTR_POSITION, playlistPosition.toString())
         .addChildren(createPlaylistTrackNodes(playlistData.getTracks()))
         .create();
   }
@@ -171,12 +224,13 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
     if ((playlistsNode != null) && CollectionUtils.isNotEmpty(playlistsNode.getChildren())) {
       ImmutableNode playlistNode = IterableUtils.find(
           playlistsNode.getChildren(),
-          node -> playlistData.getUid().equals(node.getAttributes().get(PLAYLIST_NODE_ATTR_UID))
+          node -> playlistData.getUid().equals(getNodeAttribute(node, PLAYLIST_NODE_ATTR_UID))
       );
 
       if (playlistNode != null) {
         // changing existing playlist - clear node before add new from playlist data and store position
-        playlistPosition = (int) playlistNode.getAttributes().getOrDefault(PLAYLIST_NODE_ATTR_POSITION, 0);
+        playlistPosition = Integer.valueOf((String) playlistNode.getAttributes()
+            .getOrDefault(PLAYLIST_NODE_ATTR_POSITION, 0));
         int playlistIndex = playlistsNode.getChildren().indexOf(playlistNode);
         configuration.getNodeModel().clearTree(PLAYLIST_NODE + "(" + playlistIndex + ")", configuration);
       } else {
@@ -202,7 +256,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
 
     int playlistIndex = IterableUtils.indexOf(
         playlistsNode.getChildren(),
-        node -> playlistData.getUid().equals(node.getAttributes().get(PLAYLIST_NODE_ATTR_UID))
+        node -> playlistData.getUid().equals(getNodeAttribute(node, PLAYLIST_NODE_ATTR_UID))
     );
     if (playlistIndex < 0) {
       LOG.warn("Playlist with UID '" + playlistData.getUid() + "' not found in set, renaming aborted.");
@@ -221,7 +275,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
     Map<Integer, Integer> nodeIdxPositionMap = playlistsNode.getChildren().stream()
         .collect(Collectors.toMap(
             node -> playlistsNode.getChildren().indexOf(node),
-            node -> (Integer) node.getAttributes().get(PLAYLIST_NODE_ATTR_POSITION),
+            node -> Integer.valueOf(getNodeAttribute(node, PLAYLIST_NODE_ATTR_POSITION)),
             (e1, e2) -> e1
         ));
     final List<Integer> nodeIdxList = nodeIdxPositionMap.entrySet().stream()
@@ -247,7 +301,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
 
     int playlistIndex = IterableUtils.indexOf(
         playlistsNode.getChildren(),
-        node -> playlistData.getUid().equals(node.getAttributes().get(PLAYLIST_NODE_ATTR_UID))
+        node -> playlistData.getUid().equals(getNodeAttribute(node, PLAYLIST_NODE_ATTR_UID))
     );
     if (playlistIndex < 0) {
       LOG.warn("Playlist with UID '" + playlistData.getUid() + "' not found in set, renaming aborted.");
@@ -279,6 +333,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
     saveConfiguration();
   }
 
+
   @Override
   public void saveLastFmUserData(String username, String password) {
     Assert.notNull(username);
@@ -289,12 +344,51 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
     saveConfiguration();
   }
 
-  private void saveConfiguration() {
-    try {
-      LOG.debug("save configuration");
-      configurationBuilder.save();
-    } catch (ConfigurationException e) {
-      LOG.error("Error when save configuration to file.", e);
+
+  @Override
+  public PlaylistContainerViewConfigurations getPlaylistContainerViewConfigurations() throws ConfigurationException {
+    HierarchicalConfiguration<ImmutableNode> playlistContainerColumnsConfiguration =
+        configuration.configurationAt(PLAYLIST_CONTAINER_COLUMNS_SET_NODE);
+
+    if (playlistContainerColumnsConfiguration == null) {
+      throw new ConfigurationException("Invalid playlist container view configuration.");
     }
+
+    List<PlaylistContainerViewConfigurations.PlaylistContainerColumn> playlistContainerColumns =
+        playlistContainerColumnsConfiguration.getNodeModel().getInMemoryRepresentation().getChildren().stream()
+            .map(node -> {
+              // TODO: add checks for column attributes
+              String name = getNodeAttribute(node, PLAYLIST_CONTAINER_COLUMN_NODE_ATTR_NAME);
+              String title = getNodeAttribute(node, PLAYLIST_CONTAINER_COLUMN_NODE_ATTR_TITLE);
+              double width = Double.valueOf(getNodeAttribute(node, PLAYLIST_CONTAINER_COLUMN_NODE_ATTR_WIDTH));
+              return new PlaylistContainerViewConfigurations.PlaylistContainerColumn(
+                  name, title, width
+              );
+            })
+            .collect(Collectors.toList());
+
+    return new PlaylistContainerViewConfigurations(playlistContainerColumns);
   }
+
+  @Override
+  public void savePlaylistContainerViewConfigurations(PlaylistContainerViewConfigurations viewConfigurations) {
+    Assert.notNull(viewConfigurations);
+
+    configuration.clearTree(PLAYLIST_CONTAINER_NODE);
+
+    List<ImmutableNode> columnsNodes = viewConfigurations.getColumns().stream()
+        .map(column ->
+            new ImmutableNode.Builder()
+                .name(PLAYLIST_CONTAINER_COLUMN_NODE_NAME)
+                .addAttribute(PLAYLIST_CONTAINER_COLUMN_NODE_ATTR_NAME, column.getName())
+                .addAttribute(PLAYLIST_CONTAINER_COLUMN_NODE_ATTR_TITLE, column.getTitle())
+                .addAttribute(PLAYLIST_CONTAINER_COLUMN_NODE_ATTR_WIDTH, column.getWidth())
+                .create()
+        ).collect(Collectors.toList());
+
+    configuration.addNodes(PLAYLIST_CONTAINER_COLUMNS_SET_NODE, columnsNodes);
+
+    saveConfiguration();
+  }
+
 }

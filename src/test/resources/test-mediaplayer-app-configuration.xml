@@ -14,4 +14,15 @@
     <activeUid>ec1ed359-5344-4b5b-8262-a12c26c609c8</activeUid>
     <displayedUid>ec1ed359-5344-4b5b-8262-a12c26c609c8</displayedUid>
   </playlists>
+  <view>
+    <playlistContainer>
+      <columns>
+        <column name="number" title="#" width="20"/>
+        <column name="artist" title="Artist" width="100"/>
+        <column name="album" title="Album" width="100"/>
+        <column name="title" title="Title" width="100"/>
+        <column name="length" title="Length" width="100"/>
+      </columns>
+    </playlistContainer>
+  </view>
 </configuration>

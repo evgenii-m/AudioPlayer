@@ -39,7 +39,6 @@ public class AppMain extends AbstractJavaFxApplicationSupport {
 
     stage.setTitle(windowTitle);
     stage.setScene(new Scene(mainView.getView(), DEFAULT_WIDTH, DEFAULT_HEIGHT));
-    stage.setResizable(false);
     stage.centerOnScreen();
     stage.show();
   }
