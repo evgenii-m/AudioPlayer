@@ -16,7 +16,7 @@ import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
  * @date 2/12/17
  */
 public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
+
   private static final Logger LOG = LoggerFactory.getLogger(DefaultCustomPlaylistComponent.class);
 
   private final CustomMediaPlayerFactory mediaPlayerFactory;
@@ -66,8 +67,8 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
 
     } else {
       LOG.warn("Attempts to load an empty playlists!");
+      this.playlists = new ArrayList<>();
       PlaylistData newPlaylist = createNewPlaylist();
-      this.playlists = Collections.singletonList(newPlaylist);
       activePlaylist = newPlaylist;
       trackPosition = 0;
       displayedPlaylist = newPlaylist;

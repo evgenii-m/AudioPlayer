@@ -1,14 +1,13 @@
 package ru.push.caudioplayer;
 
+import com.sun.jna.NativeLibrary;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Lazy;
-import ru.push.caudioplayer.controller.MainController;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
-import ru.push.caudioplayer.core.mediaplayer.components.NativePlayerComponent;
 import uk.co.caprica.vlcj.discovery.NativeDiscovery;
 
 import javax.annotation.Resource;
@@ -52,6 +51,10 @@ public class AppMain extends AbstractJavaFxApplicationSupport {
   }
 
   public static void main(String[] args) {
+  	// todo: make read from configuration file
+  	System.setProperty("jna.library.path", "C:/Program Files/VideoLAN/VLC");
+  	System.setProperty("VLC_PLUGIN_PATH", "C:/Program Files/VideoLAN/VLC/plugins");
+
     launchApp(AppMain.class, args);
   }
 }
