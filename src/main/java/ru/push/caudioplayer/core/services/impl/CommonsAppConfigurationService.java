@@ -347,6 +347,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
 
   @Override
   public PlaylistContainerViewConfigurations getPlaylistContainerViewConfigurations() throws ConfigurationException {
+    // TODO: add handling empty view configuration situations
     HierarchicalConfiguration<ImmutableNode> playlistContainerColumnsConfiguration =
         configuration.configurationAt(PLAYLIST_CONTAINER_COLUMNS_SET_NODE);
 
