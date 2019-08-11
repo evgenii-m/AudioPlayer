@@ -21,11 +21,22 @@ public class DefaultLastFmService implements LastFmService {
   @Autowired
 	private LastFmApiAdapter apiAdapter;
 
+	/**
+	 * See https://www.last.fm/api/desktopauth
+	 */
 	@Override
 	public void connectLastFm(Consumer<String> openAuthPageConsumer) {
+		// 1. API Key into adapter
+
+		// 2. Fetch a request token
 		String token = apiAdapter.authGetToken();
+
+		// 3. Request authorization from the user
 		String authPageUrl = apiAdapter.getUserAuthorizationPageUrl(token);
 		openAuthPageConsumer.accept(authPageUrl);
+
+		// 4. Fetch A Web Service Session
+		String sessionKey = apiAdapter.authGetSession(token);
 	}
 
 	@Override
