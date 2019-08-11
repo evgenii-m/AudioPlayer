@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
+import ru.push.caudioplayer.core.lastfm.LastFmService;
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
@@ -21,6 +22,7 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 
 /**
@@ -41,6 +43,8 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   private AppConfigurationService appConfigurationService;
   @Autowired
   private MediaInfoDataLoaderService mediaInfoDataLoaderService;
+  @Autowired
+	private LastFmService lastFmService;
 
   private MediaInfoData currentTrackInfoData;
 
@@ -57,7 +61,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
     playerComponent.addEventListener(new AudioPlayerFacadeEventListener());
   }
 
-  @Override
+	@Override
   public synchronized void addEventListener(AudioPlayerEventListener listener) {
     eventListeners.add(listener);
   }
@@ -218,6 +222,11 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   public MediaInfoData getCurrentTrackInfo() {
     return currentTrackInfoData;
   }
+
+	@Override
+	public void connectLastFm(Consumer<String> openAuthPageConsumer) {
+		lastFmService.connectLastFm(openAuthPageConsumer);
+	}
 
   @Override
   public void stopApplication() {

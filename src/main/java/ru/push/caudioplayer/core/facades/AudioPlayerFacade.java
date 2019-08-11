@@ -6,6 +6,7 @@ import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 
 import java.io.File;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * @author push <mez.e.s@yandex.ru>
@@ -53,6 +54,8 @@ public interface AudioPlayerFacade {
 
   MediaInfoData getCurrentTrackInfo();
 
-  void stopApplication();
+	void connectLastFm(Consumer<String> openAuthPageConsumer);
+
+	void stopApplication();
 
 }

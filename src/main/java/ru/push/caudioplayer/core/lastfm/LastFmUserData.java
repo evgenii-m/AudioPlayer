@@ -1,4 +1,4 @@
-package ru.push.caudioplayer.core.mediaplayer.lastfm;
+package ru.push.caudioplayer.core.lastfm;
 
 /**
  * @author push <mez.e.s@yandex.ru>

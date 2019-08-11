@@ -6,6 +6,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.push.caudioplayer.AppMain;
 import ru.push.caudioplayer.ConfigurationControllers;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 
@@ -34,6 +35,8 @@ public class MainController {
 
   @Resource
   private AudioPlayerFacade audioPlayerFacade;
+  @Resource
+	private AppMain appMain;
 
   @FXML
   public void initialize() {
@@ -66,4 +69,11 @@ public class MainController {
     List<File> files = fileChooser.showOpenMultipleDialog(mainContainer.getScene().getWindow());
     audioPlayerFacade.addFilesToPlaylist(files);
   }
+
+  @FXML
+	public void connectLastFm(ActionEvent actionEvent) {
+		audioPlayerFacade.connectLastFm(
+				(pageUrl) -> appMain.openWebPage(pageUrl)
+		);
+	}
 }

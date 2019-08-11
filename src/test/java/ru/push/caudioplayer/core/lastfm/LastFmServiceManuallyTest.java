@@ -1,7 +1,7 @@
-package ru.push.caudioplayer.core.mediaplayer.lastfm;
+package ru.push.caudioplayer.core.lastfm;
 
 import org.testng.annotations.Test;
-import ru.push.caudioplayer.core.mediaplayer.lastfm.impl.DefaultLastFmService;
+import ru.push.caudioplayer.core.lastfm.impl.DefaultLastFmService;
 
 /**
  * This test class used only for calling service methods to make Last.FM API requests,

@@ -1,6 +1,5 @@
 package ru.push.caudioplayer;
 
-import com.sun.jna.NativeLibrary;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +48,12 @@ public class AppMain extends AbstractJavaFxApplicationSupport {
     super.stop();
   }
 
-  public static void main(String[] args) {
+  public void openWebPage(String pageUrl) {
+		getHostServices().showDocument(pageUrl);
+	}
+
+	public static void main(String[] args) {
+
   	// todo: make read from configuration file
   	System.setProperty("jna.library.path", "C:/Program Files/VideoLAN/VLC");
   	System.setProperty("VLC_PLUGIN_PATH", "C:/Program Files/VideoLAN/VLC/plugins");

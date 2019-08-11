@@ -3,3 +3,4 @@ target/*
 mediaplayer-app-configuration.xml
 lastfm-api-account.info
 AppConfigurationServiceManuallyTestResult.xml
+src/main/resources/lastfm.properties

@@ -44,4 +44,13 @@
         class="ru.push.caudioplayer.core.facades.impl.DefaultAudioPlayerFacade">
   </bean>
 
+  <bean id="properties"
+        class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+  <property name="locations">
+    <list>
+      <value>classpath:lastfm.properties</value>
+    </list>
+  </property>
+</bean>
+
 </beans>
