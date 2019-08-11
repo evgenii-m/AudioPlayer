@@ -9,6 +9,7 @@ import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -335,17 +336,26 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
 
 
   @Override
-  public void saveLastFmUserData(String username, String password) {
+  public void saveLastFmUserData(String username, String sessionKey) {
     Assert.notNull(username);
-    Assert.notNull(password);
+    Assert.notNull(sessionKey);
 
     configuration.setProperty(LASTFM_USERNAME_NODE, username);
-    configuration.setProperty(LASTFM_PASSWORD_NODE, password);
+    // TODO: add hashing for session key
+    configuration.setProperty(LASTFM_SESSION_KEY_NODE, sessionKey);
+
     saveConfiguration();
   }
 
+	@Override
+	public Pair<String, String> getLastFmUserData() {
+		String lastfmUsername = configuration.getString(LASTFM_USERNAME_NODE);
+		String lastfmSessionKey = configuration.getString(LASTFM_SESSION_KEY_NODE);
+		return Pair.of(lastfmUsername, lastfmSessionKey);
+	}
 
-  @Override
+
+	@Override
   public PlaylistContainerViewConfigurations getPlaylistContainerViewConfigurations() throws ConfigurationException {
     // TODO: add handling empty view configuration situations
     HierarchicalConfiguration<ImmutableNode> playlistContainerColumnsConfiguration =

@@ -1,6 +1,7 @@
 package ru.push.caudioplayer.core.lastfm.impl;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
@@ -107,7 +108,7 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 	 * See https://www.last.fm/api/show/auth.getSession
 	 */
 	@Override
-	public String authGetSession(String token) {
+	public Pair<String, String> authGetSession(String token) {
 		LastFmApiMethod method = LastFmApiMethod.AUTH_GET_SESSION;
 		Map<String, String> methodParameters = new HashMap<>();
 		methodParameters.put(LastFmApiParam.TOKEN.getName(), token);
@@ -123,7 +124,7 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 			String sessionKey = (String) xPathFactory.newXPath().evaluate(expression, response, XPathConstants.STRING);
 			LOG.info("session key: " + sessionKey);
 
-			return sessionKey;
+			return Pair.of(username, sessionKey);
 		} catch (XPathExpressionException e) {
 			LOG.error("extract element from xml response error: ", e);
 			throw new IllegalStateException("Not satisfactory result from method " + method.getName());

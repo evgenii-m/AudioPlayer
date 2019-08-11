@@ -1,5 +1,6 @@
 package ru.push.caudioplayer.core.lastfm.impl;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,7 @@ import org.springframework.stereotype.Component;
 import ru.push.caudioplayer.core.lastfm.LastFmApiAdapter;
 import ru.push.caudioplayer.core.lastfm.LastFmService;
 import ru.push.caudioplayer.core.lastfm.LastFmUserData;
+import ru.push.caudioplayer.core.services.AppConfigurationService;
 
 import java.util.function.Consumer;
 
@@ -20,6 +22,8 @@ public class DefaultLastFmService implements LastFmService {
 
   @Autowired
 	private LastFmApiAdapter apiAdapter;
+	@Autowired
+	private AppConfigurationService appConfigurationService;
 
 	/**
 	 * See https://www.last.fm/api/desktopauth
@@ -36,7 +40,8 @@ public class DefaultLastFmService implements LastFmService {
 		openAuthPageConsumer.accept(authPageUrl);
 
 		// 4. Fetch A Web Service Session
-		String sessionKey = apiAdapter.authGetSession(token);
+		Pair<String, String> usernameSessionKey = apiAdapter.authGetSession(token);
+		appConfigurationService.saveLastFmUserData(usernameSessionKey.getKey(), usernameSessionKey.getValue());
 	}
 
 	@Override

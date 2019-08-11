@@ -21,7 +21,7 @@ public interface ConfigurationServiceConstants {
 
   String LASTFM_NODE = "lastfm";
   String LASTFM_USERNAME_NODE = LASTFM_NODE + ".username";
-  String LASTFM_PASSWORD_NODE = LASTFM_NODE + ".password";
+  String LASTFM_SESSION_KEY_NODE = LASTFM_NODE + ".sessionKey";
 
   String VIEW_NODE = "view";
   String PLAYLIST_CONTAINER_NODE = VIEW_NODE + ".playlistContainer";
