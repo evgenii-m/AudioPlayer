@@ -1,6 +1,5 @@
 package ru.push.caudioplayer.core.lastfm;
 
-import org.apache.commons.lang3.tuple.Pair;
 
 public interface LastFmApiAdapter {
 
@@ -8,8 +7,5 @@ public interface LastFmApiAdapter {
 
 	String authGetToken();
 
-	/**
-	 * @return <username, session key>
-	 */
-	Pair<String, String> authGetSession(String token);
+	LastFmSessionData authGetSession(String token);
 }

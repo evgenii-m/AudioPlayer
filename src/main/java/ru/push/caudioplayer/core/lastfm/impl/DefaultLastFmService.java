@@ -1,15 +1,15 @@
 package ru.push.caudioplayer.core.lastfm.impl;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.push.caudioplayer.core.lastfm.LastFmApiAdapter;
 import ru.push.caudioplayer.core.lastfm.LastFmService;
-import ru.push.caudioplayer.core.lastfm.LastFmUserData;
+import ru.push.caudioplayer.core.lastfm.LastFmSessionData;
 import ru.push.caudioplayer.core.services.AppConfigurationService;
 
+import javax.annotation.PostConstruct;
 import java.util.function.Consumer;
 
 /**
@@ -25,11 +25,31 @@ public class DefaultLastFmService implements LastFmService {
 	@Autowired
 	private AppConfigurationService appConfigurationService;
 
+	private LastFmSessionData currentSessionData;
+
+
+	@PostConstruct
+	public void init() {
+		LastFmSessionData sessionData = appConfigurationService.getLastFmSessionData();
+		if (sessionData != null) {
+			LOG.info("Load Last.fm session from configuration: username = {}, session key = {}",
+					sessionData.getUsername(), sessionData.getSessionKey());
+			currentSessionData = sessionData;
+		}
+	}
+
 	/**
 	 * See https://www.last.fm/api/desktopauth
 	 */
 	@Override
 	public void connectLastFm(Consumer<String> openAuthPageConsumer) {
+
+		LastFmSessionData sessionData = appConfigurationService.getLastFmSessionData();
+		if (sessionData != null) {
+			LOG.warn("Last.fm user data already set in configuration, they will be overwritten: username = {}, session key = {}",
+					sessionData.getUsername(), sessionData.getSessionKey());
+		}
+
 		// 1. API Key into adapter
 
 		// 2. Fetch a request token
@@ -40,12 +60,12 @@ public class DefaultLastFmService implements LastFmService {
 		openAuthPageConsumer.accept(authPageUrl);
 
 		// 4. Fetch A Web Service Session
-		Pair<String, String> usernameSessionKey = apiAdapter.authGetSession(token);
-		appConfigurationService.saveLastFmUserData(usernameSessionKey.getKey(), usernameSessionKey.getValue());
+		currentSessionData = apiAdapter.authGetSession(token);
+		appConfigurationService.saveLastFmSessionData(currentSessionData);
 	}
 
 	@Override
-  public void updateNowPlaying(String artistName, String trackTitle, LastFmUserData userData) {
+  public void updateNowPlaying(String artistName, String trackTitle) {
 
   }
 

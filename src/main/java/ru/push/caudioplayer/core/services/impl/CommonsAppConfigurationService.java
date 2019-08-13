@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
+import ru.push.caudioplayer.core.lastfm.LastFmSessionData;
 import ru.push.caudioplayer.core.services.MediaInfoDataLoaderService;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaSourceType;
@@ -336,22 +337,25 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
 
 
   @Override
-  public void saveLastFmUserData(String username, String sessionKey) {
-    Assert.notNull(username);
-    Assert.notNull(sessionKey);
+  public void saveLastFmSessionData(LastFmSessionData sessionData) {
+    Assert.notNull(sessionData);
+    Assert.notNull(sessionData.getUsername());
+		Assert.notNull(sessionData.getSessionKey());
 
-    configuration.setProperty(LASTFM_USERNAME_NODE, username);
+    configuration.setProperty(LASTFM_USERNAME_NODE, sessionData.getUsername());
     // TODO: add hashing for session key
-    configuration.setProperty(LASTFM_SESSION_KEY_NODE, sessionKey);
+    configuration.setProperty(LASTFM_SESSION_KEY_NODE, sessionData.getSessionKey());
 
     saveConfiguration();
   }
 
 	@Override
-	public Pair<String, String> getLastFmUserData() {
+	public LastFmSessionData getLastFmSessionData() {
 		String lastfmUsername = configuration.getString(LASTFM_USERNAME_NODE);
 		String lastfmSessionKey = configuration.getString(LASTFM_SESSION_KEY_NODE);
-		return Pair.of(lastfmUsername, lastfmSessionKey);
+		return ((lastfmUsername != null) && (lastfmSessionKey != null)) ?
+				new LastFmSessionData(lastfmUsername, lastfmSessionKey) :
+				null;
 	}
 
 

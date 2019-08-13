@@ -2,6 +2,7 @@ package ru.push.caudioplayer.core.services;
 
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.lang3.tuple.Pair;
+import ru.push.caudioplayer.core.lastfm.LastFmSessionData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 import ru.push.caudioplayer.ui.PlaylistContainerViewConfigurations;
 
@@ -37,12 +38,9 @@ public interface AppConfigurationService {
 
   // user configuration methods
 
-  void saveLastFmUserData(String username, String sessionKey);
+  void saveLastFmSessionData(LastFmSessionData sessionData);
 
-	/**
-	 * @return <username, session key>
-	 */
-  Pair<String, String> getLastFmUserData();
+	LastFmSessionData getLastFmSessionData();
 
 
   // view configuration methods

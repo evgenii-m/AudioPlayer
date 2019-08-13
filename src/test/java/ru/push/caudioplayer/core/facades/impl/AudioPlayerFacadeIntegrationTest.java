@@ -18,7 +18,6 @@ import ru.push.caudioplayer.core.services.AppConfigurationService;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.mockito.Mockito.*;
@@ -76,7 +75,7 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
     doNothing().when(appConfigurationService).deletePlaylist(any(PlaylistData.class));
     doNothing().when(appConfigurationService).saveAllPlaylists(anyListOf(PlaylistData.class),
         any(PlaylistData.class), any(PlaylistData.class));
-    doNothing().when(appConfigurationService).saveLastFmUserData(anyString(), anyString());
+    doNothing().when(appConfigurationService).saveLastFmSessionData(any());
     doReturn(Boolean.TRUE).when(playerComponent).playMedia(anyString());
   }
 

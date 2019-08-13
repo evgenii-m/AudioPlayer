@@ -141,12 +141,6 @@ public class AppConfigurationServiceManuallyTest {
   }
 
   @Test
-  public void testSaveLastFmUserData() {
-    appConfigurationServiceForWrite.saveLastFmUserData(LASTFM_USERNAME, LASTFM_PASSWORD);
-    assertTrue(true);
-  }
-
-  @Test
   public void testGetPlaylistContainerViewConfigurations() throws ConfigurationException {
     PlaylistContainerViewConfigurations playlistContainerViewConfigurations =
         appConfigurationServiceForRead.getPlaylistContainerViewConfigurations();

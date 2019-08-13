@@ -10,7 +10,7 @@ public interface LastFmService {
 
 	void connectLastFm(Consumer<String> openAuthPageConsumer);
 
-  void updateNowPlaying(String artistName, String trackName, LastFmUserData userData);
+  void updateNowPlaying(String artistName, String trackName);
 
   void getNowPlaying();
 }
