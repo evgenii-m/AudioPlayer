@@ -1,5 +1,8 @@
 package ru.push.caudioplayer.core.lastfm;
 
+import ru.push.caudioplayer.core.lastfm.pojo.Track;
+
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -9,6 +12,8 @@ import java.util.function.Consumer;
 public interface LastFmService {
 
 	void connectLastFm(Consumer<String> openAuthPageConsumer);
+
+	List<Track> getUserRecentTracks();
 
   void updateNowPlaying(String artistName, String trackName);
 

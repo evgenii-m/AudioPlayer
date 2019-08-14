@@ -19,10 +19,13 @@ import ru.push.caudioplayer.core.lastfm.LastFmApiAdapter;
 import ru.push.caudioplayer.core.lastfm.LastFmApiMethod;
 import ru.push.caudioplayer.core.lastfm.LastFmApiParam;
 import ru.push.caudioplayer.core.lastfm.LastFmSessionData;
+import ru.push.caudioplayer.core.lastfm.pojo.LastFmResponse;
+import ru.push.caudioplayer.core.lastfm.pojo.RecentTracks;
 import ru.push.caudioplayer.utils.StreamUtils;
 import ru.push.caudioplayer.utils.XmlUtils;
 
 import javax.annotation.PostConstruct;
+import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -31,6 +34,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -92,12 +96,15 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 		Map<String, String> methodParameters = new HashMap<>();
 
 		try {
-			Document response = makeApiRequest(method, methodParameters);
+			String response = makeApiRequest(method, methodParameters);
+			Document responseDocument = XmlUtils.convertStringToXmlDocument(response);
 
 			String expression = ".//*[local-name() = 'token']";
-			String token = (String) xPathFactory.newXPath().evaluate(expression, response, XPathConstants.STRING);
+			String token = (String) xPathFactory.newXPath().evaluate(expression, responseDocument, XPathConstants.STRING);
 			LOG.info("API token obtained: " + token);
 			return token;
+		} catch (IOException| SAXException | ParserConfigurationException e) {
+			LOG.error("parsing xml from response error: ", e);
 		} catch (XPathExpressionException e) {
 			LOG.error("extract element from xml response error: ", e);
 		}
@@ -115,28 +122,69 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 		methodParameters.put(LastFmApiParam.TOKEN.getName(), token);
 
 		try {
-			Document response = makeApiRequest(method, methodParameters, getSessionRetryCount);
+			String response = makeApiRequest(method, methodParameters, getSessionRetryCount);
+			Document responseDocument = XmlUtils.convertStringToXmlDocument(response);
 
 			String expression = ".//*[local-name() = 'name']";
-			String username = (String) xPathFactory.newXPath().evaluate(expression, response, XPathConstants.STRING);
+			String username = (String) xPathFactory.newXPath().evaluate(expression, responseDocument, XPathConstants.STRING);
 			LOG.info("session username: " + username);
 
 			expression = ".//*[local-name() = 'key']";
-			String sessionKey = (String) xPathFactory.newXPath().evaluate(expression, response, XPathConstants.STRING);
+			String sessionKey = (String) xPathFactory.newXPath().evaluate(expression, responseDocument, XPathConstants.STRING);
 			LOG.info("session key: " + sessionKey);
 
 			return new LastFmSessionData(username, sessionKey);
+		} catch (IOException| SAXException | ParserConfigurationException e) {
+			LOG.error("parsing xml from response error: ", e);
 		} catch (XPathExpressionException e) {
 			LOG.error("extract element from xml response error: ", e);
-			throw new IllegalStateException("Not satisfactory result from method " + method.getName());
 		}
+
+		throw new IllegalStateException("Not satisfactory result from method " + method.getName());
 	}
 
-	private Document makeApiRequest(LastFmApiMethod method, Map<String, String> methodParameters) {
+	/**
+	 * See https://www.last.fm/api/show/user.getRecentTracks
+	 */
+	@Override
+	public RecentTracks userGetRecentTracks(Integer limit, String username, Integer page, Date from, Boolean extended, Date to) {
+		LastFmApiMethod method = LastFmApiMethod.USER_GET_RECENT_TRACKS;
+		Map<String, String> methodParameters = new HashMap<>();
+		methodParameters.put(LastFmApiParam.USER.getName(), username);
+		if (limit != null) {
+			methodParameters.put(LastFmApiParam.LIMIT.getName(), limit.toString());
+		}
+		if (page != null) {
+			methodParameters.put(LastFmApiParam.PAGE.getName(), String.valueOf(page));
+		}
+		if (from != null) {
+			methodParameters.put(LastFmApiParam.FROM.getName(), String.valueOf(from.getTime()));
+		}
+		if (extended != null) {
+			methodParameters.put(LastFmApiParam.EXTENDED.getName(), extended ? "1" : "0");
+		}
+		if (to != null) {
+			methodParameters.put(LastFmApiParam.TO.getName(), String.valueOf(to.getTime()));
+		}
+
+		try {
+			String response = makeApiRequest(method, methodParameters);
+			LastFmResponse lastFmResponse = XmlUtils.unmarshalMessage(response, LastFmResponse.class.getPackage().getName());
+			RecentTracks recentTracks = lastFmResponse.getRecentTracks();
+			LOG.info("obtained recent tracks: {}", recentTracks);
+			return recentTracks;
+		} catch (JAXBException e) {
+			LOG.error("parsing xml from response error: ", e);
+		}
+
+		throw new IllegalStateException("Not satisfactory result from method " + method.getName());
+	}
+
+	private String makeApiRequest(LastFmApiMethod method, Map<String, String> methodParameters) {
 		return makeApiRequest(method, methodParameters, 0);
 	}
 
-	private Document makeApiRequest(LastFmApiMethod method, Map<String, String> methodParameters, int retryCount) {
+	private String makeApiRequest(LastFmApiMethod method, Map<String, String> methodParameters, int retryCount) {
 		// append parameters required for all methods
 		methodParameters.put(LastFmApiParam.METHOD_NAME.getName(), method.getName());
 		methodParameters.put(LastFmApiParam.API_KEY.getName(), lastfmApiKey);
@@ -165,7 +213,7 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 					if (HttpStatus.SC_OK == statusCode) {
 						String responseContent = StreamUtils.readStreamAsOneString(response.getEntity().getContent());
 						LOG.info("response content: {}", responseContent);
-						return XmlUtils.convertStringToXmlDocument(responseContent);
+						return responseContent;
 					}
 				} finally {
 					request.releaseConnection();
@@ -174,8 +222,6 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 
 		} catch (URISyntaxException e) {
 			LOG.error("construct uri error: ", e);
-		} catch (SAXException | ParserConfigurationException e) {
-			LOG.error("parsing xml from response error: ", e);
 		} catch (IOException e) {
 			LOG.error("http request error: request = {}, exception = {}", request, e);
 		} catch (InterruptedException e) {

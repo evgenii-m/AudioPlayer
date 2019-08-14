@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
+import ru.push.caudioplayer.core.lastfm.LastFmService;
 import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
@@ -58,6 +59,8 @@ public class AudioPlayerController {
   private CustomAudioPlayerComponent playerComponent;
   @Autowired
   private TrackTimeLabelBuilder trackTimeLabelBuilder;
+  @Autowired
+	private LastFmService lastFmService;
 
   private final ScheduledExecutorService playerScheduler = Executors.newSingleThreadScheduledExecutor();
   private boolean positionSliderMousePressed;
@@ -155,6 +158,8 @@ public class AudioPlayerController {
           updatePlaybackPosition(playbackPosition, currentTrackLength);
         }
       });
+
+			lastFmService.getUserRecentTracks();
     }
   }
 

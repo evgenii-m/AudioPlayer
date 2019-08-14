@@ -1,6 +1,10 @@
 package ru.push.caudioplayer.core.lastfm;
 
 
+import ru.push.caudioplayer.core.lastfm.pojo.RecentTracks;
+
+import java.util.Date;
+
 public interface LastFmApiAdapter {
 
 	String getUserAuthorizationPageUrl(String token);
@@ -8,4 +12,6 @@ public interface LastFmApiAdapter {
 	String authGetToken();
 
 	LastFmSessionData authGetSession(String token);
+
+	RecentTracks userGetRecentTracks(Integer limit, String username, Integer page, Date from, Boolean extended, Date to);
 }

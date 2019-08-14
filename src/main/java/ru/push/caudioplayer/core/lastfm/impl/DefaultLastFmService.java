@@ -7,9 +7,12 @@ import org.springframework.stereotype.Component;
 import ru.push.caudioplayer.core.lastfm.LastFmApiAdapter;
 import ru.push.caudioplayer.core.lastfm.LastFmService;
 import ru.push.caudioplayer.core.lastfm.LastFmSessionData;
+import ru.push.caudioplayer.core.lastfm.pojo.RecentTracks;
+import ru.push.caudioplayer.core.lastfm.pojo.Track;
 import ru.push.caudioplayer.core.services.AppConfigurationService;
 
 import javax.annotation.PostConstruct;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -62,6 +65,13 @@ public class DefaultLastFmService implements LastFmService {
 		// 4. Fetch A Web Service Session
 		currentSessionData = apiAdapter.authGetSession(token);
 		appConfigurationService.saveLastFmSessionData(currentSessionData);
+	}
+
+	@Override
+	public List<Track> getUserRecentTracks() {
+		RecentTracks recentTracks = apiAdapter.userGetRecentTracks(null, currentSessionData.getUsername(),
+				null, null, null, null);
+		return recentTracks.getTracks();
 	}
 
 	@Override

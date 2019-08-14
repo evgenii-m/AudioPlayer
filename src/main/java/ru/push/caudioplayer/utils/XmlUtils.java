@@ -3,6 +3,9 @@ package ru.push.caudioplayer.utils;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
@@ -14,6 +17,7 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.io.StringWriter;
 
 public class XmlUtils {
@@ -39,5 +43,13 @@ public class XmlUtils {
 		transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
 		transformer.transform(new DOMSource(document), new StreamResult(sw));
 		return sw.toString();
+	}
+
+	public static <T> T unmarshalMessage(String xmlDocument, String jaxbContextPath) throws JAXBException {
+		JAXBContext jc = JAXBContext.newInstance(jaxbContextPath);
+		Unmarshaller unmarshaller = jc.createUnmarshaller();
+		@SuppressWarnings("unchecked")
+		T t = (T) unmarshaller.unmarshal(new StringReader(xmlDocument));
+		return t;
 	}
 }

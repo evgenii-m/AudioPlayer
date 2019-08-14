@@ -5,7 +5,14 @@ public enum LastFmApiParam {
 	API_KEY("api_key"),
 	API_SIG("api_sig"),
 	METHOD_NAME("method"),
-	TOKEN("token");
+	TOKEN("token"),
+	LIMIT("limit"),
+	USER("user"),
+	PAGE("page"),
+	FROM("from"),
+	EXTENDED("extended"),
+	TO("to"),
+	;
 
 	private String name;
 
