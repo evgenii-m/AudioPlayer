@@ -3,6 +3,7 @@ package ru.push.caudioplayer.controller;
 import javafx.fxml.FXML;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SelectionMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,8 @@ public class LastFmPanelController {
 
 	@FXML
 	public void initialize() {
-		LOG.debug("initialize");
+		LOG.debug("initialize FXML for {}", this.getClass().getName());
+
 	}
 
 

@@ -56,7 +56,8 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 
   @PostConstruct
   public void init() {
-    LOG.debug("init");
+		LOG.debug("init bean {}", this.getClass().getName());
+
     refreshPlaylists();
     playerComponent.addEventListener(new AudioPlayerFacadeEventListener());
   }

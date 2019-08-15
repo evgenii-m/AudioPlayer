@@ -62,7 +62,7 @@ public class PlaylistController {
 
   @FXML
   public void initialize() {
-    LOG.debug("initialize");
+		LOG.debug("initialize FXML for {}", this.getClass().getName());
 
     playlistBrowserContainer.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
     playlistContainer.setEditable(false);
@@ -71,7 +71,7 @@ public class PlaylistController {
 
   @PostConstruct
   public void init() {
-    LOG.debug("init");
+		LOG.debug("init bean {}", this.getClass().getName());
 
     setPlaylistContainerColumns();
 

@@ -37,12 +37,12 @@ public class RenamePopupController {
 
   @FXML
   public void initialize() {
-    LOG.debug("initialize");
+		LOG.debug("initialize FXML for {}", this.getClass().getName());
   }
 
   @PostConstruct
   public void init() {
-    LOG.debug("init");
+    LOG.debug("init bean {}", this.getClass().getName());
   }
 
   public void setRenamedPlaylist(PlaylistData playlist) {

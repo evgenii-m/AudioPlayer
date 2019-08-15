@@ -65,7 +65,7 @@ public class AudioPlayerController {
 
   @FXML
   public void initialize() {
-    LOG.debug("initialize");
+    LOG.debug("initialize FXML for {}", this.getClass().getName());
 
     stopButton.setGraphic(new ImageView("content/icons/control_stop_blue.png"));
     playButton.setGraphic(new ImageView("content/icons/control_play_blue.png"));
@@ -80,7 +80,7 @@ public class AudioPlayerController {
 
   @PostConstruct
   public void init() {
-    LOG.debug("init");
+		LOG.debug("init bean {}", this.getClass().getName());
 
     audioPlayerFacade.addEventListener(new AudioPlayerEventAdapter());
 
