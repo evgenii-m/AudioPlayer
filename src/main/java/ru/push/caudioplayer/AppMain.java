@@ -20,7 +20,7 @@ import javax.annotation.Resource;
 public class AppMain extends AbstractJavaFxApplicationSupport {
 
   private static final double DEFAULT_WIDTH  = 1000;
-  private static final double DEFAULT_HEIGHT = 400;
+  private static final double DEFAULT_HEIGHT = 700;
 
   @Value("${ui.title:JavaFX приложение}")
   private String windowTitle;
@@ -39,6 +39,7 @@ public class AppMain extends AbstractJavaFxApplicationSupport {
     stage.setTitle(windowTitle);
     stage.setScene(new Scene(mainView.getView(), DEFAULT_WIDTH, DEFAULT_HEIGHT));
     stage.centerOnScreen();
+    stage.setResizable(false);
     stage.show();
   }
 

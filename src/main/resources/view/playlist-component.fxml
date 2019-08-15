@@ -5,13 +5,13 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<Pane fx:id="popupContainer" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" stylesheets="/css/style.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.push.caudioplayer.controller.PlaylistController">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" stylesheets="/css/style.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.push.caudioplayer.controller.PlaylistController">
    <children>
-      <HBox fx:id="playlistBlockContainer" prefWidth="1000.0" spacing="5">
+      <HBox fx:id="playlistBlockContainer" prefWidth="1010.0" spacing="5">
          <children>
             <ListView fx:id="playlistBrowserContainer" prefHeight="300.0" prefWidth="250.0" styleClass="playlist-browser-container">
             </ListView>
-            <TableView fx:id="playlistContainer" prefHeight="250.0" prefWidth="730.0">
+            <TableView fx:id="playlistContainer" prefHeight="250.0" prefWidth="745.0">
                <columns>
                </columns>
             </TableView>

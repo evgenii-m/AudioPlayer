@@ -32,6 +32,9 @@ public class MainController {
   @FXML
   @Resource(name = "playlistView")
   private ConfigurationControllers.View playlistView;
+	@FXML
+	@Resource(name = "lastfmPanelView")
+	private ConfigurationControllers.View lastfmPanelView;
 
   @Resource
   private AudioPlayerFacade audioPlayerFacade;
@@ -49,6 +52,7 @@ public class MainController {
 
     mainContainer.getChildren().add(audioPlayerView.getView());
     mainContainer.getChildren().add(playlistView.getView());
+    mainContainer.getChildren().add(lastfmPanelView.getView());
   }
 
   @FXML
@@ -67,6 +71,7 @@ public class MainController {
     fileChooser.setTitle("Open file(s)");
     // WARNING: if this code throws JVM crashing, add JVM option '-DVLCJ_INITX=no'
     List<File> files = fileChooser.showOpenMultipleDialog(mainContainer.getScene().getWindow());
+    // todo: add cancel action handling
     audioPlayerFacade.addFilesToPlaylist(files);
   }
 

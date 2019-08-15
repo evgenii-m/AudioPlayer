@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import ru.push.caudioplayer.controller.LastFmPanelController;
 import ru.push.caudioplayer.controller.MainController;
 import ru.push.caudioplayer.controller.AudioPlayerController;
 import ru.push.caudioplayer.controller.PlaylistController;
@@ -62,6 +63,16 @@ public class ConfigurationControllers {
   public RenamePopupController getRenamePopupController() {
     return (RenamePopupController) renamePopupView().getController();
   }
+
+  @Bean(name ="lastfmPanelView")
+	public View getLastFmPanelView() {
+  	return loadView("view/lastfm-panel-component.fxml");
+	}
+
+	@Bean
+	public LastFmPanelController getLastFmPanelController() {
+  	return (LastFmPanelController) getLastFmPanelView().getController();
+	}
 
   protected View loadView(String url) {
     try (InputStream fxmlStream = getClass().getClassLoader().getResourceAsStream(url)) {

@@ -59,8 +59,6 @@ public class AudioPlayerController {
   private CustomAudioPlayerComponent playerComponent;
   @Autowired
   private TrackTimeLabelBuilder trackTimeLabelBuilder;
-  @Autowired
-	private LastFmService lastFmService;
 
   private final ScheduledExecutorService playerScheduler = Executors.newSingleThreadScheduledExecutor();
   private boolean positionSliderMousePressed;
@@ -158,8 +156,6 @@ public class AudioPlayerController {
           updatePlaybackPosition(playbackPosition, currentTrackLength);
         }
       });
-
-			lastFmService.getUserRecentTracks();
     }
   }
 

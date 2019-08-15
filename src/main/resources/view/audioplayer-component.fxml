@@ -7,7 +7,7 @@
 
 <Pane fx:controller="ru.push.caudioplayer.controller.AudioPlayerController" prefHeight="60.0" stylesheets="/css/style.css" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <HBox fx:id="mediaButtonsControl" spacing="5.0" styleClass="media-buttons-control" BorderPane.alignment="CENTER_LEFT">
+      <HBox fx:id="mediaButtonsControl" spacing="5.0" styleClass="media-buttons-control">
          <padding>
             <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
          </padding>
@@ -17,7 +17,7 @@
             <Button fx:id="pauseButton" styleClass="media-player-button" mnemonicParsing="false" onAction="#pauseAction"/>
             <Button fx:id="prevButton" styleClass="media-player-button" mnemonicParsing="false" onAction="#prevAction"/>
             <Button fx:id="nextButton" styleClass="media-player-button" mnemonicParsing="false" onAction="#nextAction"/>
-            <Slider fx:id="positionSlider" prefHeight="20.0" prefWidth="440.0">
+            <Slider fx:id="positionSlider" prefHeight="20.0" prefWidth="460.0">
                <HBox.margin>
                   <Insets left="5.0" right="5.0" top="10.0" />
                </HBox.margin>

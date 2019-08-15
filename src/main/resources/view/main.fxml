@@ -1,38 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.*?>
-<?import java.lang.*?>
-<?import javafx.scene.control.*?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
 
-
-<Pane xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
-	  fx:controller="ru.push.caudioplayer.controller.MainController">
+<Pane xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.push.caudioplayer.controller.MainController">
 	<children>
-		<VBox fx:id="mainContainer" prefWidth="1000">
+		<VBox fx:id="mainContainer" prefWidth="1010" prefHeight="700">
 			<children>
 				<MenuBar fx:id="mainMenuBar">
 					<menus>
 						<Menu mnemonicParsing="false" text="File">
 							<items>
-								<MenuItem mnemonicParsing="false" onAction="#createNewPlaylist" text="New playlist"/>
-								<MenuItem mnemonicParsing="false" onAction="#openFiles" text="Open file(s)"/>
-								<MenuItem mnemonicParsing="false" onAction="#addLocation" text="Add location"/>
-								<MenuItem mnemonicParsing="false" text="Close"/>
+								<MenuItem mnemonicParsing="false" onAction="#createNewPlaylist" text="New playlist" />
+								<MenuItem mnemonicParsing="false" onAction="#openFiles" text="Open file(s)" />
+								<MenuItem mnemonicParsing="false" onAction="#addLocation" text="Add location" />
+								<MenuItem mnemonicParsing="false" text="Close" />
 							</items>
 						</Menu>
 						<Menu mnemonicParsing="false" text="Edit">
 							<items>
-								<MenuItem mnemonicParsing="false" text="Delete"/>
+								<MenuItem mnemonicParsing="false" text="Delete" />
 							</items>
 						</Menu>
 						<Menu mnemonicParsing="false" text="Last.fm">
 							<items>
-								<MenuItem mnemonicParsing="false" onAction="#connectLastFm" text="Connect"/>
+								<MenuItem mnemonicParsing="false" onAction="#connectLastFm" text="Connect" />
 							</items>
 						</Menu>
 						<Menu mnemonicParsing="false" text="Help">
 							<items>
-								<MenuItem mnemonicParsing="false" text="About"/>
+								<MenuItem mnemonicParsing="false" text="About" />
 							</items>
 						</Menu>
 					</menus>
