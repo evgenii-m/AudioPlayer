@@ -3,11 +3,14 @@ package ru.push.caudioplayer.core.facades.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.lastfm.LastFmService;
+import ru.push.caudioplayer.core.lastfm.pojo.Track;
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
+import ru.push.caudioplayer.core.mediaplayer.pojo.LastFmTrackData;
 import ru.push.caudioplayer.core.services.MediaInfoDataLoaderService;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaSourceType;
@@ -21,8 +24,11 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 
 /**
@@ -229,7 +235,22 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 		lastFmService.connectLastFm(openAuthPageConsumer);
 	}
 
-  @Override
+	@Override
+	public List<LastFmTrackData> getRecentTracksFromLastFm() {
+		List<Track> userRecentTracks = lastFmService.getUserRecentTracks();
+
+		if (CollectionUtils.isEmpty(userRecentTracks)) {
+			return new ArrayList<>();
+		}
+
+		return userRecentTracks.stream()
+				.map(o -> new LastFmTrackData(o.getArtist().getName(), o.getAlbum().getName(),
+						o.getName(), o.getNowPlaying(), new Date(o.getDate().getUts())))
+				.sorted(Comparator.comparing(LastFmTrackData::getScrobbleDate))
+				.collect(Collectors.toList());
+	}
+
+	@Override
   public void stopApplication() {
     // TODO: think about remove this saving
     appConfigurationService.saveAllPlaylists(

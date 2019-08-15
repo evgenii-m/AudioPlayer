@@ -14,7 +14,7 @@ import java.io.Serializable;
 public class Track implements Serializable {
 
 	@XmlAttribute(name = "nowplaying")
-	private Boolean nowPlaying;
+	private boolean nowPlaying;
 
 	@XmlElement(name = "artist")
 	private Artist artist;
@@ -41,7 +41,7 @@ public class Track implements Serializable {
 	public Track() {
 	}
 
-	public Track(Boolean nowPlaying, Artist artist, String name, String mbid, Album album, String url, Date date, String streamable) {
+	public Track(boolean nowPlaying, Artist artist, String name, String mbid, Album album, String url, Date date, String streamable) {
 		this.nowPlaying = nowPlaying;
 		this.artist = artist;
 		this.name = name;
@@ -52,11 +52,11 @@ public class Track implements Serializable {
 		this.streamable = streamable;
 	}
 
-	public Boolean getNowPlaying() {
+	public boolean getNowPlaying() {
 		return nowPlaying;
 	}
 
-	public void setNowPlaying(Boolean nowPlaying) {
+	public void setNowPlaying(boolean nowPlaying) {
 		this.nowPlaying = nowPlaying;
 	}
 

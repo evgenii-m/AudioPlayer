@@ -1,6 +1,7 @@
 package ru.push.caudioplayer.core.facades;
 
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
+import ru.push.caudioplayer.core.mediaplayer.pojo.LastFmTrackData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 
@@ -55,6 +56,12 @@ public interface AudioPlayerFacade {
   MediaInfoData getCurrentTrackInfo();
 
 	void connectLastFm(Consumer<String> openAuthPageConsumer);
+
+	/**
+	 * Return recent tracks list from Last.fm service for current user in chronological order.
+	 * If user account not connected then return empty list.
+	 */
+	List<LastFmTrackData> getRecentTracksFromLastFm();
 
 	void stopApplication();
 
