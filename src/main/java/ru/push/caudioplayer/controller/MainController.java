@@ -2,8 +2,15 @@ package ru.push.caudioplayer.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebEvent;
+import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.push.caudioplayer.AppMain;
@@ -80,5 +87,29 @@ public class MainController {
 		audioPlayerFacade.connectLastFm(
 				(pageUrl) -> appMain.openWebPage(pageUrl)
 		);
+	}
+
+	@FXML
+	public void connectDeezer(ActionEvent actionEvent) {
+		final WebView browser = new WebView();
+		final WebEngine webEngine = browser.getEngine();
+
+		ScrollPane scrollPane = new ScrollPane();
+		scrollPane.setContent(browser);
+
+
+		webEngine.load("http://java2s.com");
+
+		Scene webPageWindowScene = new Scene(browser);
+
+		Stage webPageWindowStage = new Stage();
+		Stage primaryStage = (Stage) mainContainer.getScene().getWindow();
+		webPageWindowStage.setTitle("Deezer authorize");
+		webPageWindowStage.setScene(webPageWindowScene);
+		webPageWindowStage.initModality(Modality.WINDOW_MODAL);
+		webPageWindowStage.setResizable(true);
+		webPageWindowStage.initOwner(primaryStage);
+
+		webPageWindowStage.show();
 	}
 }

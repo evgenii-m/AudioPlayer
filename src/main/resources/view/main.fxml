@@ -30,6 +30,11 @@
 								<MenuItem mnemonicParsing="false" onAction="#connectLastFm" text="Connect" />
 							</items>
 						</Menu>
+						<Menu mnemonicParsing="false" text="Deezer">
+							<items>
+								<MenuItem mnemonicParsing="false" onAction="#connectDeezer" text="Connect" />
+							</items>
+						</Menu>
 						<Menu mnemonicParsing="false" text="Help">
 							<items>
 								<MenuItem mnemonicParsing="false" text="About" />
