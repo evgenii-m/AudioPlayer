@@ -1,4 +1,4 @@
-package ru.push.caudioplayer.ui;
+package ru.push.caudioplayer.ui.configuration;
 
 import java.util.List;
 

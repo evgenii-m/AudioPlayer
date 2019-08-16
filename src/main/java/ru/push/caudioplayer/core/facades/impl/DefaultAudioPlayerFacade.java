@@ -244,9 +244,9 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 		}
 
 		return userRecentTracks.stream()
-				.map(o -> new LastFmTrackData(o.getArtist().getName(), o.getAlbum().getName(),
-						o.getName(), o.getNowPlaying(), new Date(o.getDate().getUts())))
-				.sorted(Comparator.comparing(LastFmTrackData::getScrobbleDate))
+				.map(o -> new LastFmTrackData(o.getArtist().getName(), o.getAlbum().getName(), o.getName(), o.getNowPlaying(),
+						((o.getDate() != null) && (o.getDate().getUts() != null)) ? new Date(o.getDate().getUts() * 1000) : null))
+				.sorted((o1, o2) -> o2.getScrobbleDate().compareTo(o1.getScrobbleDate()))
 				.collect(Collectors.toList());
 	}
 

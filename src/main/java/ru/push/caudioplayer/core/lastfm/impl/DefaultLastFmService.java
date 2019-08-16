@@ -24,6 +24,8 @@ import java.util.function.Consumer;
 public class DefaultLastFmService implements LastFmService {
   private static final Logger LOG = LoggerFactory.getLogger(DefaultLastFmService.class);
 
+  private static final int RECENT_TRACKS_COUNT = 15;
+
   @Autowired
 	private LastFmApiAdapter apiAdapter;
 	@Autowired
@@ -74,7 +76,7 @@ public class DefaultLastFmService implements LastFmService {
 			return new ArrayList<>();
 		}
 
-		RecentTracks recentTracks = apiAdapter.userGetRecentTracks(5, currentSessionData.getUsername(),
+		RecentTracks recentTracks = apiAdapter.userGetRecentTracks(RECENT_TRACKS_COUNT, currentSessionData.getUsername(),
 				null, null, null, null);
 		return recentTracks.getTracks();
 	}

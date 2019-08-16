@@ -7,7 +7,7 @@ import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaSourceType;
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 import ru.push.caudioplayer.core.services.impl.CommonsAppConfigurationService;
-import ru.push.caudioplayer.ui.PlaylistContainerViewConfigurations;
+import ru.push.caudioplayer.ui.configuration.PlaylistContainerViewConfigurations;
 
 import java.io.IOException;
 import java.nio.file.Files;

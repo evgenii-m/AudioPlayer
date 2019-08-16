@@ -60,7 +60,7 @@ public class LastFmTrackData {
 	}
 
 	public boolean isValid() {
-		return (artist != null) && (title != null) && (scrobbleDate != null);
+		return (artist != null) && (title != null) && (nowPlaying || (scrobbleDate != null));
 	}
 
 	@Override

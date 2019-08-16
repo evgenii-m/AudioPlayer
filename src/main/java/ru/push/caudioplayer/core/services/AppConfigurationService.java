@@ -1,12 +1,10 @@
 package ru.push.caudioplayer.core.services;
 
 import org.apache.commons.configuration2.ex.ConfigurationException;
-import org.apache.commons.lang3.tuple.Pair;
 import ru.push.caudioplayer.core.lastfm.LastFmSessionData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
-import ru.push.caudioplayer.ui.PlaylistContainerViewConfigurations;
+import ru.push.caudioplayer.ui.configuration.PlaylistContainerViewConfigurations;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**

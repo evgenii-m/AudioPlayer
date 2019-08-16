@@ -21,7 +21,7 @@ import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 import ru.push.caudioplayer.core.services.AppConfigurationService;
 import ru.push.caudioplayer.ui.MediaTrackPlaylistItem;
-import ru.push.caudioplayer.ui.PlaylistContainerViewConfigurations;
+import ru.push.caudioplayer.ui.configuration.PlaylistContainerViewConfigurations;
 import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
 
 import javax.annotation.PostConstruct;
@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static ru.push.caudioplayer.ui.PlaylistContainerViewConfigurations.*;
+import static ru.push.caudioplayer.ui.configuration.PlaylistContainerViewConfigurations.*;
 
 /**
  * @author push <mez.e.s@yandex.ru>
@@ -273,7 +273,7 @@ public class PlaylistController {
                     trackTimeLabelBuilder.buildTimeString(mediaInfoData.getLength()));
               } else {
                 String trackPath = (mediaInfoData != null) ? mediaInfoData.getTrackPath() : "NULL";
-                LOG.info("Media info not loaded for track '" + trackPath + "'");
+                LOG.warn("Media info not loaded for track '" + trackPath + "'");
                 return new MediaTrackPlaylistItem("", "", "", trackPath, trackTimeLabelBuilder.buildTimeString(0));
               }
             }).collect(Collectors.toList())

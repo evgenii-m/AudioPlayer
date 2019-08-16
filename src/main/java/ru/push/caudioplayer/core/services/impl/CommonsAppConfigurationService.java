@@ -9,7 +9,6 @@ import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.configuration2.tree.ImmutableNode;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,7 @@ import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
 import ru.push.caudioplayer.core.mediaplayer.pojo.MediaSourceType;
 import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
 import ru.push.caudioplayer.core.services.AppConfigurationService;
-import ru.push.caudioplayer.ui.PlaylistContainerViewConfigurations;
+import ru.push.caudioplayer.ui.configuration.PlaylistContainerViewConfigurations;
 
 import java.util.Collections;
 import java.util.List;
