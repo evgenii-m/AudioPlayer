@@ -97,10 +97,15 @@ public class MainController {
 		ScrollPane scrollPane = new ScrollPane();
 		scrollPane.setContent(browser);
 
+		webEngine.setJavaScriptEnabled(true);
 
-		webEngine.load("http://java2s.com");
+		webEngine.load(audioPlayerFacade.getDeezerUserAuthorizationPageUrl());
 
 		Scene webPageWindowScene = new Scene(browser);
+
+		browser.getEngine().setOnStatusChanged((wEvent) -> {
+			LOG.debug("Status Changed Event  -  Message:  " + wEvent.getData());
+		});
 
 		Stage webPageWindowStage = new Stage();
 		Stage primaryStage = (Stage) mainContainer.getScene().getWindow();
@@ -108,6 +113,7 @@ public class MainController {
 		webPageWindowStage.setScene(webPageWindowScene);
 		webPageWindowStage.initModality(Modality.WINDOW_MODAL);
 		webPageWindowStage.setResizable(true);
+
 		webPageWindowStage.initOwner(primaryStage);
 
 		webPageWindowStage.show();

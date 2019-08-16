@@ -49,6 +49,7 @@
   <property name="locations">
     <list>
       <value>classpath:lastfm.properties</value>
+		<value>classpath:deezer.properties</value>
     </list>
   </property>
 </bean>

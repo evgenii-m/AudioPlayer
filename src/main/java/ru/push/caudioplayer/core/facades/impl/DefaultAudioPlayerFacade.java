@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
+import ru.push.caudioplayer.core.deezer.DeezerApiService;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.lastfm.LastFmService;
 import ru.push.caudioplayer.core.lastfm.pojo.Track;
@@ -24,7 +25,6 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
@@ -51,6 +51,8 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   private MediaInfoDataLoaderService mediaInfoDataLoaderService;
   @Autowired
 	private LastFmService lastFmService;
+  @Autowired
+	private DeezerApiService deezerApiService;
 
   private MediaInfoData currentTrackInfoData;
 
@@ -233,6 +235,11 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 	@Override
 	public void connectLastFm(Consumer<String> openAuthPageConsumer) {
 		lastFmService.connectLastFm(openAuthPageConsumer);
+	}
+
+	@Override
+	public String getDeezerUserAuthorizationPageUrl() {
+		return deezerApiService.getUserAuthorizationPageUrl();
 	}
 
 	@Override

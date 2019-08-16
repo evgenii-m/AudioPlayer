@@ -57,6 +57,8 @@ public interface AudioPlayerFacade {
 
 	void connectLastFm(Consumer<String> openAuthPageConsumer);
 
+	String getDeezerUserAuthorizationPageUrl();
+
 	/**
 	 * Return recent tracks list from Last.fm service for current user in chronological order.
 	 * If user account not connected then return empty list.
