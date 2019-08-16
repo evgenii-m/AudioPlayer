@@ -29,7 +29,7 @@ public class LastFmPanelController {
 	private static final String LASTFM_PANEL_COLUMN_TITLE_SCROBBLE_DATE = "Date";
 	private static final double LASTFM_PANEL_COLUMN_WIDTH_SCROBBLE_DATE = 125;
 	private static final String LASTFM_PANEL_COLUMN_FORMAT_SCROBBLE_DATE = "dd-MM-yyyy  HH:mm:SS";
-	private static final String LASTFM_PANEL_COLUMN_NOW_PLAYING_PLACEHOLDER = " ~ now ~ ";
+	private static final String LASTFM_PANEL_COLUMN_NOW_PLAYING_PLACEHOLDER = " ~~~~~now~~~~~ ";
 
 	@FXML
 	public TableView<LastFmTrackData> recentTracksContainer;
