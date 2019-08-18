@@ -1,7 +1,7 @@
 package ru.push.caudioplayer.core.lastfm;
 
 
-import ru.push.caudioplayer.core.lastfm.pojo.RecentTracks;
+import ru.push.caudioplayer.core.lastfm.domain.RecentTracks;
 
 import java.util.Date;
 

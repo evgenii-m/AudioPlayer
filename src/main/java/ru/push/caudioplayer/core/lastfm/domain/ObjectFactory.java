@@ -1,4 +1,4 @@
-package ru.push.caudioplayer.core.lastfm.pojo;
+package ru.push.caudioplayer.core.lastfm.domain;
 
 import javax.xml.bind.annotation.XmlRegistry;
 

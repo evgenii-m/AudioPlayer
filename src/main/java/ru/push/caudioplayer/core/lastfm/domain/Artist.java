@@ -1,4 +1,4 @@
-package ru.push.caudioplayer.core.lastfm.pojo;
+package ru.push.caudioplayer.core.lastfm.domain;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -11,7 +11,7 @@ import java.io.Serializable;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType
 @XmlRootElement
-public class Album implements Serializable {
+public class Artist implements Serializable {
 
 	@XmlAttribute(name = "mbid")
 	private String mbid;
@@ -20,10 +20,10 @@ public class Album implements Serializable {
 	private String name;
 
 
-	public Album() {
+	public Artist() {
 	}
 
-	public Album(String mbid, String name) {
+	public Artist(String mbid, String name) {
 		this.mbid = mbid;
 		this.name = name;
 	}
@@ -46,7 +46,7 @@ public class Album implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Album{" +
+		return "Artist{" +
 				"mbid='" + mbid + '\'' +
 				", name='" + name + '\'' +
 				'}';

@@ -1,7 +1,6 @@
 package ru.push.caudioplayer.core.lastfm.impl;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
@@ -19,8 +18,8 @@ import ru.push.caudioplayer.core.lastfm.LastFmApiAdapter;
 import ru.push.caudioplayer.core.lastfm.LastFmApiMethod;
 import ru.push.caudioplayer.core.lastfm.LastFmApiParam;
 import ru.push.caudioplayer.core.lastfm.LastFmSessionData;
-import ru.push.caudioplayer.core.lastfm.pojo.LastFmResponse;
-import ru.push.caudioplayer.core.lastfm.pojo.RecentTracks;
+import ru.push.caudioplayer.core.lastfm.domain.LastFmResponse;
+import ru.push.caudioplayer.core.lastfm.domain.RecentTracks;
 import ru.push.caudioplayer.utils.StreamUtils;
 import ru.push.caudioplayer.utils.XmlUtils;
 
