@@ -357,6 +357,21 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
 				null;
 	}
 
+	@Override
+	public void saveDeezerAccessToken(String accessToken) {
+  	Assert.notNull(accessToken);
+
+		// TODO: add hashing for access token
+  	configuration.setProperty(DEEZER_ACCESS_TOKEN_NODE, accessToken);
+
+  	saveConfiguration();
+	}
+
+	@Override
+	public String getDeezerAccessToken() {
+		return configuration.getString(DEEZER_ACCESS_TOKEN_NODE);
+	}
+
 
 	@Override
   public PlaylistContainerViewConfigurations getPlaylistContainerViewConfigurations() throws ConfigurationException {

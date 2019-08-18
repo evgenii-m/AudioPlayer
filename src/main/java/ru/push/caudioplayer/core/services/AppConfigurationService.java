@@ -40,6 +40,10 @@ public interface AppConfigurationService {
 
 	LastFmSessionData getLastFmSessionData();
 
+	void saveDeezerAccessToken(String accessToken);
+
+	String getDeezerAccessToken();
+
 
   // view configuration methods
 

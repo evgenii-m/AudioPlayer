@@ -93,6 +93,12 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 
 	@Override
 	public String getAccessToken(String code) {
+
+		String currentAccessToken = appConfigurationService.getDeezerAccessToken();
+		if (currentAccessToken != null) {
+			LOG.warn("Deezer access token already set in configuration, they will be overwritten: access token = {}", currentAccessToken);
+		}
+
 		String accessTokenRequestUrl = String.format(DEEZER_API_ACCESS_TOKEN_BASE_URL, deezerAppId, deezerAppSecretKey, code);
 
 		HttpGet request = new HttpGet(accessTokenRequestUrl);
@@ -110,6 +116,7 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 				Document responseDocument = XmlUtils.convertStringToXmlDocument(responseContent);
 				String expression = ".//*[local-name() = 'access_token']";
 				String accessToken = (String) xPathFactory.newXPath().evaluate(expression, responseDocument, XPathConstants.STRING);
+				appConfigurationService.saveDeezerAccessToken(accessToken);
 				return accessToken;
 			}
 		} catch (IOException e) {

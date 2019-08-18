@@ -23,6 +23,9 @@ public interface ConfigurationServiceConstants {
   String LASTFM_USERNAME_NODE = LASTFM_NODE + ".username";
   String LASTFM_SESSION_KEY_NODE = LASTFM_NODE + ".sessionKey";
 
+  String DEEZER_NODE = "deezer";
+  String DEEZER_ACCESS_TOKEN_NODE = DEEZER_NODE + ".accessToken";
+
   String VIEW_NODE = "view";
   String PLAYLIST_CONTAINER_NODE = VIEW_NODE + ".playlistContainer";
   String PLAYLIST_CONTAINER_COLUMNS_SET_NODE_NAME = "columns";
