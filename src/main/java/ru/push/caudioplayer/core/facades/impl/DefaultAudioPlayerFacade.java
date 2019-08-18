@@ -243,6 +243,25 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 	}
 
 	@Override
+	public boolean checkDeezerAuthorizationCodeAndGetAccessToken(String redirectUri) {
+		try {
+			String authorizationCode = deezerApiService.checkAuthorizationCode(redirectUri);
+			if (authorizationCode != null) {
+				// request for access token by received authorization code
+				String accessToken = deezerApiService.getAccessToken(authorizationCode);
+				LOG.info("Deezer access token: {}", accessToken);
+				return true;
+			}
+		} catch (IllegalAccessException e) {
+			LOG.error("Deezer authorization fails: {}", e);
+			return true;
+		}
+
+		// return false for continue checking
+		return false;
+	}
+
+	@Override
 	public List<LastFmTrackData> getRecentTracksFromLastFm() {
 		List<Track> userRecentTracks = lastFmService.getUserRecentTracks();
 

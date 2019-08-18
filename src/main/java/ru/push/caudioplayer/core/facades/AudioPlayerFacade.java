@@ -60,6 +60,14 @@ public interface AudioPlayerFacade {
 	String getDeezerUserAuthorizationPageUrl();
 
 	/**
+	 * Method checks redirect URI from UI web browser component and if detect authorization
+	 *
+	 * @param redirectUri
+	 * @return
+	 */
+	boolean checkDeezerAuthorizationCodeAndGetAccessToken(String redirectUri);
+
+	/**
 	 * Return recent tracks list from Last.fm service for current user in chronological order.
 	 * If user account not connected then return empty list.
 	 */

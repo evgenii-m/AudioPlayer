@@ -6,7 +6,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebEvent;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
@@ -57,6 +56,8 @@ public class MainController {
   public void init() {
 		LOG.debug("init bean {}", this.getClass().getName());
 
+		System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
+
     mainContainer.getChildren().add(audioPlayerView.getView());
     mainContainer.getChildren().add(playlistView.getView());
     mainContainer.getChildren().add(lastfmPanelView.getView());
@@ -91,6 +92,8 @@ public class MainController {
 
 	@FXML
 	public void connectDeezer(ActionEvent actionEvent) {
+		java.net.CookieHandler.setDefault(new com.sun.webkit.network.CookieManager());
+
 		final WebView browser = new WebView();
 		final WebEngine webEngine = browser.getEngine();
 
@@ -98,23 +101,33 @@ public class MainController {
 		scrollPane.setContent(browser);
 
 		webEngine.setJavaScriptEnabled(true);
+		webEngine.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.102 Safari/537.36 Edge/18.18362");
+
+		com.sun.javafx.webkit.WebConsoleListener.setDefaultListener(
+				(webView, message, lineNumber, sourceId) ->
+						LOG.info("JS Console: [" + sourceId + ":" + lineNumber + "] " + message)
+		);
 
 		webEngine.load(audioPlayerFacade.getDeezerUserAuthorizationPageUrl());
 
 		Scene webPageWindowScene = new Scene(browser);
-
-		browser.getEngine().setOnStatusChanged((wEvent) -> {
-			LOG.debug("Status Changed Event  -  Message:  " + wEvent.getData());
-		});
-
 		Stage webPageWindowStage = new Stage();
 		Stage primaryStage = (Stage) mainContainer.getScene().getWindow();
-		webPageWindowStage.setTitle("Deezer authorize");
+		webPageWindowStage.setTitle("Deezer authorization");
 		webPageWindowStage.setScene(webPageWindowScene);
 		webPageWindowStage.initModality(Modality.WINDOW_MODAL);
 		webPageWindowStage.setResizable(true);
 
 		webPageWindowStage.initOwner(primaryStage);
+
+		// append listener for web browser location URI changes for checking authorization code
+		webEngine.locationProperty().addListener((observable, oldValue, newValue) -> {
+			LOG.debug("Location change event: observable = {}, oldValue = {}, newValue = {}", observable, oldValue, newValue);
+			boolean result = audioPlayerFacade.checkDeezerAuthorizationCodeAndGetAccessToken(newValue);
+			if (result) {
+				webPageWindowStage.close();
+			}
+		});
 
 		webPageWindowStage.show();
 	}

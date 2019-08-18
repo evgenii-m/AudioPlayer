@@ -2,7 +2,20 @@ package ru.push.caudioplayer.core.deezer;
 
 public interface DeezerApiService {
 
+	/**
+	 * Return user authorization page URL as https://connect.deezer.com/oauth/auth.php with parameters
+	 */
 	String getUserAuthorizationPageUrl();
 
-	String getAccessTokenPageUrl(String code);
+	/**
+	 * Method for checking authorization code in location URI
+	 *
+	 * @return authorization code if detected
+	 */
+	String checkAuthorizationCode(String locationUri) throws IllegalAccessException;
+
+	/**
+	 * Get access token by received authorization code
+	 */
+	String getAccessToken(String code);
 }
