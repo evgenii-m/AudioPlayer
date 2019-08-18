@@ -5,4 +5,6 @@ public interface DeezerApiAdapter {
 	String getUserAuthorizationPageUrl();
 
 	String getAccessToken(String code);
+
+	void getTrack(long trackId);
 }

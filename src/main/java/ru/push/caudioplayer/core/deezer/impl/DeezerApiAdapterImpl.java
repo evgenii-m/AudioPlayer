@@ -88,4 +88,6 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 
 		return null;
 	}
+
+
 }
