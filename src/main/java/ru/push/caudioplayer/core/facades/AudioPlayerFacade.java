@@ -73,6 +73,8 @@ public interface AudioPlayerFacade {
 	 */
 	List<LastFmTrackData> getRecentTracksFromLastFm();
 
+	void getTrackFromDeezer(int trackId);
+
 	void stopApplication();
 
 }

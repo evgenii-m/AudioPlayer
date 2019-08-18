@@ -4,6 +4,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,8 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 import ru.push.caudioplayer.core.deezer.DeezerApiAdapter;
 import ru.push.caudioplayer.core.deezer.DeezerApiConst;
+import ru.push.caudioplayer.core.deezer.DeezerApiMethod;
+import ru.push.caudioplayer.core.deezer.DeezerApiParam;
 import ru.push.caudioplayer.utils.StreamUtils;
 import ru.push.caudioplayer.utils.XmlUtils;
 
@@ -22,6 +25,10 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 @Component
@@ -29,8 +36,8 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DeezerApiAdapterImpl.class);
 
-
 	private final XPathFactory xPathFactory;
+	private final URIBuilder baseApiUriBuilder;		// todo: think about make immutable builder
 	private final HttpClient httpClient;
 
 	@Autowired
@@ -41,6 +48,9 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 
 	public DeezerApiAdapterImpl() {
 		this.xPathFactory = XPathFactory.newInstance();
+		this.baseApiUriBuilder = new URIBuilder()
+				.setScheme(DeezerApiConst.DEEZER_API_SCHEME)
+				.setHost(DeezerApiConst.DEEZER_API_HOST);
 		this.httpClient = HttpClientBuilder.create().build();
 	}
 
@@ -56,12 +66,8 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 				DeezerApiConst.DEEZER_API_DEFAULT_PERMISSIONS);
 	}
 
-	@Override
-	public String getAccessToken(String code) {
-
-		String accessTokenRequestUrl = String.format(DeezerApiConst.DEEZER_API_ACCESS_TOKEN_BASE_URL, deezerAppId, deezerAppSecretKey, code);
-
-		HttpGet request = new HttpGet(accessTokenRequestUrl);
+	private String makeApiRequest(String requestUrl) {
+		HttpGet request = new HttpGet(requestUrl);
 		LOG.info("api request: {}", request);
 
 		try {
@@ -72,21 +78,61 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 			if (HttpStatus.SC_OK == statusCode) {
 				String responseContent = StreamUtils.readStreamAsOneString(response.getEntity().getContent());
 				LOG.info("response content: {}", responseContent);
+				return responseContent;
+			}
+		} catch (IOException e) {
+			LOG.error("http request error: request = {}, exception = {}", request, e);
+		} finally {
+			request.releaseConnection();
+		}
 
+		throw new IllegalStateException("Deezer api - Not acceptable result for request: " + requestUrl);
+	}
+
+	private String makeApiRequest(String methodPath, Map<DeezerApiParam, String> params) {
+		baseApiUriBuilder.clearParameters();
+		params.forEach((key, value) -> baseApiUriBuilder.addParameter(key.getValue(), value));
+
+		baseApiUriBuilder.setPath(methodPath);
+		try {
+			URI apiUri = baseApiUriBuilder.build();
+			return makeApiRequest(apiUri.toString());
+		} catch (URISyntaxException e) {
+			LOG.error("construct uri error: ", e);
+			throw new IllegalStateException("Deezer api - Not acceptable result for request: " + methodPath);
+		}
+	}
+
+	@Override
+	public String getAccessToken(String code) {
+
+		String accessTokenRequestUrl = String.format(DeezerApiConst.DEEZER_API_ACCESS_TOKEN_BASE_URL, deezerAppId, deezerAppSecretKey, code);
+
+		try {
+			String responseContent = makeApiRequest(accessTokenRequestUrl);
+			if (responseContent != null) {
 				Document responseDocument = XmlUtils.convertStringToXmlDocument(responseContent);
 				String expression = ".//*[local-name() = 'access_token']";
 				String accessToken = (String) xPathFactory.newXPath().evaluate(expression, responseDocument, XPathConstants.STRING);
 				return accessToken;
 			}
-		} catch (IOException e) {
-			LOG.error("http request error: request = {}, exception = {}", request, e);
-		} catch (ParserConfigurationException | XPathExpressionException | SAXException e) {
+		} catch (IOException | ParserConfigurationException | XPathExpressionException | SAXException e) {
 			LOG.error("parsing xml from response error: ", e);
-		} finally {
-			request.releaseConnection();
+		} catch (IllegalStateException e) {
+			LOG.warn("getAccessToken error:", e);
 		}
-
 		return null;
+	}
+
+
+	@Override
+	public void getTrack(long trackId, String accessToken) {
+		Map<DeezerApiParam, String> requestParameters = new HashMap<>();
+		if (accessToken != null) {
+			requestParameters.put(DeezerApiParam.ACCESS_TOKEN, accessToken);
+		}
+		String methodPath = String.format(DeezerApiMethod.GET_TRACK.getValue(), trackId);
+		String responseContent = makeApiRequest(methodPath, requestParameters);
 	}
 
 

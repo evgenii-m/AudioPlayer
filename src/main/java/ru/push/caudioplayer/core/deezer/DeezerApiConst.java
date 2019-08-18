@@ -10,4 +10,7 @@ public interface DeezerApiConst {
 	String DEEZER_API_DEFAULT_PERMISSIONS = "basic_access,offline_access,manage_library,delete_library,listening_history";
 	String DEEZER_API_AUTH_PARAM_CODE_NAME = "code";
 	String DEEZER_API_AUTH_PARAM_ERROR_REASON_NAME = "error_reason";
+
+	String DEEZER_API_SCHEME = "https";
+	String DEEZER_API_HOST = "api.deezer.com";
 }

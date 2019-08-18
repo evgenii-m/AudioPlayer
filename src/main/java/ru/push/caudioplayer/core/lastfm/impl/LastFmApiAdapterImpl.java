@@ -108,7 +108,7 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 			LOG.error("extract element from xml response error: ", e);
 		}
 
-		throw new IllegalStateException("Not satisfactory result from method " + method.getName());
+		throw new IllegalStateException("Last.fm api - Not acceptable result from method " + method.getName());
 	}
 
 	/**
@@ -139,7 +139,7 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 			LOG.error("extract element from xml response error: ", e);
 		}
 
-		throw new IllegalStateException("Not satisfactory result from method " + method.getName());
+		throw new IllegalStateException("Last.fm api - Not acceptable result from method " + method.getName());
 	}
 
 	/**
@@ -176,7 +176,7 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 			LOG.error("parsing xml from response error: ", e);
 		}
 
-		throw new IllegalStateException("Not satisfactory result from method " + method.getName());
+		throw new IllegalStateException("Last.fm api - Not acceptable result from method " + method.getName());
 	}
 
 	private String makeApiRequest(LastFmApiMethod method, Map<String, String> methodParameters) {
@@ -227,7 +227,7 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 			LOG.error("timeout error: ", request, e);
 		}
 
-		throw new IllegalStateException("Not satisfactory result from method " + method.getName());
+		throw new IllegalStateException("Last.fm api - Not acceptable result from method " + method.getName());
 
 	}
 

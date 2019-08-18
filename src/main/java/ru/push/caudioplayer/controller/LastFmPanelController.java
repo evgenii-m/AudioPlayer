@@ -36,7 +36,6 @@ public class LastFmPanelController {
 	@FXML
 	public ScrollPane trackInfoContainer;
 
-
 	@Autowired
 	private AudioPlayerFacade audioPlayerFacade;
 

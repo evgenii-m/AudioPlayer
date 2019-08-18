@@ -39,6 +39,8 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 			LOG.info("Load Deezer access token from configuration: {}", accessToken);
 			this.currentAccessToken = accessToken;
 		}
+
+		getTrack(3135556);
 	}
 
 	@Override
@@ -95,7 +97,7 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 
 	@Override
 	public void getTrack(long trackId) {
-
+		deezerApiAdapter.getTrack(trackId, currentAccessToken);
 	}
 
 }

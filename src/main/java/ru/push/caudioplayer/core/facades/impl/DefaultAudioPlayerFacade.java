@@ -283,6 +283,11 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 	}
 
 	@Override
+	public void getTrackFromDeezer(int trackId) {
+		deezerApiService.getTrack(trackId);
+	}
+
+	@Override
   public void stopApplication() {
     // TODO: think about remove this saving
     appConfigurationService.saveAllPlaylists(

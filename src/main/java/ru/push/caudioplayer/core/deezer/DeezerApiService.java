@@ -21,5 +21,9 @@ public interface DeezerApiService {
 	 */
 	String getAccessToken(String code);
 
+	/**
+	 * Get track object
+	 * See https://developers.deezer.com/api/track
+	 */
 	void getTrack(long trackId);
 }
