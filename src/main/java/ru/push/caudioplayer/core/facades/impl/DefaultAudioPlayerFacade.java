@@ -243,17 +243,23 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 	}
 
 	@Override
-	public boolean checkDeezerAuthorizationCodeAndGetAccessToken(String redirectUri) {
+	public boolean processDeezerAuthorization(String redirectUri) {
 		try {
 			String authorizationCode = deezerApiService.checkAuthorizationCode(redirectUri);
 			if (authorizationCode != null) {
 				// request for access token by received authorization code
 				String accessToken = deezerApiService.getAccessToken(authorizationCode);
-				LOG.info("Deezer access token: {}", accessToken);
-				return true;
+				if (accessToken != null) {
+					LOG.info("Deezer access token: {}", accessToken);
+					// if access token received - authorization process ends
+					return true;
+				} else {
+					LOG.error("Deezer access token is NULL");
+				}
 			}
 		} catch (IllegalAccessException e) {
 			LOG.error("Deezer authorization fails: {}", e);
+			// if access error received - authorization process also ends
 			return true;
 		}
 

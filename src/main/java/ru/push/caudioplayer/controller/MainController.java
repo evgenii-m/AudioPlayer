@@ -123,7 +123,7 @@ public class MainController {
 		// append listener for web browser location URI changes for checking authorization code
 		webEngine.locationProperty().addListener((observable, oldValue, newValue) -> {
 			LOG.debug("Location change event: observable = {}, oldValue = {}, newValue = {}", observable, oldValue, newValue);
-			boolean result = audioPlayerFacade.checkDeezerAuthorizationCodeAndGetAccessToken(newValue);
+			boolean result = audioPlayerFacade.processDeezerAuthorization(newValue);
 			if (result) {
 				webPageWindowStage.close();
 			}

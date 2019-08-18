@@ -16,6 +16,10 @@ public interface DeezerApiService {
 
 	/**
 	 * Get access token by received authorization code
+	 *
+	 * @return currentAccessToken (if receiving access token failed, previous access Token value will be returned)
 	 */
 	String getAccessToken(String code);
+
+	void getTrack(long trackId);
 }
