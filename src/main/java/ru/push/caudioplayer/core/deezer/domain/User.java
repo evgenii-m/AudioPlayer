@@ -1,7 +1,10 @@
 package ru.push.caudioplayer.core.deezer.domain;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
 import java.util.Date;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class User {
 
     private Long id;

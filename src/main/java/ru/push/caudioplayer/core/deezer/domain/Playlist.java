@@ -1,7 +1,9 @@
 package ru.push.caudioplayer.core.deezer.domain;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Playlist {
 
     private Long id;
