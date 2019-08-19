@@ -6,6 +6,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import ru.push.caudioplayer.core.deezer.DeezerApiAdapter;
 import ru.push.caudioplayer.core.deezer.DeezerApiConst;
 import ru.push.caudioplayer.core.deezer.DeezerApiMethod;
 import ru.push.caudioplayer.core.deezer.DeezerApiParam;
+import ru.push.caudioplayer.core.deezer.domain.Track;
 import ru.push.caudioplayer.utils.StreamUtils;
 import ru.push.caudioplayer.utils.XmlUtils;
 
@@ -102,6 +104,10 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 			throw new IllegalStateException("Deezer api - Not acceptable result for request: " + methodPath);
 		}
 	}
+	private <T> T convertJson(final String content, Class<T> targetClass) throws IOException {
+		ObjectMapper mapper = new ObjectMapper();
+		return mapper.readValue(content, targetClass);
+	}
 
 	@Override
 	public String getAccessToken(String code) {
@@ -126,13 +132,20 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 
 
 	@Override
-	public void getTrack(long trackId, String accessToken) {
+	public Track getTrack(long trackId, String accessToken) {
 		Map<DeezerApiParam, String> requestParameters = new HashMap<>();
 		if (accessToken != null) {
 			requestParameters.put(DeezerApiParam.ACCESS_TOKEN, accessToken);
 		}
 		String methodPath = String.format(DeezerApiMethod.GET_TRACK.getValue(), trackId);
 		String responseContent = makeApiRequest(methodPath, requestParameters);
+
+		try {
+			return convertJson(responseContent, Track.class);
+		} catch (IOException e) {
+			LOG.error("convert json response error: responseContent = {}, exception = {}", responseContent, e);
+			throw new IllegalStateException("Deezer api - Not acceptable result for request: " + methodPath);
+		}
 	}
 
 

@@ -92,8 +92,6 @@ public class MainController {
 
 	@FXML
 	public void connectDeezer(ActionEvent actionEvent) {
-		java.net.CookieHandler.setDefault(new com.sun.webkit.network.CookieManager());
-
 		final WebView browser = new WebView();
 		final WebEngine webEngine = browser.getEngine();
 

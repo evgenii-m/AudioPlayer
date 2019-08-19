@@ -1,7 +1,11 @@
 package ru.push.caudioplayer.core.deezer.domain;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
+import java.util.Arrays;
 import java.util.Date;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Track {
 
     private Long id;
@@ -159,4 +163,27 @@ public class Track {
     public void setTime_add(Date time_add) {
         this.time_add = time_add;
     }
+
+	@Override
+	public String toString() {
+		return "Track{" +
+				"id=" + id +
+				", readable=" + readable +
+				", isrc='" + isrc + '\'' +
+				", title='" + title + '\'' +
+				", link='" + link + '\'' +
+				", duration=" + duration +
+				", rank=" + rank +
+				", preview='" + preview + '\'' +
+				", artist=" + artist +
+				", album=" + album +
+				", type='" + type + '\'' +
+				", track_position=" + track_position +
+				", disk_number=" + disk_number +
+				", bpm=" + bpm +
+				", gain=" + gain +
+				", available_countries=" + Arrays.toString(available_countries) +
+				", time_add=" + time_add +
+				'}';
+	}
 }

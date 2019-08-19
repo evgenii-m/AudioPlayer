@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import ru.push.caudioplayer.core.deezer.DeezerApiAdapter;
 import ru.push.caudioplayer.core.deezer.DeezerApiConst;
 import ru.push.caudioplayer.core.deezer.DeezerApiService;
+import ru.push.caudioplayer.core.deezer.domain.Track;
 import ru.push.caudioplayer.core.services.AppConfigurationService;
 
 import javax.annotation.PostConstruct;
@@ -97,7 +98,8 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 
 	@Override
 	public void getTrack(long trackId) {
-		deezerApiAdapter.getTrack(trackId, currentAccessToken);
+		Track track = deezerApiAdapter.getTrack(trackId, currentAccessToken);
+		LOG.debug("Received deezer track: {}", track);
 	}
 
 }

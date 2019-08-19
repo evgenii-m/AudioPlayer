@@ -1,10 +1,12 @@
 package ru.push.caudioplayer.core.deezer;
 
+import ru.push.caudioplayer.core.deezer.domain.Track;
+
 public interface DeezerApiAdapter {
 
 	String getUserAuthorizationPageUrl();
 
 	String getAccessToken(String code);
 
-	void getTrack(long trackId, String accessToken);
+	Track getTrack(long trackId, String accessToken);
 }
