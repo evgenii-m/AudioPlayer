@@ -1,4 +1,4 @@
-package ru.push.caudioplayer.core.mediaplayer.pojo;
+package ru.push.caudioplayer.core.mediaplayer.domain;
 
 import org.apache.commons.lang3.StringUtils;
 

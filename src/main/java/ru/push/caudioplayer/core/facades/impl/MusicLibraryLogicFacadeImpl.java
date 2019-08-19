@@ -9,7 +9,7 @@ import ru.push.caudioplayer.core.deezer.DeezerApiService;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
 import ru.push.caudioplayer.core.lastfm.LastFmService;
 import ru.push.caudioplayer.core.lastfm.domain.Track;
-import ru.push.caudioplayer.core.mediaplayer.pojo.LastFmTrackData;
+import ru.push.caudioplayer.core.mediaplayer.domain.LastFmTrackData;
 
 import java.util.ArrayList;
 import java.util.Date;

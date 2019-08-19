@@ -1,4 +1,4 @@
-package ru.push.caudioplayer.core.mediaplayer.pojo;
+package ru.push.caudioplayer.core.mediaplayer.domain;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

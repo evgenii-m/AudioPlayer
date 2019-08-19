@@ -8,9 +8,8 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
 import ru.push.caudioplayer.core.services.impl.DefaultMediaInfoDataLoaderService;
-import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
-import ru.push.caudioplayer.core.mediaplayer.pojo.MediaSourceType;
-import ru.push.caudioplayer.core.services.MediaInfoDataLoaderService;
+import ru.push.caudioplayer.core.mediaplayer.domain.MediaInfoData;
+import ru.push.caudioplayer.core.mediaplayer.domain.MediaSourceType;
 import uk.co.caprica.vlcj.discovery.NativeDiscovery;
 
 import java.io.IOException;

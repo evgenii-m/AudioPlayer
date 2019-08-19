@@ -1,7 +1,7 @@
 package ru.push.caudioplayer.core.mediaplayer;
 
-import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
-import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
+import ru.push.caudioplayer.core.mediaplayer.domain.MediaInfoData;
+import ru.push.caudioplayer.core.mediaplayer.domain.PlaylistData;
 
 /**
  * @author push <mez.e.s@yandex.ru>

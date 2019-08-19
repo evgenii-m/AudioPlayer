@@ -1,6 +1,6 @@
 package ru.push.caudioplayer.core.facades;
 
-import ru.push.caudioplayer.core.mediaplayer.pojo.LastFmTrackData;
+import ru.push.caudioplayer.core.mediaplayer.domain.LastFmTrackData;
 
 import java.util.List;
 import java.util.function.Consumer;

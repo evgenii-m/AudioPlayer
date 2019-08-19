@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
-import ru.push.caudioplayer.core.mediaplayer.pojo.LastFmTrackData;
+import ru.push.caudioplayer.core.mediaplayer.domain.LastFmTrackData;
 
 import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;

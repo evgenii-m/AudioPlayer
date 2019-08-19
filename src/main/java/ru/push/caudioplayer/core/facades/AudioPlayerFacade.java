@@ -1,13 +1,11 @@
 package ru.push.caudioplayer.core.facades;
 
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
-import ru.push.caudioplayer.core.mediaplayer.pojo.LastFmTrackData;
-import ru.push.caudioplayer.core.mediaplayer.pojo.MediaInfoData;
-import ru.push.caudioplayer.core.mediaplayer.pojo.PlaylistData;
+import ru.push.caudioplayer.core.mediaplayer.domain.MediaInfoData;
+import ru.push.caudioplayer.core.mediaplayer.domain.PlaylistData;
 
 import java.io.File;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * @author push <mez.e.s@yandex.ru>
