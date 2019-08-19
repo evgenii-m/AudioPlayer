@@ -11,5 +11,5 @@ public interface DeezerApiAdapter {
 
 	Track getTrack(long trackId, String accessToken) throws DeezerApiErrorException;
 
-	Playlists getPlaylists(String accessToken) throws DeezerApiErrorException;
+	Playlists getPlaylists(String accessToken, Integer index, Integer limit) throws DeezerApiErrorException;
 }

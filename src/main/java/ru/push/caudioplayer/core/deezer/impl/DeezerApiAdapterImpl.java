@@ -151,10 +151,16 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 	}
 
 	@Override
-	public Playlists getPlaylists(String accessToken) throws DeezerApiErrorException {
+	public Playlists getPlaylists(String accessToken, Integer index, Integer limit) throws DeezerApiErrorException {
 		Map<DeezerApiParam, String> requestParameters = new HashMap<>();
 		if (accessToken != null) {
 			requestParameters.put(DeezerApiParam.ACCESS_TOKEN, accessToken);
+		}
+		if (index != null) {
+			requestParameters.put(DeezerApiParam.INDEX, String.valueOf(index));
+		}
+		if (limit != null) {
+			requestParameters.put(DeezerApiParam.LIMIT, String.valueOf(limit));
 		}
 		String methodPath = DeezerApiMethod.USER_ME_PLAYLISTS.getValue();
 		String responseContent = makeApiRequest(methodPath, requestParameters);

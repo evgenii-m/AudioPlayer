@@ -1,7 +1,10 @@
 package ru.push.caudioplayer.core.deezer;
 
 public enum DeezerApiParam {
-	ACCESS_TOKEN("access_token");
+	ACCESS_TOKEN("access_token"),
+	INDEX("index"),
+	LIMIT("limit")
+	;
 
 	String value;
 
