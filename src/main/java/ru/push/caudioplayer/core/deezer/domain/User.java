@@ -133,4 +133,24 @@ public class User {
     public void setTracklist(String tracklist) {
         this.tracklist = tracklist;
     }
+
+	@Override
+	public String toString() {
+		return "User{" +
+				"id=" + id +
+				", name='" + name + '\'' +
+				", link='" + link + '\'' +
+				", picture='" + picture + '\'' +
+				", type='" + type + '\'' +
+				", lastname='" + lastname + '\'' +
+				", firstname='" + firstname + '\'' +
+				", birthday=" + birthday +
+				", inscription_date=" + inscription_date +
+				", gender=" + gender +
+				", country='" + country + '\'' +
+				", lang='" + lang + '\'' +
+				", status=" + status +
+				", tracklist='" + tracklist + '\'' +
+				'}';
+	}
 }

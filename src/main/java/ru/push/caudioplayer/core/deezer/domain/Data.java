@@ -40,4 +40,14 @@ public class Data<T> {
     public void setChecksum(String checksum) {
         this.checksum = checksum;
     }
+
+	@Override
+	public String toString() {
+		return "Data{" +
+				"data=" + data +
+				", total=" + total +
+				", next='" + next + '\'' +
+				", checksum='" + checksum + '\'' +
+				'}';
+	}
 }

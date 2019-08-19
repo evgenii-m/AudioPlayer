@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import ru.push.caudioplayer.AppMain;
 import ru.push.caudioplayer.ConfigurationControllers;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
+import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -44,6 +45,8 @@ public class MainController {
 
   @Resource
   private AudioPlayerFacade audioPlayerFacade;
+	@Resource
+	private MusicLibraryLogicFacade musicLibraryLogicFacade;
   @Resource
 	private AppMain appMain;
 
@@ -85,7 +88,7 @@ public class MainController {
 
   @FXML
 	public void connectLastFm(ActionEvent actionEvent) {
-		audioPlayerFacade.connectLastFm(
+		musicLibraryLogicFacade.connectLastFm(
 				(pageUrl) -> appMain.openWebPage(pageUrl)
 		);
 	}
@@ -106,7 +109,7 @@ public class MainController {
 						LOG.info("JS Console: [" + sourceId + ":" + lineNumber + "] " + message)
 		);
 
-		webEngine.load(audioPlayerFacade.getDeezerUserAuthorizationPageUrl());
+		webEngine.load(musicLibraryLogicFacade.getDeezerUserAuthorizationPageUrl());
 
 		Scene webPageWindowScene = new Scene(browser);
 		Stage webPageWindowStage = new Stage();
@@ -121,7 +124,7 @@ public class MainController {
 		// append listener for web browser location URI changes for checking authorization code
 		webEngine.locationProperty().addListener((observable, oldValue, newValue) -> {
 			LOG.debug("Location change event: observable = {}, oldValue = {}, newValue = {}", observable, oldValue, newValue);
-			boolean result = audioPlayerFacade.processDeezerAuthorization(newValue);
+			boolean result = musicLibraryLogicFacade.processDeezerAuthorization(newValue);
 			if (result) {
 				webPageWindowStage.close();
 			}

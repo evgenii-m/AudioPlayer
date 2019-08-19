@@ -17,6 +17,7 @@ import ru.push.caudioplayer.core.deezer.DeezerApiAdapter;
 import ru.push.caudioplayer.core.deezer.DeezerApiConst;
 import ru.push.caudioplayer.core.deezer.DeezerApiMethod;
 import ru.push.caudioplayer.core.deezer.DeezerApiParam;
+import ru.push.caudioplayer.core.deezer.domain.Playlists;
 import ru.push.caudioplayer.core.deezer.domain.Track;
 import ru.push.caudioplayer.utils.StreamUtils;
 import ru.push.caudioplayer.utils.XmlUtils;
@@ -142,6 +143,23 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 
 		try {
 			return convertJson(responseContent, Track.class);
+		} catch (IOException e) {
+			LOG.error("convert json response error: responseContent = {}, exception = {}", responseContent, e);
+			throw new IllegalStateException("Deezer api - Not acceptable result for request: " + methodPath);
+		}
+	}
+
+	@Override
+	public Playlists getPlaylists(String accessToken) {
+		Map<DeezerApiParam, String> requestParameters = new HashMap<>();
+		if (accessToken != null) {
+			requestParameters.put(DeezerApiParam.ACCESS_TOKEN, accessToken);
+		}
+		String methodPath = DeezerApiMethod.USER_ME_PLAYLISTS.getValue();
+		String responseContent = makeApiRequest(methodPath, requestParameters);
+
+		try {
+			return convertJson(responseContent, Playlists.class);
 		} catch (IOException e) {
 			LOG.error("convert json response error: responseContent = {}, exception = {}", responseContent, e);
 			throw new IllegalStateException("Deezer api - Not acceptable result for request: " + methodPath);

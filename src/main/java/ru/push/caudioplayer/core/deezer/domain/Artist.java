@@ -86,4 +86,19 @@ public class Artist {
     public void setTracklist(String tracklist) {
         this.tracklist = tracklist;
     }
+
+	@Override
+	public String toString() {
+		return "Artist{" +
+				"id=" + id +
+				", name='" + name + '\'' +
+				", link='" + link + '\'' +
+				", picture='" + picture + '\'' +
+				", nb_album=" + nb_album +
+				", nb_fan=" + nb_fan +
+				", radio=" + radio +
+				", type='" + type + '\'' +
+				", tracklist='" + tracklist + '\'' +
+				'}';
+	}
 }

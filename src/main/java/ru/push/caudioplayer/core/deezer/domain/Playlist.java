@@ -142,4 +142,25 @@ public class Playlist {
     public void setNb_tracks(Integer nb_tracks) {
         this.nb_tracks = nb_tracks;
     }
+
+	@Override
+	public String toString() {
+		return "Playlist{" +
+				"id=" + id +
+				", title='" + title + '\'' +
+				", description='" + description + '\'' +
+				", duration=" + duration +
+				", is_public=" + is_public +
+				", is_loved_track=" + is_loved_track +
+				", collaborative=" + collaborative +
+				", rating=" + rating +
+				", link='" + link + '\'' +
+				", picture='" + picture + '\'' +
+				", checksum='" + checksum + '\'' +
+				", creator=" + creator +
+				", type='" + type + '\'' +
+				", tracks=" + tracks +
+				", nb_tracks=" + nb_tracks +
+				'}';
+	}
 }

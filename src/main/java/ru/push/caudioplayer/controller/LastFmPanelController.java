@@ -9,7 +9,7 @@ import javafx.scene.control.TableView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
+import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
 import ru.push.caudioplayer.core.mediaplayer.pojo.LastFmTrackData;
 
 import javax.annotation.PostConstruct;
@@ -37,7 +37,7 @@ public class LastFmPanelController {
 	public ScrollPane trackInfoContainer;
 
 	@Autowired
-	private AudioPlayerFacade audioPlayerFacade;
+	private MusicLibraryLogicFacade musicLibraryLogicFacade;
 
 	private final ScheduledExecutorService updateRecentTracksScheduler = Executors.newSingleThreadScheduledExecutor();
 	private List<LastFmTrackData> currentRecentTracks;
@@ -100,7 +100,7 @@ public class LastFmPanelController {
 	}
 
 	private void updateRecentTracksContainer() {
-		List<LastFmTrackData> recentTracks = audioPlayerFacade.getRecentTracksFromLastFm();
+		List<LastFmTrackData> recentTracks = musicLibraryLogicFacade.getRecentTracksFromLastFm();
 
 		// update only when the recent tracks list is changed
 		if (!recentTracks.equals(currentRecentTracks)) {

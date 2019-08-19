@@ -212,4 +212,33 @@ public class Album {
     public void setTracklist(String tracklist) {
         this.tracklist = tracklist;
     }
+
+	@Override
+	public String toString() {
+		return "Album{" +
+				"id=" + id +
+				", title='" + title + '\'' +
+				", upc='" + upc + '\'' +
+				", link='" + link + '\'' +
+				", cover='" + cover + '\'' +
+				", genre_id='" + genre_id + '\'' +
+				", label='" + label + '\'' +
+				", duration=" + duration +
+				", fans=" + fans +
+				", rating=" + rating +
+				", release_date='" + release_date + '\'' +
+				", available=" + available +
+				", artist=" + artist +
+				", type='" + type + '\'' +
+				", tracks=" + tracks +
+				", approved_type='" + approved_type + '\'' +
+				", language='" + language + '\'' +
+				", genre='" + genre + '\'' +
+				", nb_tracks=" + nb_tracks +
+				", alternative=" + alternative +
+				", genres=" + genres +
+				", record_type='" + record_type + '\'' +
+				", tracklist='" + tracklist + '\'' +
+				'}';
+	}
 }

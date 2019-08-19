@@ -26,4 +26,10 @@ public interface DeezerApiService {
 	 * See https://developers.deezer.com/api/track
 	 */
 	void getTrack(long trackId);
+
+	/**
+	 * Get current user favorite playlists
+	 * See https://developers.deezer.com/api/user/playlists
+	 */
+	void getPlaylists();
 }
