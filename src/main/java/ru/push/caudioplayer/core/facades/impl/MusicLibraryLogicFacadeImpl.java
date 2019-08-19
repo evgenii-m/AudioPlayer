@@ -6,11 +6,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import ru.push.caudioplayer.core.deezer.DeezerApiService;
+import ru.push.caudioplayer.core.deezer.DeezerNeedAuthorizationException;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
 import ru.push.caudioplayer.core.lastfm.LastFmService;
 import ru.push.caudioplayer.core.lastfm.domain.Track;
 import ru.push.caudioplayer.core.mediaplayer.domain.LastFmTrackData;
+import ru.push.caudioplayer.core.services.AppConfigurationService;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -26,7 +29,22 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	private LastFmService lastFmService;
 	@Autowired
 	private DeezerApiService deezerApiService;
+	@Autowired
+	private AppConfigurationService appConfigurationService;
 
+
+	@PostConstruct
+	public void init() {
+		LOG.debug("init bean {}", this.getClass().getName());
+
+		try {
+			if (appConfigurationService.getDeezerAccessToken() != null) {
+				getDeezerPlaylists();
+			}
+		} catch (DeezerNeedAuthorizationException e) {
+			LOG.error("Deezer authorization fails: {}", e);
+		}
+	}
 
 	@Override
 	public void connectLastFm(Consumer<String> openAuthPageConsumer) {
@@ -53,7 +71,7 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 					LOG.error("Deezer access token is NULL");
 				}
 			}
-		} catch (IllegalAccessException e) {
+		} catch (DeezerNeedAuthorizationException e) {
 			LOG.error("Deezer authorization fails: {}", e);
 			// if access error received - authorization process also ends
 			return true;
@@ -79,12 +97,12 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	}
 
 	@Override
-	public void getTrackFromDeezer(int trackId) {
+	public void getTrackFromDeezer(int trackId) throws DeezerNeedAuthorizationException {
 		deezerApiService.getTrack(trackId);
 	}
 
 	@Override
-	public void getDeezerPlaylists() {
-
+	public void getDeezerPlaylists() throws DeezerNeedAuthorizationException {
+		deezerApiService.getPlaylists();
 	}
 }

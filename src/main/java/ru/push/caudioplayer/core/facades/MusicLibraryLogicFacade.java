@@ -1,5 +1,6 @@
 package ru.push.caudioplayer.core.facades;
 
+import ru.push.caudioplayer.core.deezer.DeezerNeedAuthorizationException;
 import ru.push.caudioplayer.core.mediaplayer.domain.LastFmTrackData;
 
 import java.util.List;
@@ -25,7 +26,7 @@ public interface MusicLibraryLogicFacade {
 	 */
 	List<LastFmTrackData> getRecentTracksFromLastFm();
 
-	void getTrackFromDeezer(int trackId);
+	void getTrackFromDeezer(int trackId) throws DeezerNeedAuthorizationException;
 
-	void getDeezerPlaylists();
+	void getDeezerPlaylists() throws DeezerNeedAuthorizationException;
 }

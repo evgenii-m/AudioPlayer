@@ -15,6 +15,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 import ru.push.caudioplayer.core.deezer.DeezerApiAdapter;
 import ru.push.caudioplayer.core.deezer.DeezerApiConst;
+import ru.push.caudioplayer.core.deezer.DeezerApiErrorException;
 import ru.push.caudioplayer.core.deezer.DeezerApiMethod;
 import ru.push.caudioplayer.core.deezer.DeezerApiParam;
 import ru.push.caudioplayer.core.deezer.domain.Playlists;
@@ -69,7 +70,7 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 				DeezerApiConst.DEEZER_API_DEFAULT_PERMISSIONS);
 	}
 
-	private String makeApiRequest(String requestUrl) {
+	private String makeApiRequest(String requestUrl) throws DeezerApiErrorException {
 		HttpGet request = new HttpGet(requestUrl);
 		LOG.info("api request: {}", request);
 
@@ -89,10 +90,10 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 			request.releaseConnection();
 		}
 
-		throw new IllegalStateException("Deezer api - Not acceptable result for request: " + requestUrl);
+		throw new DeezerApiErrorException("Deezer api - Not acceptable result for request: " + requestUrl);
 	}
 
-	private String makeApiRequest(String methodPath, Map<DeezerApiParam, String> params) {
+	private String makeApiRequest(String methodPath, Map<DeezerApiParam, String> params) throws DeezerApiErrorException {
 		baseApiUriBuilder.clearParameters();
 		params.forEach((key, value) -> baseApiUriBuilder.addParameter(key.getValue(), value));
 
@@ -102,7 +103,7 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 			return makeApiRequest(apiUri.toString());
 		} catch (URISyntaxException e) {
 			LOG.error("construct uri error: ", e);
-			throw new IllegalStateException("Deezer api - Not acceptable result for request: " + methodPath);
+			throw new DeezerApiErrorException("Deezer api - Not acceptable result for request: " + methodPath);
 		}
 	}
 	private <T> T convertJson(final String content, Class<T> targetClass) throws IOException {
@@ -125,7 +126,7 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 			}
 		} catch (IOException | ParserConfigurationException | XPathExpressionException | SAXException e) {
 			LOG.error("parsing xml from response error: ", e);
-		} catch (IllegalStateException e) {
+		} catch (DeezerApiErrorException e) {
 			LOG.warn("getAccessToken error:", e);
 		}
 		return null;
@@ -133,7 +134,7 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 
 
 	@Override
-	public Track getTrack(long trackId, String accessToken) {
+	public Track getTrack(long trackId, String accessToken) throws DeezerApiErrorException {
 		Map<DeezerApiParam, String> requestParameters = new HashMap<>();
 		if (accessToken != null) {
 			requestParameters.put(DeezerApiParam.ACCESS_TOKEN, accessToken);
@@ -145,12 +146,12 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 			return convertJson(responseContent, Track.class);
 		} catch (IOException e) {
 			LOG.error("convert json response error: responseContent = {}, exception = {}", responseContent, e);
-			throw new IllegalStateException("Deezer api - Not acceptable result for request: " + methodPath);
+			throw new DeezerApiErrorException("Deezer api - Not acceptable result for request: " + methodPath);
 		}
 	}
 
 	@Override
-	public Playlists getPlaylists(String accessToken) {
+	public Playlists getPlaylists(String accessToken) throws DeezerApiErrorException {
 		Map<DeezerApiParam, String> requestParameters = new HashMap<>();
 		if (accessToken != null) {
 			requestParameters.put(DeezerApiParam.ACCESS_TOKEN, accessToken);
@@ -162,7 +163,7 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 			return convertJson(responseContent, Playlists.class);
 		} catch (IOException e) {
 			LOG.error("convert json response error: responseContent = {}, exception = {}", responseContent, e);
-			throw new IllegalStateException("Deezer api - Not acceptable result for request: " + methodPath);
+			throw new DeezerApiErrorException("Deezer api - Not acceptable result for request: " + methodPath);
 		}
 	}
 

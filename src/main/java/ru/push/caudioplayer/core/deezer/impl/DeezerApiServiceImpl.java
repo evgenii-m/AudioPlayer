@@ -6,12 +6,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.push.caudioplayer.core.deezer.DeezerApiAdapter;
 import ru.push.caudioplayer.core.deezer.DeezerApiConst;
+import ru.push.caudioplayer.core.deezer.DeezerApiErrorException;
 import ru.push.caudioplayer.core.deezer.DeezerApiService;
+import ru.push.caudioplayer.core.deezer.DeezerNeedAuthorizationException;
 import ru.push.caudioplayer.core.deezer.domain.Playlists;
 import ru.push.caudioplayer.core.deezer.domain.Track;
 import ru.push.caudioplayer.core.services.AppConfigurationService;
 
 import javax.annotation.PostConstruct;
+import java.security.AccessControlException;
 import java.util.Properties;
 
 @Component
@@ -41,8 +44,6 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 			LOG.info("Load Deezer access token from configuration: {}", accessToken);
 			this.currentAccessToken = accessToken;
 		}
-
-		getTrack(3135556);
 	}
 
 	@Override
@@ -51,7 +52,7 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 	}
 
 	@Override
-	public String checkAuthorizationCode(String locationUri) throws IllegalAccessException {
+	public String checkAuthorizationCode(String locationUri) throws DeezerNeedAuthorizationException {
 		assert locationUri != null;
 
 		if (locationUri.startsWith(DeezerApiConst.DEEZER_API_DEFAULT_REDIRECT_URI)) {
@@ -70,7 +71,7 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 			if (errorReasonParamStartPosition > 0) {
 				String errorReason = locationUri.substring(
 						errorReasonParamStartPosition + DeezerApiConst.DEEZER_API_AUTH_PARAM_ERROR_REASON_NAME.length() + 1);
-				throw new IllegalAccessException("Error Reason: " + errorReason);
+				throw new DeezerNeedAuthorizationException("Error Reason: " + errorReason);
 			}
 		}
 
@@ -98,15 +99,31 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 	}
 
 	@Override
-	public void getTrack(long trackId) {
-		Track track = deezerApiAdapter.getTrack(trackId, currentAccessToken);
-		LOG.debug("Received deezer track: {}", track);
+	public void getTrack(long trackId) throws DeezerNeedAuthorizationException {
+		checkAccessToken();
+		try {
+			Track track = deezerApiAdapter.getTrack(trackId, currentAccessToken);
+			LOG.debug("Received deezer track: {}", track);
+		} catch (DeezerApiErrorException e) {
+			LOG.error("Deezer api error:", e);
+		}
 	}
 
 	@Override
-	public void getPlaylists() {
-		Playlists playlists = deezerApiAdapter.getPlaylists(currentAccessToken);
-		LOG.debug("Received deezer playlists: {}", playlists);
+	public void getPlaylists() throws DeezerNeedAuthorizationException {
+		checkAccessToken();
+		try {
+			Playlists playlists = deezerApiAdapter.getPlaylists(currentAccessToken);
+			LOG.debug("Received deezer playlists: {}", playlists);
+		} catch (DeezerApiErrorException e) {
+			LOG.error("Deezer api error:", e);
+		}
+	}
+
+	private void checkAccessToken() throws DeezerNeedAuthorizationException {
+		if (currentAccessToken == null) {
+			throw new DeezerNeedAuthorizationException("Access token not defined.");
+		}
 	}
 
 }

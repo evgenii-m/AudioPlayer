@@ -9,7 +9,7 @@ public interface DeezerApiAdapter {
 
 	String getAccessToken(String code);
 
-	Track getTrack(long trackId, String accessToken);
+	Track getTrack(long trackId, String accessToken) throws DeezerApiErrorException;
 
-	Playlists getPlaylists(String accessToken);
+	Playlists getPlaylists(String accessToken) throws DeezerApiErrorException;
 }

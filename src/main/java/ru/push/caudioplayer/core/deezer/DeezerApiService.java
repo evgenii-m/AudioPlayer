@@ -11,8 +11,9 @@ public interface DeezerApiService {
 	 * Method for checking authorization code in location URI
 	 *
 	 * @return authorization code if detected
+	 * @throws DeezerNeedAuthorizationException when error reason obtained
 	 */
-	String checkAuthorizationCode(String locationUri) throws IllegalAccessException;
+	String checkAuthorizationCode(String locationUri) throws DeezerNeedAuthorizationException;
 
 	/**
 	 * Get access token by received authorization code
@@ -25,11 +26,11 @@ public interface DeezerApiService {
 	 * Get track object
 	 * See https://developers.deezer.com/api/track
 	 */
-	void getTrack(long trackId);
+	void getTrack(long trackId) throws DeezerNeedAuthorizationException;
 
 	/**
 	 * Get current user favorite playlists
 	 * See https://developers.deezer.com/api/user/playlists
 	 */
-	void getPlaylists();
+	void getPlaylists() throws DeezerNeedAuthorizationException;
 }

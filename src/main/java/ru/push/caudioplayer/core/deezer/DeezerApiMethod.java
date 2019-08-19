@@ -3,7 +3,7 @@ package ru.push.caudioplayer.core.deezer;
 public enum DeezerApiMethod {
 
 	GET_TRACK("/track/%d"),
-	USER_ME_PLAYLISTS("user/me/playlists")
+	USER_ME_PLAYLISTS("/user/me/playlists")
 	;
 
 	String value;
