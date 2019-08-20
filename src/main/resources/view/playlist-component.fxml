@@ -14,7 +14,7 @@
 	  xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1"
 	  fx:controller="ru.push.caudioplayer.controller.PlaylistController">
 	<children>
-		<TabPane nodeOrientation="LEFT_TO_RIGHT" pickOnBounds="false" prefHeight="300.0" prefWidth="1010.0"
+		<TabPane fx:id="playlistsTabPane" nodeOrientation="LEFT_TO_RIGHT" pickOnBounds="false" prefHeight="300.0" prefWidth="1010.0"
 				 rotateGraphic="true" side="LEFT" tabClosingPolicy="UNAVAILABLE">
 			<tabs>
 				<Tab closable="false" text="LOCAL" fx:id="localPlaylistsTab" styleClass="tabPaneItem">

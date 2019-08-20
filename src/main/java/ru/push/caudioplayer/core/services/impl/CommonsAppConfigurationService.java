@@ -19,7 +19,7 @@ import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
 import ru.push.caudioplayer.core.mediaplayer.domain.MediaSourceType;
 import ru.push.caudioplayer.core.facades.domain.PlaylistData;
 import ru.push.caudioplayer.core.services.AppConfigurationService;
-import ru.push.caudioplayer.ui.configuration.PlaylistContainerViewConfigurations;
+import ru.push.caudioplayer.core.facades.domain.configuration.PlaylistContainerViewConfigurations;
 
 import java.util.Collections;
 import java.util.List;

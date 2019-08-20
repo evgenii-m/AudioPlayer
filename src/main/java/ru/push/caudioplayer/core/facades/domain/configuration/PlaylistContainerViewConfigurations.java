@@ -1,4 +1,4 @@
-package ru.push.caudioplayer.ui.configuration;
+package ru.push.caudioplayer.core.facades.domain.configuration;
 
 import java.util.List;
 

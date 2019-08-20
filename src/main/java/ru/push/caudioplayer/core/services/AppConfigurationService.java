@@ -3,7 +3,7 @@ package ru.push.caudioplayer.core.services;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import ru.push.caudioplayer.core.lastfm.LastFmSessionData;
 import ru.push.caudioplayer.core.facades.domain.PlaylistData;
-import ru.push.caudioplayer.ui.configuration.PlaylistContainerViewConfigurations;
+import ru.push.caudioplayer.core.facades.domain.configuration.PlaylistContainerViewConfigurations;
 
 import java.util.List;
 

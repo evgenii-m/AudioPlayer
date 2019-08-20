@@ -27,8 +27,6 @@ public class AppMain extends AbstractJavaFxApplicationSupport {
 
   @Resource(name = "mainView")
   private ConfigurationControllers.View mainView;
-  @Resource(name = "audioPlayerView")
-  private ConfigurationControllers.View audioPlayerView;
   @Autowired
   private AudioPlayerFacade audioPlayerFacade;
 

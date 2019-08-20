@@ -7,14 +7,14 @@ import javafx.beans.property.SimpleStringProperty;
  * @date 2/25/17
  * todo: remove class and make setCellValueFactory as ru.push.caudioplayer.controller.LastFmPanelController#setRecentTracksContainerColumns()
  */
-public class MediaTrackPlaylistItem {
+public class AudioTrackPlaylistItem {
   private final SimpleStringProperty number;
   private final SimpleStringProperty artist;
   private final SimpleStringProperty album;
   private final SimpleStringProperty title;
   private final SimpleStringProperty length;
 
-  public MediaTrackPlaylistItem(String number, String artist, String album, String title, String length) {
+  public AudioTrackPlaylistItem(String number, String artist, String album, String title, String length) {
     this.number = new SimpleStringProperty(number);
     this.artist = new SimpleStringProperty(artist);
     this.album = new SimpleStringProperty(album);
