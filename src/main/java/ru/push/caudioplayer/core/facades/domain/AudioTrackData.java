@@ -1,6 +1,7 @@
-package ru.push.caudioplayer.core.mediaplayer.domain;
+package ru.push.caudioplayer.core.facades.domain;
 
 import org.apache.commons.lang3.StringUtils;
+import ru.push.caudioplayer.core.mediaplayer.domain.MediaSourceType;
 
 /**
  * @author push <mez.e.s@yandex.ru>

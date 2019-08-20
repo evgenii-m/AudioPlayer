@@ -11,8 +11,8 @@ import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
 import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
-import ru.push.caudioplayer.core.mediaplayer.domain.AudioTrackData;
-import ru.push.caudioplayer.core.mediaplayer.domain.PlaylistData;
+import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
+import ru.push.caudioplayer.core.facades.domain.PlaylistData;
 import ru.push.caudioplayer.core.services.AppConfigurationService;
 
 import java.io.File;

@@ -9,9 +9,9 @@ import org.springframework.util.Assert;
 import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
 import ru.push.caudioplayer.core.services.MediaInfoDataLoaderService;
-import ru.push.caudioplayer.core.mediaplayer.domain.AudioTrackData;
+import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
 import ru.push.caudioplayer.core.mediaplayer.domain.MediaSourceType;
-import ru.push.caudioplayer.core.mediaplayer.domain.PlaylistData;
+import ru.push.caudioplayer.core.facades.domain.PlaylistData;
 
 import java.io.File;
 import java.net.MalformedURLException;

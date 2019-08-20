@@ -3,9 +3,9 @@ package ru.push.caudioplayer.core.services;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import ru.push.caudioplayer.core.mediaplayer.domain.AudioTrackData;
+import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
 import ru.push.caudioplayer.core.mediaplayer.domain.MediaSourceType;
-import ru.push.caudioplayer.core.mediaplayer.domain.PlaylistData;
+import ru.push.caudioplayer.core.facades.domain.PlaylistData;
 import ru.push.caudioplayer.core.services.impl.CommonsAppConfigurationService;
 import ru.push.caudioplayer.ui.configuration.PlaylistContainerViewConfigurations;
 

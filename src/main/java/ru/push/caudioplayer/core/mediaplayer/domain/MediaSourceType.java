@@ -5,5 +5,5 @@ package ru.push.caudioplayer.core.mediaplayer.domain;
  * @date 3/1/17
  */
 public enum MediaSourceType {
-  FILE, HTTP_STREAM
+  FILE, HTTP_STREAM, DEEZER_MEDIA
 }

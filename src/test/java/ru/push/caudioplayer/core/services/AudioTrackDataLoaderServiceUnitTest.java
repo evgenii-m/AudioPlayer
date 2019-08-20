@@ -8,7 +8,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
 import ru.push.caudioplayer.core.services.impl.DefaultMediaInfoDataLoaderService;
-import ru.push.caudioplayer.core.mediaplayer.domain.AudioTrackData;
+import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
 import ru.push.caudioplayer.core.mediaplayer.domain.MediaSourceType;
 import uk.co.caprica.vlcj.discovery.NativeDiscovery;
 

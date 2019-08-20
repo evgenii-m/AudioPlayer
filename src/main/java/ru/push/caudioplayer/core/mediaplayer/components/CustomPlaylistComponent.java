@@ -1,7 +1,7 @@
 package ru.push.caudioplayer.core.mediaplayer.components;
 
-import ru.push.caudioplayer.core.mediaplayer.domain.AudioTrackData;
-import ru.push.caudioplayer.core.mediaplayer.domain.PlaylistData;
+import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
+import ru.push.caudioplayer.core.facades.domain.PlaylistData;
 
 import java.io.File;
 import java.util.List;
