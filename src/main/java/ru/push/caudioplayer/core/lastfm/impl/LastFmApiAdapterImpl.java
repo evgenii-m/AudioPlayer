@@ -168,7 +168,7 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 
 		try {
 			String response = makeApiRequest(method, methodParameters);
-			LastFmResponse lastFmResponse = XmlUtils.unmarshalMessage(response, LastFmResponse.class.getPackage().getName());
+			LastFmResponse lastFmResponse = XmlUtils.unmarshalDocumnet(response, LastFmResponse.class.getPackage().getName());
 			RecentTracks recentTracks = lastFmResponse.getRecentTracks();
 			LOG.info("obtained recent tracks: {}", recentTracks);
 			return recentTracks;

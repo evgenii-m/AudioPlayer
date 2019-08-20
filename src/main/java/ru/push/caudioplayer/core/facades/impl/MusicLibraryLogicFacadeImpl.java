@@ -11,7 +11,7 @@ import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
 import ru.push.caudioplayer.core.lastfm.LastFmService;
 import ru.push.caudioplayer.core.lastfm.domain.Track;
 import ru.push.caudioplayer.core.mediaplayer.domain.LastFmTrackData;
-import ru.push.caudioplayer.core.services.AppConfigurationService;
+import ru.push.caudioplayer.core.config.ApplicationConfigService;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	@Autowired
 	private DeezerApiService deezerApiService;
 	@Autowired
-	private AppConfigurationService appConfigurationService;
+	private ApplicationConfigService applicationConfigService;
 
 
 	@PostConstruct
@@ -38,7 +38,7 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 		LOG.debug("init bean {}", this.getClass().getName());
 
 		try {
-			if (appConfigurationService.getDeezerAccessToken() != null) {
+			if (applicationConfigService.getDeezerAccessToken() != null) {
 				getDeezerPlaylists();
 			}
 		} catch (DeezerNeedAuthorizationException e) {

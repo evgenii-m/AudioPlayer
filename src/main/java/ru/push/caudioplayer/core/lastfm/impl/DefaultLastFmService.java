@@ -9,7 +9,7 @@ import ru.push.caudioplayer.core.lastfm.LastFmService;
 import ru.push.caudioplayer.core.lastfm.LastFmSessionData;
 import ru.push.caudioplayer.core.lastfm.domain.RecentTracks;
 import ru.push.caudioplayer.core.lastfm.domain.Track;
-import ru.push.caudioplayer.core.services.AppConfigurationService;
+import ru.push.caudioplayer.core.config.ApplicationConfigService;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -29,14 +29,14 @@ public class DefaultLastFmService implements LastFmService {
   @Autowired
 	private LastFmApiAdapter apiAdapter;
 	@Autowired
-	private AppConfigurationService appConfigurationService;
+	private ApplicationConfigService applicationConfigService;
 
 	private LastFmSessionData currentSessionData;
 
 
 	@PostConstruct
 	public void init() {
-		LastFmSessionData sessionData = appConfigurationService.getLastFmSessionData();
+		LastFmSessionData sessionData = applicationConfigService.getLastFmSessionData();
 		if (sessionData != null) {
 			LOG.info("Load Last.fm session from configuration: username = {}, session key = {}",
 					sessionData.getUsername(), sessionData.getSessionKey());
@@ -50,7 +50,7 @@ public class DefaultLastFmService implements LastFmService {
 	@Override
 	public void connectLastFm(Consumer<String> openAuthPageConsumer) {
 
-		LastFmSessionData sessionData = appConfigurationService.getLastFmSessionData();
+		LastFmSessionData sessionData = applicationConfigService.getLastFmSessionData();
 		if (sessionData != null) {
 			LOG.warn("Last.fm user data already set in configuration, they will be overwritten: username = {}, session key = {}",
 					sessionData.getUsername(), sessionData.getSessionKey());
@@ -67,7 +67,7 @@ public class DefaultLastFmService implements LastFmService {
 
 		// 4. Fetch A Web Service Session
 		currentSessionData = apiAdapter.authGetSession(token);
-		appConfigurationService.saveLastFmSessionData(currentSessionData);
+		applicationConfigService.saveLastFmSessionData(currentSessionData);
 	}
 
 	@Override

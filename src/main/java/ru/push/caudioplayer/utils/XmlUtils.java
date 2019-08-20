@@ -5,6 +5,7 @@ import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -14,9 +15,11 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 
@@ -45,11 +48,17 @@ public class XmlUtils {
 		return sw.toString();
 	}
 
-	public static <T> T unmarshalMessage(String xmlDocument, String jaxbContextPath) throws JAXBException {
+	public static <T> T unmarshalDocumnet(String xmlDocument, String jaxbContextPath) throws JAXBException {
 		JAXBContext jc = JAXBContext.newInstance(jaxbContextPath);
 		Unmarshaller unmarshaller = jc.createUnmarshaller();
 		@SuppressWarnings("unchecked")
 		T t = (T) unmarshaller.unmarshal(new StringReader(xmlDocument));
 		return t;
+	}
+
+	public static <T> void marshalDocument(T document, BufferedWriter stream, String jaxbContextPath) throws JAXBException {
+		JAXBContext jc = JAXBContext.newInstance(jaxbContextPath);
+		Marshaller marshaller = jc.createMarshaller();
+		marshaller.marshal(document, stream);
 	}
 }

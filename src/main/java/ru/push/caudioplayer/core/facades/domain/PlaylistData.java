@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -63,22 +64,18 @@ public class PlaylistData {
     this.tracks = tracks;
   }
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		PlaylistData that = (PlaylistData) o;
+		return Objects.equals(uid, that.uid) &&
+				Objects.equals(name, that.name);
+	}
 
-    PlaylistData that = (PlaylistData) o;
+	@Override
+	public int hashCode() {
 
-    if (name != null ? !name.equals(that.name) : that.name != null) return false;
-    return tracks != null ? tracks.equals(that.tracks) : that.tracks == null;
-
-  }
-
-  @Override
-  public int hashCode() {
-    int result = name != null ? name.hashCode() : 0;
-    result = 31 * result + (tracks != null ? tracks.hashCode() : 0);
-    return result;
-  }
+		return Objects.hash(uid, name);
+	}
 }

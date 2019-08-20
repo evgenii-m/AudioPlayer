@@ -12,7 +12,7 @@ import ru.push.caudioplayer.core.deezer.DeezerNeedAuthorizationException;
 import ru.push.caudioplayer.core.deezer.domain.Playlist;
 import ru.push.caudioplayer.core.deezer.domain.Playlists;
 import ru.push.caudioplayer.core.deezer.domain.Track;
-import ru.push.caudioplayer.core.services.AppConfigurationService;
+import ru.push.caudioplayer.core.config.ApplicationConfigService;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -33,7 +33,7 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 	private DeezerApiAdapter deezerApiAdapter;
 
 	@Autowired
-	private AppConfigurationService appConfigurationService;
+	private ApplicationConfigService applicationConfigService;
 
 	private String currentAccessToken;
 
@@ -42,7 +42,7 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 
 	@PostConstruct
 	public void init() {
-		String accessToken = appConfigurationService.getDeezerAccessToken();
+		String accessToken = applicationConfigService.getDeezerAccessToken();
 		if (accessToken != null) {
 			LOG.info("Load Deezer access token from configuration: {}", accessToken);
 			this.currentAccessToken = accessToken;
@@ -84,7 +84,7 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 	@Override
 	public String getAccessToken(String code) {
 
-		String accessToken = appConfigurationService.getDeezerAccessToken();
+		String accessToken = applicationConfigService.getDeezerAccessToken();
 		if (accessToken != null) {
 			LOG.warn("Deezer access token already set in configuration, they will be overwritten: access token = {}", accessToken);
 		}
@@ -93,7 +93,7 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 		if (newAccessToken != null) {
 			LOG.info("Set new Deezer access token: {}", newAccessToken);
 			currentAccessToken = newAccessToken;
-			appConfigurationService.saveDeezerAccessToken(currentAccessToken);
+			applicationConfigService.saveDeezerAccessToken(currentAccessToken);
 		} else {
 			LOG.warn("Received empty access token, current user token will not be updated");
 		}

@@ -19,7 +19,7 @@ import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
 import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
 import ru.push.caudioplayer.core.facades.domain.PlaylistData;
-import ru.push.caudioplayer.core.services.AppConfigurationService;
+import ru.push.caudioplayer.core.config.ApplicationConfigService;
 import ru.push.caudioplayer.ui.AudioTrackPlaylistItem;
 import ru.push.caudioplayer.core.facades.domain.configuration.PlaylistContainerViewConfigurations;
 import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
@@ -64,7 +64,7 @@ public class PlaylistController {
   @Autowired
   private TrackTimeLabelBuilder trackTimeLabelBuilder;
   @Autowired
-  private AppConfigurationService appConfigurationService;
+  private ApplicationConfigService applicationConfigService;
 
   private Scene renamePopupScene;
 
@@ -88,7 +88,7 @@ public class PlaylistController {
   public void init() throws ConfigurationException {
 		LOG.debug("init bean {}", this.getClass().getName());
 
-    setPlaylistContainerColumns(localPlaylistContainer, appConfigurationService.getPlaylistContainerViewConfigurations());
+    setPlaylistContainerColumns(localPlaylistContainer, applicationConfigService.getPlaylistContainerViewConfigurations());
 		setPlaylistContainerRowFactory();
 
     renamePopupScene = new Scene(renamePopupView.getView());
@@ -304,7 +304,7 @@ public class PlaylistController {
             )
         ).collect(Collectors.toList());
     PlaylistContainerViewConfigurations viewConfigurations = new PlaylistContainerViewConfigurations(columns);
-    appConfigurationService.savePlaylistContainerViewConfigurations(viewConfigurations);
+    applicationConfigService.savePlaylistContainerViewConfigurations(viewConfigurations);
   }
 
 

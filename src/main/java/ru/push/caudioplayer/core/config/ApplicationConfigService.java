@@ -1,4 +1,4 @@
-package ru.push.caudioplayer.core.services;
+package ru.push.caudioplayer.core.config;
 
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import ru.push.caudioplayer.core.lastfm.LastFmSessionData;
@@ -11,7 +11,7 @@ import java.util.List;
  * @author push <mez.e.s@yandex.ru>
  * @date 2/23/17
  */
-public interface AppConfigurationService {
+public interface ApplicationConfigService {
 
   // playlists configuration methods
 
