@@ -25,11 +25,6 @@ public abstract class DefaultAudioPlayerEventAdapter implements AudioPlayerEvent
   public void refreshTrackMediaInfo(int trackPosition, AudioTrackData mediaInfo) {
   }
 
-	@Override
-	public void stopAudioPlayer() {
-
-	}
-
   @Override
   public void renamedPlaylist(PlaylistData playlistData) {
   }

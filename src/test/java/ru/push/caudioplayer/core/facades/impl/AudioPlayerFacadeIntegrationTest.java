@@ -82,14 +82,10 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
   @AfterMethod
   public void tearDown() throws Exception {
     audioPlayerFacade.stopApplication();
-    verify(eventListener).stopAudioPlayer();
     audioPlayerFacade.removeEventListener(eventListener);
   }
 
   private class TestAudioPlayerEventAdapter extends DefaultAudioPlayerEventAdapter {
-    @Override
-    public void stopAudioPlayer() {
-    }
   }
 
   /**

@@ -124,7 +124,7 @@ public class PlaylistController {
   }
 
 	@PreDestroy
-	public void stopApplication() {
+	public void stop() {
 		savePlaylistContainerViewConfiguration();
 	}
 
