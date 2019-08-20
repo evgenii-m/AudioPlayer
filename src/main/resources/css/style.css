@@ -22,3 +22,11 @@
 .playlist-container {
  -fx-background-color: #6E6E6E;
 }
+
+.tabPaneItem {
+ -fx-padding: 3px 12px 3px 12px;
+ -fx-text-fill: #828282;
+ -fx-font-size: 12px;
+ -fx-font-weight: bold;
+}
+
