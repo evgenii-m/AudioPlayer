@@ -1,6 +1,6 @@
 package ru.push.caudioplayer.core.mediaplayer;
 
-import ru.push.caudioplayer.core.mediaplayer.domain.MediaInfoData;
+import ru.push.caudioplayer.core.mediaplayer.domain.AudioTrackData;
 import ru.push.caudioplayer.core.mediaplayer.domain.PlaylistData;
 
 /**
@@ -15,7 +15,7 @@ public interface AudioPlayerEventListener {
 
   void changedTrackPosition(PlaylistData playlist, int trackPosition);
 
-  void refreshTrackMediaInfo(int trackPosition, MediaInfoData mediaInfo);
+  void refreshTrackMediaInfo(int trackPosition, AudioTrackData mediaInfo);
 
   void stopAudioPlayer();
 

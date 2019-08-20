@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
-import ru.push.caudioplayer.core.mediaplayer.domain.MediaInfoData;
+import ru.push.caudioplayer.core.mediaplayer.domain.AudioTrackData;
 import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
 
 import javax.annotation.PostConstruct;
@@ -132,10 +132,10 @@ public class AudioPlayerController {
       }
     }
 
-    MediaInfoData mediaInfoData = audioPlayerFacade.getCurrentTrackInfo();
+    AudioTrackData audioTrackData = audioPlayerFacade.getCurrentTrackInfo();
     float playbackPosition = playerComponent.getPlaybackPosition();
 
-    updatePlaybackPosition(playbackPosition, mediaInfoData.getLength());
+    updatePlaybackPosition(playbackPosition, audioTrackData.getLength());
   }
 
   private final class UpdateUiRunnable implements Runnable {

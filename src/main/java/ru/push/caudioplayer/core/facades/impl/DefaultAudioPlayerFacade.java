@@ -8,7 +8,7 @@ import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
 import ru.push.caudioplayer.core.services.MediaInfoDataLoaderService;
-import ru.push.caudioplayer.core.mediaplayer.domain.MediaInfoData;
+import ru.push.caudioplayer.core.mediaplayer.domain.AudioTrackData;
 import ru.push.caudioplayer.core.mediaplayer.domain.MediaSourceType;
 import ru.push.caudioplayer.core.mediaplayer.domain.PlaylistData;
 import ru.push.caudioplayer.core.services.AppConfigurationService;
@@ -42,11 +42,11 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   @Autowired
   private MediaInfoDataLoaderService mediaInfoDataLoaderService;
 
-  private MediaInfoData currentTrackInfoData;
+  private AudioTrackData currentTrackInfoData;
 
 
   public DefaultAudioPlayerFacade() {
-    currentTrackInfoData = new MediaInfoData();
+    currentTrackInfoData = new AudioTrackData();
     eventListeners = new ArrayList<>();
   }
 
@@ -182,29 +182,29 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 
   @Override
   public void playTrack(String playlistUid, int trackPosition) {
-    MediaInfoData trackInfo = playlistComponent.playTrack(playlistUid, trackPosition);
+    AudioTrackData trackInfo = playlistComponent.playTrack(playlistUid, trackPosition);
     playTrack(trackInfo);
   }
 
   @Override
   public void playCurrentTrack() {
-    MediaInfoData trackInfo = playlistComponent.playCurrentTrack();
+    AudioTrackData trackInfo = playlistComponent.playCurrentTrack();
     playTrack(trackInfo);
   }
 
   @Override
   public void playNextTrack() {
-    MediaInfoData trackInfo = playlistComponent.playNextTrack();
+    AudioTrackData trackInfo = playlistComponent.playNextTrack();
     playTrack(trackInfo);
   }
 
   @Override
   public void playPrevTrack() {
-    MediaInfoData trackInfo = playlistComponent.playPrevTrack();
+    AudioTrackData trackInfo = playlistComponent.playPrevTrack();
     playTrack(trackInfo);
   }
 
-  private void playTrack(MediaInfoData trackInfo) {
+  private void playTrack(AudioTrackData trackInfo) {
     String resourceUri = MediaSourceType.FILE.equals(trackInfo.getSourceType()) ?
         Paths.get(trackInfo.getTrackPath()).toString() : trackInfo.getTrackPath();
     playerComponent.playMedia(resourceUri);
@@ -216,7 +216,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   }
 
   @Override
-  public MediaInfoData getCurrentTrackInfo() {
+  public AudioTrackData getCurrentTrackInfo() {
     return currentTrackInfoData;
   }
 

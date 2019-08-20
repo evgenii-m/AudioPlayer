@@ -8,7 +8,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
 import ru.push.caudioplayer.core.services.impl.DefaultMediaInfoDataLoaderService;
-import ru.push.caudioplayer.core.mediaplayer.domain.MediaInfoData;
+import ru.push.caudioplayer.core.mediaplayer.domain.AudioTrackData;
 import ru.push.caudioplayer.core.mediaplayer.domain.MediaSourceType;
 import uk.co.caprica.vlcj.discovery.NativeDiscovery;
 
@@ -20,7 +20,7 @@ import static org.testng.Assert.*;
  * @author push <mez.e.s@yandex.ru>
  * @date 4/2/17
  */
-public class MediaInfoDataLoaderServiceUnitTest {
+public class AudioTrackDataLoaderServiceUnitTest {
   private static final String[] MEDIA_PLAYER_FACTORY_ARGS = new String[] {
       "--quiet"
   };
@@ -71,25 +71,25 @@ public class MediaInfoDataLoaderServiceUnitTest {
   @Test(dataProvider = "correctMediaFilesData")
   public void testLoadFromFile(String mediaFilePath, String expectedArtist, String expectedAlbum,
                                String expectedTitle) throws Exception {
-    MediaInfoData mediaInfoData = mediaInfoDataLoaderService.load(mediaFilePath, MediaSourceType.FILE);
+    AudioTrackData audioTrackData = mediaInfoDataLoaderService.load(mediaFilePath, MediaSourceType.FILE);
 
-    assertEquals(mediaInfoData.getTrackPath(), mediaFilePath, "Unexpected track path.");
-    assertEquals(mediaInfoData.getArtist(), expectedArtist, "Unexpected artist.");
-    assertEquals(mediaInfoData.getAlbum(), expectedAlbum, "Unexpected album.");
-    assertEquals(mediaInfoData.getTitle(), expectedTitle, "Unexpected title.");
-    assertEquals(mediaInfoData.getSourceType(), MediaSourceType.FILE, "Unexpected source type.");
+    assertEquals(audioTrackData.getTrackPath(), mediaFilePath, "Unexpected track path.");
+    assertEquals(audioTrackData.getArtist(), expectedArtist, "Unexpected artist.");
+    assertEquals(audioTrackData.getAlbum(), expectedAlbum, "Unexpected album.");
+    assertEquals(audioTrackData.getTitle(), expectedTitle, "Unexpected title.");
+    assertEquals(audioTrackData.getSourceType(), MediaSourceType.FILE, "Unexpected source type.");
   }
 
   @Test(dataProvider = "correctMediaHttpStreamsData")
   public void testLoadFromHttpStream(String mediaHttpStreamPath, String expectedStationName) throws Exception {
-    MediaInfoData mediaInfoData = mediaInfoDataLoaderService.load(mediaHttpStreamPath, MediaSourceType.HTTP_STREAM);
+    AudioTrackData audioTrackData = mediaInfoDataLoaderService.load(mediaHttpStreamPath, MediaSourceType.HTTP_STREAM);
 
-    assertEquals(mediaInfoData.getTrackPath(), mediaHttpStreamPath, "Unexpected track path.");
-    assertTrue(StringUtils.isNotEmpty(mediaInfoData.getArtist()), "Artist field must not be empty.");
-    assertTrue(StringUtils.isNotEmpty(mediaInfoData.getTitle()), "Title field must not be empty.");
-    assertTrue(StringUtils.contains(mediaInfoData.getAlbum(), expectedStationName),
+    assertEquals(audioTrackData.getTrackPath(), mediaHttpStreamPath, "Unexpected track path.");
+    assertTrue(StringUtils.isNotEmpty(audioTrackData.getArtist()), "Artist field must not be empty.");
+    assertTrue(StringUtils.isNotEmpty(audioTrackData.getTitle()), "Title field must not be empty.");
+    assertTrue(StringUtils.contains(audioTrackData.getAlbum(), expectedStationName),
         "Album field must contains station name.");
-    assertEquals(mediaInfoData.getSourceType(), MediaSourceType.HTTP_STREAM, "Unexpected source type.");
+    assertEquals(audioTrackData.getSourceType(), MediaSourceType.HTTP_STREAM, "Unexpected source type.");
   }
 
 

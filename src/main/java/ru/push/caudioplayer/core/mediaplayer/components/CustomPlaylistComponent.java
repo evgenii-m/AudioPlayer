@@ -1,6 +1,6 @@
 package ru.push.caudioplayer.core.mediaplayer.components;
 
-import ru.push.caudioplayer.core.mediaplayer.domain.MediaInfoData;
+import ru.push.caudioplayer.core.mediaplayer.domain.AudioTrackData;
 import ru.push.caudioplayer.core.mediaplayer.domain.PlaylistData;
 
 import java.io.File;
@@ -34,13 +34,13 @@ public interface CustomPlaylistComponent extends NativePlayerComponent {
 
   int getActiveTrackPosition();
 
-  MediaInfoData playTrack(String playlistUid, int trackPosition) throws IllegalArgumentException;
+  AudioTrackData playTrack(String playlistUid, int trackPosition) throws IllegalArgumentException;
 
-  MediaInfoData playCurrentTrack();
+  AudioTrackData playCurrentTrack();
 
-  MediaInfoData playNextTrack();
+  AudioTrackData playNextTrack();
 
-  MediaInfoData playPrevTrack();
+  AudioTrackData playPrevTrack();
 
   PlaylistData addFilesToPlaylist(String playlistUid, List<File> files);
 

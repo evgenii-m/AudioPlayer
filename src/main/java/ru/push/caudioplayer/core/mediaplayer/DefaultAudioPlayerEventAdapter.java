@@ -1,6 +1,6 @@
 package ru.push.caudioplayer.core.mediaplayer;
 
-import ru.push.caudioplayer.core.mediaplayer.domain.MediaInfoData;
+import ru.push.caudioplayer.core.mediaplayer.domain.AudioTrackData;
 import ru.push.caudioplayer.core.mediaplayer.domain.PlaylistData;
 
 /**
@@ -22,7 +22,7 @@ public abstract class DefaultAudioPlayerEventAdapter implements AudioPlayerEvent
   }
 
   @Override
-  public void refreshTrackMediaInfo(int trackPosition, MediaInfoData mediaInfo) {
+  public void refreshTrackMediaInfo(int trackPosition, AudioTrackData mediaInfo) {
   }
 
   @Override

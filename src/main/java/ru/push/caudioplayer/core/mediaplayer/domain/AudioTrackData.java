@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
  * @author push <mez.e.s@yandex.ru>
  * @date 2/13/17
  */
-public class MediaInfoData {
+public class AudioTrackData {
   private String trackPath;
   private MediaSourceType sourceType;
   private String artist;
@@ -17,17 +17,17 @@ public class MediaInfoData {
   private String trackNumber;
   private long length;
 
-  public MediaInfoData() {
+  public AudioTrackData() {
     this.trackPath = StringUtils.EMPTY;
     this.sourceType = MediaSourceType.FILE;
   }
 
-  public MediaInfoData(String trackPath, MediaSourceType sourceType) {
+  public AudioTrackData(String trackPath, MediaSourceType sourceType) {
     this.trackPath = trackPath;
     this.sourceType = sourceType;
   }
 
-  private MediaInfoData(Builder builder) {
+  private AudioTrackData(Builder builder) {
     this.trackPath = builder.trackPath;
     this.sourceType = builder.sourceType;
     this.artist = builder.artist;
@@ -116,7 +116,7 @@ public class MediaInfoData {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
 
-    MediaInfoData that = (MediaInfoData) o;
+    AudioTrackData that = (AudioTrackData) o;
 
     if (length != that.length) return false;
     if (trackPath != null ? !trackPath.equals(that.trackPath) : that.trackPath != null) return false;
@@ -187,8 +187,8 @@ public class MediaInfoData {
       return this;
     }
 
-    public MediaInfoData build() {
-      return new MediaInfoData(this);
+    public AudioTrackData build() {
+      return new AudioTrackData(this);
     }
   }
 }

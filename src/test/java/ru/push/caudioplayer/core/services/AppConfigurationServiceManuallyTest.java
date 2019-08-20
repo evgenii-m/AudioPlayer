@@ -3,7 +3,7 @@ package ru.push.caudioplayer.core.services;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import ru.push.caudioplayer.core.mediaplayer.domain.MediaInfoData;
+import ru.push.caudioplayer.core.mediaplayer.domain.AudioTrackData;
 import ru.push.caudioplayer.core.mediaplayer.domain.MediaSourceType;
 import ru.push.caudioplayer.core.mediaplayer.domain.PlaylistData;
 import ru.push.caudioplayer.core.services.impl.CommonsAppConfigurationService;
@@ -50,27 +50,27 @@ public class AppConfigurationServiceManuallyTest {
     playlist1.setName(PLAYLIST_1_NAME);
     playlist1.setTracks(
         Arrays.asList(
-            new MediaInfoData(PLAYLIST_1_NAME + "_1", MediaSourceType.FILE),
-            new MediaInfoData(PLAYLIST_1_NAME + "_2", MediaSourceType.FILE),
-            new MediaInfoData(PLAYLIST_1_NAME + "_3", MediaSourceType.FILE)
+            new AudioTrackData(PLAYLIST_1_NAME + "_1", MediaSourceType.FILE),
+            new AudioTrackData(PLAYLIST_1_NAME + "_2", MediaSourceType.FILE),
+            new AudioTrackData(PLAYLIST_1_NAME + "_3", MediaSourceType.FILE)
         )
     );
     PlaylistData playlist2 = new PlaylistData();
     playlist2.setName(PLAYLIST_2_NAME);
     playlist2.setTracks(
         Arrays.asList(
-            new MediaInfoData(PLAYLIST_2_NAME + "_1", MediaSourceType.FILE),
-            new MediaInfoData(PLAYLIST_2_NAME + "_2", MediaSourceType.FILE),
-            new MediaInfoData(PLAYLIST_2_NAME + "_3", MediaSourceType.FILE)
+            new AudioTrackData(PLAYLIST_2_NAME + "_1", MediaSourceType.FILE),
+            new AudioTrackData(PLAYLIST_2_NAME + "_2", MediaSourceType.FILE),
+            new AudioTrackData(PLAYLIST_2_NAME + "_3", MediaSourceType.FILE)
         )
     );
     PlaylistData playlist3 = new PlaylistData();
     playlist3.setName(PLAYLIST_3_NAME);
     playlist3.setTracks(
         Arrays.asList(
-            new MediaInfoData(PLAYLIST_3_NAME + "_1", MediaSourceType.HTTP_STREAM),
-            new MediaInfoData(PLAYLIST_3_NAME + "_2", MediaSourceType.HTTP_STREAM),
-            new MediaInfoData(PLAYLIST_3_NAME + "_3", MediaSourceType.HTTP_STREAM)
+            new AudioTrackData(PLAYLIST_3_NAME + "_1", MediaSourceType.HTTP_STREAM),
+            new AudioTrackData(PLAYLIST_3_NAME + "_2", MediaSourceType.HTTP_STREAM),
+            new AudioTrackData(PLAYLIST_3_NAME + "_3", MediaSourceType.HTTP_STREAM)
         )
     );
     playlists = Arrays.asList(playlist1, playlist2, playlist3);

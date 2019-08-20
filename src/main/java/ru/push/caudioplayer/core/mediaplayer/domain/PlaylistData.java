@@ -15,7 +15,7 @@ public class PlaylistData {
 
   private final String uid;
   private String name;
-  private List<MediaInfoData> tracks;
+  private List<AudioTrackData> tracks;
 
   public static String getNewPlaylistName() {
     String currentTimeString = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new Date());
@@ -30,14 +30,14 @@ public class PlaylistData {
     this(name, new ArrayList<>());
   }
 
-  public PlaylistData(String name, List<MediaInfoData> tracks) {
+  public PlaylistData(String name, List<AudioTrackData> tracks) {
     this.uid = UUID.randomUUID().toString();
     this.name = name;
     this.tracks = tracks;
   }
 
 
-  public PlaylistData(String uid, String name, List<MediaInfoData> tracks) {
+  public PlaylistData(String uid, String name, List<AudioTrackData> tracks) {
     this.uid = uid;
     this.name = name;
     this.tracks = tracks;
@@ -55,11 +55,11 @@ public class PlaylistData {
     this.name = name;
   }
 
-  public List<MediaInfoData> getTracks() {
+  public List<AudioTrackData> getTracks() {
     return tracks;
   }
 
-  public void setTracks(List<MediaInfoData> tracks) {
+  public void setTracks(List<AudioTrackData> tracks) {
     this.tracks = tracks;
   }
 

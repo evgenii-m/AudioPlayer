@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import ru.push.caudioplayer.core.lastfm.LastFmSessionData;
 import ru.push.caudioplayer.core.services.MediaInfoDataLoaderService;
-import ru.push.caudioplayer.core.mediaplayer.domain.MediaInfoData;
+import ru.push.caudioplayer.core.mediaplayer.domain.AudioTrackData;
 import ru.push.caudioplayer.core.mediaplayer.domain.MediaSourceType;
 import ru.push.caudioplayer.core.mediaplayer.domain.PlaylistData;
 import ru.push.caudioplayer.core.services.AppConfigurationService;
@@ -116,7 +116,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
     return configuration.getString(DISPLAYED_PLAYLIST_UID_NODE);
   }
 
-  private List<MediaInfoData> createMediaInfoDataList(List<ImmutableNode> playlistTrackNodes) {
+  private List<AudioTrackData> createMediaInfoDataList(List<ImmutableNode> playlistTrackNodes) {
     assert playlistTrackNodes != null;
 
     return playlistTrackNodes.stream()
@@ -145,7 +145,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
       playlistName = UNTITLED_PLAYLIST_NAME;
     }
 
-    List<MediaInfoData> playlistTracks = createMediaInfoDataList(playlistNode.getChildren());
+    List<AudioTrackData> playlistTracks = createMediaInfoDataList(playlistNode.getChildren());
 
     return (playlistUid != null) ?
         new PlaylistData(playlistUid, playlistName, playlistTracks) :
@@ -189,7 +189,7 @@ public class CommonsAppConfigurationService implements AppConfigurationService {
     saveConfiguration();
   }
 
-  private List<ImmutableNode> createPlaylistTrackNodes(List<MediaInfoData> tracks) {
+  private List<ImmutableNode> createPlaylistTrackNodes(List<AudioTrackData> tracks) {
     assert tracks != null;
 
     return tracks.stream()

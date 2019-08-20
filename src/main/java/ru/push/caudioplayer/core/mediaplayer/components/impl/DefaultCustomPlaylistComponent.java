@@ -9,7 +9,7 @@ import org.springframework.util.Assert;
 import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
 import ru.push.caudioplayer.core.services.MediaInfoDataLoaderService;
-import ru.push.caudioplayer.core.mediaplayer.domain.MediaInfoData;
+import ru.push.caudioplayer.core.mediaplayer.domain.AudioTrackData;
 import ru.push.caudioplayer.core.mediaplayer.domain.MediaSourceType;
 import ru.push.caudioplayer.core.mediaplayer.domain.PlaylistData;
 
@@ -196,7 +196,7 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
   }
 
   @Override
-  public MediaInfoData playTrack(String playlistUid, int trackPosition) throws IllegalArgumentException {
+  public AudioTrackData playTrack(String playlistUid, int trackPosition) throws IllegalArgumentException {
     boolean activeResult = setActivePlaylist(playlistUid, trackPosition);
     if (!activeResult) {
       throw new IllegalArgumentException("Invalid arguments [playlistUid = " + playlistUid
@@ -206,10 +206,10 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
   }
 
   @Override
-  public MediaInfoData playCurrentTrack() {
+  public AudioTrackData playCurrentTrack() {
     if ((activePlaylist == null) || CollectionUtils.isEmpty(activePlaylist.getTracks())) {
       LOG.info("Attempt to play empty or null playlist");
-      return new MediaInfoData();
+      return new AudioTrackData();
     }
 
     if ((trackPosition < 0) || (trackPosition >= activePlaylist.getTracks().size())) {
@@ -220,7 +220,7 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
   }
 
   @Override
-  public MediaInfoData playNextTrack() {
+  public AudioTrackData playNextTrack() {
     if (trackPosition < (activePlaylist.getTracks().size() - 1)) {
       trackPosition++;
     } else {
@@ -230,7 +230,7 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
   }
 
   @Override
-  public MediaInfoData playPrevTrack() {
+  public AudioTrackData playPrevTrack() {
     if (trackPosition > 0) {
       trackPosition--;
     } else {
@@ -245,7 +245,7 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
     List<String> mediaPaths = files.stream()
         .map(File::getAbsolutePath)
         .collect(Collectors.toList());
-    List<MediaInfoData> mediaInfoList = mediaInfoDataLoaderService.load(mediaPaths, MediaSourceType.FILE);
+    List<AudioTrackData> mediaInfoList = mediaInfoDataLoaderService.load(mediaPaths, MediaSourceType.FILE);
     playlist.getTracks().addAll(mediaInfoList);
     return playlist;
   }
@@ -274,7 +274,7 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
         })
         .filter(Objects::nonNull)
         .collect(Collectors.toList());
-    List<MediaInfoData> mediaInfoList = mediaInfoDataLoaderService.load(mediaPaths, MediaSourceType.HTTP_STREAM);
+    List<AudioTrackData> mediaInfoList = mediaInfoDataLoaderService.load(mediaPaths, MediaSourceType.HTTP_STREAM);
     playlist.getTracks().addAll(mediaInfoList);
     return playlist;
   }
