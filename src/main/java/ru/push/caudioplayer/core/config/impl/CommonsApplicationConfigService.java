@@ -17,6 +17,7 @@ import ru.push.caudioplayer.core.config.domain.view.Column;
 import ru.push.caudioplayer.core.config.domain.view.Columns;
 import ru.push.caudioplayer.core.config.domain.view.PlaylistContainer;
 import ru.push.caudioplayer.core.config.domain.view.View;
+import ru.push.caudioplayer.core.facades.domain.PlaylistType;
 import ru.push.caudioplayer.core.lastfm.LastFmSessionData;
 import ru.push.caudioplayer.core.services.MediaInfoDataLoaderService;
 import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
@@ -178,7 +179,9 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
 					return true;
 				})
 				.map(o -> playlistConfigMap.get(o.getPlaylistUid()))
-				.map(o -> new PlaylistData(o.getUid(), o.getName(), createMediaInfoDataList(o.getTracks())))
+				.map(o -> new PlaylistData(
+						o.getUid(), o.getName(), PlaylistType.fromValue(o.getPlaylistType().value()),
+						o.getLink(), createMediaInfoDataList(o.getTracks())))
 				.collect(Collectors.toList());
   }
 
@@ -206,7 +209,10 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
 	}
 
 	private PlaylistConfig convertPlaylist(PlaylistData data) {
-		return new PlaylistConfig(data.getUid(), data.getName(),
+		return new PlaylistConfig(
+				data.getUid(), data.getName(),
+				ru.push.caudioplayer.core.config.domain.PlaylistType.valueOf(data.getPlaylistType().value()),
+				data.getLink(),
 				data.getTracks().stream()
 						.map(t -> new Track(SourceType.fromValue(t.getSourceType().name()), t.getTrackPath()))
 						.collect(Collectors.toList())
@@ -239,6 +245,7 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
 		PlaylistConfig renamedPlaylist = playlistConfigMap.get(playlistData.getUid());
 		if (renamedPlaylist != null) {
 			renamedPlaylist.setName(playlistData.getName());
+			savePlaylistConfig(renamedPlaylist);
 			saveConfiguration();
 		} else {
 			LOG.warn("Playlist with UID '" + playlistData.getUid() + "' not found in set, renaming aborted.");

@@ -16,6 +16,8 @@ public class PlaylistData {
 
   private final String uid;
   private String name;
+  private final PlaylistType playlistType;
+  private String link;
   private List<AudioTrackData> tracks;
 
   public static String getNewPlaylistName() {
@@ -34,13 +36,16 @@ public class PlaylistData {
   public PlaylistData(String name, List<AudioTrackData> tracks) {
     this.uid = UUID.randomUUID().toString();
     this.name = name;
+		this.playlistType = PlaylistType.LOCAL;
     this.tracks = tracks;
   }
 
 
-  public PlaylistData(String uid, String name, List<AudioTrackData> tracks) {
+  public PlaylistData(String uid, String name, PlaylistType playlistType, String link, List<AudioTrackData> tracks) {
     this.uid = uid;
     this.name = name;
+    this.playlistType = playlistType;
+    this.link = link;
     this.tracks = tracks;
   }
 
@@ -56,7 +61,19 @@ public class PlaylistData {
     this.name = name;
   }
 
-  public List<AudioTrackData> getTracks() {
+	public PlaylistType getPlaylistType() {
+		return playlistType;
+	}
+
+	public String getLink() {
+		return link;
+	}
+
+	public void setLink(String link) {
+		this.link = link;
+	}
+
+	public List<AudioTrackData> getTracks() {
     return tracks;
   }
 

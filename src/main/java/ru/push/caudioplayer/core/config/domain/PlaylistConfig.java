@@ -20,15 +20,23 @@ public class PlaylistConfig implements Serializable {
 	@XmlAttribute
 	private String name;
 
+	@XmlAttribute(name ="type")
+	private PlaylistType playlistType;
+
+	@XmlAttribute
+	private String link;
+
 	@XmlElement(name = "track")
 	private List<Track> tracks;
 
 	public PlaylistConfig() {
 	}
 
-	public PlaylistConfig(String uid, String name, List<Track> tracks) {
+	public PlaylistConfig(String uid, String name, PlaylistType playlistType, String link, List<Track> tracks) {
 		this.uid = uid;
 		this.name = name;
+		this.playlistType = playlistType;
+		this.link = link;
 		this.tracks = tracks;
 	}
 
@@ -48,6 +56,22 @@ public class PlaylistConfig implements Serializable {
 		this.name = name;
 	}
 
+	public PlaylistType getPlaylistType() {
+		return playlistType;
+	}
+
+	public void setPlaylistType(PlaylistType playlistType) {
+		this.playlistType = playlistType;
+	}
+
+	public String getLink() {
+		return link;
+	}
+
+	public void setLink(String link) {
+		this.link = link;
+	}
+
 	public List<Track> getTracks() {
 		return tracks;
 	}
@@ -61,6 +85,8 @@ public class PlaylistConfig implements Serializable {
 		return "PlaylistConfig{" +
 				"uid='" + uid + '\'' +
 				", name='" + name + '\'' +
+				", playlistType=" + playlistType +
+				", link='" + link + '\'' +
 				", tracks=" + tracks +
 				'}';
 	}
