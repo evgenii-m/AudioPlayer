@@ -59,6 +59,7 @@ public class XmlUtils {
 	public static <T> void marshalDocument(T document, BufferedWriter stream, String jaxbContextPath) throws JAXBException {
 		JAXBContext jc = JAXBContext.newInstance(jaxbContextPath);
 		Marshaller marshaller = jc.createMarshaller();
+		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
 		marshaller.marshal(document, stream);
 	}
 }
