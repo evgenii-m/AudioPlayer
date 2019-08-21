@@ -20,6 +20,7 @@ import ru.push.caudioplayer.core.deezer.DeezerApiMethod;
 import ru.push.caudioplayer.core.deezer.DeezerApiParam;
 import ru.push.caudioplayer.core.deezer.domain.Playlists;
 import ru.push.caudioplayer.core.deezer.domain.Track;
+import ru.push.caudioplayer.core.deezer.domain.Tracks;
 import ru.push.caudioplayer.utils.StreamUtils;
 import ru.push.caudioplayer.utils.XmlUtils;
 
@@ -106,10 +107,25 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 			throw new DeezerApiErrorException("Deezer api - Not acceptable result for request: " + methodPath);
 		}
 	}
+
+	private void putBaseRequestParameters(Map<DeezerApiParam, String> requestParameters,
+																				String accessToken, Integer index, Integer limit) {
+		if (accessToken != null) {
+			requestParameters.put(DeezerApiParam.ACCESS_TOKEN, accessToken);
+		}
+		if (index != null) {
+			requestParameters.put(DeezerApiParam.INDEX, String.valueOf(index));
+		}
+		if (limit != null) {
+			requestParameters.put(DeezerApiParam.LIMIT, String.valueOf(limit));
+		}
+	}
+
 	private <T> T convertJson(final String content, Class<T> targetClass) throws IOException {
 		ObjectMapper mapper = new ObjectMapper();
 		return mapper.readValue(content, targetClass);
 	}
+
 
 	@Override
 	public String getAccessToken(String code) {
@@ -132,7 +148,6 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 		return null;
 	}
 
-
 	@Override
 	public Track getTrack(long trackId, String accessToken) throws DeezerApiErrorException {
 		Map<DeezerApiParam, String> requestParameters = new HashMap<>();
@@ -153,20 +168,29 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 	@Override
 	public Playlists getPlaylists(String accessToken, Integer index, Integer limit) throws DeezerApiErrorException {
 		Map<DeezerApiParam, String> requestParameters = new HashMap<>();
-		if (accessToken != null) {
-			requestParameters.put(DeezerApiParam.ACCESS_TOKEN, accessToken);
-		}
-		if (index != null) {
-			requestParameters.put(DeezerApiParam.INDEX, String.valueOf(index));
-		}
-		if (limit != null) {
-			requestParameters.put(DeezerApiParam.LIMIT, String.valueOf(limit));
-		}
+		putBaseRequestParameters(requestParameters, accessToken, index, limit);
+
 		String methodPath = DeezerApiMethod.USER_ME_PLAYLISTS.getValue();
 		String responseContent = makeApiRequest(methodPath, requestParameters);
 
 		try {
 			return convertJson(responseContent, Playlists.class);
+		} catch (IOException e) {
+			LOG.error("convert json response error: responseContent = {}, exception = {}", responseContent, e);
+			throw new DeezerApiErrorException("Deezer api - Not acceptable result for request: " + methodPath);
+		}
+	}
+
+	@Override
+	public Tracks getPlaylistTracks(long playlistId, String accessToken, Integer index, Integer limit) throws DeezerApiErrorException {
+		Map<DeezerApiParam, String> requestParameters = new HashMap<>();
+		putBaseRequestParameters(requestParameters, accessToken, index, limit);
+
+		String methodPath = DeezerApiMethod.GET_PLAYLIST_TRACKS.getValue();
+		String responseContent = makeApiRequest(methodPath, requestParameters);
+
+		try {
+			return convertJson(responseContent, Tracks.class);
 		} catch (IOException e) {
 			LOG.error("convert json response error: responseContent = {}, exception = {}", responseContent, e);
 			throw new DeezerApiErrorException("Deezer api - Not acceptable result for request: " + methodPath);

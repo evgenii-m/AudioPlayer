@@ -1,5 +1,9 @@
 package ru.push.caudioplayer.core.deezer;
 
+import ru.push.caudioplayer.core.facades.domain.PlaylistData;
+
+import java.util.List;
+
 public interface DeezerApiService {
 
 	/**
@@ -32,5 +36,5 @@ public interface DeezerApiService {
 	 * Get current user favorite playlists
 	 * See https://developers.deezer.com/api/user/playlists
 	 */
-	void getPlaylists() throws DeezerNeedAuthorizationException;
+	List<PlaylistData> getPlaylists() throws DeezerNeedAuthorizationException;
 }

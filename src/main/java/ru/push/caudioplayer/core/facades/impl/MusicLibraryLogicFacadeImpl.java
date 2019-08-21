@@ -8,6 +8,7 @@ import org.springframework.util.CollectionUtils;
 import ru.push.caudioplayer.core.deezer.DeezerApiService;
 import ru.push.caudioplayer.core.deezer.DeezerNeedAuthorizationException;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
+import ru.push.caudioplayer.core.facades.domain.PlaylistData;
 import ru.push.caudioplayer.core.lastfm.LastFmService;
 import ru.push.caudioplayer.core.lastfm.domain.Track;
 import ru.push.caudioplayer.core.mediaplayer.domain.LastFmTrackData;
@@ -103,6 +104,8 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 
 	@Override
 	public void getDeezerPlaylists() throws DeezerNeedAuthorizationException {
-		deezerApiService.getPlaylists();
+
+		List<PlaylistData> playlists = deezerApiService.getPlaylists();
+
 	}
 }

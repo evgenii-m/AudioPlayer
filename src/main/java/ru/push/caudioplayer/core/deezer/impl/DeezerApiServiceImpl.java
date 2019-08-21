@@ -13,11 +13,19 @@ import ru.push.caudioplayer.core.deezer.domain.Playlist;
 import ru.push.caudioplayer.core.deezer.domain.Playlists;
 import ru.push.caudioplayer.core.deezer.domain.Track;
 import ru.push.caudioplayer.core.config.ApplicationConfigService;
+import ru.push.caudioplayer.core.deezer.domain.Tracks;
+import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
+import ru.push.caudioplayer.core.facades.domain.PlaylistData;
+import ru.push.caudioplayer.core.facades.domain.PlaylistType;
+import ru.push.caudioplayer.core.mediaplayer.domain.MediaSourceType;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 @Component
 public class DeezerApiServiceImpl implements DeezerApiService {
@@ -113,9 +121,11 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 	}
 
 	@Override
-	public void getPlaylists() throws DeezerNeedAuthorizationException {
+	public List<PlaylistData> getPlaylists() throws DeezerNeedAuthorizationException {
 		checkAccessToken();
+
 		try {
+			// get user playlists
 			List<Playlist> playlists = new ArrayList<>();
 			Playlists playlistsResponse;
 			int index = 0;
@@ -125,9 +135,42 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 				index += PLAYLISTS_DEFAULT_LIMIT;
 			} while (playlistsResponse.getNext() != null);
 			LOG.debug("Received deezer {} playlists: {}", playlists.size(), playlists);
+
+			// get tracks for playlists
+			return fetchPlaylistsTracks(playlists);
 		} catch (DeezerApiErrorException e) {
 			LOG.error("Deezer api error:", e);
+			return new ArrayList<>();
 		}
+	}
+
+	private List<PlaylistData> fetchPlaylistsTracks(List<Playlist> playlists) throws DeezerApiErrorException {
+		Map<Playlist, List<Track>> playlistTracksMap = new HashMap<>();
+		for (Playlist playlist : playlists) {
+			List<Track> playlistTracks = new ArrayList<>();
+			Tracks tracksResponse;
+			int j = 0;
+			do {
+				tracksResponse = deezerApiAdapter.getPlaylistTracks(playlist.getId(), currentAccessToken, j, PLAYLISTS_DEFAULT_LIMIT);
+				playlistTracks.addAll(tracksResponse.getData());
+			} while (tracksResponse.getNext() != null);
+
+			playlistTracksMap.put(playlist, playlistTracks);
+			LOG.debug("Received deezer playlist tracks: playlist = {}, size = {}, tracks = {}", playlist.getId(),
+					playlistTracks.size(), playlistTracks);
+		}
+
+		return playlistTracksMap.entrySet().stream()
+				.map(e -> new PlaylistData(String.valueOf(e.getKey().getId()), e.getKey().getTitle(),
+						PlaylistType.DEEZER, e.getKey().getLink(),
+						e.getValue().stream()
+								.map(t -> new AudioTrackData.Builder(t.getPreview(), MediaSourceType.HTTP_STREAM, t.getArtist().getName(), t.getTitle())
+										.album(t.getAlbum().getTitle())
+										.length(t.getDuration() * 1000) // duration in seconds, length in milliseconds
+										.build())
+								.collect(Collectors.toList())
+				))
+				.collect(Collectors.toList());
 	}
 
 	private void checkAccessToken() throws DeezerNeedAuthorizationException {
