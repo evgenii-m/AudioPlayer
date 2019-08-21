@@ -50,8 +50,6 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
 
   @Override
   public boolean loadPlaylists(List<PlaylistData> playlists, String activePlaylistUid, String displayedPlaylistUid) {
-    boolean loadStatus;   // if true - all right, if false - with errors and need refresh config file
-
     if (CollectionUtils.isNotEmpty(playlists)) {
       this.playlists = playlists;
       boolean activeResult = setActivePlaylist(activePlaylistUid, 0);
@@ -63,19 +61,14 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
       if (!displayedResult) {
         displayedPlaylist = playlists.get(0);
       }
-      loadStatus = activeResult && displayedResult;
+      return activeResult && displayedResult;
 
     } else {
-      LOG.warn("Attempts to load an empty playlists!");
-      this.playlists = new ArrayList<>();
-      PlaylistData newPlaylist = createNewPlaylist();
-      activePlaylist = newPlaylist;
-      trackPosition = 0;
-      displayedPlaylist = newPlaylist;
-      loadStatus = false;
+			this.playlists = new ArrayList<>();
+			LOG.warn("Attempts to load an empty playlists!");
+			return false;
     }
 
-    return loadStatus;
   }
 
   @Override

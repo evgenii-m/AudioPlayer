@@ -73,15 +73,17 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
     List<PlaylistData> playlists = applicationConfigService.getPlaylists();
     String activePlaylistUid = applicationConfigService.getActivePlaylistUid();
     String displayedPlaylistUid = applicationConfigService.getDisplayedPlaylistUid();
+
     boolean loadStatus = playlistComponent.loadPlaylists(playlists, activePlaylistUid, displayedPlaylistUid);
 
     if (!loadStatus) {
-      applicationConfigService.saveAllPlaylists(
-          playlistComponent.getPlaylists(),
-          playlistComponent.getActivePlaylist(),
-          playlistComponent.getDisplayedPlaylist()
-      );
-    }
+			PlaylistData newPlaylist = createNewPlaylist();
+			applicationConfigService.saveAllPlaylists(
+					playlistComponent.getPlaylists(),
+					playlistComponent.getActivePlaylist(),
+					playlistComponent.getDisplayedPlaylist()
+			);
+		}
   }
 
   @Override

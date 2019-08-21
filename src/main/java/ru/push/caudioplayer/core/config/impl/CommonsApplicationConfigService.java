@@ -1,7 +1,6 @@
 package ru.push.caudioplayer.core.config.impl;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +8,8 @@ import org.springframework.util.Assert;
 import ru.push.caudioplayer.core.config.domain.Configuration;
 import ru.push.caudioplayer.core.config.domain.DeezerSessionData;
 import ru.push.caudioplayer.core.config.domain.LastfmSessionData;
-import ru.push.caudioplayer.core.config.domain.Playlist;
+import ru.push.caudioplayer.core.config.domain.PlaylistConfig;
+import ru.push.caudioplayer.core.config.domain.PlaylistItem;
 import ru.push.caudioplayer.core.config.domain.Playlists;
 import ru.push.caudioplayer.core.config.domain.SourceType;
 import ru.push.caudioplayer.core.config.domain.Track;
@@ -31,12 +31,15 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -48,30 +51,35 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
   private static final Logger LOG = LoggerFactory.getLogger(CommonsApplicationConfigService.class);
 
   private static final String DEFAULT_CONFIG_FILE_NAME = "mediaplayer-app-configuration.xml";
+  private static final String DEFAULT_PLAYLISTS_FOLDER_PATH = "playlists/";
+  private static final String DEFAULT_PLAYLIST_FILE_EXT = ".xml";
   private static final String UNTITLED_PLAYLIST_NAME = "Untitled";
 
   @Autowired
   private MediaInfoDataLoaderService mediaInfoDataLoaderService;
 
-  private Configuration configuration;
+  private Configuration config;
+  private Map<String, PlaylistConfig> playlistConfigMap;
   private final String configurationPath;
 
 
-  public CommonsApplicationConfigService(String configurationFileName) {
+  public CommonsApplicationConfigService(String configurationFileName) throws IOException {
   	configurationPath = configurationFileName;
 
 		try {
 			String configurationContent = new String(Files.readAllBytes(Paths.get(configurationFileName)), StandardCharsets.UTF_8);
-			configuration = XmlUtils.unmarshalDocumnet(configurationContent, Configuration.class.getPackage().getName());
-			LOG.debug("Configuration loaded: {}", configuration);
+			config = XmlUtils.unmarshalDocumnet(configurationContent, Configuration.class.getPackage().getName());
+			LOG.debug("Configuration loaded: {}", config);
 		} catch (IOException | JAXBException e) {
 			LOG.error("Exception occurred when configuration load, will be created default configuration file.", e);
-			configuration = createDefaultConfiguration();
+			config = createDefaultConfiguration();
 			saveConfiguration();
 		}
+
+		loadPlaylists();
   }
 
-  public CommonsApplicationConfigService() {
+  public CommonsApplicationConfigService() throws IOException {
     this(DEFAULT_CONFIG_FILE_NAME);
   }
 
@@ -92,47 +100,99 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
   	return defaultConfiguration;
   }
 
+  private void loadPlaylists() throws IOException {
+
+		Path playlistsFolderPath = Paths.get(DEFAULT_PLAYLISTS_FOLDER_PATH);
+		if (Files.notExists(playlistsFolderPath) || !Files.isDirectory(playlistsFolderPath)) {
+			Files.createDirectories(playlistsFolderPath);
+		}
+		playlistConfigMap = new HashMap<>();
+
+		List<String> playlistsUid = config.getPlaylists().getPlaylists().stream()
+				.map(PlaylistItem::getPlaylistUid)
+				.collect(Collectors.toList());
+		try (Stream<Path> paths = Files.walk(Paths.get(DEFAULT_PLAYLISTS_FOLDER_PATH))) {
+			paths
+					.filter(Files::isRegularFile)
+					.forEach(p -> {
+						LOG.debug("Playlist folder file detected: {}", p);
+						try {
+							String playlistConfigContent = new String(Files.readAllBytes(p));
+							PlaylistConfig playlistConfig = XmlUtils.unmarshalDocumnet(playlistConfigContent, PlaylistConfig.class.getPackage().getName());
+							if (playlistsUid.contains(playlistConfig.getUid())) {
+								playlistConfigMap.put(playlistConfig.getUid(), playlistConfig);
+							}
+						} catch (JAXBException | IOException e) {
+							LOG.error("Playlist loading error: file path = {}, error = {}", p, e);
+						}
+					});
+		}
+	}
+
   private void saveConfiguration() {
     try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
     		Paths.get(configurationPath), StandardCharsets.UTF_8))
 		{
-			XmlUtils.marshalDocument(configuration, bufferedWriter, Configuration.class.getPackage().getName());
+			XmlUtils.marshalDocument(config, bufferedWriter, Configuration.class.getPackage().getName());
 			LOG.debug("save configuration");
     } catch (JAXBException | IOException e) {
       LOG.error("Error when save configuration to file.", e);
 		}
 	}
 
+	private void savePlaylistConfig(PlaylistConfig playlistConfig) {
+		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
+				constructPlaylistPath(playlistConfig.getUid()), StandardCharsets.UTF_8))
+		{
+			XmlUtils.marshalDocument(playlistConfig, bufferedWriter, PlaylistConfig.class.getPackage().getName());
+			LOG.debug("save playlist {}", playlistConfig.getUid());
+		} catch (JAXBException | IOException e) {
+			LOG.error("Error when save playlist configuration to file.", e);
+		}
+	}
+
+	private Path constructPlaylistPath(String playlistUid) {
+		return Paths.get(DEFAULT_PLAYLISTS_FOLDER_PATH + playlistUid + DEFAULT_PLAYLIST_FILE_EXT);
+	}
+
 
   @Override
   public String getActivePlaylistUid() {
-    return configuration.getPlaylists().getActiveUid();
+    return config.getPlaylists().getActiveUid();
   }
 
   @Override
   public String getDisplayedPlaylistUid() {
-    return configuration.getPlaylists().getDisplayedUid();
+    return config.getPlaylists().getDisplayedUid();
   }
 
   @Override
   public List<PlaylistData> getPlaylists() {
-
-		return configuration.getPlaylists().getPlaylists().stream()
-				.map(p -> new PlaylistData(p.getUid(), p.getName(), createMediaInfoDataList(p.getTracks())))
+  	return config.getPlaylists().getPlaylists().stream()
+				.sorted((o1, o2) -> Long.compare(o1.getPosition(), o2.getPosition()))
+				.filter(o -> {
+					if (!playlistConfigMap.containsKey(o.getPlaylistUid())) {
+						LOG.warn("Playlist configuration not found: {}", o.getPlaylistUid());
+						return false;
+					}
+					return true;
+				})
+				.map(o -> playlistConfigMap.get(o.getPlaylistUid()))
+				.map(o -> new PlaylistData(o.getUid(), o.getName(), createMediaInfoDataList(o.getTracks())))
 				.collect(Collectors.toList());
   }
 
   @Override
   public void saveActivePlaylist(PlaylistData activePlaylist) {
     Assert.notNull(activePlaylist);
-    configuration.getPlaylists().setActiveUid(activePlaylist.getUid());
+    config.getPlaylists().setActiveUid(activePlaylist.getUid());
     saveConfiguration();
   }
 
   @Override
   public void saveDisplayedPlaylist(PlaylistData displayedPlaylist) {
     Assert.notNull(displayedPlaylist);
-    configuration.getPlaylists().setDisplayedUid(displayedPlaylist.getUid());
+    config.getPlaylists().setDisplayedUid(displayedPlaylist.getUid());
     saveConfiguration();
   }
 
@@ -145,41 +205,40 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
 				.collect(Collectors.toList());
 	}
 
+	private PlaylistConfig convertPlaylist(PlaylistData data) {
+		return new PlaylistConfig(data.getUid(), data.getName(),
+				data.getTracks().stream()
+						.map(t -> new Track(SourceType.fromValue(t.getSourceType().name()), t.getTrackPath()))
+						.collect(Collectors.toList())
+		);
+	}
+
   @Override
   public void savePlaylist(PlaylistData playlistData) {
     Assert.notNull(playlistData);
 
-		List<Playlist> playlists = configuration.getPlaylists().getPlaylists();
+		PlaylistConfig playlistConfig = convertPlaylist(playlistData);
+		playlistConfigMap.put(playlistData.getUid(), playlistConfig);
+		savePlaylistConfig(playlistConfig);
 
-    long playlistPosition = 0;
+		List<String> playlistItemsUid = config.getPlaylists().getPlaylists().stream()
+				.map(PlaylistItem::getPlaylistUid)
+				.collect(Collectors.toList());
 
-    if (CollectionUtils.isNotEmpty(playlists)) {
-
-			Optional<Playlist> existingPlaylist = playlists.stream()
-					.filter(p -> p.getUid().equals(playlistData.getUid()))
-					.findFirst();
-			if (existingPlaylist.isPresent()) {
-				playlistPosition = existingPlaylist.get().getPosition();
-				configuration.getPlaylists().getPlaylists().remove(existingPlaylist.get());
-			} else {
-				playlistPosition = playlists.size();
-			}
-    }
-
-    playlists.add(convertPlaylist(playlistData, playlistPosition));
-
-    saveConfiguration();
+		// added new playlist item
+		if (CollectionUtils.isEmpty(playlistItemsUid) || !playlistItemsUid.contains(playlistData.getUid())) {
+			config.getPlaylists().getPlaylists().add(new PlaylistItem(playlistData.getUid(), playlistItemsUid.size()));
+			saveConfiguration();
+		}
   }
 
   @Override
   public void renamePlaylist(PlaylistData playlistData) {
     Assert.notNull(playlistData);
 
-		Optional<Playlist> renamedPlaylist = configuration.getPlaylists().getPlaylists().stream()
-				.filter(p -> p.getUid().equals(playlistData.getUid()))
-				.findFirst();
-		if (renamedPlaylist.isPresent()) {
-			renamedPlaylist.get().setName(playlistData.getName());
+		PlaylistConfig renamedPlaylist = playlistConfigMap.get(playlistData.getUid());
+		if (renamedPlaylist != null) {
+			renamedPlaylist.setName(playlistData.getName());
 			saveConfiguration();
 		} else {
 			LOG.warn("Playlist with UID '" + playlistData.getUid() + "' not found in set, renaming aborted.");
@@ -190,14 +249,26 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
   public void deletePlaylist(PlaylistData playlistData) {
     Assert.notNull(playlistData);
 
-    configuration.getPlaylists().getPlaylists().removeIf(playlist -> playlist.getUid().equals(playlistData.getUid()));
+		String playlistUid = playlistData.getUid();
+		if (!playlistConfigMap.containsKey(playlistUid)) {
+    	LOG.warn("delete playlist not found: {}", playlistUid);
+    	return;
+		}
+
+		try {
+			Files.delete(constructPlaylistPath(playlistUid));
+		} catch (IOException e) {
+			LOG.error("Delete playlist file error: uid = {}, error = {}", playlistUid, e);
+		}
+		playlistConfigMap.remove(playlistUid);
+    config.getPlaylists().getPlaylists().removeIf(playlist -> playlist.getPlaylistUid().equals(playlistUid));
 
     // refresh position attribute for playlist nodes to prevent gaps
-		List<Playlist> playlists = configuration.getPlaylists().getPlaylists();
-		Map<Integer, Long> nodeIdxPositionMap = playlists.stream()
+		List<PlaylistItem> playlistItems = config.getPlaylists().getPlaylists();
+		Map<Integer, Long> nodeIdxPositionMap = playlistItems.stream()
 				.collect(Collectors.toMap(
-						playlists::indexOf,
-						Playlist::getPosition,
+						playlistItems::indexOf,
+						PlaylistItem::getPosition,
 						(e1, e2) -> e1
 				));
 		final List<Integer> nodeIdxList = nodeIdxPositionMap.entrySet().stream()
@@ -205,9 +276,8 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
 				.map(Map.Entry::getKey)
 				.collect(Collectors.toList());
 		for (int i = 0; i < nodeIdxList.size(); i++) {
-			playlists.get(nodeIdxList.get(i)).setPosition(i);
+			playlistItems.get(nodeIdxList.get(i)).setPosition(i);
 		}
-
     saveConfiguration();
   }
 
@@ -215,29 +285,20 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
   public void saveAllPlaylists(List<PlaylistData> playlistsData, PlaylistData activePlaylist,
                                PlaylistData displayedPlaylist) {
     Assert.notNull(playlistsData);
-    Assert.notNull(activePlaylist);
     Assert.notNull(displayedPlaylist);
 
-		Playlists playlistsConfig = configuration.getPlaylists();
+		Playlists playlistsConfig = config.getPlaylists();
 
-		playlistsConfig.setActiveUid(activePlaylist.getUid());
+		playlistsConfig.setActiveUid((activePlaylist != null) ? activePlaylist.getUid() : displayedPlaylist.getUid());
 		playlistsConfig.setDisplayedUid(displayedPlaylist.getUid());
 
-		List<Playlist> playlists = playlistsData.stream()
-				.map(o -> convertPlaylist(o, playlistsData.indexOf(o)))
+		List<PlaylistItem> playlistItems = playlistsData.stream()
+				.map(o -> new PlaylistItem(o.getUid(), playlistsData.indexOf(o)))
 				.collect(Collectors.toList());
-		playlistsConfig.setPlaylists(playlists);
+		playlistsConfig.setPlaylists(playlistItems);
 
     saveConfiguration();
   }
-
-  private Playlist convertPlaylist(PlaylistData data, long position) {
-		return new Playlist(data.getUid(), data.getName(), position,
-				data.getTracks().stream()
-						.map(t -> new Track(SourceType.fromValue(t.getSourceType().name()), t.getTrackPath()))
-						.collect(Collectors.toList())
-		);
-	}
 
   @Override
   public void saveLastFmSessionData(LastFmSessionData sessionData) {
@@ -245,20 +306,20 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
     Assert.notNull(sessionData.getUsername());
 		Assert.notNull(sessionData.getSessionKey());
 
-		if (configuration.getLastfmSessionData() == null) {
-			configuration.setLastfmSessionData(new LastfmSessionData());
+		if (config.getLastfmSessionData() == null) {
+			config.setLastfmSessionData(new LastfmSessionData());
 		}
 
-		configuration.getLastfmSessionData().setUsername(sessionData.getUsername());
+		config.getLastfmSessionData().setUsername(sessionData.getUsername());
     // TODO: add hashing for session key
-		configuration.getLastfmSessionData().setSessionKey(sessionData.getSessionKey());
+		config.getLastfmSessionData().setSessionKey(sessionData.getSessionKey());
 
     saveConfiguration();
   }
 
 	@Override
 	public LastFmSessionData getLastFmSessionData() {
-		Optional<LastfmSessionData> sessionDataOptional = Optional.ofNullable(configuration.getLastfmSessionData());
+		Optional<LastfmSessionData> sessionDataOptional = Optional.ofNullable(config.getLastfmSessionData());
 		String lastfmUsername =  sessionDataOptional.map(LastfmSessionData::getUsername).orElse(null);
 		String lastfmSessionKey = sessionDataOptional.map(LastfmSessionData::getSessionKey).orElse(null);
 		return ((lastfmUsername != null) && (lastfmSessionKey != null)) ?
@@ -270,29 +331,25 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
 	public void saveDeezerAccessToken(String accessToken) {
   	Assert.notNull(accessToken);
 
-		if (configuration.getDeezerSessionData() == null) {
-			configuration.setDeezerSessionData(new DeezerSessionData());
+		if (config.getDeezerSessionData() == null) {
+			config.setDeezerSessionData(new DeezerSessionData());
 		}
 
 		// TODO: add hashing for access token
-  	configuration.getDeezerSessionData().setAccessToken(accessToken);
+  	config.getDeezerSessionData().setAccessToken(accessToken);
 
   	saveConfiguration();
 	}
 
 	@Override
 	public String getDeezerAccessToken() {
-		return Optional.ofNullable(configuration.getDeezerSessionData())
+		return Optional.ofNullable(config.getDeezerSessionData())
 				.map(DeezerSessionData::getAccessToken).orElse(null);
 	}
 
 	@Override
-  public PlaylistContainerViewConfigurations getPlaylistContainerViewConfigurations() throws ConfigurationException {
-		List<Column> columnsConfig = configuration.getView().getPlaylistContainer().getColumns().getColumns();
-
-		if (columnsConfig == null) {
-      throw new ConfigurationException("Invalid playlist container view configuration.");
-    }
+  public PlaylistContainerViewConfigurations getPlaylistContainerViewConfigurations() {
+		List<Column> columnsConfig = config.getView().getPlaylistContainer().getColumns().getColumns();
 
 		List<PlaylistContainerViewConfigurations.PlaylistContainerColumn> playlistContainerColumns = columnsConfig.stream()
 				.map(column -> new PlaylistContainerViewConfigurations.PlaylistContainerColumn(
@@ -308,7 +365,7 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
 		List<Column> columns = viewConfigurations.getColumns().stream()
 				.map(column -> new Column(column.getName(), column.getTitle(), column.getWidth()))
 				.collect(Collectors.toList());
-    configuration.getView().getPlaylistContainer().getColumns().setColumns(columns);
+    config.getView().getPlaylistContainer().getColumns().setColumns(columns);
 
     saveConfiguration();
   }

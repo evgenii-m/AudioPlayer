@@ -11,8 +11,8 @@ import java.util.List;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType
-@XmlRootElement
-public class Playlist implements Serializable {
+@XmlRootElement(name = "playlistConfiguration")
+public class PlaylistConfig implements Serializable {
 
 	@XmlAttribute
 	private String uid;
@@ -20,19 +20,15 @@ public class Playlist implements Serializable {
 	@XmlAttribute
 	private String name;
 
-	@XmlAttribute
-	private long position;
-
 	@XmlElement(name = "track")
 	private List<Track> tracks;
 
-	public Playlist() {
+	public PlaylistConfig() {
 	}
 
-	public Playlist(String uid, String name, long position, List<Track> tracks) {
+	public PlaylistConfig(String uid, String name, List<Track> tracks) {
 		this.uid = uid;
 		this.name = name;
-		this.position = position;
 		this.tracks = tracks;
 	}
 
@@ -52,14 +48,6 @@ public class Playlist implements Serializable {
 		this.name = name;
 	}
 
-	public long getPosition() {
-		return position;
-	}
-
-	public void setPosition(long position) {
-		this.position = position;
-	}
-
 	public List<Track> getTracks() {
 		return tracks;
 	}
@@ -70,10 +58,9 @@ public class Playlist implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Playlist{" +
+		return "PlaylistConfig{" +
 				"uid='" + uid + '\'' +
 				", name='" + name + '\'' +
-				", position=" + position +
 				", tracks=" + tracks +
 				'}';
 	}

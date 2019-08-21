@@ -12,6 +12,9 @@ import java.util.List;
  */
 public interface CustomPlaylistComponent extends NativePlayerComponent {
 
+	/**
+	 * @return if true - all right, if false - with errors and need refresh config file
+	 */
   boolean loadPlaylists(List<PlaylistData> playlists, String activePlaylistUid, String displayedPlaylistUid);
 
   List<PlaylistData> getPlaylists();

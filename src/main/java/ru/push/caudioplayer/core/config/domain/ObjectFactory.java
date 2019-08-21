@@ -12,4 +12,9 @@ public class ObjectFactory {
 	public Configuration createConfiguration() {
 		return new Configuration();
 	}
+
+	public PlaylistConfig createPlaylist() {
+		return new PlaylistConfig();
+	}
+
 }

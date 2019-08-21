@@ -20,12 +20,12 @@ public class Playlists implements Serializable {
 	private String displayedUid;
 
 	@XmlElement(name = "playlist")
-	private List<Playlist> playlists;
+	private List<PlaylistItem> playlists;
 
 	public Playlists() {
 	}
 
-	public Playlists(String activeUid, String displayedUid, List<Playlist> playlists) {
+	public Playlists(String activeUid, String displayedUid, List<PlaylistItem> playlists) {
 		this.activeUid = activeUid;
 		this.displayedUid = displayedUid;
 		this.playlists = playlists;
@@ -47,11 +47,11 @@ public class Playlists implements Serializable {
 		this.displayedUid = displayedUid;
 	}
 
-	public List<Playlist> getPlaylists() {
+	public List<PlaylistItem> getPlaylists() {
 		return playlists;
 	}
 
-	public void setPlaylists(List<Playlist> playlists) {
+	public void setPlaylists(List<PlaylistItem> playlists) {
 		this.playlists = playlists;
 	}
 

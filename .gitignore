@@ -5,3 +5,4 @@ lastfm-api-account.info
 AppConfigurationServiceManuallyTestResult.xml
 src/main/resources/lastfm.properties
 src/main/resources/deezer.properties
+playlists/
