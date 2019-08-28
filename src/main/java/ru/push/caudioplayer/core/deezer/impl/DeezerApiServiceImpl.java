@@ -32,7 +32,7 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DeezerApiServiceImpl.class);
 
-	private static final Integer PLAYLISTS_DEFAULT_LIMIT = 100;
+	private static final Integer PLAYLISTS_DEFAULT_LIMIT = 500;
 
 	@Autowired
 	private Properties properties;
@@ -153,6 +153,7 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 			do {
 				tracksResponse = deezerApiAdapter.getPlaylistTracks(playlist.getId(), currentAccessToken, j, PLAYLISTS_DEFAULT_LIMIT);
 				playlistTracks.addAll(tracksResponse.getData());
+				j += PLAYLISTS_DEFAULT_LIMIT;
 			} while (tracksResponse.getNext() != null);
 
 			playlistTracksMap.put(playlist, playlistTracks);

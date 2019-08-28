@@ -186,7 +186,7 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 		Map<DeezerApiParam, String> requestParameters = new HashMap<>();
 		putBaseRequestParameters(requestParameters, accessToken, index, limit);
 
-		String methodPath = DeezerApiMethod.GET_PLAYLIST_TRACKS.getValue();
+		String methodPath = String.format(DeezerApiMethod.GET_PLAYLIST_TRACKS.getValue(), playlistId);
 		String responseContent = makeApiRequest(methodPath, requestParameters);
 
 		try {

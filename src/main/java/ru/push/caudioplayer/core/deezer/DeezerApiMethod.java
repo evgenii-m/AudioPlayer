@@ -4,7 +4,7 @@ public enum DeezerApiMethod {
 
 	GET_TRACK("/track/%d"),
 	USER_ME_PLAYLISTS("/user/me/playlists"),
-	GET_PLAYLIST_TRACKS("playlist/%d/tracks")
+	GET_PLAYLIST_TRACKS("/playlist/%d/tracks")
 	;
 
 	String value;
