@@ -64,6 +64,7 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
   private final String configurationPath;
 
 
+  // TODO: add configuration validation
   public CommonsApplicationConfigService(String configurationFileName) throws IOException {
   	configurationPath = configurationFileName;
 
@@ -88,15 +89,25 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
   	Configuration defaultConfiguration = new Configuration();
   	defaultConfiguration.setPlaylists(new Playlists());
 
-  	View viewConfig = new View(new PlaylistContainer(new Columns(
-  			Arrays.asList(
-  					new Column("number", "#", 120),
+		PlaylistContainer localPlaylistContainer = new PlaylistContainer(new Columns(
+				Arrays.asList(
+						new Column("number", "#", 120),
 						new Column("artist", "Artist", 140),
 						new Column("album", "Album", 160),
 						new Column("title", "Title", 245),
 						new Column("Length", "Length", 77)
 				)
-		)));
+		));
+		PlaylistContainer deezerPlaylistContainer = new PlaylistContainer(new Columns(
+				Arrays.asList(
+						new Column("number", "#", 120),
+						new Column("artist", "Artist", 140),
+						new Column("album", "Album", 160),
+						new Column("title", "Title", 245),
+						new Column("Length", "Length", 77)
+				)
+		));
+		View viewConfig = new View(localPlaylistContainer, deezerPlaylistContainer);
   	defaultConfiguration.setView(viewConfig);
   	return defaultConfiguration;
   }
@@ -356,23 +367,33 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
 
 	@Override
   public PlaylistContainerViewConfigurations getPlaylistContainerViewConfigurations() {
-		List<Column> columnsConfig = config.getView().getPlaylistContainer().getColumns().getColumns();
+    return new PlaylistContainerViewConfigurations(
+				getContainerColumnsViewConfiguration(config.getView().getLocalPlaylistContainer().getColumns())
+		);
+  }
 
-		List<PlaylistContainerViewConfigurations.PlaylistContainerColumn> playlistContainerColumns = columnsConfig.stream()
+	@Override
+	public PlaylistContainerViewConfigurations getDeezerPlaylistContainerViewConfigurations() {
+		return new PlaylistContainerViewConfigurations(
+				getContainerColumnsViewConfiguration(config.getView().getDeezerPlaylistContainer().getColumns())
+		);
+	}
+
+	private List<PlaylistContainerViewConfigurations.PlaylistContainerColumn> getContainerColumnsViewConfiguration(Columns columnsConfig) {
+		return columnsConfig.getColumns().stream()
 				.map(column -> new PlaylistContainerViewConfigurations.PlaylistContainerColumn(
 						column.getName(), column.getTitle(), column.getWidth()))
 				.collect(Collectors.toList());
-    return new PlaylistContainerViewConfigurations(playlistContainerColumns);
-  }
+	}
 
-  @Override
+	@Override
   public void savePlaylistContainerViewConfigurations(PlaylistContainerViewConfigurations viewConfigurations) {
     Assert.notNull(viewConfigurations);
 
 		List<Column> columns = viewConfigurations.getColumns().stream()
 				.map(column -> new Column(column.getName(), column.getTitle(), column.getWidth()))
 				.collect(Collectors.toList());
-    config.getView().getPlaylistContainer().getColumns().setColumns(columns);
+    config.getView().getLocalPlaylistContainer().getColumns().setColumns(columns);
 
     saveConfiguration();
   }

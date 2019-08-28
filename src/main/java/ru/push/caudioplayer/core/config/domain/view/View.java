@@ -15,27 +15,41 @@ public class View implements Serializable {
 
 	@NotNull
 	@XmlElement
-	private PlaylistContainer playlistContainer;
+	private PlaylistContainer localPlaylistContainer;
+
+	@NotNull
+	@XmlElement
+	private PlaylistContainer deezerPlaylistContainer;
 
 	public View() {
 	}
 
-	public View(PlaylistContainer playlistContainer) {
-		this.playlistContainer = playlistContainer;
+	public View(PlaylistContainer localPlaylistContainer, PlaylistContainer deezerPlaylistContainer) {
+		this.localPlaylistContainer = localPlaylistContainer;
+		this.deezerPlaylistContainer = deezerPlaylistContainer;
 	}
 
-	public PlaylistContainer getPlaylistContainer() {
-		return playlistContainer;
+	public PlaylistContainer getLocalPlaylistContainer() {
+		return localPlaylistContainer;
 	}
 
-	public void setPlaylistContainer(PlaylistContainer playlistContainer) {
-		this.playlistContainer = playlistContainer;
+	public void setLocalPlaylistContainer(PlaylistContainer localPlaylistContainer) {
+		this.localPlaylistContainer = localPlaylistContainer;
+	}
+
+	public PlaylistContainer getDeezerPlaylistContainer() {
+		return deezerPlaylistContainer;
+	}
+
+	public void setDeezerPlaylistContainer(PlaylistContainer deezerPlaylistContainer) {
+		this.deezerPlaylistContainer = deezerPlaylistContainer;
 	}
 
 	@Override
 	public String toString() {
 		return "View{" +
-				"playlistContainer=" + playlistContainer +
+				"localPlaylistContainer=" + localPlaylistContainer +
+				",deezerPlaylistContainer=" + deezerPlaylistContainer +
 				'}';
 	}
 }

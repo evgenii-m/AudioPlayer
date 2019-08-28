@@ -47,7 +47,9 @@ public interface ApplicationConfigService {
 
   // view configuration methods
 
-  PlaylistContainerViewConfigurations getPlaylistContainerViewConfigurations() throws ConfigurationException;
+  PlaylistContainerViewConfigurations getPlaylistContainerViewConfigurations();
+
+	PlaylistContainerViewConfigurations getDeezerPlaylistContainerViewConfigurations();
 
   void savePlaylistContainerViewConfigurations(PlaylistContainerViewConfigurations viewConfigurations);
 }

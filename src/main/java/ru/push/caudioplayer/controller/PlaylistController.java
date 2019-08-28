@@ -89,7 +89,8 @@ public class PlaylistController {
 		LOG.debug("init bean {}", this.getClass().getName());
 
     setPlaylistContainerColumns(localPlaylistContainer, applicationConfigService.getPlaylistContainerViewConfigurations());
-		setPlaylistContainerRowFactory();
+    setPlaylistContainerColumns(deezerPlaylistContainer, applicationConfigService.getDeezerPlaylistContainerViewConfigurations());
+		setLocalPlaylistContainerRowFactory();
 
     renamePopupScene = new Scene(renamePopupView.getView());
 
@@ -246,7 +247,7 @@ public class PlaylistController {
 		playlistContainer.getColumns().addAll(numberCol, artistCol, albumCol, titleCol, lengthCol);
 	}
 
-  private void setPlaylistContainerRowFactory() {
+  private void setLocalPlaylistContainerRowFactory() {
     localPlaylistContainer.setRowFactory(lv -> {
       TableRow<AudioTrackPlaylistItem> tableRow = new TableRow<>();
 
