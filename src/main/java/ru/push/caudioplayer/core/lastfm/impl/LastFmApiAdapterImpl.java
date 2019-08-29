@@ -170,7 +170,7 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 			String response = makeApiRequest(method, methodParameters);
 			LastFmResponse lastFmResponse = XmlUtils.unmarshalDocumnet(response, LastFmResponse.class.getPackage().getName());
 			RecentTracks recentTracks = lastFmResponse.getRecentTracks();
-			LOG.info("obtained recent tracks: {}", recentTracks);
+			LOG.debug("obtained recent tracks: {}", recentTracks);
 			return recentTracks;
 		} catch (JAXBException e) {
 			LOG.error("parsing xml from response error: ", e);
@@ -200,7 +200,7 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 		try {
 			URI apiUri = baseApiUriBuilder.build();
 
-			// TODO: fix GUI application hangs by thread sleep
+			// TODO: fix GUI application hangs using thread sleep
 			for (; retryCount >= 0; retryCount--, Thread.sleep(retryTimeoutSeconds * 1000)) {
 				request = new HttpGet(apiUri);
 				try {
@@ -211,7 +211,7 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 					int statusCode = response.getStatusLine().getStatusCode();
 					if (HttpStatus.SC_OK == statusCode) {
 						String responseContent = StreamUtils.readStreamAsOneString(response.getEntity().getContent());
-						LOG.info("response content: {}", responseContent);
+						LOG.debug("response content: {}", responseContent);
 						return responseContent;
 					}
 				} finally {

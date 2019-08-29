@@ -1,3 +1,4 @@
 deezer.application.name=
 deezer.application.api.id=
 deezer.application.api.secret.key=
+deezer.api.service.thread.pool.size=

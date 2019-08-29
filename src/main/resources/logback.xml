@@ -1,15 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-    <encoder>
-      <pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger:%n  %msg%n</pattern>
-    </encoder>
-  </appender>
+	<timestamp key="CURRENT_DATE" datePattern="yyyy_MM_dd"/>
 
-  <logger name="ru.push.caudioplayer" level="DEBUG"/>
+	<property name="LOG_MSG_PATTERN" value="%d{HH:mm:ss.SSS} %-5level [%thread] %logger:%n %msg%n"/>
+	<property name="LOG_FILE_PATH" value="logs/application-${CURRENT_DATE}.log"/>
 
-  <root level="INFO">
-    <appender-ref ref="STDOUT" />
-  </root>
+	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
+		<file>${LOG_FILE_PATH}</file>
+		<append>true</append>
+		<encoder>
+			<pattern>${LOG_MSG_PATTERN}</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+		<appender-ref ref="FILE" />
+	</appender>
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>${LOG_MSG_PATTERN}</pattern>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>INFO</level>
+		</filter>
+	</appender>
+
+	<logger name="ru.push.caudioplayer" level="DEBUG">
+		<appender-ref ref="ASYNC"/>
+	</logger>
+
+	<root>
+		<appender-ref ref="STDOUT"/>
+	</root>
 
 </configuration>

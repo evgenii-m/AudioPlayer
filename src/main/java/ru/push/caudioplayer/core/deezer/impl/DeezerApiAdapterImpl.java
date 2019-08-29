@@ -82,7 +82,7 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 			int statusCode = response.getStatusLine().getStatusCode();
 			if (HttpStatus.SC_OK == statusCode) {
 				String responseContent = StreamUtils.readStreamAsOneString(response.getEntity().getContent());
-				LOG.info("response content: {}", responseContent);
+				LOG.debug("response content: {}", responseContent);
 				return responseContent;
 			}
 		} catch (IOException e) {

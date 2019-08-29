@@ -1,5 +1,6 @@
 package ru.push.caudioplayer.core.deezer.impl;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +21,18 @@ import ru.push.caudioplayer.core.facades.domain.PlaylistType;
 import ru.push.caudioplayer.core.mediaplayer.domain.MediaSourceType;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Component
@@ -43,18 +51,29 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 	@Autowired
 	private ApplicationConfigService applicationConfigService;
 
+	private ExecutorService executorService;
+
 	private String currentAccessToken;
+
 
 	public DeezerApiServiceImpl() {
 	}
 
 	@PostConstruct
 	public void init() {
+		String deezerApiServiceThreadPoolSize = properties.getProperty("deezer.api.service.thread.pool.size");
+		executorService = Executors.newFixedThreadPool(Integer.valueOf(deezerApiServiceThreadPoolSize));
+
 		String accessToken = applicationConfigService.getDeezerAccessToken();
 		if (accessToken != null) {
 			LOG.info("Load Deezer access token from configuration: {}", accessToken);
 			this.currentAccessToken = accessToken;
 		}
+	}
+
+	@PreDestroy
+	public void stop() {
+		executorService.shutdown();
 	}
 
 	@Override
@@ -144,34 +163,66 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 		}
 	}
 
-	private List<PlaylistData> fetchPlaylistsTracks(List<Playlist> playlists) throws DeezerApiErrorException {
-		Map<Playlist, List<Track>> playlistTracksMap = new HashMap<>();
-		for (Playlist playlist : playlists) {
-			List<Track> playlistTracks = new ArrayList<>();
-			Tracks tracksResponse;
-			int j = 0;
-			do {
-				tracksResponse = deezerApiAdapter.getPlaylistTracks(playlist.getId(), currentAccessToken, j, PLAYLISTS_DEFAULT_LIMIT);
-				playlistTracks.addAll(tracksResponse.getData());
-				j += PLAYLISTS_DEFAULT_LIMIT;
-			} while (tracksResponse.getNext() != null);
+	private List<PlaylistData> fetchPlaylistsTracks(List<Playlist> playlists) {
+		List<PlaylistData> playlistData = new ArrayList<>();
+		LOG.debug("Deezer fetching playlists tracks begin");
 
-			playlistTracksMap.put(playlist, playlistTracks);
-			LOG.debug("Received deezer playlist tracks: playlist = {}, size = {}, tracks = {}", playlist.getId(),
-					playlistTracks.size(), playlistTracks);
+		List<Callable<ImmutablePair<Playlist, List<Track>>>> tasks = playlists.stream()
+				.map(playlist -> (Callable<ImmutablePair<Playlist, List<Track>>>) () -> {
+					List<Track> playlistTracks = new ArrayList<>();
+					Tracks tracksResponse;
+					int j = 0;
+					do {
+						try {
+							tracksResponse = deezerApiAdapter.getPlaylistTracks(playlist.getId(), currentAccessToken, j, PLAYLISTS_DEFAULT_LIMIT);
+							playlistTracks.addAll(tracksResponse.getData());
+							j += PLAYLISTS_DEFAULT_LIMIT;
+						} catch (DeezerApiErrorException e) {
+							LOG.error("Deezer api error:", e);
+							break;
+						}
+					} while (tracksResponse.getNext() != null);
+
+//					LOG.debug("Received deezer playlist tracks: playlist = {}, size = {}, tracks = {}", playlist.getId(),
+//							playlistTracks.size(), playlistTracks);
+					LOG.debug("Received deezer playlist tracks: playlist = {}, size = {}", playlist.getId(), playlistTracks.size());
+
+					return ImmutablePair.of(playlist, playlistTracks);
+				})
+				.collect(Collectors.toList());
+
+		try {
+			List<Future<ImmutablePair<Playlist, List<Track>>>> futures = executorService.invokeAll(tasks);
+
+			// wait until all task will be executed
+			while (futures.stream().anyMatch(future -> !future.isDone() && !future.isCancelled())) {
+				TimeUnit.MILLISECONDS.sleep(100);
+			}
+
+			for (Future<ImmutablePair<Playlist, List<Track>>> future : futures) {
+				ImmutablePair<Playlist, List<Track>> entry = future.get();
+				Playlist entryPlaylist = entry.getLeft();
+				List<Track> entryTracks = entry.getRight();
+				playlistData.add(
+						new PlaylistData(String.valueOf(entryPlaylist.getId()), entryPlaylist.getTitle(),
+								PlaylistType.DEEZER, entryPlaylist.getLink(),
+								entryTracks.stream()
+										.map(t -> new AudioTrackData.Builder(t.getPreview(), MediaSourceType.HTTP_STREAM, t.getArtist().getName(), t.getTitle())
+												.album(t.getAlbum().getTitle())
+												.length(t.getDuration() * 1000) // duration in seconds, length in milliseconds
+												.build())
+										.collect(Collectors.toList())
+						)
+				);
+			}
+
+		} catch (InterruptedException | ExecutionException e) {
+			LOG.error("Executor Service error", e);
 		}
 
-		return playlistTracksMap.entrySet().stream()
-				.map(e -> new PlaylistData(String.valueOf(e.getKey().getId()), e.getKey().getTitle(),
-						PlaylistType.DEEZER, e.getKey().getLink(),
-						e.getValue().stream()
-								.map(t -> new AudioTrackData.Builder(t.getPreview(), MediaSourceType.HTTP_STREAM, t.getArtist().getName(), t.getTitle())
-										.album(t.getAlbum().getTitle())
-										.length(t.getDuration() * 1000) // duration in seconds, length in milliseconds
-										.build())
-								.collect(Collectors.toList())
-				))
-				.collect(Collectors.toList());
+		LOG.debug("Deezer fetching playlists tracks end");
+
+		return playlistData;
 	}
 
 	private void checkAccessToken() throws DeezerNeedAuthorizationException {
