@@ -10,13 +10,13 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.ConfigurationControllers;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
+import ru.push.caudioplayer.core.facades.domain.PlaylistType;
 import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
 import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
 import ru.push.caudioplayer.core.facades.domain.PlaylistData;
@@ -83,7 +83,7 @@ public class PlaylistController {
   }
 
   @PostConstruct
-  public void init() throws ConfigurationException {
+  public void init() {
 		LOG.debug("init bean {}", this.getClass().getName());
 
 		List<PlaylistData> playlists = musicLibraryLogicFacade.getPlaylists();
@@ -93,7 +93,8 @@ public class PlaylistController {
 		audioPlayerFacade.addEventListener(new AudioPlayerEventAdapter());
 
 		// configure playlist browser container
-		setLocalPlaylistBrowserContainerCellFactory();
+		setPlaylistBrowserContainerCellFactory(localPlaylistBrowserContainer);
+		setPlaylistBrowserContainerCellFactory(deezerPlaylistBrowserContainer);
 		fillPlaylistBrowserContainers(playlists, displayedPlaylist);
 
 		// configure playlist content container
@@ -134,8 +135,8 @@ public class PlaylistController {
 		savePlaylistContainerViewConfiguration();
 	}
 
-  private void setLocalPlaylistBrowserContainerCellFactory() {
-    localPlaylistBrowserContainer.setCellFactory(lv -> {
+  private void setPlaylistBrowserContainerCellFactory(ListView<PlaylistData> playlistBrowserContainer) {
+    playlistBrowserContainer.setCellFactory(lv -> {
       ListCell<PlaylistData> cell = new ListCell<PlaylistData>() {
         @Override
         protected void updateItem(PlaylistData item, boolean empty) {
@@ -192,14 +193,23 @@ public class PlaylistController {
   }
 
 	private void fillPlaylistBrowserContainers(List<PlaylistData> playlists, PlaylistData displayedPlaylist) {
+  	assert displayedPlaylist != null;
+
 		if (CollectionUtils.isNotEmpty(playlists)) {
 			localPlaylistBrowserContainer.getItems().clear();
-			boolean activeSelected = false;
+			deezerPlaylistBrowserContainer.getItems().clear();
+
 			for (PlaylistData playlist : playlists) {
-				localPlaylistBrowserContainer.getItems().add(playlist);
-				if (!activeSelected && displayedPlaylist.equals(playlist)) {
-					activeSelected = true;
-					localPlaylistBrowserContainer.getSelectionModel().select(playlist);
+				if (PlaylistType.LOCAL.equals(playlist.getPlaylistType())) {
+					localPlaylistBrowserContainer.getItems().add(playlist);
+					if (playlist.equals(displayedPlaylist)) {
+						localPlaylistBrowserContainer.getSelectionModel().select(playlist);
+					}
+				} else {
+					deezerPlaylistBrowserContainer.getItems().add(playlist);
+					if (playlist.equals(displayedPlaylist)) {
+						deezerPlaylistBrowserContainer.getSelectionModel().select(playlist);
+					}
 				}
 			}
 		}

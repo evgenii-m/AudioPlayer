@@ -71,7 +71,7 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
 
   }
 
-  @Override
+	@Override
   public List<PlaylistData> getPlaylists() {
     return playlists;
   }

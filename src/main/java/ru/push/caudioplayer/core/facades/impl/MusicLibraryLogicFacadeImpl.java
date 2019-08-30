@@ -123,7 +123,16 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 
 	@Override
 	public void refreshPlaylists() {
-		List<PlaylistData> playlists = applicationConfigService.getPlaylists();
+		List<PlaylistData> playlists = new ArrayList<>();
+		try {
+			List<PlaylistData> deezerPlaylists = deezerApiService.getPlaylists();
+			playlists.addAll(deezerPlaylists);
+		} catch (DeezerNeedAuthorizationException e) {
+			LOG.warn("Deezer playlist not loaded", e);
+		}
+		List<PlaylistData> localPlaylists = applicationConfigService.getPlaylists();
+		playlists.addAll(localPlaylists);
+
 		String activePlaylistUid = applicationConfigService.getActivePlaylistUid();
 		String displayedPlaylistUid = applicationConfigService.getDisplayedPlaylistUid();
 
