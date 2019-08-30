@@ -12,9 +12,9 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.AppMain;
 import ru.push.caudioplayer.ConfigurationControllers;
-import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
 
 import javax.annotation.PostConstruct;
@@ -43,11 +43,9 @@ public class MainController {
 	@Resource(name = "lastfmPanelView")
 	private ConfigurationControllers.View lastfmPanelView;
 
-  @Resource
-  private AudioPlayerFacade audioPlayerFacade;
-	@Resource
+	@Autowired
 	private MusicLibraryLogicFacade musicLibraryLogicFacade;
-  @Resource
+	@Autowired
 	private AppMain appMain;
 
   @FXML
@@ -68,12 +66,12 @@ public class MainController {
 
   @FXML
   public void addLocation(ActionEvent actionEvent) {
-    audioPlayerFacade.addLocationsToPlaylist(Collections.singletonList("http://ice1.somafm.com/groovesalad-128.mp3"));
+		musicLibraryLogicFacade.addLocationsToPlaylist(Collections.singletonList("http://ice1.somafm.com/groovesalad-128.mp3"));
   }
 
   @FXML
   public void createNewPlaylist(ActionEvent actionEvent) {
-    audioPlayerFacade.createNewPlaylist();
+		musicLibraryLogicFacade.createNewPlaylist();
   }
 
   @FXML
@@ -83,7 +81,7 @@ public class MainController {
     // WARNING: if this code throws JVM crashing, add JVM option '-DVLCJ_INITX=no'
     List<File> files = fileChooser.showOpenMultipleDialog(mainContainer.getScene().getWindow());
     // todo: add cancel action handling
-    audioPlayerFacade.addFilesToPlaylist(files);
+		musicLibraryLogicFacade.addFilesToPlaylist(files);
   }
 
   @FXML

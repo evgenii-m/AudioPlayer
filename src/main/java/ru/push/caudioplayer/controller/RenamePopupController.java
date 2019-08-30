@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
-import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
+import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
 import ru.push.caudioplayer.core.facades.domain.PlaylistData;
 
 import javax.annotation.PostConstruct;
@@ -29,8 +29,8 @@ public class RenamePopupController {
   @FXML
   private Button applyButton;
 
-  @Autowired
-  private AudioPlayerFacade audioPlayerFacade;
+	@Autowired
+	private MusicLibraryLogicFacade musicLibraryLogicFacade;
 
   private PlaylistData renamedPlaylist;
 
@@ -56,7 +56,7 @@ public class RenamePopupController {
   }
 
   public void applyRename(ActionEvent actionEvent) {
-    audioPlayerFacade.renamePlaylist(renamedPlaylist.getUid(), nameTextField.getText());
+		musicLibraryLogicFacade.renamePlaylist(renamedPlaylist.getUid(), nameTextField.getText());
     closePopup();
   }
 

@@ -8,6 +8,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.*;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
+import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
 import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
@@ -31,9 +32,11 @@ import static org.testng.Assert.*;
 @ContextConfiguration(locations = {
     "classpath:spring/test-application-context.xml"
 })
-public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContextTests {
+public class BussinesLogicFacadesIntegrationTest extends AbstractTestNGSpringContextTests {
   @Autowired
   private AudioPlayerFacade audioPlayerFacade;
+	@Autowired
+	private MusicLibraryLogicFacade musicLibraryLogicFacade;
   @Autowired
   private CustomAudioPlayerComponent playerComponent;
   @Autowired
@@ -66,7 +69,7 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
 
     eventListener = Mockito.spy(new TestAudioPlayerEventAdapter());
     audioPlayerFacade.addEventListener(eventListener);
-    audioPlayerFacade.refreshPlaylists(); // refresh playlist component after each test
+		musicLibraryLogicFacade.refreshPlaylists(); // refresh playlist component after each test
 
     doNothing().when(applicationConfigService).saveActivePlaylist(any(PlaylistData.class));
     doNothing().when(applicationConfigService).saveDisplayedPlaylist(any(PlaylistData.class));
@@ -97,27 +100,27 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
    */
   @Test
   public void shouldGetPlaylistsFromAppConfig() {
-    List<PlaylistData> playlists = audioPlayerFacade.getPlaylists();
+    List<PlaylistData> playlists = musicLibraryLogicFacade.getPlaylists();
 
     assertTrue(CollectionUtils.isNotEmpty(playlists), "Playlists collection null or empty.");
     assertEquals(playlists.size(), PLAYLISTS_COUNT, "Unexpected count of playlists.");
 
-    PlaylistData firstPlaylist = audioPlayerFacade.getPlaylist(FIRST_PLAYLIST_UID);
+    PlaylistData firstPlaylist = musicLibraryLogicFacade.getPlaylist(FIRST_PLAYLIST_UID);
     assertNotNull(firstPlaylist, "Playlist with uid '" + FIRST_PLAYLIST_UID + "' not found.");
     assertEquals(firstPlaylist.getName(), FIRST_PLAYLIST_NAME, "Unexpected playlist name.");
     assertTrue(CollectionUtils.isNotEmpty(firstPlaylist.getTracks()),
         "Tracks of playlist [" + FIRST_PLAYLIST_UID + "] null or empty.");
 
-    PlaylistData secondPlaylist = audioPlayerFacade.getPlaylist(SECOND_PLAYLIST_UID);
+    PlaylistData secondPlaylist = musicLibraryLogicFacade.getPlaylist(SECOND_PLAYLIST_UID);
     assertNotNull(secondPlaylist, "Playlist with uid '" + SECOND_PLAYLIST_UID + "' not found.");
     assertEquals(secondPlaylist.getName(), SECOND_PLAYLIST_NAME, "Unexpected playlist name.");
     assertTrue(CollectionUtils.isNotEmpty(secondPlaylist.getTracks()),
         "Tracks of playlist [" + SECOND_PLAYLIST_UID + "] null or empty.");
 
-    PlaylistData activePlaylist = audioPlayerFacade.getActivePlaylist();
+    PlaylistData activePlaylist = musicLibraryLogicFacade.getActivePlaylist();
     assertNotNull(activePlaylist, "Active playlist must be specified.");
 
-    PlaylistData displayedPlaylist = audioPlayerFacade.getDisplayedPlaylist();
+    PlaylistData displayedPlaylist = musicLibraryLogicFacade.getDisplayedPlaylist();
     assertNotNull(displayedPlaylist, "Displayed playlist must be specified.");
   }
 
@@ -129,33 +132,33 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
    */
   @Test
   public void shouldCreateRenameAndDeletePlaylists() {
-    List<PlaylistData> playlists = audioPlayerFacade.getPlaylists();
+    List<PlaylistData> playlists = musicLibraryLogicFacade.getPlaylists();
     assertTrue(CollectionUtils.isNotEmpty(playlists), "Playlists collection null or empty.");
 
     int originalPlaylistsSize = playlists.size();
 
-    PlaylistData newPlaylist = audioPlayerFacade.createNewPlaylist();
-    PlaylistData displayedPlaylist = audioPlayerFacade.getDisplayedPlaylist();
+    PlaylistData newPlaylist = musicLibraryLogicFacade.createNewPlaylist();
+    PlaylistData displayedPlaylist = musicLibraryLogicFacade.getDisplayedPlaylist();
     assertNotNull(newPlaylist, "New playlist is null.");
     assertNotNull(displayedPlaylist, "Displayed playlist is null.");
     assertEquals(newPlaylist, displayedPlaylist, "New playlist must be displayed!");
     verify(eventListener).createdNewPlaylist(newPlaylist);
-    int actualPlaylistsSize = audioPlayerFacade.getPlaylists().size();
+    int actualPlaylistsSize = musicLibraryLogicFacade.getPlaylists().size();
     assertEquals(actualPlaylistsSize, originalPlaylistsSize + 1, "Expected increase in playlists size.");
 
     String playlistUid = newPlaylist.getUid();
     String newPlaylistName = "new playlist name";
-    audioPlayerFacade.renamePlaylist(playlistUid, newPlaylistName);
-    assertEquals(audioPlayerFacade.getPlaylist(playlistUid).getName(), newPlaylistName,
+		musicLibraryLogicFacade.renamePlaylist(playlistUid, newPlaylistName);
+    assertEquals(musicLibraryLogicFacade.getPlaylist(playlistUid).getName(), newPlaylistName,
         "Unexpected playlist [" + playlistUid + "] name.");
 
-    boolean deletePlaylistResult = audioPlayerFacade.deletePlaylist(playlistUid);
+    boolean deletePlaylistResult = musicLibraryLogicFacade.deletePlaylist(playlistUid);
     assertTrue(deletePlaylistResult, "Unexpected delete playlist result.");
-    assertNull(audioPlayerFacade.getPlaylist(playlistUid), "Playlist [" + playlistUid + "] must be deleted.");
-    displayedPlaylist = audioPlayerFacade.getDisplayedPlaylist();
+    assertNull(musicLibraryLogicFacade.getPlaylist(playlistUid), "Playlist [" + playlistUid + "] must be deleted.");
+    displayedPlaylist = musicLibraryLogicFacade.getDisplayedPlaylist();
     assertNotNull(displayedPlaylist, "After delete displayed playlist must be changed.");
     verify(eventListener).changedPlaylist(displayedPlaylist);
-    actualPlaylistsSize = audioPlayerFacade.getPlaylists().size();
+    actualPlaylistsSize = musicLibraryLogicFacade.getPlaylists().size();
     assertEquals(actualPlaylistsSize, originalPlaylistsSize, "Expected decrease in playlists size.");
 
     verify(applicationConfigService, times(1)).savePlaylist(any(PlaylistData.class));
@@ -169,19 +172,19 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
    */
   @Test
   public void shouldCreateNewPlaylistAfterDeleteLast() {
-    List<PlaylistData> playlists = audioPlayerFacade.getPlaylists();
+    List<PlaylistData> playlists = musicLibraryLogicFacade.getPlaylists();
     assertTrue(CollectionUtils.isNotEmpty(playlists), "Playlists collection null or empty.");
 
     List<String> playlistsUid = playlists.stream().map(PlaylistData::getUid).collect(Collectors.toList());
-    playlistsUid.stream().forEach(playlistUid -> audioPlayerFacade.deletePlaylist(playlistUid));
+    playlistsUid.stream().forEach(playlistUid -> musicLibraryLogicFacade.deletePlaylist(playlistUid));
 
-    playlists = audioPlayerFacade.getPlaylists();
+    playlists = musicLibraryLogicFacade.getPlaylists();
     assertTrue(CollectionUtils.isNotEmpty(playlists), "New playlist not created after delete last!");
     assertEquals(playlists.size(), 1, "Only one playlist must be created.");
     PlaylistData createdPlaylist = playlists.get(0);
-    PlaylistData activePlaylist = audioPlayerFacade.getActivePlaylist();
+    PlaylistData activePlaylist = musicLibraryLogicFacade.getActivePlaylist();
     assertEquals(createdPlaylist, activePlaylist, "Created playlist must be active.");
-    PlaylistData displayedPlaylist = audioPlayerFacade.getDisplayedPlaylist();
+    PlaylistData displayedPlaylist = musicLibraryLogicFacade.getDisplayedPlaylist();
     assertEquals(displayedPlaylist, createdPlaylist, "Created playlist must be displayed.");
 
     verify(applicationConfigService, atLeastOnce()).deletePlaylist(any(PlaylistData.class));
@@ -197,11 +200,11 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
    */
   @Test
   public void shouldAddAndDeletePlaylistItems() {
-    PlaylistData displayedPlaylist = audioPlayerFacade.showActivePlaylist();
+    PlaylistData displayedPlaylist = musicLibraryLogicFacade.showActivePlaylist();
     assertNotNull(displayedPlaylist, "Displayed playlist is null.");
 
     int tracklistSize = displayedPlaylist.getTracks().size();
-    audioPlayerFacade.addFilesToPlaylist(
+		musicLibraryLogicFacade.addFilesToPlaylist(
         Arrays.asList(MEDIA_FILES_PATHS).stream().map(File::new).collect(Collectors.toList())
     );
     int expectedPlaylistSize = tracklistSize + MEDIA_FILES_PATHS.length;
@@ -209,14 +212,14 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
     assertEquals(actualTracklistSize, expectedPlaylistSize, "Unexpected tracklist size after add files.");
 
     tracklistSize = displayedPlaylist.getTracks().size();
-    audioPlayerFacade.addLocationsToPlaylist(Arrays.asList(MEDIA_LOCATIONS_PATHS));
+		musicLibraryLogicFacade.addLocationsToPlaylist(Arrays.asList(MEDIA_LOCATIONS_PATHS));
     expectedPlaylistSize = tracklistSize + MEDIA_LOCATIONS_PATHS.length;
     actualTracklistSize = displayedPlaylist.getTracks().size();
     assertEquals(actualTracklistSize, expectedPlaylistSize, "Unexpected tracklist size after add locations.");
 
     tracklistSize = displayedPlaylist.getTracks().size();
     List<Integer> deletedItemIndexes = Arrays.asList(0, 1);
-    audioPlayerFacade.deleteItemsFromPlaylist(deletedItemIndexes);
+		musicLibraryLogicFacade.deleteItemsFromPlaylist(deletedItemIndexes);
     expectedPlaylistSize = tracklistSize - deletedItemIndexes.size();
     actualTracklistSize = displayedPlaylist.getTracks().size();
     assertEquals(actualTracklistSize, expectedPlaylistSize, "Unexpected tracklist size after delete items.");
@@ -234,17 +237,17 @@ public class AudioPlayerFacadeIntegrationTest extends AbstractTestNGSpringContex
    */
   @Test
   public void shouldPlayAndSwitchPlaylistTracks() {
-    List<PlaylistData> playlists = audioPlayerFacade.getPlaylists();
+    List<PlaylistData> playlists = musicLibraryLogicFacade.getPlaylists();
     assertTrue(CollectionUtils.isNotEmpty(playlists), "Playlists collection null or empty.");
 
     // tests must consider that active and displayed playlist may be different
-    PlaylistData activePlaylist = audioPlayerFacade.getActivePlaylist();
+    PlaylistData activePlaylist = musicLibraryLogicFacade.getActivePlaylist();
     PlaylistData inactivePlaylist = IterableUtils.find(
         playlists, playlistData -> !playlistData.equals(activePlaylist)
     );
     assertNotNull(inactivePlaylist, "There must be at least one inactive playlist.");
     assertNotEquals(inactivePlaylist, activePlaylist, "Active and inactive playlist must be different!");
-    PlaylistData displayedPlaylist = audioPlayerFacade.showPlaylist(inactivePlaylist.getUid());
+    PlaylistData displayedPlaylist = musicLibraryLogicFacade.showPlaylist(inactivePlaylist.getUid());
     assertEquals(displayedPlaylist, inactivePlaylist, "Inactive playlist must be displayed.");
 
     // for this test, the tracks in playlist must be different and size of each playlist must be at least 2!

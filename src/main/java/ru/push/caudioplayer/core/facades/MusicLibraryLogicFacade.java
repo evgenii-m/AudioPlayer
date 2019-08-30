@@ -1,12 +1,19 @@
 package ru.push.caudioplayer.core.facades;
 
 import ru.push.caudioplayer.core.deezer.DeezerNeedAuthorizationException;
+import ru.push.caudioplayer.core.facades.domain.PlaylistData;
+import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
 import ru.push.caudioplayer.core.mediaplayer.domain.LastFmTrackData;
 
+import java.io.File;
 import java.util.List;
 import java.util.function.Consumer;
 
 public interface MusicLibraryLogicFacade {
+
+	void addEventListener(AudioPlayerEventListener listener);
+
+	void removeEventListener(AudioPlayerEventListener listener);
 
 	void connectLastFm(Consumer<String> openAuthPageConsumer);
 
@@ -26,7 +33,33 @@ public interface MusicLibraryLogicFacade {
 	 */
 	List<LastFmTrackData> getRecentTracksFromLastFm();
 
+	void refreshPlaylists();
+
+	List<PlaylistData> getPlaylists();
+
+	PlaylistData getActivePlaylist();
+
+	PlaylistData getDisplayedPlaylist();
+
+	PlaylistData getPlaylist(String playlistUid);
+
+	PlaylistData showPlaylist(String playlistUid);
+
+	PlaylistData showActivePlaylist();
+
+	PlaylistData createNewPlaylist();
+
+	boolean deletePlaylist(String playlistUid);
+
+	void renamePlaylist(String playlistUid, String newPlaylistName);
+
+	void addFilesToPlaylist(List<File> files);
+
+	void deleteItemsFromPlaylist(List<Integer> itemsIndexes);
+
+	void addLocationsToPlaylist(List<String> locations);
+
 	void getTrackFromDeezer(int trackId) throws DeezerNeedAuthorizationException;
 
-	void getDeezerPlaylists() throws DeezerNeedAuthorizationException;
+	List<PlaylistData> getDeezerPlaylists() throws DeezerNeedAuthorizationException;
 }

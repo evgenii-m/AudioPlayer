@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.ConfigurationControllers;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
+import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
 import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
 import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
 import ru.push.caudioplayer.core.facades.domain.PlaylistData;
@@ -30,6 +31,7 @@ import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author push <mez.e.s@yandex.ru>
@@ -60,6 +62,8 @@ public class PlaylistController {
   @Autowired
   private AudioPlayerFacade audioPlayerFacade;
   @Autowired
+	private MusicLibraryLogicFacade musicLibraryLogicFacade;
+  @Autowired
   private TrackTimeLabelBuilder trackTimeLabelBuilder;
   @Autowired
   private ApplicationConfigService applicationConfigService;
@@ -70,8 +74,6 @@ public class PlaylistController {
   @FXML
   public void initialize() {
 		LOG.debug("initialize FXML for {}", this.getClass().getName());
-
-		playlistBrowserTabPane.getSelectionModel().select(deezerPlaylistsTab);
 
     localPlaylistBrowserContainer.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 		deezerPlaylistBrowserContainer.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
@@ -84,39 +86,47 @@ public class PlaylistController {
   public void init() throws ConfigurationException {
 		LOG.debug("init bean {}", this.getClass().getName());
 
+		List<PlaylistData> playlists = musicLibraryLogicFacade.getPlaylists();
+		PlaylistData displayedPlaylist = musicLibraryLogicFacade.getDisplayedPlaylist();
+		renamePopupScene = new Scene(renamePopupView.getView());
+
+		audioPlayerFacade.addEventListener(new AudioPlayerEventAdapter());
+
+		// configure playlist browser container
+		setLocalPlaylistBrowserContainerCellFactory();
+		fillPlaylistBrowserContainers(playlists, displayedPlaylist);
+
+		// configure playlist content container
     setPlaylistContainerColumns(playlistContentContainer, applicationConfigService.getPlaylistContainerViewConfigurations());
 		setPlaylistContentContainerRowFactory();
+		setPlaylistContainerItems(displayedPlaylist);
 
-    renamePopupScene = new Scene(renamePopupView.getView());
-
-    audioPlayerFacade.addEventListener(new AudioPlayerEventAdapter());
-
+		// bind playlist container mouse click event to play track action
     playlistContentContainer.setOnMouseClicked(mouseEvent -> {
       if (mouseEvent.getButton().equals(MouseButton.PRIMARY) && (mouseEvent.getClickCount() == 2)) {
-        PlaylistData displayedPlaylist = localPlaylistBrowserContainer.getSelectionModel().getSelectedItem();
+        PlaylistData currentPlaylist = musicLibraryLogicFacade.getDisplayedPlaylist();
         int trackPosition = playlistContentContainer.getFocusModel().getFocusedCell().getRow();
-        audioPlayerFacade.playTrack(displayedPlaylist.getUid(), trackPosition);
+        audioPlayerFacade.playTrack(currentPlaylist.getUid(), trackPosition);
       }
     });
 
-    List<PlaylistData> playlists = audioPlayerFacade.getPlaylists();
-    PlaylistData displayedPlaylist = audioPlayerFacade.getDisplayedPlaylist();
-    fillPlaylistBrowserContainer(playlists, displayedPlaylist);
+		// skip unused mouse press action for playlist browser containers
+		Stream.of(localPlaylistBrowserContainer, deezerPlaylistBrowserContainer).forEach(o ->
+				o.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
+					if (!event.isPrimaryButtonDown()) {
+						event.consume();
+					}
+				})
+		);
+    // bind selected item of playlist browser changes to show playlist action
+		Stream.of(localPlaylistBrowserContainer, deezerPlaylistBrowserContainer).forEach(o ->
+				o.getSelectionModel().selectedItemProperty()
+						.addListener((observable, oldValue, newValue) -> {
+							PlaylistData playlist = musicLibraryLogicFacade.showPlaylist(newValue.getUid());
+							setPlaylistContainerItems(playlist);
+						})
+		);
 
-    localPlaylistBrowserContainer.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
-      if (!event.isPrimaryButtonDown()) {
-        event.consume();
-      }
-    });
-
-    localPlaylistBrowserContainer.getSelectionModel().selectedItemProperty().addListener(
-        (observable, oldValue, newValue) -> {
-          PlaylistData playlist = audioPlayerFacade.showPlaylist(newValue.getUid());
-          setPlaylistContainerItems(playlist);
-        });
-
-    setPlaylistContainerItems(audioPlayerFacade.getDisplayedPlaylist());
-    setPlaylistBrowserContainerCellFactory();
   }
 
 	@PreDestroy
@@ -124,7 +134,7 @@ public class PlaylistController {
 		savePlaylistContainerViewConfiguration();
 	}
 
-  private void setPlaylistBrowserContainerCellFactory() {
+  private void setLocalPlaylistBrowserContainerCellFactory() {
     localPlaylistBrowserContainer.setCellFactory(lv -> {
       ListCell<PlaylistData> cell = new ListCell<PlaylistData>() {
         @Override
@@ -176,12 +186,12 @@ public class PlaylistController {
 
   private void removePlaylistAction(ActionEvent event, ListCell<PlaylistData> cell) {
     PlaylistData deletedPlaylist = cell.getItem();
-    if (audioPlayerFacade.deletePlaylist(deletedPlaylist.getUid())) {
+    if (musicLibraryLogicFacade.deletePlaylist(deletedPlaylist.getUid())) {
       localPlaylistBrowserContainer.getItems().remove(deletedPlaylist);
     }
   }
 
-	private void fillPlaylistBrowserContainer(List<PlaylistData> playlists, PlaylistData displayedPlaylist) {
+	private void fillPlaylistBrowserContainers(List<PlaylistData> playlists, PlaylistData displayedPlaylist) {
 		if (CollectionUtils.isNotEmpty(playlists)) {
 			localPlaylistBrowserContainer.getItems().clear();
 			boolean activeSelected = false;
@@ -252,7 +262,7 @@ public class PlaylistController {
 
       MenuItem removeMenuItem = new MenuItem("Delete");
       removeMenuItem.setOnAction(event ->
-          audioPlayerFacade.deleteItemsFromPlaylist(playlistContentContainer.getSelectionModel().getSelectedIndices())
+					musicLibraryLogicFacade.deleteItemsFromPlaylist(playlistContentContainer.getSelectionModel().getSelectedIndices())
       );
 
       MenuItem propertiesMenuItem = new MenuItem("Properties");

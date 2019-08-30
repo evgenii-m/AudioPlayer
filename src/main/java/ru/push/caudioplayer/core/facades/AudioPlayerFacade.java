@@ -17,32 +17,6 @@ public interface AudioPlayerFacade {
 
   void removeEventListener(AudioPlayerEventListener listener);
 
-  void refreshPlaylists();
-
-  List<PlaylistData> getPlaylists();
-
-  PlaylistData getActivePlaylist();
-
-  PlaylistData getDisplayedPlaylist();
-
-  PlaylistData getPlaylist(String playlistUid);
-
-  PlaylistData showPlaylist(String playlistUid);
-
-  PlaylistData showActivePlaylist();
-
-  PlaylistData createNewPlaylist();
-
-  boolean deletePlaylist(String playlistUid);
-
-  void renamePlaylist(String playlistUid, String newPlaylistName);
-
-  void addFilesToPlaylist(List<File> files);
-
-  void deleteItemsFromPlaylist(List<Integer> itemsIndexes);
-
-  void addLocationsToPlaylist(List<String> locations);
-
   void playTrack(String playlistUid, int trackPosition);
 
   void playCurrentTrack();
