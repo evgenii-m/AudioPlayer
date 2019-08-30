@@ -2,10 +2,13 @@ package ru.push.caudioplayer.core.deezer.impl;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.HttpClient;
+import org.apache.http.annotation.ThreadSafe;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,14 +39,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+@ThreadSafe
 @Component
 public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DeezerApiAdapterImpl.class);
 
-	private final XPathFactory xPathFactory;
-	private final URIBuilder baseApiUriBuilder;		// todo: think about make immutable builder
-	private final HttpClient httpClient;
+	private final CloseableHttpClient httpClient;
 
 	@Autowired
 	private Properties properties;
@@ -52,11 +54,12 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 	private String deezerAppSecretKey;
 
 	public DeezerApiAdapterImpl() {
-		this.xPathFactory = XPathFactory.newInstance();
-		this.baseApiUriBuilder = new URIBuilder()
-				.setScheme(DeezerApiConst.DEEZER_API_SCHEME)
-				.setHost(DeezerApiConst.DEEZER_API_HOST);
-		this.httpClient = HttpClientBuilder.create().build();
+		PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+		cm.setMaxTotal(200);
+		cm.setDefaultMaxPerRoute(20);
+		this.httpClient = HttpClients.custom()
+				.setConnectionManager(cm)
+				.build();
 	}
 
 	@PostConstruct
@@ -95,12 +98,15 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 	}
 
 	private String makeApiRequest(String methodPath, Map<DeezerApiParam, String> params) throws DeezerApiErrorException {
-		baseApiUriBuilder.clearParameters();
-		params.forEach((key, value) -> baseApiUriBuilder.addParameter(key.getValue(), value));
+		URIBuilder apiUriBuilder = new URIBuilder()
+				.setScheme(DeezerApiConst.DEEZER_API_SCHEME)
+				.setHost(DeezerApiConst.DEEZER_API_HOST);
+		apiUriBuilder.clearParameters();
+		params.forEach((key, value) -> apiUriBuilder.addParameter(key.getValue(), value));
 
-		baseApiUriBuilder.setPath(methodPath);
+		apiUriBuilder.setPath(methodPath);
 		try {
-			URI apiUri = baseApiUriBuilder.build();
+			URI apiUri = apiUriBuilder.build();
 			return makeApiRequest(apiUri.toString());
 		} catch (URISyntaxException e) {
 			LOG.error("construct uri error: ", e);
@@ -137,7 +143,8 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 			if (responseContent != null) {
 				Document responseDocument = XmlUtils.convertStringToXmlDocument(responseContent);
 				String expression = ".//*[local-name() = 'access_token']";
-				String accessToken = (String) xPathFactory.newXPath().evaluate(expression, responseDocument, XPathConstants.STRING);
+				String accessToken = (String) XPathFactory.newInstance().newXPath()
+						.evaluate(expression, responseDocument, XPathConstants.STRING);
 				return accessToken;
 			}
 		} catch (IOException | ParserConfigurationException | XPathExpressionException | SAXException e) {

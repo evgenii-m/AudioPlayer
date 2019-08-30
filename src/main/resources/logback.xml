@@ -7,7 +7,7 @@
 
 	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
 		<file>${LOG_FILE_PATH}</file>
-		<append>true</append>
+		<append>false</append>
 		<encoder>
 			<pattern>${LOG_MSG_PATTERN}</pattern>
 		</encoder>
@@ -29,6 +29,9 @@
 	<logger name="ru.push.caudioplayer" level="DEBUG">
 		<appender-ref ref="ASYNC"/>
 	</logger>
+
+	<logger name="ru.push.caudioplayer.core.deezer.impl" level="DEBUG"/>
+	<logger name="ru.push.caudioplayer.core.lastfm.impl" level="DEBUG"/>
 
 	<root>
 		<appender-ref ref="STDOUT"/>

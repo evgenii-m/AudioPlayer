@@ -23,9 +23,7 @@ import ru.push.caudioplayer.core.mediaplayer.domain.MediaSourceType;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -153,7 +151,7 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 				playlists.addAll(playlistsResponse.getData());
 				index += PLAYLISTS_DEFAULT_LIMIT;
 			} while (playlistsResponse.getNext() != null);
-			LOG.debug("Received deezer {} playlists: {}", playlists.size(), playlists);
+			LOG.info("Received deezer {} playlists: {}", playlists.size(), playlists);
 
 			// get tracks for playlists
 			return fetchPlaylistsTracks(playlists);
@@ -185,7 +183,8 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 
 //					LOG.debug("Received deezer playlist tracks: playlist = {}, size = {}, tracks = {}", playlist.getId(),
 //							playlistTracks.size(), playlistTracks);
-					LOG.debug("Received deezer playlist tracks: playlist = {}, size = {}", playlist.getId(), playlistTracks.size());
+					LOG.info("Received deezer playlist tracks: playlist = {}, name = {}, size = {}",
+							playlist.getId(), playlist.getTitle(), playlistTracks.size());
 
 					return ImmutablePair.of(playlist, playlistTracks);
 				})
