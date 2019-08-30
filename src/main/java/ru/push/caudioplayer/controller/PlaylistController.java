@@ -41,19 +41,17 @@ public class PlaylistController {
   private static final Logger LOG = LoggerFactory.getLogger(PlaylistController.class);
 
 	@FXML
-  private TabPane playlistsTabPane;
+  private TabPane playlistBrowserTabPane;
 	@FXML
 	private Tab localPlaylistsTab;
 	@FXML
 	private Tab deezerPlaylistsTab;
 	@FXML
   private ListView<PlaylistData> localPlaylistBrowserContainer;
-  @FXML
-  private TableView<AudioTrackPlaylistItem> localPlaylistContainer;
 	@FXML
 	private ListView<PlaylistData> deezerPlaylistBrowserContainer;
 	@FXML
-	private TableView<AudioTrackPlaylistItem> deezerPlaylistContainer;
+	private TableView<AudioTrackPlaylistItem> playlistContentContainer;
 
   @FXML
   @Resource(name = "renamePopupView")
@@ -73,33 +71,30 @@ public class PlaylistController {
   public void initialize() {
 		LOG.debug("initialize FXML for {}", this.getClass().getName());
 
-		playlistsTabPane.getSelectionModel().select(deezerPlaylistsTab);
+		playlistBrowserTabPane.getSelectionModel().select(deezerPlaylistsTab);
 
     localPlaylistBrowserContainer.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-    localPlaylistContainer.setEditable(false);
-    localPlaylistContainer.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-
 		deezerPlaylistBrowserContainer.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-		deezerPlaylistContainer.setEditable(false);
-		deezerPlaylistContainer.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+		playlistContentContainer.setEditable(false);
+		playlistContentContainer.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
   }
 
   @PostConstruct
   public void init() throws ConfigurationException {
 		LOG.debug("init bean {}", this.getClass().getName());
 
-    setPlaylistContainerColumns(localPlaylistContainer, applicationConfigService.getPlaylistContainerViewConfigurations());
-    setPlaylistContainerColumns(deezerPlaylistContainer, applicationConfigService.getDeezerPlaylistContainerViewConfigurations());
-		setLocalPlaylistContainerRowFactory();
+    setPlaylistContainerColumns(playlistContentContainer, applicationConfigService.getPlaylistContainerViewConfigurations());
+		setPlaylistContentContainerRowFactory();
 
     renamePopupScene = new Scene(renamePopupView.getView());
 
     audioPlayerFacade.addEventListener(new AudioPlayerEventAdapter());
 
-    localPlaylistContainer.setOnMouseClicked(mouseEvent -> {
+    playlistContentContainer.setOnMouseClicked(mouseEvent -> {
       if (mouseEvent.getButton().equals(MouseButton.PRIMARY) && (mouseEvent.getClickCount() == 2)) {
         PlaylistData displayedPlaylist = localPlaylistBrowserContainer.getSelectionModel().getSelectedItem();
-        int trackPosition = localPlaylistContainer.getFocusModel().getFocusedCell().getRow();
+        int trackPosition = playlistContentContainer.getFocusModel().getFocusedCell().getRow();
         audioPlayerFacade.playTrack(displayedPlaylist.getUid(), trackPosition);
       }
     });
@@ -247,8 +242,8 @@ public class PlaylistController {
 		playlistContainer.getColumns().addAll(numberCol, artistCol, albumCol, titleCol, lengthCol);
 	}
 
-  private void setLocalPlaylistContainerRowFactory() {
-    localPlaylistContainer.setRowFactory(lv -> {
+  private void setPlaylistContentContainerRowFactory() {
+    playlistContentContainer.setRowFactory(lv -> {
       TableRow<AudioTrackPlaylistItem> tableRow = new TableRow<>();
 
       // prepare context menu
@@ -257,7 +252,7 @@ public class PlaylistController {
 
       MenuItem removeMenuItem = new MenuItem("Delete");
       removeMenuItem.setOnAction(event ->
-          audioPlayerFacade.deleteItemsFromPlaylist(localPlaylistContainer.getSelectionModel().getSelectedIndices())
+          audioPlayerFacade.deleteItemsFromPlaylist(playlistContentContainer.getSelectionModel().getSelectedIndices())
       );
 
       MenuItem propertiesMenuItem = new MenuItem("Properties");
@@ -278,8 +273,8 @@ public class PlaylistController {
   }
 
   private void setPlaylistContainerItems(PlaylistData playlistData) {
-    localPlaylistContainer.getItems().clear();
-    localPlaylistContainer.getItems().addAll(
+    playlistContentContainer.getItems().clear();
+    playlistContentContainer.getItems().addAll(
         playlistData.getTracks().stream()
             .map(mediaInfoData -> {
               if ((mediaInfoData != null) && (mediaInfoData.getTitle() != null)) {
@@ -296,7 +291,7 @@ public class PlaylistController {
   }
 
   private void savePlaylistContainerViewConfiguration() {
-    List<PlaylistContainerViewConfigurations.PlaylistContainerColumn> columns = localPlaylistContainer.getColumns().stream()
+    List<PlaylistContainerViewConfigurations.PlaylistContainerColumn> columns = playlistContentContainer.getColumns().stream()
         .map(tc ->
             new PlaylistContainerViewConfigurations.PlaylistContainerColumn(
                 (String) tc.getUserData(),
@@ -333,8 +328,8 @@ public class PlaylistController {
 
     @Override
     public void refreshTrackMediaInfo(int trackPosition, AudioTrackData mediaInfo) {
-      if ((trackPosition > 0) && (trackPosition < localPlaylistContainer.getItems().size())) {
-        AudioTrackPlaylistItem playlistItem = (AudioTrackPlaylistItem) localPlaylistContainer.getItems().get(trackPosition);
+      if ((trackPosition > 0) && (trackPosition < playlistContentContainer.getItems().size())) {
+        AudioTrackPlaylistItem playlistItem = (AudioTrackPlaylistItem) playlistContentContainer.getItems().get(trackPosition);
         playlistItem.setNumber(mediaInfo.getTrackNumber());
         playlistItem.setArtist(mediaInfo.getArtist());
         playlistItem.setAlbum(mediaInfo.getAlbum());
