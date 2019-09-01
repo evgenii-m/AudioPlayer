@@ -56,8 +56,12 @@ public class RenamePopupController {
   }
 
   public void applyRename(ActionEvent actionEvent) {
-		musicLibraryLogicFacade.renamePlaylist(renamedPlaylist.getUid(), nameTextField.getText());
-    closePopup();
+		boolean result = musicLibraryLogicFacade.renamePlaylist(renamedPlaylist.getUid(), nameTextField.getText());
+		if (result) {
+			closePopup();
+		} else {
+			LOG.error("Failed to rename playlist");
+		}
   }
 
   private void closePopup() {

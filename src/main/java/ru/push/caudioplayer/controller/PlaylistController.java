@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.ConfigurationControllers;
+import ru.push.caudioplayer.core.deezer.domain.Playlist;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
 import ru.push.caudioplayer.core.facades.domain.PlaylistType;
@@ -437,7 +438,11 @@ public class PlaylistController {
 
     @Override
     public void renamedPlaylist(PlaylistData playlistData) {
-      localPlaylistBrowserContainer.refresh();
+    	if (PlaylistType.LOCAL.equals(playlistData.getPlaylistType())) {
+				localPlaylistBrowserContainer.refresh();
+			} else if (PlaylistType.DEEZER.equals(playlistData.getPlaylistType())) {
+				deezerPlaylistBrowserContainer.refresh();
+			}
     }
 
   }

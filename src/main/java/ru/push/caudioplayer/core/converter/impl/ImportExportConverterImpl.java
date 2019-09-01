@@ -11,6 +11,7 @@ import ru.push.caudioplayer.core.config.domain.PlaylistType;
 import ru.push.caudioplayer.core.config.domain.SourceType;
 import ru.push.caudioplayer.core.converter.domain.PlaylistExportData;
 import ru.push.caudioplayer.core.converter.domain.TrackExportData;
+import ru.push.caudioplayer.core.deezer.domain.Playlist;
 import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
 import ru.push.caudioplayer.core.facades.domain.PlaylistData;
 import ru.push.caudioplayer.core.mediaplayer.domain.MediaSourceType;
@@ -102,6 +103,14 @@ public class ImportExportConverterImpl implements ImportExportConverter {
 				ru.push.caudioplayer.core.facades.domain.PlaylistType.DEEZER, playlist.getLink(),
 				toAudioTrackData(tracks)
 		);
+	}
+
+	@Override
+	public Playlist toPlaylistDeezerData(PlaylistData playlistData) {
+		Playlist playlist = new Playlist();
+		playlist.setId(Long.valueOf(playlistData.getUid()));
+		playlist.setTitle(playlistData.getName());
+		return playlist;
 	}
 
 	@Override

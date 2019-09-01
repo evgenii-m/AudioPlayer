@@ -52,7 +52,7 @@ public interface MusicLibraryLogicFacade {
 
 	boolean deletePlaylist(String playlistUid);
 
-	void renamePlaylist(String playlistUid, String newPlaylistName);
+	boolean renamePlaylist(String playlistUid, String newPlaylistName);
 
 	void exportPlaylistToFile(String playlistUid, String folderPath) throws JAXBException;
 

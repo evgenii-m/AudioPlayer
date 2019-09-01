@@ -44,4 +44,6 @@ public interface DeezerApiService {
 	Long createPlaylist(String title) throws DeezerApiErrorException, DeezerNeedAuthorizationException;
 
 	boolean deletePlaylist(long playlistId) throws DeezerApiErrorException, DeezerNeedAuthorizationException;
+
+	boolean renamePlaylist(PlaylistData playlistData) throws DeezerApiErrorException, DeezerNeedAuthorizationException;
 }

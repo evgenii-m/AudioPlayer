@@ -241,10 +241,27 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	}
 
 	@Override
-	public void renamePlaylist(String playlistUid, String newPlaylistName) {
+	public boolean renamePlaylist(String playlistUid, String newPlaylistName) {
 		PlaylistData changedPlaylist = playlistComponent.renamePlaylist(playlistUid, newPlaylistName);
-		applicationConfigService.renamePlaylist(changedPlaylist);
+		if (changedPlaylist == null) {
+			return false;
+		}
+
+		if (PlaylistType.LOCAL.equals(changedPlaylist.getPlaylistType())) {
+			applicationConfigService.renamePlaylist(changedPlaylist);
+		} else if (PlaylistType.DEEZER.equals(changedPlaylist.getPlaylistType())) {
+			try {
+				deezerApiService.renamePlaylist(changedPlaylist);
+			} catch (DeezerNeedAuthorizationException | DeezerApiErrorException e) {
+				LOG.error("Rename Deezer playlist error: ", e);
+				return false;
+			}
+		} else {
+			return false;
+		}
+
 		eventListeners.forEach(listener -> listener.renamedPlaylist(changedPlaylist));
+		return true;
 	}
 
 	@Override

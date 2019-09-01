@@ -1,5 +1,6 @@
 package ru.push.caudioplayer.core.deezer;
 
+import ru.push.caudioplayer.core.deezer.domain.Playlist;
 import ru.push.caudioplayer.core.deezer.domain.Playlists;
 import ru.push.caudioplayer.core.deezer.domain.Track;
 import ru.push.caudioplayer.core.deezer.domain.Tracks;
@@ -15,9 +16,13 @@ public interface DeezerApiAdapter {
 
 	Playlists getPlaylists(String accessToken, Integer index, Integer limit) throws DeezerApiErrorException;
 
+	Playlist getPlaylist(long playlistId, String accessToken) throws DeezerApiErrorException;
+
 	Tracks getPlaylistTracks(long playlistId, String accessToken, Integer index, Integer limit) throws DeezerApiErrorException;
 
 	PlaylistId createPlaylist(String title, String accessToken) throws DeezerApiErrorException;
 
 	boolean deletePlaylist(long playlistId, String accessToken) throws DeezerApiErrorException;
+
+	boolean renamePlaylist(long playlistId, String newTitle, String accessToken) throws DeezerApiErrorException;
 }

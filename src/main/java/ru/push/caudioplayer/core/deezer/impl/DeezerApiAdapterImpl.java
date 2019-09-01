@@ -8,6 +8,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
@@ -25,6 +26,7 @@ import ru.push.caudioplayer.core.deezer.DeezerApiErrorException;
 import ru.push.caudioplayer.core.deezer.DeezerApiMethod;
 import ru.push.caudioplayer.core.deezer.DeezerApiParam;
 import ru.push.caudioplayer.core.deezer.DeezerApiRequestMethodType;
+import ru.push.caudioplayer.core.deezer.domain.Playlist;
 import ru.push.caudioplayer.core.deezer.domain.Playlists;
 import ru.push.caudioplayer.core.deezer.domain.Track;
 import ru.push.caudioplayer.core.deezer.domain.Tracks;
@@ -38,6 +40,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -106,9 +109,17 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 		return makeApiRequest(request);
 	}
 
-	private String makeApiPostRequest(String requestUrl) throws DeezerApiErrorException {
+	private String makeApiPostRequest(String requestUrl, String requestBody) throws DeezerApiErrorException {
 		HttpPost request = new HttpPost(requestUrl);
-		return makeApiRequest(request);
+		try {
+			if ((requestBody != null) && !requestBody.isEmpty()) {
+				request.setEntity(new ByteArrayEntity(requestBody.getBytes("UTF-8")));
+			}
+			return makeApiRequest(request);
+		} catch (UnsupportedEncodingException e) {
+			LOG.error("request error: ", e);
+			return null;
+		}
 	}
 
 	private String makeApiDeleteRequest(String requestUrl) throws DeezerApiErrorException {
@@ -117,7 +128,8 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 	}
 
 	private String makeApiRequest(String methodPath, DeezerApiRequestMethodType methodType,
-																Map<DeezerApiParam, String> params) throws DeezerApiErrorException {
+																		Map<DeezerApiParam, String> params) throws DeezerApiErrorException {
+
 		URIBuilder apiUriBuilder = new URIBuilder()
 				.setScheme(DeezerApiConst.DEEZER_API_SCHEME)
 				.setHost(DeezerApiConst.DEEZER_API_HOST);
@@ -130,7 +142,7 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 
 			switch (methodType) {
 				case POST:
-					return makeApiPostRequest(apiUri.toString());
+					return makeApiPostRequest(apiUri.toString(), null);
 				case DELETE:
 					return makeApiDeleteRequest(apiUri.toString());
 				case GET:
@@ -162,6 +174,16 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 			return mapper.readValue(content, targetClass);
 		} catch (IOException e) {
 			LOG.error("convert json response error: responseContent = {}, exception = {}", content, e);
+			throw new DeezerApiErrorException("Deezer api - Not acceptable result for request: " + methodPath);
+		}
+	}
+
+	private <T> String convertToJson(T object, String methodPath) throws DeezerApiErrorException {
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			return mapper.writeValueAsString(object);
+		} catch (IOException e) {
+			LOG.error("convert json response error: object = {}, exception = {}", object, e);
 			throw new DeezerApiErrorException("Deezer api - Not acceptable result for request: " + methodPath);
 		}
 	}
@@ -213,6 +235,17 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 	}
 
 	@Override
+	public Playlist getPlaylist(long playlistId, String accessToken) throws DeezerApiErrorException {
+		Map<DeezerApiParam, String> requestParameters = new HashMap<>();
+		putBaseRequestParameters(requestParameters, accessToken, null, null);
+
+		String methodPath = String.format(DeezerApiMethod.GET_PLAYLIST.getValue(), playlistId);
+		String responseContent = makeApiRequest(methodPath, DeezerApiMethod.GET_PLAYLIST.getMethodType(), requestParameters);
+
+		return convertJson(responseContent, Playlist.class, methodPath);
+	}
+
+	@Override
 	public Tracks getPlaylistTracks(long playlistId, String accessToken, Integer index, Integer limit) throws DeezerApiErrorException {
 		Map<DeezerApiParam, String> requestParameters = new HashMap<>();
 		putBaseRequestParameters(requestParameters, accessToken, index, limit);
@@ -242,6 +275,18 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 
 		String methodPath = String.format(DeezerApiMethod.DELETE_USER_PLAYLIST.getValue(), playlistId);
 		String responseContent = makeApiRequest(methodPath, DeezerApiMethod.DELETE_USER_PLAYLIST.getMethodType(), requestParameters);
+
+		return Boolean.valueOf(responseContent);
+	}
+
+	@Override
+	public boolean renamePlaylist(long playlistId, String newTitle, String accessToken) throws DeezerApiErrorException {
+		Map<DeezerApiParam, String> requestParameters = new HashMap<>();
+		putBaseRequestParameters(requestParameters, accessToken, null, null);
+		requestParameters.put(DeezerApiParam.TITLE, newTitle);
+
+		String methodPath = String.format(DeezerApiMethod.UPDATE_USER_PLAYLIST.getValue(), playlistId);
+		String responseContent = makeApiRequest(methodPath, DeezerApiMethod.UPDATE_USER_PLAYLIST.getMethodType(), requestParameters);
 
 		return Boolean.valueOf(responseContent);
 	}
