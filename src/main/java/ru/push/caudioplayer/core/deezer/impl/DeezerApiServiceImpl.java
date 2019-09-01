@@ -215,6 +215,13 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 		return playlistId.getId();
 	}
 
+	@Override
+	public boolean deletePlaylist(long playlistId) throws DeezerApiErrorException, DeezerNeedAuthorizationException {
+		checkAccessToken();
+
+		return deezerApiAdapter.deletePlaylist(playlistId, currentAccessToken);
+	}
+
 	private List<Track> getPlaylistAllTracks(long playlistId) {
 		List<Track> playlistTracks = new ArrayList<>();
 		Tracks tracksResponse;

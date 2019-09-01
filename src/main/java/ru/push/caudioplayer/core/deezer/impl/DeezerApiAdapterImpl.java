@@ -235,5 +235,16 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 		return convertJson(responseContent, PlaylistId.class, methodPath);
 	}
 
+	@Override
+	public boolean deletePlaylist(long playlistId, String accessToken) throws DeezerApiErrorException {
+		Map<DeezerApiParam, String> requestParameters = new HashMap<>();
+		putBaseRequestParameters(requestParameters, accessToken, null, null);
+
+		String methodPath = String.format(DeezerApiMethod.DELETE_USER_PLAYLIST.getValue(), playlistId);
+		String responseContent = makeApiRequest(methodPath, DeezerApiMethod.DELETE_USER_PLAYLIST.getMethodType(), requestParameters);
+
+		return Boolean.valueOf(responseContent);
+	}
+
 
 }

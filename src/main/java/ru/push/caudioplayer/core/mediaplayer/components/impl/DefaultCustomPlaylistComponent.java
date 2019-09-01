@@ -165,7 +165,12 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
 		return displayedPlaylist;
   }
 
-  @Override
+	@Override
+	public long getLocalPlaylistsCount() {
+		return playlists.stream().filter(p -> PlaylistType.LOCAL.equals(p.getPlaylistType())).count();
+	}
+
+	@Override
   public PlaylistData getPlaylist(String playlistUid) {
     return IterableUtils.find(
         playlists, playlist -> playlist.getUid().equals(playlistUid)

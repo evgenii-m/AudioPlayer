@@ -32,6 +32,8 @@ public interface CustomPlaylistComponent extends NativePlayerComponent {
 
   PlaylistData getDisplayedPlaylist();
 
+	long getLocalPlaylistsCount();
+
   boolean setDisplayedPlaylist(String playlistUid);
 
   void setDisplayedPlaylist(PlaylistData playlist);

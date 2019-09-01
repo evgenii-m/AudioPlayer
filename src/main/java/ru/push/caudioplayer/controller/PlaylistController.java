@@ -217,9 +217,18 @@ public class PlaylistController {
   private void removePlaylistAction(ActionEvent event, ListCell<PlaylistData> cell) {
 		Stage popupStage = createPopup("Confirm action", confirmActionPopupScene);
 		PlaylistData deletedPlaylist = cell.getItem();
+		if (deletedPlaylist == null) {
+			LOG.error("Empty playlist data from item.");
+			return;
+		}
+
 		Supplier<PlaylistData> actionSupplier = () -> {
 			if (musicLibraryLogicFacade.deletePlaylist(deletedPlaylist.getUid())) {
-				localPlaylistBrowserContainer.getItems().remove(deletedPlaylist);
+				if (PlaylistType.LOCAL.equals(deletedPlaylist.getPlaylistType())) {
+					localPlaylistBrowserContainer.getItems().remove(deletedPlaylist);
+				} else if (PlaylistType.DEEZER.equals(deletedPlaylist.getPlaylistType())) {
+					deezerPlaylistBrowserContainer.getItems().remove(deletedPlaylist);
+				}
 				return deletedPlaylist;
 			}
 			return null;

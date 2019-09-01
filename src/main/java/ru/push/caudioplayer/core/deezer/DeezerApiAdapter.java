@@ -18,4 +18,6 @@ public interface DeezerApiAdapter {
 	Tracks getPlaylistTracks(long playlistId, String accessToken, Integer index, Integer limit) throws DeezerApiErrorException;
 
 	PlaylistId createPlaylist(String title, String accessToken) throws DeezerApiErrorException;
+
+	boolean deletePlaylist(long playlistId, String accessToken) throws DeezerApiErrorException;
 }

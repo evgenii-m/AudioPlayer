@@ -214,17 +214,28 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 		PlaylistData requiredPlaylist = getPlaylist(playlistUid);
 		boolean deleteDisplayed = playlistComponent.getDisplayedPlaylist().equals(requiredPlaylist);
 
-		if (playlistComponent.getPlaylists().size() == 1) {
-			PlaylistData newPlaylist = playlistComponent.createNewPlaylist(PlaylistType.LOCAL);
-			applicationConfigService.savePlaylist(newPlaylist);
-		}
-
 		boolean deleteResult = playlistComponent.deletePlaylist(playlistUid);
 		if (deleteResult) {
+			if (PlaylistType.LOCAL.equals(requiredPlaylist.getPlaylistType())) {
+				if (playlistComponent.getLocalPlaylistsCount() == 0) {
+					PlaylistData newPlaylist = playlistComponent.createNewPlaylist(PlaylistType.LOCAL);
+					applicationConfigService.savePlaylist(newPlaylist);
+				}
+			}
 			if (deleteDisplayed) {
 				eventListeners.forEach(listener -> listener.changedPlaylist(playlistComponent.getDisplayedPlaylist()));
 			}
-			applicationConfigService.deletePlaylist(requiredPlaylist);
+
+			if (PlaylistType.LOCAL.equals(requiredPlaylist.getPlaylistType())) {
+				applicationConfigService.deletePlaylist(requiredPlaylist);
+			} else if (PlaylistType.DEEZER.equals(requiredPlaylist.getPlaylistType())) {
+				try {
+					deleteResult = deezerApiService.deletePlaylist(Long.valueOf(requiredPlaylist.getUid()));
+				} catch (DeezerNeedAuthorizationException | DeezerApiErrorException e) {
+					LOG.error("Delete Deezer playlist failed: id = {}, error = {}", playlistUid, e);
+					deleteResult = false;
+				}
+			}
 		}
 		return deleteResult;
 	}
