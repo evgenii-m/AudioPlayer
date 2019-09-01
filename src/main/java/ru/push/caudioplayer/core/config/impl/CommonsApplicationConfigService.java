@@ -234,9 +234,13 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
   public void savePlaylist(PlaylistData playlistData) {
     Assert.notNull(playlistData);
 
+    if (PlaylistType.DEEZER.equals(playlistData.getPlaylistType())) {
+    	throw new IllegalStateException("Saving Deezer playlist to configuration not provided");
+		}
+
 		PlaylistConfig playlistConfig = convertPlaylist(playlistData);
-		playlistConfigMap.put(playlistData.getUid(), playlistConfig);
 		savePlaylistConfig(playlistConfig);
+		playlistConfigMap.put(playlistData.getUid(), playlistConfig);
 
 		List<String> playlistItemsUid = config.getPlaylists().getPlaylists().stream()
 				.map(PlaylistItem::getPlaylistUid)
@@ -244,8 +248,8 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
 
 		// added new playlist item
 		if (CollectionUtils.isEmpty(playlistItemsUid) || !playlistItemsUid.contains(playlistData.getUid())) {
-			config.getPlaylists().getPlaylists().add(new PlaylistItem(playlistData.getUid(), playlistItemsUid.size()));
 			saveConfiguration();
+			config.getPlaylists().getPlaylists().add(new PlaylistItem(playlistData.getUid(), playlistItemsUid.size()));
 		}
   }
 
@@ -296,25 +300,6 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
 		for (int i = 0; i < nodeIdxList.size(); i++) {
 			playlistItems.get(nodeIdxList.get(i)).setPosition(i);
 		}
-    saveConfiguration();
-  }
-
-  @Override
-  public void saveAllPlaylists(List<PlaylistData> playlistsData, PlaylistData activePlaylist,
-                               PlaylistData displayedPlaylist) {
-    Assert.notNull(playlistsData);
-    Assert.notNull(displayedPlaylist);
-
-		Playlists playlistsConfig = config.getPlaylists();
-
-		playlistsConfig.setActiveUid((activePlaylist != null) ? activePlaylist.getUid() : displayedPlaylist.getUid());
-		playlistsConfig.setDisplayedUid(displayedPlaylist.getUid());
-
-		List<PlaylistItem> playlistItems = playlistsData.stream()
-				.map(o -> new PlaylistItem(o.getUid(), playlistsData.indexOf(o)))
-				.collect(Collectors.toList());
-		playlistsConfig.setPlaylists(playlistItems);
-
     saveConfiguration();
   }
 

@@ -76,8 +76,6 @@ public class BussinesLogicFacadesIntegrationTest extends AbstractTestNGSpringCon
     doNothing().when(applicationConfigService).savePlaylist(any(PlaylistData.class));
     doNothing().when(applicationConfigService).renamePlaylist(any(PlaylistData.class));
     doNothing().when(applicationConfigService).deletePlaylist(any(PlaylistData.class));
-    doNothing().when(applicationConfigService).saveAllPlaylists(anyListOf(PlaylistData.class),
-        any(PlaylistData.class), any(PlaylistData.class));
     doNothing().when(applicationConfigService).saveLastFmSessionData(any());
     doReturn(Boolean.TRUE).when(playerComponent).playMedia(anyString());
   }

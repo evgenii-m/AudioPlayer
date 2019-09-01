@@ -1,6 +1,5 @@
 package ru.push.caudioplayer.core.config;
 
-import org.apache.commons.configuration2.ex.ConfigurationException;
 import ru.push.caudioplayer.core.lastfm.LastFmSessionData;
 import ru.push.caudioplayer.core.facades.domain.PlaylistData;
 import ru.push.caudioplayer.core.facades.domain.configuration.PlaylistContainerViewConfigurations;
@@ -30,8 +29,6 @@ public interface ApplicationConfigService {
   void renamePlaylist(PlaylistData playlistData);
 
   void deletePlaylist(PlaylistData playlistData);
-
-  void saveAllPlaylists(List<PlaylistData> playlistsData, PlaylistData activePlaylist, PlaylistData displayedPlaylist);
 
 
   // user configuration methods

@@ -140,11 +140,8 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 
 		if (!loadStatus) {
 			PlaylistData newPlaylist = createNewPlaylist();
-			applicationConfigService.saveAllPlaylists(
-					playlistComponent.getPlaylists(),
-					playlistComponent.getActivePlaylist(),
-					playlistComponent.getDisplayedPlaylist()
-			);
+			applicationConfigService.saveDisplayedPlaylist(newPlaylist);
+			applicationConfigService.saveActivePlaylist(newPlaylist);
 		}
 	}
 

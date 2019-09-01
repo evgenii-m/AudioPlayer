@@ -136,12 +136,6 @@ public class ApplicationConfigServiceManuallyTest {
   }
 
   @Test
-  public void testSaveAllPlaylists() {
-    applicationConfigServiceForWrite.saveAllPlaylists(playlists, activePlaylist, displayedPlaylist);
-    assertTrue(true);
-  }
-
-  @Test
   public void testGetPlaylistContainerViewConfigurations() throws ConfigurationException {
     PlaylistContainerViewConfigurations playlistContainerViewConfigurations =
         applicationConfigServiceForRead.getPlaylistContainerViewConfigurations();

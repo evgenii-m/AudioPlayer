@@ -81,6 +81,9 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
     PlaylistData newPlaylist = new PlaylistData();
     playlists.add(newPlaylist);
     displayedPlaylist = newPlaylist;
+    if (activePlaylist == null) {
+    	activePlaylist = newPlaylist;
+		}
     return newPlaylist;
   }
 
