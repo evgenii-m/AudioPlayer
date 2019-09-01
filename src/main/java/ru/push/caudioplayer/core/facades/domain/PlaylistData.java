@@ -40,6 +40,12 @@ public class PlaylistData {
     this.tracks = tracks;
   }
 
+	public PlaylistData(String name, PlaylistType playlistType, List<AudioTrackData> tracks) {
+		this.uid = null;
+		this.name = name;
+		this.playlistType = playlistType;
+		this.tracks = tracks;
+	}
 
   public PlaylistData(String uid, String name, PlaylistType playlistType, String link, List<AudioTrackData> tracks) {
     this.uid = uid;

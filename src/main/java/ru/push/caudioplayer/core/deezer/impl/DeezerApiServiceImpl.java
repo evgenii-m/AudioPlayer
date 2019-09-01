@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.push.caudioplayer.core.config.ImportExportConverter;
+import ru.push.caudioplayer.core.converter.ImportExportConverter;
 import ru.push.caudioplayer.core.deezer.DeezerApiAdapter;
 import ru.push.caudioplayer.core.deezer.DeezerApiConst;
 import ru.push.caudioplayer.core.deezer.DeezerApiErrorException;
@@ -18,7 +18,6 @@ import ru.push.caudioplayer.core.config.ApplicationConfigService;
 import ru.push.caudioplayer.core.deezer.domain.Tracks;
 import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
 import ru.push.caudioplayer.core.facades.domain.PlaylistData;
-import ru.push.caudioplayer.core.facades.domain.PlaylistType;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -186,7 +185,7 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 				Playlist entryPlaylist = entry.getLeft();
 				List<Track> entryTracks = entry.getRight();
 				playlistData.add(
-						importExportConverter.convertDeezerPlaylist(entryPlaylist, entryTracks)
+						importExportConverter.toPlaylistDataFromDeezerData(entryPlaylist, entryTracks)
 				);
 			}
 
@@ -204,7 +203,7 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 		checkAccessToken();
 
 		List<Track> tracks = getPlaylistAllTracks(playlistId);
-		return importExportConverter.convertDeezerTracks(tracks);
+		return importExportConverter.toAudioTrackData(tracks);
 	}
 
 	private List<Track> getPlaylistAllTracks(long playlistId) {

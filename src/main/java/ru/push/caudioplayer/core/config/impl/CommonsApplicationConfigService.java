@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
-import ru.push.caudioplayer.core.config.ImportExportConverter;
+import ru.push.caudioplayer.core.converter.ImportExportConverter;
 import ru.push.caudioplayer.core.config.domain.Configuration;
 import ru.push.caudioplayer.core.config.domain.DeezerSessionData;
 import ru.push.caudioplayer.core.config.domain.LastfmSessionData;
@@ -186,7 +186,7 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
 					return true;
 				})
 				.map(o -> playlistConfigMap.get(o.getPlaylistUid()))
-				.map(o -> importExportConverter.convertPlaylist(o))
+				.map(o -> importExportConverter.toPlaylistData(o))
 				.collect(Collectors.toList());
   }
 
@@ -212,7 +212,7 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
     	throw new IllegalStateException("Saving Deezer playlist to configuration not provided");
 		}
 
-		PlaylistConfig playlistConfig = importExportConverter.convertPlaylist(playlistData);
+		PlaylistConfig playlistConfig = importExportConverter.toPlaylistConfig(playlistData);
 		savePlaylistConfig(playlistConfig);
 		playlistConfigMap.put(playlistData.getUid(), playlistConfig);
 

@@ -5,8 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import ru.push.caudioplayer.core.config.ImportExportConverter;
-import ru.push.caudioplayer.core.config.domain.PlaylistConfig;
+import ru.push.caudioplayer.core.converter.ImportExportConverter;
+import ru.push.caudioplayer.core.converter.domain.PlaylistExportData;
 import ru.push.caudioplayer.core.deezer.DeezerApiService;
 import ru.push.caudioplayer.core.deezer.DeezerNeedAuthorizationException;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
@@ -218,8 +218,8 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	@Override
 	public void exportPlaylistToFile(String playlistUid, File file) throws JAXBException {
 		PlaylistData playlist = playlistComponent.getPlaylist(playlistUid);
-		PlaylistConfig playlistConfig = importExportConverter.convertPlaylist(playlist);
-		XmlUtils.marshalDocument(playlistConfig, file, PlaylistConfig.class.getPackage().getName());
+		PlaylistExportData exportData = importExportConverter.toPlaylistExportData(playlist);
+		XmlUtils.marshalDocument(exportData, file, PlaylistExportData.class.getPackage().getName());
 		LOG.info("export playlist to file: uid = {}, filePath = {}", playlistUid, file.getAbsolutePath());
 	}
 
