@@ -29,7 +29,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import javax.xml.bind.JAXBException;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -220,10 +219,7 @@ public class PlaylistController {
 			if (Files.notExists(exportFolderPath) || !Files.isDirectory(exportFolderPath)) {
 				Files.createDirectories(exportFolderPath);
 			}
-
-			File exportFile = new File(DEFAULT_PLAYLIST_EXPORT_FOLDER + playlist.getExportFileName());
-
-			musicLibraryLogicFacade.exportPlaylistToFile(playlist.getUid(), exportFile);
+			musicLibraryLogicFacade.exportPlaylistToFile(playlist.getUid(), DEFAULT_PLAYLIST_EXPORT_FOLDER);
 		} catch (IOException | JAXBException e) {
 			LOG.error("Export playlist error", e);
 		}

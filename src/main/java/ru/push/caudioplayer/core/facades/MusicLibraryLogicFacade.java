@@ -54,7 +54,9 @@ public interface MusicLibraryLogicFacade {
 
 	void renamePlaylist(String playlistUid, String newPlaylistName);
 
-	void exportPlaylistToFile(String playlistUid, File file) throws JAXBException;
+	void exportPlaylistToFile(String playlistUid, String folderPath) throws JAXBException;
+
+	void backupPlaylists(String folderName);
 
 	void addFilesToPlaylist(List<File> files);
 

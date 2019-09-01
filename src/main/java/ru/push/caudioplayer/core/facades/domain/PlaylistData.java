@@ -85,7 +85,8 @@ public class PlaylistData {
   }
 
   public String getExportFileName() {
-  	return this.uid + " - " + this.name + ".xml";
+		String validName = this.name.replaceAll("[^a-zA-Zа-яА-Я0-9\\.\\-]", "_");
+  	return this.uid + " " + validName + ".xml";
 	}
 
 	@Override

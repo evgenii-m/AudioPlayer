@@ -24,6 +24,9 @@ import ru.push.caudioplayer.utils.XmlUtils;
 import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBException;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -234,11 +237,29 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	}
 
 	@Override
-	public void exportPlaylistToFile(String playlistUid, File file) throws JAXBException {
+	public void exportPlaylistToFile(String playlistUid, String folderPath) throws JAXBException {
 		PlaylistData playlist = playlistComponent.getPlaylist(playlistUid);
+		File file = new File(folderPath + playlist.getExportFileName());
 		PlaylistExportData exportData = importExportConverter.toPlaylistExportData(playlist);
 		XmlUtils.marshalDocument(exportData, file, PlaylistExportData.class.getPackage().getName());
 		LOG.info("export playlist to file: uid = {}, filePath = {}", playlistUid, file.getAbsolutePath());
+	}
+
+	@Override
+	public void backupPlaylists(String folderName) {
+		List<PlaylistData> playlists = playlistComponent.getPlaylists();
+
+		playlists.forEach(playlist -> {
+			PlaylistExportData exportData = importExportConverter.toPlaylistExportData(playlist);
+			File file = new File(folderName + playlist.getExportFileName());
+			try {
+				XmlUtils.marshalDocument(exportData, file, PlaylistExportData.class.getPackage().getName());
+				LOG.info("export playlist to file: uid = {}, filePath = {}", playlist.getUid(), file.getAbsolutePath());
+			} catch (JAXBException e) {
+				LOG.error("Playlist backup saving error: playlist = {} {}, error = {}",
+						playlist.getUid(), playlist.getName(), e);
+			}
+		});
 	}
 
 	@Override

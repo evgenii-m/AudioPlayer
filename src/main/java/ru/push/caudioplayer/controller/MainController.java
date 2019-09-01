@@ -20,7 +20,13 @@ import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -30,6 +36,9 @@ import java.util.List;
 public class MainController {
 
   private static final Logger LOG = LoggerFactory.getLogger(MainController.class);
+
+  private static final String DEFAULT_PLAYLIST_BACKUP_FOLDER_NAME = "export/backup_%s/";
+  private static final String DEFAULT_PLAYLIST_BACKUP_FOLDER_TIMESTAMP_FORMAT = "yyyy-MM-dd_HH-mm-ss";
 
   @FXML
   private VBox mainContainer;
@@ -129,5 +138,20 @@ public class MainController {
 		});
 
 		webPageWindowStage.show();
+	}
+
+	@FXML
+	public void backupPlaylists(ActionEvent actionEvent) {
+		String currentTimeString = new SimpleDateFormat(DEFAULT_PLAYLIST_BACKUP_FOLDER_TIMESTAMP_FORMAT).format(new Date());
+		String backupFolderName = String.format(DEFAULT_PLAYLIST_BACKUP_FOLDER_NAME, currentTimeString);
+		Path exportFolderPath = Paths.get(backupFolderName);
+		try {
+			if (Files.notExists(exportFolderPath) || !Files.isDirectory(exportFolderPath)) {
+				Files.createDirectories(exportFolderPath);
+			}
+			musicLibraryLogicFacade.backupPlaylists(backupFolderName);
+		} catch (IOException e) {
+			LOG.error("Export playlist error", e);
+		}
 	}
 }

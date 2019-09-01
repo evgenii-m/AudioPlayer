@@ -14,16 +14,14 @@
 					<menus>
 						<Menu mnemonicParsing="false" text="File">
 							<items>
-								<MenuItem mnemonicParsing="false" onAction="#createNewPlaylist" text="New playlist" />
-								<MenuItem mnemonicParsing="false" onAction="#openFiles" text="Open file(s)" />
-								<MenuItem mnemonicParsing="false" onAction="#addLocation" text="Add location" />
 								<MenuItem mnemonicParsing="false" text="Close" />
 							</items>
 						</Menu>
-						<Menu mnemonicParsing="false" text="Edit">
-							<items>
-								<MenuItem mnemonicParsing="false" text="Delete" />
-							</items>
+						<Menu mnemonicParsing="false" text="Playlist">
+							<MenuItem mnemonicParsing="false" onAction="#createNewPlaylist" text="New playlist" />
+							<MenuItem mnemonicParsing="false" onAction="#openFiles" text="Open file(s)" />
+							<MenuItem mnemonicParsing="false" onAction="#addLocation" text="Add location" />
+							<MenuItem mnemonicParsing="false" onAction="#backupPlaylists" text="Backup playlists" />
 						</Menu>
 						<Menu mnemonicParsing="false" text="Last.fm">
 							<items>

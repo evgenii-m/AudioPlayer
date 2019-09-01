@@ -17,6 +17,8 @@ public interface ImportExportConverter {
 
 	PlaylistExportData toPlaylistExportData(PlaylistData playlistData);
 
+	List<PlaylistExportData> toPlaylistExportData(List<PlaylistData> playlistData);
+
 	PlaylistData toPlaylistDataFromExportData(PlaylistExportData playlistConfig);
 
 	PlaylistData toPlaylistDataFromDeezerData(Playlist playlist, List<Track> tracks);

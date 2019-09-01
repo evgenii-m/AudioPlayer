@@ -74,6 +74,13 @@ public class ImportExportConverterImpl implements ImportExportConverter {
 	}
 
 	@Override
+	public List<PlaylistExportData> toPlaylistExportData(List<PlaylistData> playlistData) {
+		return playlistData.stream()
+				.map(this::toPlaylistExportData)
+				.collect(Collectors.toList());
+	}
+
+	@Override
 	public PlaylistData toPlaylistDataFromExportData(PlaylistExportData exportData) {
 		if (PlaylistType.DEEZER.equals(exportData.getPlaylistType())) {
 			throw new IllegalStateException("Operation not supported for Deezer playlists");

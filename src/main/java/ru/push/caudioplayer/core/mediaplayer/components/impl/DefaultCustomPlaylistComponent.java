@@ -36,7 +36,7 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
   @Autowired
   private MediaInfoDataLoaderService mediaInfoDataLoaderService;
 
-  private List<PlaylistData> playlists;
+  private List<PlaylistData> playlists = new ArrayList<>();
   private PlaylistData displayedPlaylist;
   private PlaylistData activePlaylist;
   private Integer trackPosition;
