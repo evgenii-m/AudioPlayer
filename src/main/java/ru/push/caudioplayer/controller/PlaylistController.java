@@ -102,6 +102,13 @@ public class PlaylistController {
 		audioPlayerFacade.addEventListener(eventAdapter);
 		musicLibraryLogicFacade.addEventListener(eventAdapter);
 
+		// switch browser container to tab with displayed playlist
+		if (PlaylistType.LOCAL.equals(displayedPlaylist.getPlaylistType())) {
+			playlistBrowserTabPane.getSelectionModel().select(localPlaylistsTab);
+		} else {
+			playlistBrowserTabPane.getSelectionModel().select(deezerPlaylistsTab);
+		}
+
 		// configure playlist browser container
 		setPlaylistBrowserContainerCellFactory(localPlaylistBrowserContainer);
 		setPlaylistBrowserContainerCellFactory(deezerPlaylistBrowserContainer);
