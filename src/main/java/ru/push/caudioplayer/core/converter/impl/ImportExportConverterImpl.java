@@ -16,6 +16,7 @@ import ru.push.caudioplayer.core.facades.domain.PlaylistData;
 import ru.push.caudioplayer.core.mediaplayer.domain.MediaSourceType;
 import ru.push.caudioplayer.core.services.MediaInfoDataLoaderService;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,13 +46,16 @@ public class ImportExportConverterImpl implements ImportExportConverter {
 		if (PlaylistType.DEEZER.equals(playlistConfig.getPlaylistType())) {
 			throw new IllegalStateException("Operation not supported for Deezer playlists");
 		}
+		List<AudioTrackData> tracksData = (playlistConfig.getTracks() != null) ?
+				playlistConfig.getTracks().stream()
+						.map(p -> mediaInfoDataLoaderService.load(p.getTrackPath(), MediaSourceType.valueOf(p.getSourceType().value())))
+						.collect(Collectors.toList()) :
+				new ArrayList<>();
+
 		return new PlaylistData(
 				playlistConfig.getUid(), playlistConfig.getName(),
 				ru.push.caudioplayer.core.facades.domain.PlaylistType.fromValue(playlistConfig.getPlaylistType().value()),
-				playlistConfig.getLink(),
-				playlistConfig.getTracks().stream()
-						.map(p -> mediaInfoDataLoaderService.load(p.getTrackPath(), MediaSourceType.valueOf(p.getSourceType().value())))
-						.collect(Collectors.toList())
+				playlistConfig.getLink(), tracksData
 		);
 	}
 

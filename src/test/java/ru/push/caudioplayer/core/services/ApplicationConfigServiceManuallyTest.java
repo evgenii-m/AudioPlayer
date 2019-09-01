@@ -5,6 +5,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import ru.push.caudioplayer.core.config.ApplicationConfigService;
 import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
+import ru.push.caudioplayer.core.facades.domain.PlaylistType;
 import ru.push.caudioplayer.core.mediaplayer.domain.MediaSourceType;
 import ru.push.caudioplayer.core.facades.domain.PlaylistData;
 import ru.push.caudioplayer.core.config.impl.CommonsApplicationConfigService;
@@ -47,7 +48,7 @@ public class ApplicationConfigServiceManuallyTest {
 
   @BeforeClass
   public static void setUpClass() throws Exception {
-    PlaylistData playlist1 = new PlaylistData();
+    PlaylistData playlist1 = new PlaylistData(PlaylistType.LOCAL);
     playlist1.setName(PLAYLIST_1_NAME);
     playlist1.setTracks(
         Arrays.asList(
@@ -56,7 +57,7 @@ public class ApplicationConfigServiceManuallyTest {
             new AudioTrackData(PLAYLIST_1_NAME + "_3", MediaSourceType.FILE)
         )
     );
-    PlaylistData playlist2 = new PlaylistData();
+    PlaylistData playlist2 = new PlaylistData(PlaylistType.LOCAL);
     playlist2.setName(PLAYLIST_2_NAME);
     playlist2.setTracks(
         Arrays.asList(
@@ -65,7 +66,7 @@ public class ApplicationConfigServiceManuallyTest {
             new AudioTrackData(PLAYLIST_2_NAME + "_3", MediaSourceType.FILE)
         )
     );
-    PlaylistData playlist3 = new PlaylistData();
+    PlaylistData playlist3 = new PlaylistData(PlaylistType.LOCAL);
     playlist3.setName(PLAYLIST_3_NAME);
     playlist3.setTracks(
         Arrays.asList(
@@ -136,14 +137,14 @@ public class ApplicationConfigServiceManuallyTest {
   }
 
   @Test
-  public void testGetPlaylistContainerViewConfigurations() throws ConfigurationException {
+  public void testGetPlaylistContainerViewConfigurations() {
     PlaylistContainerViewConfigurations playlistContainerViewConfigurations =
         applicationConfigServiceForRead.getPlaylistContainerViewConfigurations();
     assertNotNull(playlistContainerViewConfigurations);
   }
 
   @Test
-  public void testSavePlaylistContainerViewConfigurations() throws ConfigurationException {
+  public void testSavePlaylistContainerViewConfigurations() {
     PlaylistContainerViewConfigurations playlistContainerViewConfigurations =
         applicationConfigServiceForRead.getPlaylistContainerViewConfigurations();
     applicationConfigServiceForWrite.savePlaylistContainerViewConfigurations(playlistContainerViewConfigurations);

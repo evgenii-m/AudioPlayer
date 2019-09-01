@@ -360,8 +360,13 @@ public class PlaylistController {
     applicationConfigService.savePlaylistContainerViewConfigurations(viewConfigurations);
   }
 
+  @FXML
+	public void createNewPlaylist(ActionEvent actionEvent) {
+		musicLibraryLogicFacade.createNewPlaylist();
+	}
 
-  private final class AudioPlayerEventAdapter extends DefaultAudioPlayerEventAdapter {
+
+	private final class AudioPlayerEventAdapter extends DefaultAudioPlayerEventAdapter {
 
     @Override
     public void changedPlaylist(PlaylistData playlist) {
@@ -370,9 +375,18 @@ public class PlaylistController {
 
     @Override
     public void createdNewPlaylist(PlaylistData newPlaylist) {
-      localPlaylistBrowserContainer.getItems().add(newPlaylist);
-      localPlaylistBrowserContainer.getSelectionModel().select(newPlaylist);
-      setPlaylistContainerItems(newPlaylist);
+      if (PlaylistType.LOCAL.equals(newPlaylist.getPlaylistType())) {
+				localPlaylistBrowserContainer.getItems().add(newPlaylist);
+				localPlaylistBrowserContainer.getSelectionModel().select(newPlaylist);
+				playlistBrowserTabPane.getSelectionModel().select(localPlaylistsTab);
+
+      } else if (PlaylistType.DEEZER.equals(newPlaylist.getPlaylistType())) {
+				deezerPlaylistBrowserContainer.getItems().add(newPlaylist);
+				deezerPlaylistBrowserContainer.getSelectionModel().select(newPlaylist);
+				playlistBrowserTabPane.getSelectionModel().select(deezerPlaylistsTab);
+			}
+
+			setPlaylistContainerItems(newPlaylist);
     }
 
     @Override

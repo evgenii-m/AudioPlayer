@@ -2,6 +2,7 @@ package ru.push.caudioplayer.core.mediaplayer.components;
 
 import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
 import ru.push.caudioplayer.core.facades.domain.PlaylistData;
+import ru.push.caudioplayer.core.facades.domain.PlaylistType;
 
 import java.io.File;
 import java.util.List;
@@ -19,7 +20,7 @@ public interface CustomPlaylistComponent extends NativePlayerComponent {
 
   List<PlaylistData> getPlaylists();
 
-  PlaylistData createNewPlaylist();
+  PlaylistData createNewPlaylist(PlaylistType playlistType);
 
   boolean deletePlaylist(String playlistUid);
 

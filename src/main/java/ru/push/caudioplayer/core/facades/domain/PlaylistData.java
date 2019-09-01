@@ -14,7 +14,7 @@ import java.util.UUID;
 public class PlaylistData {
   private static final String DEFAULT_PLAYLIST_NAME = "New playlist";
 
-  private final String uid;
+  private String uid;
   private String name;
   private final PlaylistType playlistType;
   private String link;
@@ -25,24 +25,17 @@ public class PlaylistData {
     return DEFAULT_PLAYLIST_NAME + " " + currentTimeString;
   }
 
-  public PlaylistData() {
-    this(getNewPlaylistName());
+  public PlaylistData(PlaylistType playlistType) {
+    this(getNewPlaylistName(), playlistType);
   }
 
-  public PlaylistData(String name) {
-    this(name, new ArrayList<>());
-  }
-
-  public PlaylistData(String name, List<AudioTrackData> tracks) {
-    this.uid = UUID.randomUUID().toString();
-    this.name = name;
-		this.playlistType = PlaylistType.LOCAL;
-    this.tracks = tracks;
+  public PlaylistData(String name, PlaylistType playlistType) {
+    this(name, playlistType, new ArrayList<>());
   }
 
 	public PlaylistData(String name, PlaylistType playlistType, List<AudioTrackData> tracks) {
-		this.uid = null;
-		this.name = name;
+		this.uid = UUID.randomUUID().toString();
+  	this.name = name;
 		this.playlistType = playlistType;
 		this.tracks = tracks;
 	}
@@ -59,7 +52,11 @@ public class PlaylistData {
     return uid;
   }
 
-  public String getName() {
+	public void setUid(String uid) {
+		this.uid = uid;
+	}
+
+	public String getName() {
     return name;
   }
 

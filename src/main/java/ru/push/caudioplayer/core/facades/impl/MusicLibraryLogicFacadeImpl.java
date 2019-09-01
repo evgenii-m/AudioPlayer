@@ -7,10 +7,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import ru.push.caudioplayer.core.converter.ImportExportConverter;
 import ru.push.caudioplayer.core.converter.domain.PlaylistExportData;
+import ru.push.caudioplayer.core.deezer.DeezerApiErrorException;
 import ru.push.caudioplayer.core.deezer.DeezerApiService;
 import ru.push.caudioplayer.core.deezer.DeezerNeedAuthorizationException;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
 import ru.push.caudioplayer.core.facades.domain.PlaylistData;
+import ru.push.caudioplayer.core.facades.domain.PlaylistType;
 import ru.push.caudioplayer.core.lastfm.LastFmService;
 import ru.push.caudioplayer.core.lastfm.domain.Track;
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
@@ -137,10 +139,12 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 		boolean loadStatus = playlistComponent.loadPlaylists(playlists, activePlaylistUid, displayedPlaylistUid);
 
 		if (!loadStatus) {
-			PlaylistData newPlaylist = createNewPlaylist();
-			applicationConfigService.saveDisplayedPlaylist(newPlaylist);
-			applicationConfigService.saveActivePlaylist(newPlaylist);
+			PlaylistData displayedPlaylist = playlistComponent.getDisplayedPlaylist();
+			eventListeners.forEach(listener -> listener.createdNewPlaylist(displayedPlaylist));
+			applicationConfigService.savePlaylist(displayedPlaylist);
 		}
+		applicationConfigService.saveDisplayedPlaylist(playlistComponent.getDisplayedPlaylist());
+		applicationConfigService.saveActivePlaylist(playlistComponent.getActivePlaylist());
 	}
 
 	@Override
@@ -182,10 +186,24 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 
 	@Override
 	public PlaylistData createNewPlaylist() {
-		PlaylistData newPlaylist = playlistComponent.createNewPlaylist();
-		eventListeners.forEach(listener -> listener.createdNewPlaylist(newPlaylist));
-		applicationConfigService.savePlaylist(newPlaylist);
-		return newPlaylist;
+		if (PlaylistType.LOCAL.equals(getDisplayedPlaylist().getPlaylistType())) {
+			PlaylistData  newPlaylist = playlistComponent.createNewPlaylist(PlaylistType.LOCAL);
+			applicationConfigService.savePlaylist(newPlaylist);
+			eventListeners.forEach(listener -> listener.createdNewPlaylist(newPlaylist));
+			return newPlaylist;
+
+		} else if (PlaylistType.DEEZER.equals(getDisplayedPlaylist().getPlaylistType())) {
+			 PlaylistData newPlaylist = playlistComponent.createNewPlaylist(PlaylistType.DEEZER);
+			try {
+				Long playlistUid = deezerApiService.createPlaylist(newPlaylist.getName());
+				newPlaylist.setUid(String.valueOf(playlistUid));
+				eventListeners.forEach(listener -> listener.createdNewPlaylist(newPlaylist));
+				return newPlaylist;
+			} catch (DeezerApiErrorException | DeezerNeedAuthorizationException e) {
+				LOG.error("Create Deezer playlist error:", e);
+			}
+		}
+		return null;
 	}
 
 	@Override
@@ -194,7 +212,7 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 		boolean deleteDisplayed = playlistComponent.getDisplayedPlaylist().equals(requiredPlaylist);
 
 		if (playlistComponent.getPlaylists().size() == 1) {
-			PlaylistData newPlaylist = playlistComponent.createNewPlaylist();
+			PlaylistData newPlaylist = playlistComponent.createNewPlaylist(PlaylistType.LOCAL);
 			applicationConfigService.savePlaylist(newPlaylist);
 		}
 

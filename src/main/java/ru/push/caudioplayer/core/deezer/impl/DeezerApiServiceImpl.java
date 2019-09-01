@@ -16,6 +16,7 @@ import ru.push.caudioplayer.core.deezer.domain.Playlists;
 import ru.push.caudioplayer.core.deezer.domain.Track;
 import ru.push.caudioplayer.core.config.ApplicationConfigService;
 import ru.push.caudioplayer.core.deezer.domain.Tracks;
+import ru.push.caudioplayer.core.deezer.domain.internal.PlaylistId;
 import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
 import ru.push.caudioplayer.core.facades.domain.PlaylistData;
 
@@ -204,6 +205,14 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 
 		List<Track> tracks = getPlaylistAllTracks(playlistId);
 		return importExportConverter.toAudioTrackData(tracks);
+	}
+
+	@Override
+	public Long createPlaylist(String title) throws DeezerApiErrorException, DeezerNeedAuthorizationException {
+		checkAccessToken();
+
+		PlaylistId playlistId = deezerApiAdapter.createPlaylist(title, currentAccessToken);
+		return playlistId.getId();
 	}
 
 	private List<Track> getPlaylistAllTracks(long playlistId) {

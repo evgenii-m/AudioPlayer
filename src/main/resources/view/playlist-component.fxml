@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
@@ -12,28 +13,38 @@
 	<children>
 		<HBox fx:id="playlistBlockContainer" prefWidth="1000.0" spacing="5.0">
 			<children>
-				<TabPane fx:id="playlistBrowserTabPane" nodeOrientation="LEFT_TO_RIGHT" pickOnBounds="false" prefHeight="300.0" prefWidth="290.0" rotateGraphic="true" side="LEFT" tabClosingPolicy="UNAVAILABLE">
-					<tabs>
-						<Tab fx:id="localPlaylistsTab" closable="false" styleClass="tabPaneItem" text="LOCAL">
-							<content>
-								<ListView fx:id="localPlaylistBrowserContainer" prefHeight="300.0" prefWidth="250.0" styleClass="playlist-browser-container">
-								</ListView>
-							</content>
-						</Tab>
-						<Tab fx:id="deezerPlaylistsTab" closable="false" styleClass="tabPaneItem" text="DEEZER">
-							<content>
-								<ListView fx:id="deezerPlaylistBrowserContainer" prefHeight="300.0" prefWidth="250.0" styleClass="playlist-browser-container">
-								</ListView>
-							</content>
-						</Tab>
-					</tabs>
-					<opaqueInsets>
-						<Insets />
-					</opaqueInsets>
-					<padding>
-						<Insets left="5.0" />
-					</padding>
-				</TabPane>
+				<Pane prefHeight="300" prefWidth="290.0">
+					<HBox prefHeight="25.0" prefWidth="290.0" spacing="7.0">
+						<children>
+							<Button prefWidth="60.0" onAction="#createNewPlaylist">New</Button>
+						</children>
+						<padding>
+							<Insets left="5.0" right="5.0"/>
+						</padding>
+					</HBox>
+					<TabPane fx:id="playlistBrowserTabPane" nodeOrientation="LEFT_TO_RIGHT" pickOnBounds="false" layoutY="30.0" prefHeight="270.0" prefWidth="290.0" rotateGraphic="true" side="LEFT" tabClosingPolicy="UNAVAILABLE">
+						<tabs>
+							<Tab fx:id="localPlaylistsTab" closable="false" styleClass="tabPaneItem" text="LOCAL">
+								<content>
+									<ListView fx:id="localPlaylistBrowserContainer" prefHeight="300.0" prefWidth="250.0" styleClass="playlist-browser-container">
+									</ListView>
+								</content>
+							</Tab>
+							<Tab fx:id="deezerPlaylistsTab" closable="false" styleClass="tabPaneItem" text="DEEZER">
+								<content>
+									<ListView fx:id="deezerPlaylistBrowserContainer" prefHeight="300.0" prefWidth="250.0" styleClass="playlist-browser-container">
+									</ListView>
+								</content>
+							</Tab>
+						</tabs>
+						<opaqueInsets>
+							<Insets />
+						</opaqueInsets>
+						<padding>
+							<Insets left="5.0" />
+						</padding>
+					</TabPane>
+				</Pane>
 				<TableView fx:id="playlistContentContainer" prefHeight="250.0" prefWidth="700.0">
 					<columns>
 					</columns>

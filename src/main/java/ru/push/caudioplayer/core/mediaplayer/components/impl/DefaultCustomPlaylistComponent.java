@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
+import ru.push.caudioplayer.core.facades.domain.PlaylistType;
 import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
 import ru.push.caudioplayer.core.services.MediaInfoDataLoaderService;
@@ -53,23 +54,16 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
   public boolean loadPlaylists(List<PlaylistData> playlists, String activePlaylistUid, String displayedPlaylistUid) {
     if (CollectionUtils.isNotEmpty(playlists)) {
       this.playlists = playlists;
-      boolean activeResult = setActivePlaylist(activePlaylistUid, 0);
-      if (!activeResult) {
-        activePlaylist = playlists.get(0);
-        trackPosition = 0;
-      }
-      boolean displayedResult = setDisplayedPlaylist(displayedPlaylistUid);
-      if (!displayedResult) {
-        displayedPlaylist = playlists.get(0);
-      }
-      return activeResult && displayedResult;
+      setActivePlaylist(activePlaylistUid, 0);
+      setDisplayedPlaylist(displayedPlaylistUid);
+      return true;
 
     } else {
-			this.playlists = new ArrayList<>();
 			LOG.warn("Attempts to load an empty playlists!");
+			this.playlists = new ArrayList<>();
+			this.activePlaylist = createNewPlaylist(PlaylistType.LOCAL);
 			return false;
     }
-
   }
 
 	@Override
@@ -78,13 +72,10 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
   }
 
   @Override
-  public PlaylistData createNewPlaylist() {
-    PlaylistData newPlaylist = new PlaylistData();
+  public PlaylistData createNewPlaylist(PlaylistType playlistType) {
+    PlaylistData newPlaylist = new PlaylistData(playlistType);
     playlists.add(newPlaylist);
     displayedPlaylist = newPlaylist;
-    if (activePlaylist == null) {
-    	activePlaylist = newPlaylist;
-		}
     return newPlaylist;
   }
 
@@ -159,12 +150,19 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
 
 	@Override
   public PlaylistData getActivePlaylist() {
-    return activePlaylist;
+    if ((activePlaylist == null) && (playlists.size() > 0)) {
+    	activePlaylist = playlists.get(0);
+			trackPosition = 0;
+		}
+		return activePlaylist;
   }
 
   @Override
   public PlaylistData getDisplayedPlaylist() {
-    return displayedPlaylist;
+		if ((displayedPlaylist == null) && (playlists.size() > 0)) {
+			displayedPlaylist = playlists.get(0);
+		}
+		return displayedPlaylist;
   }
 
   @Override

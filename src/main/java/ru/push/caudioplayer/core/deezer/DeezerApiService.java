@@ -39,5 +39,7 @@ public interface DeezerApiService {
 	 */
 	List<PlaylistData> getPlaylists() throws DeezerNeedAuthorizationException;
 
-	List<AudioTrackData> getPlaylistTracks(long playlistId) throws  DeezerNeedAuthorizationException;
+	List<AudioTrackData> getPlaylistTracks(long playlistId) throws DeezerNeedAuthorizationException;
+
+	Long createPlaylist(String title) throws DeezerApiErrorException, DeezerNeedAuthorizationException;
 }
