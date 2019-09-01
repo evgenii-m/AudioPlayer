@@ -81,6 +81,10 @@ public class PlaylistData {
     this.tracks = tracks;
   }
 
+  public String getExportFileName() {
+  	return this.uid + " - " + this.name + ".xml";
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;

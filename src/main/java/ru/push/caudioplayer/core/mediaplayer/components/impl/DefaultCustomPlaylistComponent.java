@@ -19,6 +19,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -96,7 +97,7 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
 
     PlaylistData playlistData = getPlaylist(playlistUid);
     if (playlistData == null) {
-      LOG.debug("Try delete unknown playlist [playlistUid: " + playlistUid + "]");
+      LOG.warn("Try delete unknown playlist [playlistUid: " + playlistUid + "]");
       return false;
     }
 
@@ -112,6 +113,7 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
     if (playlistData.equals(displayedPlaylist)) {
       displayedPlaylist = activePlaylist;
     }
+		LOG.debug("Removed playlist: {}", playlistData);
     playlists.remove(playlistData);
     return true;
 
@@ -132,7 +134,30 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
     return playlistData;
   }
 
-  @Override
+	@Override
+	public List<PlaylistData> appendOrUpdatePlaylists(List<PlaylistData> updatedPlaylists) {
+  	List<PlaylistData> newPlaylists = new ArrayList<>(updatedPlaylists);
+
+  	// at first update existed playlists
+  	playlists.replaceAll(playlist -> {
+			Optional<PlaylistData> updatedPlaylist = updatedPlaylists.stream()
+					.filter(p -> p.getUid().equals(playlist.getUid()))
+					.findFirst();
+			if (updatedPlaylist.isPresent()) {
+				newPlaylists.remove(updatedPlaylist.get());
+				return updatedPlaylist.get();
+			} else {
+				return playlist;
+			}
+		});
+
+  	// after add new playlists
+  	playlists.addAll(newPlaylists);
+
+  	return playlists;
+	}
+
+	@Override
   public PlaylistData getActivePlaylist() {
     return activePlaylist;
   }

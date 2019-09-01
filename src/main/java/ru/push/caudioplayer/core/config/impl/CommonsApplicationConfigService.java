@@ -5,23 +5,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
+import ru.push.caudioplayer.core.config.ImportExportConverter;
 import ru.push.caudioplayer.core.config.domain.Configuration;
 import ru.push.caudioplayer.core.config.domain.DeezerSessionData;
 import ru.push.caudioplayer.core.config.domain.LastfmSessionData;
 import ru.push.caudioplayer.core.config.domain.PlaylistConfig;
 import ru.push.caudioplayer.core.config.domain.PlaylistItem;
 import ru.push.caudioplayer.core.config.domain.Playlists;
-import ru.push.caudioplayer.core.config.domain.SourceType;
-import ru.push.caudioplayer.core.config.domain.Track;
 import ru.push.caudioplayer.core.config.domain.view.Column;
 import ru.push.caudioplayer.core.config.domain.view.Columns;
 import ru.push.caudioplayer.core.config.domain.view.PlaylistContainer;
 import ru.push.caudioplayer.core.config.domain.view.View;
 import ru.push.caudioplayer.core.facades.domain.PlaylistType;
 import ru.push.caudioplayer.core.lastfm.LastFmSessionData;
-import ru.push.caudioplayer.core.services.MediaInfoDataLoaderService;
-import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
-import ru.push.caudioplayer.core.mediaplayer.domain.MediaSourceType;
 import ru.push.caudioplayer.core.facades.domain.PlaylistData;
 import ru.push.caudioplayer.core.config.ApplicationConfigService;
 import ru.push.caudioplayer.core.facades.domain.configuration.PlaylistContainerViewConfigurations;
@@ -57,7 +53,7 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
   private static final String UNTITLED_PLAYLIST_NAME = "Untitled";
 
   @Autowired
-  private MediaInfoDataLoaderService mediaInfoDataLoaderService;
+	private ImportExportConverter importExportConverter;
 
   private Configuration config;
   private Map<String, PlaylistConfig> playlistConfigMap;
@@ -190,9 +186,7 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
 					return true;
 				})
 				.map(o -> playlistConfigMap.get(o.getPlaylistUid()))
-				.map(o -> new PlaylistData(
-						o.getUid(), o.getName(), PlaylistType.fromValue(o.getPlaylistType().value()),
-						o.getLink(), createMediaInfoDataList(o.getTracks())))
+				.map(o -> importExportConverter.convertPlaylist(o))
 				.collect(Collectors.toList());
   }
 
@@ -210,26 +204,6 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
     saveConfiguration();
   }
 
-
-	private List<AudioTrackData> createMediaInfoDataList(List<Track> playlistTracks) {
-  	assert playlistTracks != null;
-
-		return playlistTracks.stream()
-				.map(p -> mediaInfoDataLoaderService.load(p.getTrackPath(), MediaSourceType.valueOf(p.getSourceType().value())))
-				.collect(Collectors.toList());
-	}
-
-	private PlaylistConfig convertPlaylist(PlaylistData data) {
-		return new PlaylistConfig(
-				data.getUid(), data.getName(),
-				ru.push.caudioplayer.core.config.domain.PlaylistType.valueOf(data.getPlaylistType().value()),
-				data.getLink(),
-				data.getTracks().stream()
-						.map(t -> new Track(SourceType.fromValue(t.getSourceType().name()), t.getTrackPath()))
-						.collect(Collectors.toList())
-		);
-	}
-
   @Override
   public void savePlaylist(PlaylistData playlistData) {
     Assert.notNull(playlistData);
@@ -238,7 +212,7 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
     	throw new IllegalStateException("Saving Deezer playlist to configuration not provided");
 		}
 
-		PlaylistConfig playlistConfig = convertPlaylist(playlistData);
+		PlaylistConfig playlistConfig = importExportConverter.convertPlaylist(playlistData);
 		savePlaylistConfig(playlistConfig);
 		playlistConfigMap.put(playlistData.getUid(), playlistConfig);
 

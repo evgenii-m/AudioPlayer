@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+import ru.push.caudioplayer.core.config.ImportExportConverter;
+import ru.push.caudioplayer.core.config.domain.PlaylistConfig;
 import ru.push.caudioplayer.core.deezer.DeezerApiService;
 import ru.push.caudioplayer.core.deezer.DeezerNeedAuthorizationException;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
@@ -15,8 +17,10 @@ import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
 import ru.push.caudioplayer.core.mediaplayer.domain.LastFmTrackData;
 import ru.push.caudioplayer.core.config.ApplicationConfigService;
+import ru.push.caudioplayer.utils.XmlUtils;
 
 import javax.annotation.PostConstruct;
+import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
@@ -39,6 +43,8 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	private DeezerApiService deezerApiService;
 	@Autowired
 	private ApplicationConfigService applicationConfigService;
+	@Autowired
+	private ImportExportConverter importExportConverter;
 
 
 	public MusicLibraryLogicFacadeImpl() {
@@ -50,14 +56,6 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 		LOG.debug("init bean {}", this.getClass().getName());
 
 		refreshPlaylists();
-
-		try {
-			if (applicationConfigService.getDeezerAccessToken() != null) {
-				getDeezerPlaylists();
-			}
-		} catch (DeezerNeedAuthorizationException e) {
-			LOG.error("Deezer authorization fails: {}", e);
-		}
 	}
 
 	@Override
@@ -218,6 +216,14 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	}
 
 	@Override
+	public void exportPlaylistToFile(String playlistUid, File file) throws JAXBException {
+		PlaylistData playlist = playlistComponent.getPlaylist(playlistUid);
+		PlaylistConfig playlistConfig = importExportConverter.convertPlaylist(playlist);
+		XmlUtils.marshalDocument(playlistConfig, file, PlaylistConfig.class.getPackage().getName());
+		LOG.info("export playlist to file: uid = {}, filePath = {}", playlistUid, file.getAbsolutePath());
+	}
+
+	@Override
 	public void addFilesToPlaylist(List<File> files) {
 		PlaylistData displayedPlaylist = playlistComponent.getDisplayedPlaylist();
 		PlaylistData changedPlaylist = playlistComponent.addFilesToPlaylist(displayedPlaylist.getUid(), files);
@@ -248,6 +254,8 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 
 	@Override
 	public List<PlaylistData> getDeezerPlaylists() throws DeezerNeedAuthorizationException {
-		return deezerApiService.getPlaylists();
+		List<PlaylistData> deezerPlaylists = deezerApiService.getPlaylists();
+		playlistComponent.appendOrUpdatePlaylists(deezerPlaylists);
+		return deezerPlaylists;
 	}
 }

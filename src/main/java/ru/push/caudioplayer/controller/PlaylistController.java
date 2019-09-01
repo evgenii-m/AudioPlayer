@@ -28,6 +28,12 @@ import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
+import javax.xml.bind.JAXBException;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -41,6 +47,8 @@ import java.util.stream.Stream;
 public class PlaylistController {
 
   private static final Logger LOG = LoggerFactory.getLogger(PlaylistController.class);
+
+  private static final String DEFAULT_PLAYLIST_EXPORT_FOLDER = "export/";
 
 	@FXML
   private TabPane playlistBrowserTabPane;
@@ -90,7 +98,9 @@ public class PlaylistController {
 		PlaylistData displayedPlaylist = musicLibraryLogicFacade.getDisplayedPlaylist();
 		renamePopupScene = new Scene(renamePopupView.getView());
 
-		audioPlayerFacade.addEventListener(new AudioPlayerEventAdapter());
+		AudioPlayerEventAdapter eventAdapter = new AudioPlayerEventAdapter();
+		audioPlayerFacade.addEventListener(eventAdapter);
+		musicLibraryLogicFacade.addEventListener(eventAdapter);
 
 		// configure playlist browser container
 		setPlaylistBrowserContainerCellFactory(localPlaylistBrowserContainer);
@@ -158,7 +168,10 @@ public class PlaylistController {
       MenuItem renameMenuItem = new MenuItem("Rename");
       renameMenuItem.setOnAction(event -> renamePlaylistAction(event, cell));
 
-      contextMenu.getItems().addAll(removeMenuItem, renameMenuItem);
+      MenuItem exportMenuItem = new MenuItem("Export");
+      exportMenuItem.setOnAction(event -> exportPlaylistAction(event, cell));
+
+      contextMenu.getItems().addAll(removeMenuItem, renameMenuItem, exportMenuItem);
 
       cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
         if (isNowEmpty) {
@@ -191,6 +204,23 @@ public class PlaylistController {
       localPlaylistBrowserContainer.getItems().remove(deletedPlaylist);
     }
   }
+
+  private void exportPlaylistAction(ActionEvent event, ListCell<PlaylistData> cell) {
+		PlaylistData playlist = cell.getItem();
+
+		try {
+			Path exportFolderPath = Paths.get(DEFAULT_PLAYLIST_EXPORT_FOLDER);
+			if (Files.notExists(exportFolderPath) || !Files.isDirectory(exportFolderPath)) {
+				Files.createDirectories(exportFolderPath);
+			}
+
+			File exportFile = new File(DEFAULT_PLAYLIST_EXPORT_FOLDER + playlist.getExportFileName());
+
+			musicLibraryLogicFacade.exportPlaylistToFile(playlist.getUid(), exportFile);
+		} catch (IOException | JAXBException e) {
+			LOG.error("Export playlist error", e);
+		}
+	}
 
 	private void fillPlaylistBrowserContainers(List<PlaylistData> playlists, PlaylistData displayedPlaylist) {
   	assert displayedPlaylist != null;

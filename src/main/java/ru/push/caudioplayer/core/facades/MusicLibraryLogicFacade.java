@@ -5,6 +5,7 @@ import ru.push.caudioplayer.core.facades.domain.PlaylistData;
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
 import ru.push.caudioplayer.core.mediaplayer.domain.LastFmTrackData;
 
+import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.util.List;
 import java.util.function.Consumer;
@@ -52,6 +53,8 @@ public interface MusicLibraryLogicFacade {
 	boolean deletePlaylist(String playlistUid);
 
 	void renamePlaylist(String playlistUid, String newPlaylistName);
+
+	void exportPlaylistToFile(String playlistUid, File file) throws JAXBException;
 
 	void addFilesToPlaylist(List<File> files);
 

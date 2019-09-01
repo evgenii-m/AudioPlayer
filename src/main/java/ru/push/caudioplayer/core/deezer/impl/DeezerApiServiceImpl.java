@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import ru.push.caudioplayer.core.config.ImportExportConverter;
 import ru.push.caudioplayer.core.deezer.DeezerApiAdapter;
 import ru.push.caudioplayer.core.deezer.DeezerApiConst;
 import ru.push.caudioplayer.core.deezer.DeezerApiErrorException;
@@ -18,7 +19,6 @@ import ru.push.caudioplayer.core.deezer.domain.Tracks;
 import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
 import ru.push.caudioplayer.core.facades.domain.PlaylistData;
 import ru.push.caudioplayer.core.facades.domain.PlaylistType;
-import ru.push.caudioplayer.core.mediaplayer.domain.MediaSourceType;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -48,6 +48,9 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 
 	@Autowired
 	private ApplicationConfigService applicationConfigService;
+
+	@Autowired
+	private ImportExportConverter importExportConverter;
 
 	private ExecutorService executorService;
 
@@ -166,28 +169,8 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 		LOG.debug("Deezer fetching playlists tracks begin");
 
 		List<Callable<ImmutablePair<Playlist, List<Track>>>> tasks = playlists.stream()
-				.map(playlist -> (Callable<ImmutablePair<Playlist, List<Track>>>) () -> {
-					List<Track> playlistTracks = new ArrayList<>();
-					Tracks tracksResponse;
-					int j = 0;
-					do {
-						try {
-							tracksResponse = deezerApiAdapter.getPlaylistTracks(playlist.getId(), currentAccessToken, j, PLAYLISTS_DEFAULT_LIMIT);
-							playlistTracks.addAll(tracksResponse.getData());
-							j += PLAYLISTS_DEFAULT_LIMIT;
-						} catch (DeezerApiErrorException e) {
-							LOG.error("Deezer api error:", e);
-							break;
-						}
-					} while (tracksResponse.getNext() != null);
-
-//					LOG.debug("Received deezer playlist tracks: playlist = {}, size = {}, tracks = {}", playlist.getId(),
-//							playlistTracks.size(), playlistTracks);
-					LOG.info("Received deezer playlist tracks: playlist = {}, name = {}, size = {}",
-							playlist.getId(), playlist.getTitle(), playlistTracks.size());
-
-					return ImmutablePair.of(playlist, playlistTracks);
-				})
+				.map(playlist -> (Callable<ImmutablePair<Playlist, List<Track>>>) () ->
+						ImmutablePair.of(playlist, getPlaylistAllTracks(playlist.getId())))
 				.collect(Collectors.toList());
 
 		try {
@@ -203,15 +186,7 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 				Playlist entryPlaylist = entry.getLeft();
 				List<Track> entryTracks = entry.getRight();
 				playlistData.add(
-						new PlaylistData(String.valueOf(entryPlaylist.getId()), entryPlaylist.getTitle(),
-								PlaylistType.DEEZER, entryPlaylist.getLink(),
-								entryTracks.stream()
-										.map(t -> new AudioTrackData.Builder(t.getPreview(), MediaSourceType.HTTP_STREAM, t.getArtist().getName(), t.getTitle())
-												.album(t.getAlbum().getTitle())
-												.length(t.getDuration() * 1000) // duration in seconds, length in milliseconds
-												.build())
-										.collect(Collectors.toList())
-						)
+						importExportConverter.convertDeezerPlaylist(entryPlaylist, entryTracks)
 				);
 			}
 
@@ -222,6 +197,33 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 		LOG.debug("Deezer fetching playlists tracks end");
 
 		return playlistData;
+	}
+
+	@Override
+	public List<AudioTrackData> getPlaylistTracks(long playlistId) throws DeezerNeedAuthorizationException {
+		checkAccessToken();
+
+		List<Track> tracks = getPlaylistAllTracks(playlistId);
+		return importExportConverter.convertDeezerTracks(tracks);
+	}
+
+	private List<Track> getPlaylistAllTracks(long playlistId) {
+		List<Track> playlistTracks = new ArrayList<>();
+		Tracks tracksResponse;
+		int j = 0;
+		do {
+			try {
+				tracksResponse = deezerApiAdapter.getPlaylistTracks(playlistId, currentAccessToken, j, PLAYLISTS_DEFAULT_LIMIT);
+				playlistTracks.addAll(tracksResponse.getData());
+				j += PLAYLISTS_DEFAULT_LIMIT;
+			} catch (DeezerApiErrorException e) {
+				LOG.error("Deezer api error:", e);
+				break;
+			}
+		} while (tracksResponse.getNext() != null);
+
+		LOG.info("Received deezer playlist tracks: playlist = {}, size = {}", playlistId, playlistTracks.size());
+		return playlistTracks;
 	}
 
 	private void checkAccessToken() throws DeezerNeedAuthorizationException {

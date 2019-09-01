@@ -1,5 +1,6 @@
 package ru.push.caudioplayer.core.deezer;
 
+import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
 import ru.push.caudioplayer.core.facades.domain.PlaylistData;
 
 import java.util.List;
@@ -37,4 +38,6 @@ public interface DeezerApiService {
 	 * See https://developers.deezer.com/api/user/playlists
 	 */
 	List<PlaylistData> getPlaylists() throws DeezerNeedAuthorizationException;
+
+	List<AudioTrackData> getPlaylistTracks(long playlistId) throws  DeezerNeedAuthorizationException;
 }
