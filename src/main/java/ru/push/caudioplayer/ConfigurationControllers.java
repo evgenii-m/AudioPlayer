@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import ru.push.caudioplayer.controller.ConfirmActionPopupController;
 import ru.push.caudioplayer.controller.LastFmPanelController;
 import ru.push.caudioplayer.controller.MainController;
 import ru.push.caudioplayer.controller.AudioPlayerController;
@@ -72,6 +73,16 @@ public class ConfigurationControllers {
 	@Bean
 	public LastFmPanelController getLastFmPanelController() {
   	return (LastFmPanelController) getLastFmPanelView().getController();
+	}
+
+	@Bean(name = "confirmActionPopupView")
+	public View getConfirmActionPopupView() {
+  	return loadView("view/confirm-action-popup.fxml");
+	}
+
+	@Bean
+	public ConfirmActionPopupController getConfirmActionPopupController() {
+  	return (ConfirmActionPopupController) getConfirmActionPopupView().getController();
 	}
 
   protected View loadView(String url) {

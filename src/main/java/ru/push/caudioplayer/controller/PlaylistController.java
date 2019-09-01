@@ -35,6 +35,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -61,10 +62,12 @@ public class PlaylistController {
 	private ListView<PlaylistData> deezerPlaylistBrowserContainer;
 	@FXML
 	private TableView<AudioTrackPlaylistItem> playlistContentContainer;
-
   @FXML
   @Resource(name = "renamePopupView")
   private ConfigurationControllers.View renamePopupView;
+	@FXML
+	@Resource(name = "confirmActionPopupView")
+	private ConfigurationControllers.View confirmActionPopupView;
 
   @Autowired
   private AudioPlayerFacade audioPlayerFacade;
@@ -76,6 +79,7 @@ public class PlaylistController {
   private ApplicationConfigService applicationConfigService;
 
   private Scene renamePopupScene;
+  private Scene confirmActionPopupScene;
 
 
   @FXML
@@ -96,6 +100,7 @@ public class PlaylistController {
 		List<PlaylistData> playlists = musicLibraryLogicFacade.getPlaylists();
 		PlaylistData displayedPlaylist = musicLibraryLogicFacade.getDisplayedPlaylist();
 		renamePopupScene = new Scene(renamePopupView.getView());
+		confirmActionPopupScene = new Scene(confirmActionPopupView.getView());
 
 		AudioPlayerEventAdapter eventAdapter = new AudioPlayerEventAdapter();
 		audioPlayerFacade.addEventListener(eventAdapter);
@@ -190,25 +195,39 @@ public class PlaylistController {
     });
   }
 
+	private Stage createPopup(String title, Scene scene) {
+		Stage popupStage = new Stage();
+		Stage primaryStage = (Stage) localPlaylistBrowserContainer.getScene().getWindow();
+		popupStage.setTitle(title);
+		popupStage.setResizable(false);
+		popupStage.setScene(scene);
+		popupStage.initModality(Modality.WINDOW_MODAL);
+		popupStage.initOwner(primaryStage);
+		return popupStage;
+	}
+
   private void renamePlaylistAction(ActionEvent event, ListCell<PlaylistData> cell) {
     assert renamePopupView.getController() instanceof RenamePopupController;
 
-    Stage popupStage = new Stage();
-    Stage primaryStage = (Stage) localPlaylistBrowserContainer.getScene().getWindow();
-    popupStage.setTitle("Rename");
-    popupStage.setResizable(false);
-    popupStage.setScene(renamePopupScene);
-    popupStage.initModality(Modality.WINDOW_MODAL);
-    popupStage.initOwner(primaryStage);
-    ((RenamePopupController) renamePopupView.getController()).setRenamedPlaylist(cell.getItem());
+		Stage popupStage = createPopup("Rename", renamePopupScene);
+		((RenamePopupController) renamePopupView.getController()).setRenamedPlaylist(cell.getItem());
     popupStage.show();
   }
 
   private void removePlaylistAction(ActionEvent event, ListCell<PlaylistData> cell) {
-    PlaylistData deletedPlaylist = cell.getItem();
-    if (musicLibraryLogicFacade.deletePlaylist(deletedPlaylist.getUid())) {
-      localPlaylistBrowserContainer.getItems().remove(deletedPlaylist);
-    }
+		Stage popupStage = createPopup("Confirm action", confirmActionPopupScene);
+		PlaylistData deletedPlaylist = cell.getItem();
+		Supplier<PlaylistData> actionSupplier = () -> {
+			if (musicLibraryLogicFacade.deletePlaylist(deletedPlaylist.getUid())) {
+				localPlaylistBrowserContainer.getItems().remove(deletedPlaylist);
+				return deletedPlaylist;
+			}
+			return null;
+		};
+		String message = String.format("Remove playlist \'%s\'?", deletedPlaylist.getName());
+		((ConfirmActionPopupController) confirmActionPopupView.getController()).setAction(actionSupplier, message);
+		popupStage.show();
+
   }
 
   private void exportPlaylistAction(ActionEvent event, ListCell<PlaylistData> cell) {

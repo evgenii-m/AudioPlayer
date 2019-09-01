@@ -1,11 +1,13 @@
 package ru.push.caudioplayer.core.config.domain;
 
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -19,10 +21,12 @@ public class Playlists implements Serializable {
 	@XmlElement
 	private String displayedUid;
 
+	@NotNull
 	@XmlElement(name = "playlist")
 	private List<PlaylistItem> playlists;
 
 	public Playlists() {
+		this.playlists = new ArrayList<>();
 	}
 
 	public Playlists(String activeUid, String displayedUid, List<PlaylistItem> playlists) {
