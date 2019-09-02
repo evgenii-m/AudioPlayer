@@ -89,6 +89,14 @@ public class PlaylistData {
   	return this.uid + " " + validName + ".xml";
 	}
 
+	public boolean isLocal() {
+		return PlaylistType.LOCAL.equals(playlistType);
+	}
+
+	public boolean isDeezer() {
+		return PlaylistType.DEEZER.equals(playlistType);
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;

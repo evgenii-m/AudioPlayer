@@ -17,10 +17,12 @@ import ru.push.caudioplayer.core.mediaplayer.domain.LastFmTrackData;
 import ru.push.caudioplayer.ui.AudioTrackPlaylistItem;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class LastFmPanelController {
 
@@ -60,11 +62,16 @@ public class LastFmPanelController {
 	public void init() {
 		LOG.debug("init bean {}", this.getClass().getName());
 
-//		updateRecentTracksScheduler.scheduleAtFixedRate(new UpdateUiRunnable(), 0L, 1L, TimeUnit.SECONDS);
+		updateRecentTracksScheduler.scheduleAtFixedRate(new UpdateUiRunnable(), 0L, 10L, TimeUnit.SECONDS);
 
 		setRecentTracksContainerColumns();
 		setRecentTracksContainerRowFactory();
 		updateRecentTracksContainer();
+	}
+
+	@PreDestroy
+	public void stop() {
+		updateRecentTracksScheduler.shutdown();
 	}
 
 	private void setRecentTracksContainerColumns() {

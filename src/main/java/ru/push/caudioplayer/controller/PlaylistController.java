@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.ConfigurationControllers;
-import ru.push.caudioplayer.core.deezer.domain.Playlist;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
 import ru.push.caudioplayer.core.facades.domain.PlaylistType;
@@ -108,11 +107,7 @@ public class PlaylistController {
 		musicLibraryLogicFacade.addEventListener(eventAdapter);
 
 		// switch browser container to tab with displayed playlist
-		if (PlaylistType.LOCAL.equals(displayedPlaylist.getPlaylistType())) {
-			playlistBrowserTabPane.getSelectionModel().select(localPlaylistsTab);
-		} else {
-			playlistBrowserTabPane.getSelectionModel().select(deezerPlaylistsTab);
-		}
+		playlistBrowserTabPane.getSelectionModel().select(getCurrentPlaylistTab(displayedPlaylist));
 
 		// configure playlist browser container
 		setPlaylistBrowserContainerCellFactory(localPlaylistBrowserContainer);
@@ -225,11 +220,7 @@ public class PlaylistController {
 
 		Supplier<PlaylistData> actionSupplier = () -> {
 			if (musicLibraryLogicFacade.deletePlaylist(deletedPlaylist.getUid())) {
-				if (PlaylistType.LOCAL.equals(deletedPlaylist.getPlaylistType())) {
-					localPlaylistBrowserContainer.getItems().remove(deletedPlaylist);
-				} else if (PlaylistType.DEEZER.equals(deletedPlaylist.getPlaylistType())) {
-					deezerPlaylistBrowserContainer.getItems().remove(deletedPlaylist);
-				}
+				getCurrentPlaylistContainer(deletedPlaylist).getItems().remove(deletedPlaylist);
 				return deletedPlaylist;
 			}
 			return null;
@@ -262,16 +253,9 @@ public class PlaylistController {
 			deezerPlaylistBrowserContainer.getItems().clear();
 
 			for (PlaylistData playlist : playlists) {
-				if (PlaylistType.LOCAL.equals(playlist.getPlaylistType())) {
-					localPlaylistBrowserContainer.getItems().add(playlist);
-					if (playlist.equals(displayedPlaylist)) {
-						localPlaylistBrowserContainer.getSelectionModel().select(playlist);
-					}
-				} else {
-					deezerPlaylistBrowserContainer.getItems().add(playlist);
-					if (playlist.equals(displayedPlaylist)) {
-						deezerPlaylistBrowserContainer.getSelectionModel().select(playlist);
-					}
+				getCurrentPlaylistContainer(playlist).getItems().add(playlist);
+				if (playlist.equals(displayedPlaylist)) {
+					getCurrentPlaylistContainer(playlist).getSelectionModel().select(playlist);
 				}
 			}
 		}
@@ -390,6 +374,27 @@ public class PlaylistController {
 		musicLibraryLogicFacade.createNewPlaylist();
 	}
 
+	@FXML
+	public void refreshPlaylists(ActionEvent actionEvent) {
+		musicLibraryLogicFacade.refreshPlaylists();
+
+		List<PlaylistData> playlists = musicLibraryLogicFacade.getPlaylists();
+		PlaylistData displayedPlaylist = musicLibraryLogicFacade.getDisplayedPlaylist();
+
+		playlistBrowserTabPane.getSelectionModel().select(getCurrentPlaylistTab(displayedPlaylist));
+		fillPlaylistBrowserContainers(playlists, displayedPlaylist);
+		setPlaylistContainerItems(displayedPlaylist);
+	}
+
+	private ListView<PlaylistData> getCurrentPlaylistContainer(PlaylistData playlistData) {
+  	return PlaylistType.LOCAL.equals(playlistData.getPlaylistType()) ?
+				localPlaylistBrowserContainer : deezerPlaylistBrowserContainer;
+	}
+
+	private Tab getCurrentPlaylistTab(PlaylistData playlistData) {
+		return PlaylistType.LOCAL.equals(playlistData.getPlaylistType()) ?
+				localPlaylistsTab : deezerPlaylistsTab;
+	}
 
 	private final class AudioPlayerEventAdapter extends DefaultAudioPlayerEventAdapter {
 
@@ -400,17 +405,9 @@ public class PlaylistController {
 
     @Override
     public void createdNewPlaylist(PlaylistData newPlaylist) {
-      if (PlaylistType.LOCAL.equals(newPlaylist.getPlaylistType())) {
-				localPlaylistBrowserContainer.getItems().add(newPlaylist);
-				localPlaylistBrowserContainer.getSelectionModel().select(newPlaylist);
-				playlistBrowserTabPane.getSelectionModel().select(localPlaylistsTab);
-
-      } else if (PlaylistType.DEEZER.equals(newPlaylist.getPlaylistType())) {
-				deezerPlaylistBrowserContainer.getItems().add(newPlaylist);
-				deezerPlaylistBrowserContainer.getSelectionModel().select(newPlaylist);
-				playlistBrowserTabPane.getSelectionModel().select(deezerPlaylistsTab);
-			}
-
+			getCurrentPlaylistContainer(newPlaylist).getItems().add(newPlaylist);
+			getCurrentPlaylistContainer(newPlaylist).getSelectionModel().select(newPlaylist);
+			playlistBrowserTabPane.getSelectionModel().select(getCurrentPlaylistTab(newPlaylist));
 			setPlaylistContainerItems(newPlaylist);
     }
 
@@ -438,11 +435,7 @@ public class PlaylistController {
 
     @Override
     public void renamedPlaylist(PlaylistData playlistData) {
-    	if (PlaylistType.LOCAL.equals(playlistData.getPlaylistType())) {
-				localPlaylistBrowserContainer.refresh();
-			} else if (PlaylistType.DEEZER.equals(playlistData.getPlaylistType())) {
-				deezerPlaylistBrowserContainer.refresh();
-			}
+    	getCurrentPlaylistContainer(playlistData).refresh();
     }
 
   }
