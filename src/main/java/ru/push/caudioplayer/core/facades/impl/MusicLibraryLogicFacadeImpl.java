@@ -11,6 +11,7 @@ import ru.push.caudioplayer.core.deezer.DeezerApiErrorException;
 import ru.push.caudioplayer.core.deezer.DeezerApiService;
 import ru.push.caudioplayer.core.deezer.DeezerNeedAuthorizationException;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
+import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
 import ru.push.caudioplayer.core.facades.domain.PlaylistData;
 import ru.push.caudioplayer.core.facades.domain.PlaylistType;
 import ru.push.caudioplayer.core.lastfm.LastFmService;
@@ -324,5 +325,32 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 		List<PlaylistData> deezerPlaylists = deezerApiService.getPlaylists();
 		playlistComponent.appendOrUpdatePlaylists(deezerPlaylists);
 		return deezerPlaylists;
+	}
+
+	@Override
+	public boolean addLastFmTrackToCurrentDeezerPlaylist(LastFmTrackData trackData) {
+		PlaylistData displayedPlaylist = playlistComponent.getDisplayedPlaylist();
+		if (!PlaylistType.DEEZER.equals(displayedPlaylist.getPlaylistType())) {
+			LOG.error("Operation supported only Deezer platlists");
+			return false;
+		}
+
+		String query = trackData.getArtist() + " " + trackData.getTitle();
+		if (trackData.getAlbum() != null) {
+			query = query + " " + trackData.getAlbum();
+		}
+
+		try {
+			List<AudioTrackData> searchedTracksResult = deezerApiService.searchTracksQuery(query);
+			LOG.info("Searched {} tracks: {}", searchedTracksResult.size(), searchedTracksResult);
+			if (!CollectionUtils.isEmpty(searchedTracksResult)) {
+				AudioTrackData searchedTrack = searchedTracksResult.get(0);
+				String trackId = searchedTrack.getTrackId();
+				return deezerApiService.addTrackToPlaylist(Long.valueOf(displayedPlaylist.getUid()), Long.valueOf(trackId));
+			}
+		} catch (DeezerNeedAuthorizationException | DeezerApiErrorException e) {
+			LOG.error("Add track to Deezer error: track data = {}, error = {}", trackData, e);
+		}
+		return false;
 	}
 }

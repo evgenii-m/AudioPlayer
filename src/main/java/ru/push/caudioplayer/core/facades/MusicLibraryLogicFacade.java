@@ -67,4 +67,6 @@ public interface MusicLibraryLogicFacade {
 	void getTrackFromDeezer(int trackId) throws DeezerNeedAuthorizationException;
 
 	List<PlaylistData> getDeezerPlaylists() throws DeezerNeedAuthorizationException;
+
+	boolean addLastFmTrackToCurrentDeezerPlaylist(LastFmTrackData trackData);
 }

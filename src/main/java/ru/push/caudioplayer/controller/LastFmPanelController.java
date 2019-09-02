@@ -2,15 +2,19 @@ package ru.push.caudioplayer.controller;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
 import ru.push.caudioplayer.core.mediaplayer.domain.LastFmTrackData;
+import ru.push.caudioplayer.ui.AudioTrackPlaylistItem;
 
 import javax.annotation.PostConstruct;
 import java.text.SimpleDateFormat;
@@ -59,6 +63,7 @@ public class LastFmPanelController {
 //		updateRecentTracksScheduler.scheduleAtFixedRate(new UpdateUiRunnable(), 0L, 1L, TimeUnit.SECONDS);
 
 		setRecentTracksContainerColumns();
+		setRecentTracksContainerRowFactory();
 		updateRecentTracksContainer();
 	}
 
@@ -86,6 +91,36 @@ public class LastFmPanelController {
 		});
 
 		recentTracksContainer.getColumns().addAll(artistColumn, trackTitleColumn, scrobbleDateColumn);
+	}
+
+	private void setRecentTracksContainerRowFactory() {
+		recentTracksContainer.setRowFactory(lv -> {
+			TableRow<LastFmTrackData> tableRow = new TableRow<>();
+
+			// prepare context menu
+			ContextMenu contextMenu = new ContextMenu();
+
+			MenuItem addToDeezerPlaylistMenuItem = new MenuItem("Add to Deezer playlist");
+			addToDeezerPlaylistMenuItem.setOnAction(event -> {
+				LastFmTrackData data = tableRow.getItem();
+				musicLibraryLogicFacade.addLastFmTrackToCurrentDeezerPlaylist(data);
+			});
+
+			MenuItem addToDeezerLovedTracksMenuItem = new MenuItem("Add to Deezer loved tracks");
+
+			contextMenu.getItems().addAll(
+					addToDeezerPlaylistMenuItem, addToDeezerLovedTracksMenuItem
+			);
+
+			tableRow.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
+				if (isNowEmpty) {
+					tableRow.setContextMenu(null);
+				} else {
+					tableRow.setContextMenu(contextMenu);
+				}
+			});
+			return tableRow;
+		});
 	}
 
 	private final class UpdateUiRunnable implements Runnable {
