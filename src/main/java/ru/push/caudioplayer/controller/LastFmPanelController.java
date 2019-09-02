@@ -103,7 +103,10 @@ public class LastFmPanelController {
 			MenuItem addToDeezerPlaylistMenuItem = new MenuItem("Add to Deezer playlist");
 			addToDeezerPlaylistMenuItem.setOnAction(event -> {
 				LastFmTrackData data = tableRow.getItem();
-				musicLibraryLogicFacade.addLastFmTrackToCurrentDeezerPlaylist(data);
+				boolean result = musicLibraryLogicFacade.addLastFmTrackToCurrentDeezerPlaylist(data);
+				if (!result) {
+					LOG.error("Failed to add track to Deezer playlist: track = {}", data);
+				}
 			});
 
 			MenuItem addToDeezerLovedTracksMenuItem = new MenuItem("Add to Deezer loved tracks");
