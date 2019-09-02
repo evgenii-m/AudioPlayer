@@ -365,13 +365,21 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 			return false;
 		}
 
-		String query = trackData.getArtist() + " " + trackData.getTitle();
+		String shortQuery = trackData.getArtist() + " " + trackData.getTitle();
+		String extendedQuery = null;
 		if (trackData.getAlbum() != null) {
-			query = query + " " + trackData.getAlbum();
+			extendedQuery = shortQuery + " " + trackData.getAlbum();
 		}
 
 		try {
-			List<AudioTrackData> searchedTracksResult = deezerApiService.searchTracksQuery(query);
+			List<AudioTrackData> searchedTracksResult = null;
+			if (extendedQuery != null) {
+				searchedTracksResult = deezerApiService.searchTracksQuery(extendedQuery);
+			}
+			if (CollectionUtils.isEmpty(searchedTracksResult)) {
+				searchedTracksResult = deezerApiService.searchTracksQuery(shortQuery);
+			}
+
 			LOG.info("Searched {} tracks: {}", searchedTracksResult.size(), searchedTracksResult);
 			if (!CollectionUtils.isEmpty(searchedTracksResult)) {
 				AudioTrackData searchedTrack = searchedTracksResult.get(0);

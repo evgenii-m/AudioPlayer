@@ -140,8 +140,10 @@ public class PlaylistController {
 		Stream.of(localPlaylistBrowserContainer, deezerPlaylistBrowserContainer).forEach(o ->
 				o.getSelectionModel().selectedItemProperty()
 						.addListener((observable, oldValue, newValue) -> {
-							PlaylistData playlist = musicLibraryLogicFacade.showPlaylist(newValue.getUid());
-							setPlaylistContainerItems(playlist);
+							if (newValue != null) {
+								PlaylistData playlist = musicLibraryLogicFacade.showPlaylist(newValue.getUid());
+								setPlaylistContainerItems(playlist);
+							}
 						})
 		);
 
