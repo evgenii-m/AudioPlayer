@@ -256,14 +256,14 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 	}
 
 	@Override
-	public boolean removeTrackToPlaylist(long playlistId, long trackId) throws DeezerApiErrorException, DeezerNeedAuthorizationException {
-		return removeTracksToPlaylist(playlistId, Collections.singletonList(trackId));
+	public boolean removeTrackFromPlaylist(long playlistId, long trackId) throws DeezerApiErrorException, DeezerNeedAuthorizationException {
+		return removeTracksFromPlaylist(playlistId, Collections.singletonList(trackId));
 	}
 
 	@Override
-	public boolean removeTracksToPlaylist(long playlistId, List<Long> trackIds) throws DeezerApiErrorException, DeezerNeedAuthorizationException {
+	public boolean removeTracksFromPlaylist(long playlistId, List<Long> trackIds) throws DeezerApiErrorException, DeezerNeedAuthorizationException {
 		checkAccessToken();
-		return deezerApiAdapter.removeTracksToPlaylist(playlistId, trackIds, currentAccessToken);
+		return deezerApiAdapter.removeTracksFromPlaylist(playlistId, trackIds, currentAccessToken);
 	}
 
 	@Override

@@ -18,7 +18,7 @@ public class PlaylistData {
   private String name;
   private final PlaylistType playlistType;
   private String link;
-  private List<AudioTrackData> tracks;
+  private List<AudioTrackData> tracks = new ArrayList<>();
 
   public static String getNewPlaylistName() {
     String currentTimeString = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new Date());

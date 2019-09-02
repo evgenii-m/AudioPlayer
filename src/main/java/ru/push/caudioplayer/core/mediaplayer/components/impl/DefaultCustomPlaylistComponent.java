@@ -266,11 +266,6 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
   @Override
   public PlaylistData addFilesToPlaylist(String playlistUid, List<File> files) {
     PlaylistData playlist = getPlaylist(playlistUid);
-    if (PlaylistType.DEEZER.equals(playlist.getPlaylistType())) {
-    	LOG.warn("Unsupported operation for Deezer playlist");
-    	return playlist;
-		}
-
     List<String> mediaPaths = files.stream()
         .map(File::getAbsolutePath)
         .collect(Collectors.toList());
@@ -291,11 +286,6 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
   @Override
   public PlaylistData addLocationsToPlaylist(String playlistUid, List<String> locations) {
     PlaylistData playlist = getPlaylist(playlistUid);
-		if (PlaylistType.DEEZER.equals(playlist.getPlaylistType())) {
-			LOG.warn("Unsupported operation for Deezer playlist");
-			return playlist;
-		}
-
     List<String> mediaPaths = locations.stream()
         .map(location -> {
           URL locationUrl = null;

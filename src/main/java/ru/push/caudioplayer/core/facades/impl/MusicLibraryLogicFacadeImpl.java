@@ -31,6 +31,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -294,6 +295,11 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	@Override
 	public void addFilesToPlaylist(List<File> files) {
 		PlaylistData displayedPlaylist = playlistComponent.getDisplayedPlaylist();
+		if (PlaylistType.DEEZER.equals(displayedPlaylist.getPlaylistType())) {
+			LOG.warn("Unsupported operation for Deezer playlist");
+			return;
+		}
+
 		PlaylistData changedPlaylist = playlistComponent.addFilesToPlaylist(displayedPlaylist.getUid(), files);
 		applicationConfigService.savePlaylist(changedPlaylist);
 		eventListeners.forEach(listener -> listener.changedPlaylist(displayedPlaylist));
@@ -302,14 +308,41 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	@Override
 	public void deleteItemsFromPlaylist(List<Integer> itemsIndexes) {
 		PlaylistData displayedPlaylist = playlistComponent.getDisplayedPlaylist();
+
+		List<Long> removedTrackIds = itemsIndexes.stream()
+				.filter(idx -> idx < displayedPlaylist.getTracks().size())
+				.map(idx -> displayedPlaylist.getTracks().get(idx).getTrackId())
+				.filter(Objects::nonNull)
+				.map(Long::valueOf)
+				.collect(Collectors.toList());
+
 		PlaylistData changedPlaylist = playlistComponent.deleteItemsFromPlaylist(displayedPlaylist.getUid(), itemsIndexes);
-		applicationConfigService.savePlaylist(changedPlaylist);
+
+		if (PlaylistType.LOCAL.equals(displayedPlaylist.getPlaylistType())) {
+			applicationConfigService.savePlaylist(changedPlaylist);
+		} else {
+			try {
+				boolean result = deezerApiService.removeTracksFromPlaylist(Long.valueOf(displayedPlaylist.getUid()), removedTrackIds);
+				if (!result) {
+					LOG.error("Remove track from Deezer fails: playlist id = {}, track ids = {}",
+							displayedPlaylist.getUid(), removedTrackIds);
+				}
+			} catch (DeezerNeedAuthorizationException | DeezerApiErrorException e) {
+				LOG.error("Remove track from Deezer error: playlist id = {}, track ids = {}, error = {}",
+						displayedPlaylist.getUid(), removedTrackIds, e);
+			}
+		}
 		eventListeners.forEach(listener -> listener.changedPlaylist(displayedPlaylist));
 	}
 
 	@Override
 	public void addLocationsToPlaylist(List<String> locations) {
 		PlaylistData displayedPlaylist = playlistComponent.getDisplayedPlaylist();
+		if (PlaylistType.DEEZER.equals(displayedPlaylist.getPlaylistType())) {
+			LOG.warn("Unsupported operation for Deezer playlist");
+			return;
+		}
+
 		PlaylistData changedPlaylist = playlistComponent.addLocationsToPlaylist(displayedPlaylist.getUid(), locations);
 		applicationConfigService.savePlaylist(changedPlaylist);
 		eventListeners.forEach(listener -> listener.changedPlaylist(displayedPlaylist));

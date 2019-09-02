@@ -306,7 +306,7 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 	}
 
 	@Override
-	public boolean removeTracksToPlaylist(long playlistId, List<Long> trackIds, String accessToken) throws DeezerApiErrorException {
+	public boolean removeTracksFromPlaylist(long playlistId, List<Long> trackIds, String accessToken) throws DeezerApiErrorException {
 		Map<DeezerApiParam, String> requestParameters = new HashMap<>();
 		putBaseRequestParameters(requestParameters, accessToken, null, null);
 		String trackIdsString = trackIds.stream().map(String::valueOf).collect(Collectors.joining(","));

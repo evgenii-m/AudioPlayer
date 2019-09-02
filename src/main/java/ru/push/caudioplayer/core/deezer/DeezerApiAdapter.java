@@ -30,7 +30,7 @@ public interface DeezerApiAdapter {
 
 	boolean addTracksToPlaylist(long playlistId, List<Long> trackIds, String accessToken) throws DeezerApiErrorException;
 
-	boolean removeTracksToPlaylist(long playlistId, List<Long> trackIds, String accessToken) throws DeezerApiErrorException;
+	boolean removeTracksFromPlaylist(long playlistId, List<Long> trackIds, String accessToken) throws DeezerApiErrorException;
 
 	Tracks searchTracksQuery(String query, String accessToken) throws DeezerApiErrorException;
 
