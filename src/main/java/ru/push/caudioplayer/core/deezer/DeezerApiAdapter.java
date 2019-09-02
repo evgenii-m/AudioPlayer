@@ -6,6 +6,8 @@ import ru.push.caudioplayer.core.deezer.domain.Track;
 import ru.push.caudioplayer.core.deezer.domain.Tracks;
 import ru.push.caudioplayer.core.deezer.domain.internal.PlaylistId;
 
+import java.util.List;
+
 public interface DeezerApiAdapter {
 
 	String getUserAuthorizationPageUrl();
@@ -25,4 +27,11 @@ public interface DeezerApiAdapter {
 	boolean deletePlaylist(long playlistId, String accessToken) throws DeezerApiErrorException;
 
 	boolean renamePlaylist(long playlistId, String newTitle, String accessToken) throws DeezerApiErrorException;
+
+	boolean addTracksToPlaylist(long playlistId, List<Long> trackIds, String accessToken) throws DeezerApiErrorException;
+
+	boolean removeTracksToPlaylist(long playlistId, List<Long> trackIds, String accessToken) throws DeezerApiErrorException;
+
+	Tracks searchTracksQuery(String query, String accessToken) throws DeezerApiErrorException;
+
 }

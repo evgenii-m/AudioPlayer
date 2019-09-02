@@ -10,7 +10,6 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -44,8 +43,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 @ThreadSafe
 @Component
@@ -217,7 +218,7 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 		if (accessToken != null) {
 			requestParameters.put(DeezerApiParam.ACCESS_TOKEN, accessToken);
 		}
-		String methodPath = String.format(DeezerApiMethod.GET_TRACK.getValue(), trackId);
+		String methodPath = DeezerApiMethod.GET_TRACK.formate(trackId);
 		String responseContent = makeApiRequest(methodPath, DeezerApiMethod.GET_TRACK.getMethodType(), requestParameters);
 
 		return convertJson(responseContent, Track.class, methodPath);
@@ -239,7 +240,7 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 		Map<DeezerApiParam, String> requestParameters = new HashMap<>();
 		putBaseRequestParameters(requestParameters, accessToken, null, null);
 
-		String methodPath = String.format(DeezerApiMethod.GET_PLAYLIST.getValue(), playlistId);
+		String methodPath = DeezerApiMethod.GET_PLAYLIST.formate(playlistId);
 		String responseContent = makeApiRequest(methodPath, DeezerApiMethod.GET_PLAYLIST.getMethodType(), requestParameters);
 
 		return convertJson(responseContent, Playlist.class, methodPath);
@@ -250,7 +251,7 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 		Map<DeezerApiParam, String> requestParameters = new HashMap<>();
 		putBaseRequestParameters(requestParameters, accessToken, index, limit);
 
-		String methodPath = String.format(DeezerApiMethod.GET_PLAYLIST_TRACKS.getValue(), playlistId);
+		String methodPath = DeezerApiMethod.GET_PLAYLIST_TRACKS.formate(playlistId);
 		String responseContent = makeApiRequest(methodPath, DeezerApiMethod.GET_PLAYLIST_TRACKS.getMethodType(), requestParameters);
 
 		return convertJson(responseContent, Tracks.class, methodPath);
@@ -273,7 +274,7 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 		Map<DeezerApiParam, String> requestParameters = new HashMap<>();
 		putBaseRequestParameters(requestParameters, accessToken, null, null);
 
-		String methodPath = String.format(DeezerApiMethod.DELETE_USER_PLAYLIST.getValue(), playlistId);
+		String methodPath = DeezerApiMethod.DELETE_USER_PLAYLIST.formate(playlistId);
 		String responseContent = makeApiRequest(methodPath, DeezerApiMethod.DELETE_USER_PLAYLIST.getMethodType(), requestParameters);
 
 		return Boolean.valueOf(responseContent);
@@ -285,10 +286,48 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 		putBaseRequestParameters(requestParameters, accessToken, null, null);
 		requestParameters.put(DeezerApiParam.TITLE, newTitle);
 
-		String methodPath = String.format(DeezerApiMethod.UPDATE_USER_PLAYLIST.getValue(), playlistId);
+		String methodPath = DeezerApiMethod.UPDATE_USER_PLAYLIST.formate(playlistId);
 		String responseContent = makeApiRequest(methodPath, DeezerApiMethod.UPDATE_USER_PLAYLIST.getMethodType(), requestParameters);
 
 		return Boolean.valueOf(responseContent);
+	}
+
+	@Override
+	public boolean addTracksToPlaylist(long playlistId, List<Long> trackIds, String accessToken) throws DeezerApiErrorException {
+		Map<DeezerApiParam, String> requestParameters = new HashMap<>();
+		putBaseRequestParameters(requestParameters, accessToken, null, null);
+		String trackIdsString = trackIds.stream().map(String::valueOf).collect(Collectors.joining(","));
+		requestParameters.put(DeezerApiParam.SONGS, trackIdsString);
+
+		String methodPath = DeezerApiMethod.PLAYLIST_ADD_TRACK.formate(playlistId);
+		String responseContent = makeApiRequest(methodPath, DeezerApiMethod.PLAYLIST_ADD_TRACK.getMethodType(), requestParameters);
+
+		return Boolean.valueOf(responseContent);
+	}
+
+	@Override
+	public boolean removeTracksToPlaylist(long playlistId, List<Long> trackIds, String accessToken) throws DeezerApiErrorException {
+		Map<DeezerApiParam, String> requestParameters = new HashMap<>();
+		putBaseRequestParameters(requestParameters, accessToken, null, null);
+		String trackIdsString = trackIds.stream().map(String::valueOf).collect(Collectors.joining(","));
+		requestParameters.put(DeezerApiParam.SONGS, trackIdsString);
+
+		String methodPath = DeezerApiMethod.PLAYLIST_REMOVE_TRACK.formate(playlistId);
+		String responseContent = makeApiRequest(methodPath, DeezerApiMethod.PLAYLIST_REMOVE_TRACK.getMethodType(), requestParameters);
+
+		return Boolean.valueOf(responseContent);
+	}
+
+	@Override
+	public Tracks searchTracksQuery(String query, String accessToken) throws DeezerApiErrorException {
+		Map<DeezerApiParam, String> requestParameters = new HashMap<>();
+		putBaseRequestParameters(requestParameters, accessToken, null, null);
+		requestParameters.put(DeezerApiParam.QUERY, query);
+
+		String methodPath = DeezerApiMethod.SEARCH_TRACK_QUERY.getValue();
+		String responseContent = makeApiRequest(methodPath, DeezerApiMethod.SEARCH_TRACK_QUERY.getMethodType(), requestParameters);
+
+		return convertJson(responseContent, Tracks.class, methodPath);
 	}
 
 

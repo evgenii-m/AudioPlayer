@@ -46,4 +46,14 @@ public interface DeezerApiService {
 	boolean deletePlaylist(long playlistId) throws DeezerApiErrorException, DeezerNeedAuthorizationException;
 
 	boolean renamePlaylist(PlaylistData playlistData) throws DeezerApiErrorException, DeezerNeedAuthorizationException;
+
+	boolean addTrackToPlaylist(long playlistId, long trackId) throws DeezerApiErrorException, DeezerNeedAuthorizationException;
+
+	boolean addTracksToPlaylist(long playlistId, List<Long> trackIds) throws DeezerApiErrorException, DeezerNeedAuthorizationException;
+
+	boolean removeTrackToPlaylist(long playlistId, long trackId) throws DeezerApiErrorException, DeezerNeedAuthorizationException;
+
+	boolean removeTracksToPlaylist(long playlistId, List<Long> trackIds) throws DeezerApiErrorException, DeezerNeedAuthorizationException;
+
+	List<AudioTrackData> searchTracksQuery(String query) throws DeezerApiErrorException, DeezerNeedAuthorizationException;
 }

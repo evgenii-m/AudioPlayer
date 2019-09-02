@@ -23,6 +23,7 @@ import ru.push.caudioplayer.core.facades.domain.PlaylistData;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.Callable;
@@ -111,7 +112,6 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 
 	@Override
 	public String getAccessToken(String code) {
-
 		String accessToken = applicationConfigService.getDeezerAccessToken();
 		if (accessToken != null) {
 			LOG.warn("Deezer access token already set in configuration, they will be overwritten: access token = {}", accessToken);
@@ -143,7 +143,6 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 	@Override
 	public List<PlaylistData> getPlaylists() throws DeezerNeedAuthorizationException {
 		checkAccessToken();
-
 		try {
 			// get user playlists
 			List<Playlist> playlists = new ArrayList<>();
@@ -199,37 +198,6 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 		return playlistData;
 	}
 
-	@Override
-	public List<AudioTrackData> getPlaylistTracks(long playlistId) throws DeezerNeedAuthorizationException {
-		checkAccessToken();
-
-		List<Track> tracks = getPlaylistAllTracks(playlistId);
-		return importExportConverter.toAudioTrackData(tracks);
-	}
-
-	@Override
-	public Long createPlaylist(String title) throws DeezerApiErrorException, DeezerNeedAuthorizationException {
-		checkAccessToken();
-
-		PlaylistId playlistId = deezerApiAdapter.createPlaylist(title, currentAccessToken);
-		return playlistId.getId();
-	}
-
-	@Override
-	public boolean deletePlaylist(long playlistId) throws DeezerApiErrorException, DeezerNeedAuthorizationException {
-		checkAccessToken();
-
-		return deezerApiAdapter.deletePlaylist(playlistId, currentAccessToken);
-	}
-
-	@Override
-	public boolean renamePlaylist(PlaylistData playlistData) throws DeezerApiErrorException, DeezerNeedAuthorizationException {
-		checkAccessToken();
-
-		long playlistId = Long.valueOf(playlistData.getUid());
-		return deezerApiAdapter.renamePlaylist(playlistId, playlistData.getName(), currentAccessToken);
-	}
-
 	private List<Track> getPlaylistAllTracks(long playlistId) {
 		List<Track> playlistTracks = new ArrayList<>();
 		Tracks tracksResponse;
@@ -247,6 +215,66 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 
 		LOG.info("Received deezer playlist tracks: playlist = {}, size = {}", playlistId, playlistTracks.size());
 		return playlistTracks;
+	}
+
+	@Override
+	public List<AudioTrackData> getPlaylistTracks(long playlistId) throws DeezerNeedAuthorizationException {
+		checkAccessToken();
+		List<Track> tracks = getPlaylistAllTracks(playlistId);
+		return importExportConverter.toAudioTrackData(tracks);
+	}
+
+	@Override
+	public Long createPlaylist(String title) throws DeezerApiErrorException, DeezerNeedAuthorizationException {
+		checkAccessToken();
+		PlaylistId playlistId = deezerApiAdapter.createPlaylist(title, currentAccessToken);
+		return playlistId.getId();
+	}
+
+	@Override
+	public boolean deletePlaylist(long playlistId) throws DeezerApiErrorException, DeezerNeedAuthorizationException {
+		checkAccessToken();
+		return deezerApiAdapter.deletePlaylist(playlistId, currentAccessToken);
+	}
+
+	@Override
+	public boolean renamePlaylist(PlaylistData playlistData) throws DeezerApiErrorException, DeezerNeedAuthorizationException {
+		checkAccessToken();
+		long playlistId = Long.valueOf(playlistData.getUid());
+		return deezerApiAdapter.renamePlaylist(playlistId, playlistData.getName(), currentAccessToken);
+	}
+
+	@Override
+	public boolean addTrackToPlaylist(long playlistId, long trackId) throws DeezerApiErrorException, DeezerNeedAuthorizationException {
+		return addTracksToPlaylist(playlistId, Collections.singletonList(trackId));
+	}
+
+	@Override
+	public boolean addTracksToPlaylist(long playlistId, List<Long> trackIds) throws DeezerApiErrorException, DeezerNeedAuthorizationException {
+		checkAccessToken();
+		return deezerApiAdapter.addTracksToPlaylist(playlistId, trackIds, currentAccessToken);
+	}
+
+	@Override
+	public boolean removeTrackToPlaylist(long playlistId, long trackId) throws DeezerApiErrorException, DeezerNeedAuthorizationException {
+		return removeTracksToPlaylist(playlistId, Collections.singletonList(trackId));
+	}
+
+	@Override
+	public boolean removeTracksToPlaylist(long playlistId, List<Long> trackIds) throws DeezerApiErrorException, DeezerNeedAuthorizationException {
+		checkAccessToken();
+		return deezerApiAdapter.removeTracksToPlaylist(playlistId, trackIds, currentAccessToken);
+	}
+
+	@Override
+	public List<AudioTrackData> searchTracksQuery(String query) throws DeezerApiErrorException, DeezerNeedAuthorizationException {
+		checkAccessToken();
+		Tracks tracks = deezerApiAdapter.searchTracksQuery(query, currentAccessToken);
+		if (tracks != null) {
+			return importExportConverter.toAudioTrackData(tracks.getData());
+		} else {
+			return new ArrayList<>();
+		}
 	}
 
 	private void checkAccessToken() throws DeezerNeedAuthorizationException {

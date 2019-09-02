@@ -4,7 +4,9 @@ public enum DeezerApiParam {
 	ACCESS_TOKEN("access_token"),
 	INDEX("index"),
 	LIMIT("limit"),
-	TITLE("title")
+	TITLE("title"),
+	SONGS("songs"),
+	QUERY("q")
 	;
 
 	String value;
