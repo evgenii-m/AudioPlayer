@@ -208,8 +208,9 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
   public void savePlaylist(PlaylistData playlistData) {
     Assert.notNull(playlistData);
 
-    if (PlaylistType.DEEZER.equals(playlistData.getPlaylistType())) {
-    	throw new IllegalStateException("Saving Deezer playlist to configuration not provided");
+    if (playlistData.isDeezer()) {
+    	LOG.error("Saving Deezer playlist to configuration not provided");
+    	return;
 		}
 
 		PlaylistConfig playlistConfig = importExportConverter.toPlaylistConfig(playlistData);
@@ -231,8 +232,9 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
   public void renamePlaylist(PlaylistData playlistData) {
     Assert.notNull(playlistData);
 
-		if (PlaylistType.DEEZER.equals(playlistData.getPlaylistType())) {
-			throw new IllegalStateException("Saving Deezer playlist to configuration not provided");
+		if (playlistData.isDeezer()) {
+			LOG.error("Saving Deezer playlist to configuration not provided");
+			return;
 		}
 
 		PlaylistConfig renamedPlaylist = playlistConfigMap.get(playlistData.getUid());
@@ -249,8 +251,9 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
   public void deletePlaylist(PlaylistData playlistData) {
     Assert.notNull(playlistData);
 
-		if (PlaylistType.DEEZER.equals(playlistData.getPlaylistType())) {
-			throw new IllegalStateException("Saving Deezer playlist to configuration not provided");
+		if (playlistData.isDeezer()) {
+			LOG.error("Saving Deezer playlist to configuration not provided");
+			return;
 		}
 
 		String playlistUid = playlistData.getUid();

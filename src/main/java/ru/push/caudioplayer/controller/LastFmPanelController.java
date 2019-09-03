@@ -117,6 +117,13 @@ public class LastFmPanelController {
 			});
 
 			MenuItem addToDeezerLovedTracksMenuItem = new MenuItem("Add to Deezer loved tracks");
+			addToDeezerLovedTracksMenuItem.setOnAction(event -> {
+				LastFmTrackData data = tableRow.getItem();
+				boolean result = musicLibraryLogicFacade.addLastFmTrackToDeezerLovedTracks(data);
+				if (!result) {
+					LOG.error("Failed to add track to Deezer favorites playlist: track = {}", data);
+				}
+			});
 
 			contextMenu.getItems().addAll(
 					addToDeezerPlaylistMenuItem, addToDeezerLovedTracksMenuItem

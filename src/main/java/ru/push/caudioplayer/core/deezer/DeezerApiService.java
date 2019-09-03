@@ -39,6 +39,8 @@ public interface DeezerApiService {
 	 */
 	List<PlaylistData> getPlaylists() throws DeezerNeedAuthorizationException;
 
+	Long getFavoritesPlaylistId();
+
 	List<AudioTrackData> getPlaylistTracks(long playlistId) throws DeezerNeedAuthorizationException;
 
 	Long createPlaylist(String title) throws DeezerApiErrorException, DeezerNeedAuthorizationException;
@@ -55,5 +57,9 @@ public interface DeezerApiService {
 
 	boolean removeTracksFromPlaylist(long playlistId, List<Long> trackIds) throws DeezerApiErrorException, DeezerNeedAuthorizationException;
 
-	List<AudioTrackData> searchTracksQuery(String query) throws DeezerApiErrorException, DeezerNeedAuthorizationException;
+	List<AudioTrackData> searchTracksQuery(String shortQuery, String extendedQuery) throws DeezerApiErrorException, DeezerNeedAuthorizationException;
+
+	boolean addTrackToFavorites(long trackId) throws DeezerApiErrorException, DeezerNeedAuthorizationException;
+
+	boolean removeTrackFromFavorites(long trackId) throws DeezerApiErrorException, DeezerNeedAuthorizationException;
 }

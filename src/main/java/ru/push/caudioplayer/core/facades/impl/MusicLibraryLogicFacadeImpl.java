@@ -188,13 +188,13 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 
 	@Override
 	public PlaylistData createNewPlaylist() {
-		if (PlaylistType.LOCAL.equals(getDisplayedPlaylist().getPlaylistType())) {
+		if (getDisplayedPlaylist().isLocal()) {
 			PlaylistData  newPlaylist = playlistComponent.createNewPlaylist(PlaylistType.LOCAL);
 			applicationConfigService.savePlaylist(newPlaylist);
 			eventListeners.forEach(listener -> listener.createdNewPlaylist(newPlaylist));
 			return newPlaylist;
 
-		} else if (PlaylistType.DEEZER.equals(getDisplayedPlaylist().getPlaylistType())) {
+		} else if (getDisplayedPlaylist().isDeezer()) {
 			 PlaylistData newPlaylist = playlistComponent.createNewPlaylist(PlaylistType.DEEZER);
 			try {
 				Long playlistUid = deezerApiService.createPlaylist(newPlaylist.getName());
@@ -210,12 +210,13 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 
 	@Override
 	public boolean deletePlaylist(String playlistUid) {
-		boolean deleteDisplayed = playlistComponent.getDisplayedPlaylist().getUid().equals(playlistUid);
+		PlaylistData requiredPlaylist = getPlaylist(playlistUid);
+
+		boolean deleteDisplayed = playlistComponent.getDisplayedPlaylist().equals(requiredPlaylist);
 		boolean deleteResult = playlistComponent.deletePlaylist(playlistUid);
 
 		if (deleteResult) {
-			PlaylistData requiredPlaylist = getPlaylist(playlistUid);
-			if (PlaylistType.LOCAL.equals(requiredPlaylist.getPlaylistType())) {
+			if (requiredPlaylist.isLocal()) {
 				if (playlistComponent.getLocalPlaylistsCount() == 0) {
 					PlaylistData newPlaylist = playlistComponent.createNewPlaylist(PlaylistType.LOCAL);
 					applicationConfigService.savePlaylist(newPlaylist);
@@ -225,9 +226,9 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 				eventListeners.forEach(listener -> listener.changedPlaylist(playlistComponent.getDisplayedPlaylist()));
 			}
 
-			if (PlaylistType.LOCAL.equals(requiredPlaylist.getPlaylistType())) {
+			if (requiredPlaylist.isLocal()) {
 				applicationConfigService.deletePlaylist(requiredPlaylist);
-			} else if (PlaylistType.DEEZER.equals(requiredPlaylist.getPlaylistType())) {
+			} else if (requiredPlaylist.isDeezer()) {
 				try {
 					deleteResult = deezerApiService.deletePlaylist(Long.valueOf(requiredPlaylist.getUid()));
 				} catch (DeezerNeedAuthorizationException | DeezerApiErrorException e) {
@@ -246,9 +247,9 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 			return false;
 		}
 
-		if (PlaylistType.LOCAL.equals(changedPlaylist.getPlaylistType())) {
+		if (changedPlaylist.isLocal()) {
 			applicationConfigService.renamePlaylist(changedPlaylist);
-		} else if (PlaylistType.DEEZER.equals(changedPlaylist.getPlaylistType())) {
+		} else if (changedPlaylist.isDeezer()) {
 			try {
 				deezerApiService.renamePlaylist(changedPlaylist);
 			} catch (DeezerNeedAuthorizationException | DeezerApiErrorException e) {
@@ -292,7 +293,7 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	@Override
 	public void addFilesToPlaylist(List<File> files) {
 		PlaylistData displayedPlaylist = playlistComponent.getDisplayedPlaylist();
-		if (PlaylistType.DEEZER.equals(displayedPlaylist.getPlaylistType())) {
+		if (displayedPlaylist.isDeezer()) {
 			LOG.warn("Unsupported operation for Deezer playlist");
 			return;
 		}
@@ -335,7 +336,7 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	@Override
 	public void addLocationsToPlaylist(List<String> locations) {
 		PlaylistData displayedPlaylist = playlistComponent.getDisplayedPlaylist();
-		if (PlaylistType.DEEZER.equals(displayedPlaylist.getPlaylistType())) {
+		if (displayedPlaylist.isDeezer()) {
 			LOG.warn("Unsupported operation for Deezer playlist");
 			return;
 		}
@@ -360,34 +361,25 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	@Override
 	public boolean addLastFmTrackToCurrentDeezerPlaylist(LastFmTrackData trackData) {
 		PlaylistData displayedPlaylist = playlistComponent.getDisplayedPlaylist();
-		if (!PlaylistType.DEEZER.equals(displayedPlaylist.getPlaylistType())) {
+		if (!displayedPlaylist.isDeezer()) {
 			LOG.error("Operation supported only Deezer platlists");
 			return false;
 		}
 
-		String shortQuery = trackData.getArtist() + " " + trackData.getTitle();
-		String extendedQuery = null;
-		if (trackData.getAlbum() != null) {
-			extendedQuery = shortQuery + " " + trackData.getAlbum();
-		}
-
 		try {
-			List<AudioTrackData> searchedTracksResult = null;
-			if (extendedQuery != null) {
-				searchedTracksResult = deezerApiService.searchTracksQuery(extendedQuery);
-			}
-			if (CollectionUtils.isEmpty(searchedTracksResult)) {
-				searchedTracksResult = deezerApiService.searchTracksQuery(shortQuery);
-			}
-
+			List<AudioTrackData> searchedTracksResult = deezerApiService.searchTracksQuery(
+					formShortQuery(trackData), formExtendedQuery(trackData));
 			LOG.info("Searched {} tracks: {}", searchedTracksResult.size(), searchedTracksResult);
+
 			if (!CollectionUtils.isEmpty(searchedTracksResult)) {
 				AudioTrackData searchedTrack = searchedTracksResult.get(0);
 				String trackId = searchedTrack.getTrackId();
 				boolean result = deezerApiService.addTrackToPlaylist(Long.valueOf(displayedPlaylist.getUid()), Long.valueOf(trackId));
 				if (result) {
-					playlistComponent.addAudioTrackToPlaylist(displayedPlaylist.getUid(), searchedTrack);
-					eventListeners.forEach(listener -> listener.changedPlaylist(displayedPlaylist));
+					PlaylistData changedPlaylist = playlistComponent.addAudioTrackToPlaylist(displayedPlaylist.getUid(), searchedTrack);
+					if (changedPlaylist != null) {
+						eventListeners.forEach(listener -> listener.changedPlaylist(changedPlaylist));
+					}
 				}
 				return result;
 			}
@@ -395,5 +387,47 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 			LOG.error("Add track to Deezer error: track data = {}, error = {}", trackData, e);
 		}
 		return false;
+	}
+
+	@Override
+	public boolean addLastFmTrackToDeezerLovedTracks(LastFmTrackData trackData) {
+		Long favoritesPlaylistId = deezerApiService.getFavoritesPlaylistId();
+		if (favoritesPlaylistId == null) {
+			LOG.error("Deezer favorites playlist not defined.");
+			return false;
+		}
+		String favoritesPlaylistUid = String.valueOf(favoritesPlaylistId);
+
+		try {
+			List<AudioTrackData> searchedTracksResult = deezerApiService.searchTracksQuery(
+					formShortQuery(trackData), formExtendedQuery(trackData));
+			LOG.info("Searched {} tracks: {}", searchedTracksResult.size(), searchedTracksResult);
+
+			if (!CollectionUtils.isEmpty(searchedTracksResult)) {
+				AudioTrackData searchedTrack = searchedTracksResult.get(0);
+				String trackId = searchedTrack.getTrackId();
+				boolean result = deezerApiService.addTrackToFavorites(Long.valueOf(trackId));
+				if (result) {
+					PlaylistData changedPlaylist = playlistComponent.addAudioTrackToPlaylist(
+							favoritesPlaylistUid, searchedTrack);
+					String displayedPlaylistUid = playlistComponent.getDisplayedPlaylist().getUid();
+					if ((changedPlaylist != null) && displayedPlaylistUid.equals(favoritesPlaylistUid)) {
+						eventListeners.forEach(listener -> listener.changedPlaylist(changedPlaylist));
+					}
+				}
+				return result;
+			}
+		} catch (DeezerNeedAuthorizationException | DeezerApiErrorException e) {
+			LOG.error("Add track to Deezer error: track data = {}, error = {}", trackData, e);
+		}
+		return false;
+	}
+
+	private String formShortQuery(LastFmTrackData trackData) {
+		return trackData.getArtist() + " " + trackData.getTitle();
+	}
+
+	private String formExtendedQuery(LastFmTrackData trackData) {
+		return trackData.getArtist() + " " + trackData.getTitle() + " " + trackData.getAlbum();
 	}
 }

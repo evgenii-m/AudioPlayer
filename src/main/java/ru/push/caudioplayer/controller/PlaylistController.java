@@ -171,16 +171,17 @@ public class PlaylistController {
       // prepare context menu
       ContextMenu contextMenu = new ContextMenu();
 
-      MenuItem removeMenuItem = new MenuItem("Delete");
-      removeMenuItem.setOnAction(event -> removePlaylistAction(event, cell));
+			MenuItem removeMenuItem = new MenuItem("Delete");
+			removeMenuItem.setOnAction(event -> removePlaylistAction(event, cell));
 
-      MenuItem renameMenuItem = new MenuItem("Rename");
-      renameMenuItem.setOnAction(event -> renamePlaylistAction(event, cell));
+			MenuItem renameMenuItem = new MenuItem("Rename");
+			renameMenuItem.setOnAction(event -> renamePlaylistAction(event, cell));
 
-      MenuItem exportMenuItem = new MenuItem("Export");
-      exportMenuItem.setOnAction(event -> exportPlaylistAction(event, cell));
 
-      contextMenu.getItems().addAll(removeMenuItem, renameMenuItem, exportMenuItem);
+			MenuItem exportMenuItem = new MenuItem("Export");
+			exportMenuItem.setOnAction(event -> exportPlaylistAction(event, cell));
+
+			contextMenu.getItems().addAll(removeMenuItem, renameMenuItem, exportMenuItem);
 
       cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
         if (isNowEmpty) {
@@ -207,18 +208,26 @@ public class PlaylistController {
   private void renamePlaylistAction(ActionEvent event, ListCell<PlaylistData> cell) {
     assert renamePopupView.getController() instanceof RenamePopupController;
 
+		PlaylistData itemPlaylist = cell.getItem();
+		if (!itemPlaylist.getEditable()) {
+			LOG.warn("Not editable playlist rename blocked");
+			return;
+		}
+
 		Stage popupStage = createPopup("Rename", renamePopupScene);
-		((RenamePopupController) renamePopupView.getController()).setRenamedPlaylist(cell.getItem());
+		((RenamePopupController) renamePopupView.getController()).setRenamedPlaylist(itemPlaylist);
     popupStage.show();
   }
 
   private void removePlaylistAction(ActionEvent event, ListCell<PlaylistData> cell) {
-		Stage popupStage = createPopup("Confirm action", confirmActionPopupScene);
 		PlaylistData deletedPlaylist = cell.getItem();
-		if (deletedPlaylist == null) {
-			LOG.error("Empty playlist data from item.");
+
+		if (!deletedPlaylist.getEditable()) {
+			LOG.warn("Not editable playlist rename blocked");
 			return;
 		}
+
+		Stage popupStage = createPopup("Confirm action", confirmActionPopupScene);
 
 		Supplier<PlaylistData> actionSupplier = () -> {
 			if (musicLibraryLogicFacade.deletePlaylist(deletedPlaylist.getUid())) {

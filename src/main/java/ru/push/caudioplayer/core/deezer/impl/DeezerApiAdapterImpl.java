@@ -229,8 +229,8 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 		Map<DeezerApiParam, String> requestParameters = new HashMap<>();
 		putBaseRequestParameters(requestParameters, accessToken, index, limit);
 
-		String methodPath = DeezerApiMethod.USER_ME_PLAYLISTS.getValue();
-		String responseContent = makeApiRequest(methodPath, DeezerApiMethod.USER_ME_PLAYLISTS.getMethodType(), requestParameters);
+		String methodPath = DeezerApiMethod.USER_PLAYLISTS.getValue();
+		String responseContent = makeApiRequest(methodPath, DeezerApiMethod.USER_PLAYLISTS.getMethodType(), requestParameters);
 
 		return convertJson(responseContent, Playlists.class, methodPath);
 	}
@@ -263,8 +263,8 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 		putBaseRequestParameters(requestParameters, accessToken, null, null);
 		requestParameters.put(DeezerApiParam.TITLE, title);
 
-		String methodPath = DeezerApiMethod.CREATE_USER_PLAYLIST.getValue();
-		String responseContent = makeApiRequest(methodPath, DeezerApiMethod.CREATE_USER_PLAYLIST.getMethodType(), requestParameters);
+		String methodPath = DeezerApiMethod.USER_PLAYLIST_CREATE.getValue();
+		String responseContent = makeApiRequest(methodPath, DeezerApiMethod.USER_PLAYLIST_CREATE.getMethodType(), requestParameters);
 
 		return convertJson(responseContent, PlaylistId.class, methodPath);
 	}
@@ -330,5 +330,28 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 		return convertJson(responseContent, Tracks.class, methodPath);
 	}
 
+	@Override
+	public boolean addTrackToFavorites(long trackId, String accessToken) throws DeezerApiErrorException {
+		Map<DeezerApiParam, String> requestParameters = new HashMap<>();
+		putBaseRequestParameters(requestParameters, accessToken, null, null);
+		requestParameters.put(DeezerApiParam.TRACK_ID, String.valueOf(trackId));
+
+		String methodPath = DeezerApiMethod.USER_FAVORITES_ADD_TRACK.getValue();
+		String responseContent = makeApiRequest(methodPath, DeezerApiMethod.USER_FAVORITES_ADD_TRACK.getMethodType(), requestParameters);
+
+		return Boolean.valueOf(responseContent);
+	}
+
+	@Override
+	public boolean removeTrackFromFavorites(long trackId, String accessToken) throws DeezerApiErrorException {
+		Map<DeezerApiParam, String> requestParameters = new HashMap<>();
+		putBaseRequestParameters(requestParameters, accessToken, null, null);
+		requestParameters.put(DeezerApiParam.TRACK_ID, String.valueOf(trackId));
+
+		String methodPath = DeezerApiMethod.USER_FAVORITES_REMOVE_TRACK.getValue();
+		String responseContent = makeApiRequest(methodPath, DeezerApiMethod.USER_FAVORITES_REMOVE_TRACK.getMethodType(), requestParameters);
+
+		return Boolean.valueOf(responseContent);
+	}
 
 }

@@ -120,6 +120,7 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
       LOG.info("Playlist with name '" + playlistUid + "' not found, rename failed.");
       return null;
     }
+
     // TODO: add validation for playlist name
     playlistData.setName(newPlaylistName);
     return playlistData;
@@ -266,6 +267,11 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
   @Override
   public PlaylistData addFilesToPlaylist(String playlistUid, List<File> files) {
     PlaylistData playlist = getPlaylist(playlistUid);
+		if (playlist == null) {
+			LOG.info("Playlist with name '" + playlistUid + "' not found, add track failed.");
+			return null;
+		}
+
     List<String> mediaPaths = files.stream()
         .map(File::getAbsolutePath)
         .collect(Collectors.toList());
@@ -277,6 +283,11 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
   @Override
   public PlaylistData deleteItemsFromPlaylist(String playlistUid, List<Integer> itemsIndexes) {
     PlaylistData playlist = getPlaylist(playlistUid);
+		if (playlist == null) {
+			LOG.info("Playlist with name '" + playlistUid + "' not found, delete playlist failed.");
+			return null;
+		}
+
     itemsIndexes.stream()
         .filter(itemIndex -> (itemIndex >= 0) && (itemIndex < playlist.getTracks().size()))
         .forEach(itemIndex -> playlist.getTracks().remove(itemIndex.intValue()));
@@ -286,6 +297,11 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
   @Override
   public PlaylistData addLocationsToPlaylist(String playlistUid, List<String> locations) {
     PlaylistData playlist = getPlaylist(playlistUid);
+		if (playlist == null) {
+			LOG.info("Playlist with name '" + playlistUid + "' not found, add track failed.");
+			return null;
+		}
+
     List<String> mediaPaths = locations.stream()
         .map(location -> {
           URL locationUrl = null;
@@ -306,6 +322,11 @@ public class DefaultCustomPlaylistComponent implements CustomPlaylistComponent {
 	@Override
 	public PlaylistData addAudioTrackToPlaylist(String playlistUid, AudioTrackData trackData) {
 		PlaylistData playlist = getPlaylist(playlistUid);
+		if (playlist == null) {
+			LOG.info("Playlist with name '" + playlistUid + "' not found, add track failed.");
+			return null;
+		}
+
 		playlist.getTracks().add(trackData);
   	return playlist;
 	}

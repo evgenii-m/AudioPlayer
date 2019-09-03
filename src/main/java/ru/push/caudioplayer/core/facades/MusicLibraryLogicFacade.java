@@ -69,4 +69,6 @@ public interface MusicLibraryLogicFacade {
 	List<PlaylistData> getDeezerPlaylists() throws DeezerNeedAuthorizationException;
 
 	boolean addLastFmTrackToCurrentDeezerPlaylist(LastFmTrackData trackData);
+
+	boolean addLastFmTrackToDeezerLovedTracks(LastFmTrackData trackData);
 }

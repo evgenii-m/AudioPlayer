@@ -34,4 +34,7 @@ public interface DeezerApiAdapter {
 
 	Tracks searchTracksQuery(String query, String accessToken) throws DeezerApiErrorException;
 
+	boolean addTrackToFavorites(long trackId, String accessToken) throws DeezerApiErrorException;
+
+	boolean removeTrackFromFavorites(long trackId, String accessToken) throws DeezerApiErrorException;
 }

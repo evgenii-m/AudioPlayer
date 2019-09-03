@@ -44,9 +44,6 @@ public class ImportExportConverterImpl implements ImportExportConverter {
 
 	@Override
 	public PlaylistData toPlaylistData(PlaylistConfig playlistConfig) {
-		if (PlaylistType.DEEZER.equals(playlistConfig.getPlaylistType())) {
-			throw new IllegalStateException("Operation not supported for Deezer playlists");
-		}
 		List<AudioTrackData> tracksData = (playlistConfig.getTracks() != null) ?
 				playlistConfig.getTracks().stream()
 						.map(p -> mediaInfoDataLoaderService.load(p.getTrackPath(), MediaSourceType.valueOf(p.getSourceType().value())))
@@ -56,7 +53,7 @@ public class ImportExportConverterImpl implements ImportExportConverter {
 		return new PlaylistData(
 				playlistConfig.getUid(), playlistConfig.getName(),
 				ru.push.caudioplayer.core.facades.domain.PlaylistType.fromValue(playlistConfig.getPlaylistType().value()),
-				playlistConfig.getLink(), tracksData
+				playlistConfig.getLink(), tracksData, true
 		);
 	}
 
@@ -83,10 +80,6 @@ public class ImportExportConverterImpl implements ImportExportConverter {
 
 	@Override
 	public PlaylistData toPlaylistDataFromExportData(PlaylistExportData exportData) {
-		if (PlaylistType.DEEZER.equals(exportData.getPlaylistType())) {
-			throw new IllegalStateException("Operation not supported for Deezer playlists");
-		}
-
 		return new PlaylistData(
 				exportData.getName(),
 				ru.push.caudioplayer.core.facades.domain.PlaylistType.fromValue(exportData.getPlaylistType().value()),
@@ -101,7 +94,7 @@ public class ImportExportConverterImpl implements ImportExportConverter {
 																									 List<ru.push.caudioplayer.core.deezer.domain.Track> tracks) {
 		return new PlaylistData(String.valueOf(playlist.getId()), playlist.getTitle(),
 				ru.push.caudioplayer.core.facades.domain.PlaylistType.DEEZER, playlist.getLink(),
-				toAudioTrackData(tracks)
+				toAudioTrackData(tracks), !playlist.getIs_loved_track()
 		);
 	}
 

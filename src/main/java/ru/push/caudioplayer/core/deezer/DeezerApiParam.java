@@ -6,7 +6,8 @@ public enum DeezerApiParam {
 	LIMIT("limit"),
 	TITLE("title"),
 	SONGS("songs"),
-	QUERY("q")
+	QUERY("q"),
+	TRACK_ID("track_id")
 	;
 
 	String value;

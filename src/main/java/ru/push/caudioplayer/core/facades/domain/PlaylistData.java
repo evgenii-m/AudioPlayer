@@ -18,6 +18,7 @@ public class PlaylistData {
   private String name;
   private final PlaylistType playlistType;
   private String link;
+  private boolean editable;
   private List<AudioTrackData> tracks = new ArrayList<>();
 
   public static String getNewPlaylistName() {
@@ -38,14 +39,17 @@ public class PlaylistData {
   	this.name = name;
 		this.playlistType = playlistType;
 		this.tracks = tracks;
+		this.editable = true;
 	}
 
-  public PlaylistData(String uid, String name, PlaylistType playlistType, String link, List<AudioTrackData> tracks) {
+  public PlaylistData(String uid, String name, PlaylistType playlistType, String link,
+											List<AudioTrackData> tracks, boolean editable) {
     this.uid = uid;
     this.name = name;
     this.playlistType = playlistType;
     this.link = link;
     this.tracks = tracks;
+    this.editable = editable;
   }
 
   public String getUid() {
@@ -84,7 +88,15 @@ public class PlaylistData {
     this.tracks = tracks;
   }
 
-  public String getExportFileName() {
+	public boolean getEditable() {
+		return editable;
+	}
+
+	public void setEditable(boolean editable) {
+		this.editable = editable;
+	}
+
+	public String getExportFileName() {
 		String validName = this.name.replaceAll("[^a-zA-Zа-яА-Я0-9\\.\\-]", "_");
   	return this.uid + " " + validName + ".xml";
 	}
@@ -108,7 +120,18 @@ public class PlaylistData {
 
 	@Override
 	public int hashCode() {
-
 		return Objects.hash(uid, name);
+	}
+
+	@Override
+	public String toString() {
+		return "PlaylistData{" +
+				"uid='" + uid + '\'' +
+				", name='" + name + '\'' +
+				", playlistType=" + playlistType +
+				", link='" + link + '\'' +
+				", editable='" + editable + '\'' +
+				", tracks=" + tracks +
+				'}';
 	}
 }
