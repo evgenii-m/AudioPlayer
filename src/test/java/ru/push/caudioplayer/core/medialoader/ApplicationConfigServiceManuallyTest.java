@@ -1,6 +1,5 @@
-package ru.push.caudioplayer.core.services;
+package ru.push.caudioplayer.core.medialoader;
 
-import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import ru.push.caudioplayer.core.config.ApplicationConfigService;

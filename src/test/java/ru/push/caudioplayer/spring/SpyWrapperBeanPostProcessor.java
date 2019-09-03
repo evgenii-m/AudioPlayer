@@ -10,7 +10,7 @@ import ru.push.caudioplayer.core.facades.impl.DefaultAudioPlayerFacade;
 import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
 import ru.push.caudioplayer.core.mediaplayer.components.impl.DefaultCustomAudioPlayerComponent;
 import ru.push.caudioplayer.core.mediaplayer.components.impl.DefaultCustomPlaylistComponent;
-import ru.push.caudioplayer.core.services.impl.DefaultMediaInfoDataLoaderService;
+import ru.push.caudioplayer.core.medialoader.impl.DefaultMediaInfoDataLoaderService;
 import ru.push.caudioplayer.core.config.impl.CommonsApplicationConfigService;
 
 import java.util.Arrays;

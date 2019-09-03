@@ -1,4 +1,4 @@
-package ru.push.caudioplayer.core.services;
+package ru.push.caudioplayer.core.medialoader;
 
 import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
 import ru.push.caudioplayer.core.mediaplayer.domain.MediaSourceType;

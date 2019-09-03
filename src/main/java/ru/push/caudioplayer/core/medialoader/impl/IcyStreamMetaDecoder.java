@@ -1,4 +1,4 @@
-package ru.push.caudioplayer.core.services.impl;
+package ru.push.caudioplayer.core.medialoader.impl;
 
 import org.apache.commons.lang3.StringUtils;
 

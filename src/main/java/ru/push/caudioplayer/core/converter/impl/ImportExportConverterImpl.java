@@ -15,7 +15,7 @@ import ru.push.caudioplayer.core.deezer.domain.Playlist;
 import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
 import ru.push.caudioplayer.core.facades.domain.PlaylistData;
 import ru.push.caudioplayer.core.mediaplayer.domain.MediaSourceType;
-import ru.push.caudioplayer.core.services.MediaInfoDataLoaderService;
+import ru.push.caudioplayer.core.medialoader.MediaInfoDataLoaderService;
 
 import java.util.ArrayList;
 import java.util.List;
