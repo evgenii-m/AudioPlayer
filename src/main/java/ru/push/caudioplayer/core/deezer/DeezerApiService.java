@@ -1,7 +1,7 @@
 package ru.push.caudioplayer.core.deezer;
 
-import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
-import ru.push.caudioplayer.core.facades.domain.PlaylistData;
+import ru.push.caudioplayer.core.deezer.domain.Playlist;
+import ru.push.caudioplayer.core.deezer.domain.Track;
 
 import java.util.List;
 
@@ -18,7 +18,7 @@ public interface DeezerApiService {
 	 * @return authorization code if detected
 	 * @throws DeezerNeedAuthorizationException when error reason obtained
 	 */
-	String checkAuthorizationCode(String locationUri) throws DeezerNeedAuthorizationException;
+	String checkAuthorizationCode(String locationUri) throws DeezerApiErrorException;
 
 	/**
 	 * Get access token by received authorization code
@@ -31,35 +31,33 @@ public interface DeezerApiService {
 	 * Get track object
 	 * See https://developers.deezer.com/api/track
 	 */
-	void getTrack(long trackId) throws DeezerNeedAuthorizationException;
+	void getTrack(long trackId) throws DeezerApiErrorException;
 
 	/**
 	 * Get current user favorite playlists
 	 * See https://developers.deezer.com/api/user/playlists
 	 */
-	List<PlaylistData> getPlaylists() throws DeezerNeedAuthorizationException;
+	List<Playlist> getPlaylists() throws DeezerApiErrorException;
 
-	Long getFavoritesPlaylistId();
+	List<Track> getPlaylistTracks(long playlistId) throws DeezerApiErrorException;
 
-	List<AudioTrackData> getPlaylistTracks(long playlistId) throws DeezerNeedAuthorizationException;
+	Long createPlaylist(String title) throws DeezerApiErrorException;
 
-	Long createPlaylist(String title) throws DeezerApiErrorException, DeezerNeedAuthorizationException;
+	boolean deletePlaylist(long playlistId) throws DeezerApiErrorException;
 
-	boolean deletePlaylist(long playlistId) throws DeezerApiErrorException, DeezerNeedAuthorizationException;
+	boolean renamePlaylist(long playlistId, String newTitle) throws DeezerApiErrorException;
 
-	boolean renamePlaylist(PlaylistData playlistData) throws DeezerApiErrorException, DeezerNeedAuthorizationException;
+	boolean addTrackToPlaylist(long playlistId, long trackId) throws DeezerApiErrorException;
 
-	boolean addTrackToPlaylist(long playlistId, long trackId) throws DeezerApiErrorException, DeezerNeedAuthorizationException;
+	boolean addTracksToPlaylist(long playlistId, List<Long> trackIds) throws DeezerApiErrorException;
 
-	boolean addTracksToPlaylist(long playlistId, List<Long> trackIds) throws DeezerApiErrorException, DeezerNeedAuthorizationException;
+	boolean removeTrackFromPlaylist(long playlistId, long trackId) throws DeezerApiErrorException;
 
-	boolean removeTrackFromPlaylist(long playlistId, long trackId) throws DeezerApiErrorException, DeezerNeedAuthorizationException;
+	boolean removeTracksFromPlaylist(long playlistId, List<Long> trackIds) throws DeezerApiErrorException;
 
-	boolean removeTracksFromPlaylist(long playlistId, List<Long> trackIds) throws DeezerApiErrorException, DeezerNeedAuthorizationException;
+	List<Track> searchTracksQuery(String shortQuery, String extendedQuery) throws DeezerApiErrorException;
 
-	List<AudioTrackData> searchTracksQuery(String shortQuery, String extendedQuery) throws DeezerApiErrorException, DeezerNeedAuthorizationException;
+	boolean addTrackToFavorites(long trackId) throws DeezerApiErrorException;
 
-	boolean addTrackToFavorites(long trackId) throws DeezerApiErrorException, DeezerNeedAuthorizationException;
-
-	boolean removeTrackFromFavorites(long trackId) throws DeezerApiErrorException, DeezerNeedAuthorizationException;
+	boolean removeTrackFromFavorites(long trackId) throws DeezerApiErrorException;
 }

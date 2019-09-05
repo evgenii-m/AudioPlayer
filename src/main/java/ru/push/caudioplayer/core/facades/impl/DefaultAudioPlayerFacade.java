@@ -6,11 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
-import ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponent;
 import ru.push.caudioplayer.core.medialoader.MediaInfoDataLoaderService;
 import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
 import ru.push.caudioplayer.core.mediaplayer.domain.MediaSourceType;
-import ru.push.caudioplayer.core.config.ApplicationConfigService;
+import ru.push.caudioplayer.core.playlist.PlaylistService;
+import ru.push.caudioplayer.core.playlist.domain.Playlist;
+import ru.push.caudioplayer.core.playlist.domain.PlaylistItem;
 import uk.co.caprica.vlcj.player.MediaMeta;
 import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
@@ -34,17 +35,11 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   @Autowired
   private CustomAudioPlayerComponent playerComponent;
   @Autowired
-  private CustomPlaylistComponent playlistComponent;
-  @Autowired
-  private ApplicationConfigService applicationConfigService;
+	private PlaylistService playlistService;
   @Autowired
   private MediaInfoDataLoaderService mediaInfoDataLoaderService;
 
-  private AudioTrackData currentTrackInfoData;
-
-
   public DefaultAudioPlayerFacade() {
-    currentTrackInfoData = new AudioTrackData();
     eventListeners = new ArrayList<>();
   }
 
@@ -66,51 +61,48 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   }
 
   @Override
-  public void playTrack(String playlistUid, int trackPosition) {
-    AudioTrackData trackInfo = playlistComponent.playTrack(playlistUid, trackPosition);
-    playTrack(trackInfo);
+  public void playTrack(String playlistUid, int trackIndex) {
+		PlaylistItem playlistTrack = playlistService.setActivePlaylistTrack(playlistUid, trackIndex);
+    playTrack(playlistTrack);
   }
 
   @Override
   public void playCurrentTrack() {
-    AudioTrackData trackInfo = playlistComponent.playCurrentTrack();
-    playTrack(trackInfo);
+		PlaylistItem playlistTrack = playlistService.getActivePlaylistTrack();
+		playTrack(playlistTrack);
   }
 
   @Override
   public void playNextTrack() {
-    AudioTrackData trackInfo = playlistComponent.playNextTrack();
-    playTrack(trackInfo);
+		PlaylistItem playlistTrack = playlistService.nextActivePlaylistTrack();
+		playTrack(playlistTrack);
   }
 
   @Override
   public void playPrevTrack() {
-    AudioTrackData trackInfo = playlistComponent.playPrevTrack();
-    playTrack(trackInfo);
+		PlaylistItem playlistTrack = playlistService.prevActivePlaylistTrack();
+		playTrack(playlistTrack);
   }
 
-  private void playTrack(AudioTrackData trackInfo) {
-    String resourceUri = MediaSourceType.FILE.equals(trackInfo.getSourceType()) ?
-        Paths.get(trackInfo.getTrackPath()).toString() : trackInfo.getTrackPath();
+  private void playTrack(PlaylistItem playlistTrack) {
+    String resourceUri = MediaSourceType.FILE.equals(playlistTrack.getSourceType()) ?
+        Paths.get(playlistTrack.getTrackPath()).toString() : playlistTrack.getTrackPath();
     playerComponent.playMedia(resourceUri);
-    currentTrackInfoData = trackInfo;
-    eventListeners.forEach(listener ->
-        listener.changedTrackPosition(playlistComponent.getActivePlaylist(),
-            playlistComponent.getActiveTrackPosition())
-    );
+    eventListeners.forEach(listener ->{
+			Playlist playlist = playlistTrack.getPlaylist();
+			listener.changedTrackPosition(playlist, playlist.getItems().indexOf(playlistTrack));
+    });
   }
 
   @Override
-  public AudioTrackData getCurrentTrackInfo() {
-    return currentTrackInfoData;
+  public PlaylistItem getActivePlaylistTrack() {
+    return playlistService.getActivePlaylistTrack();
   }
 
 	@Override
   public void stopApplication() {
     playerComponent.releaseComponent();
-    playlistComponent.releaseComponent();
   }
-
 
   private class AudioPlayerFacadeEventListener extends MediaPlayerEventAdapter {
 
@@ -118,19 +110,18 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
     public void mediaMetaChanged(MediaPlayer mediaPlayer, int metaType) {
       if (mediaPlayer.isPlaying()) {  // media changes actual only when playing media
         LOG.debug("mediaMetaChanged");
-        MediaMeta mediaMeta = mediaPlayer.getMediaMeta();
-        if (mediaMeta != null) {
-          MediaSourceType sourceType = (currentTrackInfoData.getSourceType() != null) ?
-              currentTrackInfoData.getSourceType() : MediaSourceType.FILE;
-          mediaInfoDataLoaderService.fillMediaInfoFromMediaMeta(currentTrackInfoData, mediaMeta, sourceType);
-          mediaMeta.release();
-        } else {
-          LOG.error("Media info is null!");
-        }
-
-        int currentTrackPosition = playlistComponent.getActiveTrackPosition();
-        eventListeners.forEach(listener ->
-            listener.refreshTrackMediaInfo(currentTrackPosition, currentTrackInfoData));
+				PlaylistItem playlistTrack = playlistService.getActivePlaylistTrack();
+				if (playlistTrack != null) {
+					MediaMeta mediaMeta = mediaPlayer.getMediaMeta();
+					if (mediaMeta != null) {
+						MediaSourceType sourceType = (playlistTrack.getSourceType() != null) ?
+								playlistTrack.getSourceType() : MediaSourceType.FILE;
+						mediaInfoDataLoaderService.fillMediaInfoFromMediaMeta(playlistTrack, mediaMeta, sourceType);
+						mediaMeta.release();
+					} else {
+						LOG.error("Media info is null!");
+					}
+				}
       }
     }
   }

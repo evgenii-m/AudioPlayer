@@ -251,21 +251,21 @@ public class BussinesLogicFacadesIntegrationTest extends AbstractTestNGSpringCon
     // for this test, the tracks in playlist must be different and size of each playlist must be at least 2!
     assertTrue((activePlaylist.getTracks().size() >= 2), "Playlist size must be at least 2!");
     assertTrue((displayedPlaylist.getTracks().size() >= 2), "Playlist size must be at least 2!");
-    AudioTrackData currentTrackInfo = audioPlayerFacade.getCurrentTrackInfo();
+    AudioTrackData currentTrackInfo = audioPlayerFacade.getActivePlaylistTrack();
     assertNotNull(currentTrackInfo, "Facade must provide the current track info even before play media.");
 
     audioPlayerFacade.playCurrentTrack();
-    currentTrackInfo = audioPlayerFacade.getCurrentTrackInfo();
+    currentTrackInfo = audioPlayerFacade.getActivePlaylistTrack();
     verify(playerComponent).playMedia(currentTrackInfo.getTrackPath());
 
-    AudioTrackData prevTrackInfo = audioPlayerFacade.getCurrentTrackInfo();
+    AudioTrackData prevTrackInfo = audioPlayerFacade.getActivePlaylistTrack();
     audioPlayerFacade.playNextTrack();
-    currentTrackInfo = audioPlayerFacade.getCurrentTrackInfo();
+    currentTrackInfo = audioPlayerFacade.getActivePlaylistTrack();
     assertNotEquals(prevTrackInfo, currentTrackInfo, "Media info data must be changed!");
     verify(playerComponent).playMedia(currentTrackInfo.getTrackPath());
 
     audioPlayerFacade.playPrevTrack();
-    currentTrackInfo = audioPlayerFacade.getCurrentTrackInfo();
+    currentTrackInfo = audioPlayerFacade.getActivePlaylistTrack();
     assertEquals(currentTrackInfo, prevTrackInfo, "Media info data must be changed back to previous!");
     verify(playerComponent, times(2)).playMedia(currentTrackInfo.getTrackPath());
 
@@ -273,11 +273,11 @@ public class BussinesLogicFacadesIntegrationTest extends AbstractTestNGSpringCon
     verify(eventListener, times(3)).changedTrackPosition(eq(activePlaylist), anyInt());
 
     audioPlayerFacade.playTrack(displayedPlaylist.getUid(), 0);
-    currentTrackInfo = audioPlayerFacade.getCurrentTrackInfo();
+    currentTrackInfo = audioPlayerFacade.getActivePlaylistTrack();
     verify(playerComponent).playMedia(currentTrackInfo.getTrackPath());
 
     audioPlayerFacade.playNextTrack();
-    final AudioTrackData trackInfo = audioPlayerFacade.getCurrentTrackInfo();
+    final AudioTrackData trackInfo = audioPlayerFacade.getActivePlaylistTrack();
     boolean trackInDisplayedPlaylist = displayedPlaylist.getTracks().stream()
         .anyMatch(track -> track.equals(trackInfo));
     assertTrue(trackInDisplayedPlaylist,

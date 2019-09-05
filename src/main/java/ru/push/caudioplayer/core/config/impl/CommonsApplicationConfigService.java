@@ -3,9 +3,7 @@ package ru.push.caudioplayer.core.config.impl;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
-import ru.push.caudioplayer.core.converter.ImportExportConverter;
 import ru.push.caudioplayer.core.config.domain.Configuration;
 import ru.push.caudioplayer.core.config.domain.DeezerSessionData;
 import ru.push.caudioplayer.core.config.domain.LastfmSessionData;
@@ -16,7 +14,6 @@ import ru.push.caudioplayer.core.config.domain.view.Column;
 import ru.push.caudioplayer.core.config.domain.view.Columns;
 import ru.push.caudioplayer.core.config.domain.view.PlaylistContainer;
 import ru.push.caudioplayer.core.config.domain.view.View;
-import ru.push.caudioplayer.core.facades.domain.PlaylistType;
 import ru.push.caudioplayer.core.lastfm.LastFmSessionData;
 import ru.push.caudioplayer.core.facades.domain.PlaylistData;
 import ru.push.caudioplayer.core.config.ApplicationConfigService;
@@ -28,15 +25,12 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 /**
@@ -48,12 +42,6 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
   private static final Logger LOG = LoggerFactory.getLogger(CommonsApplicationConfigService.class);
 
   private static final String DEFAULT_CONFIG_FILE_NAME = "mediaplayer-app-configuration.xml";
-  private static final String DEFAULT_PLAYLISTS_FOLDER_PATH = "playlists/";
-  private static final String DEFAULT_PLAYLIST_FILE_EXT = ".xml";
-  private static final String UNTITLED_PLAYLIST_NAME = "Untitled";
-
-  @Autowired
-	private ImportExportConverter importExportConverter;
 
   private Configuration config;
   private Map<String, PlaylistConfig> playlistConfigMap;
@@ -110,31 +98,6 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
 
   private void loadPlaylists() throws IOException {
 
-		Path playlistsFolderPath = Paths.get(DEFAULT_PLAYLISTS_FOLDER_PATH);
-		if (Files.notExists(playlistsFolderPath) || !Files.isDirectory(playlistsFolderPath)) {
-			Files.createDirectories(playlistsFolderPath);
-		}
-		playlistConfigMap = new HashMap<>();
-
-		List<String> playlistsUid = config.getPlaylists().getPlaylists().stream()
-				.map(PlaylistItem::getPlaylistUid)
-				.collect(Collectors.toList());
-		try (Stream<Path> paths = Files.walk(Paths.get(DEFAULT_PLAYLISTS_FOLDER_PATH))) {
-			paths
-					.filter(Files::isRegularFile)
-					.forEach(p -> {
-						LOG.debug("Playlist folder file detected: {}", p);
-						try {
-							String playlistConfigContent = new String(Files.readAllBytes(p));
-							PlaylistConfig playlistConfig = XmlUtils.unmarshalDocumnet(playlistConfigContent, PlaylistConfig.class.getPackage().getName());
-							if (playlistsUid.contains(playlistConfig.getUid())) {
-								playlistConfigMap.put(playlistConfig.getUid(), playlistConfig);
-							}
-						} catch (JAXBException | IOException e) {
-							LOG.error("Playlist loading error: file path = {}, error = {}", p, e);
-						}
-					});
-		}
 	}
 
   private void saveConfiguration() {
@@ -148,22 +111,6 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
 		}
 	}
 
-	private void savePlaylistConfig(PlaylistConfig playlistConfig) {
-		try (BufferedWriter bufferedWriter = Files.newBufferedWriter(
-				constructPlaylistPath(playlistConfig.getUid()), StandardCharsets.UTF_8))
-		{
-			XmlUtils.marshalDocument(playlistConfig, bufferedWriter, PlaylistConfig.class.getPackage().getName());
-			LOG.debug("save playlist {}", playlistConfig.getUid());
-		} catch (JAXBException | IOException e) {
-			LOG.error("Error when save playlist configuration to file.", e);
-		}
-	}
-
-	private Path constructPlaylistPath(String playlistUid) {
-		return Paths.get(DEFAULT_PLAYLISTS_FOLDER_PATH + playlistUid + DEFAULT_PLAYLIST_FILE_EXT);
-	}
-
-
   @Override
   public String getActivePlaylistUid() {
     return config.getPlaylists().getActiveUid();
@@ -174,21 +121,13 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
     return config.getPlaylists().getDisplayedUid();
   }
 
-  @Override
-  public List<PlaylistData> getPlaylists() {
-  	return config.getPlaylists().getPlaylists().stream()
+	@Override
+	public List<String> getLocalPlaylistsUid() {
+		return config.getPlaylists().getPlaylists().stream()
 				.sorted((o1, o2) -> Long.compare(o1.getPosition(), o2.getPosition()))
-				.filter(o -> {
-					if (!playlistConfigMap.containsKey(o.getPlaylistUid())) {
-						LOG.warn("Playlist configuration not found: {}", o.getPlaylistUid());
-						return false;
-					}
-					return true;
-				})
-				.map(o -> playlistConfigMap.get(o.getPlaylistUid()))
-				.map(o -> importExportConverter.toPlaylistData(o))
+				.map(PlaylistItem::getPlaylistUid)
 				.collect(Collectors.toList());
-  }
+	}
 
   @Override
   public void saveActivePlaylist(PlaylistData activePlaylist) {
@@ -205,69 +144,20 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
   }
 
   @Override
-  public void savePlaylist(PlaylistData playlistData) {
-    Assert.notNull(playlistData);
-
-    if (playlistData.isDeezer()) {
-    	LOG.error("Saving Deezer playlist to configuration not provided");
-    	return;
-		}
-
-		PlaylistConfig playlistConfig = importExportConverter.toPlaylistConfig(playlistData);
-		savePlaylistConfig(playlistConfig);
-		playlistConfigMap.put(playlistData.getUid(), playlistConfig);
-
+  public void appendPlaylist(String playlistUid) {
 		List<String> playlistItemsUid = config.getPlaylists().getPlaylists().stream()
 				.map(PlaylistItem::getPlaylistUid)
 				.collect(Collectors.toList());
 
 		// added new playlist item
-		if (CollectionUtils.isEmpty(playlistItemsUid) || !playlistItemsUid.contains(playlistData.getUid())) {
+		if (CollectionUtils.isEmpty(playlistItemsUid) || !playlistItemsUid.contains(playlistUid)) {
+			config.getPlaylists().getPlaylists().add(new PlaylistItem(playlistUid, playlistItemsUid.size()));
 			saveConfiguration();
-			config.getPlaylists().getPlaylists().add(new PlaylistItem(playlistData.getUid(), playlistItemsUid.size()));
 		}
   }
 
   @Override
-  public void renamePlaylist(PlaylistData playlistData) {
-    Assert.notNull(playlistData);
-
-		if (playlistData.isDeezer()) {
-			LOG.error("Saving Deezer playlist to configuration not provided");
-			return;
-		}
-
-		PlaylistConfig renamedPlaylist = playlistConfigMap.get(playlistData.getUid());
-		if (renamedPlaylist != null) {
-			renamedPlaylist.setName(playlistData.getName());
-			savePlaylistConfig(renamedPlaylist);
-			saveConfiguration();
-		} else {
-			LOG.warn("Playlist with UID '" + playlistData.getUid() + "' not found in set, renaming aborted.");
-		}
-  }
-
-  @Override
-  public void deletePlaylist(PlaylistData playlistData) {
-    Assert.notNull(playlistData);
-
-		if (playlistData.isDeezer()) {
-			LOG.error("Saving Deezer playlist to configuration not provided");
-			return;
-		}
-
-		String playlistUid = playlistData.getUid();
-		if (!playlistConfigMap.containsKey(playlistUid)) {
-    	LOG.warn("delete playlist not found: {}", playlistUid);
-    	return;
-		}
-
-		try {
-			Files.delete(constructPlaylistPath(playlistUid));
-		} catch (IOException e) {
-			LOG.error("Delete playlist file error: uid = {}, error = {}", playlistUid, e);
-		}
-		playlistConfigMap.remove(playlistUid);
+  public void removePlaylist(String playlistUid) {
     config.getPlaylists().getPlaylists().removeIf(playlist -> playlist.getPlaylistUid().equals(playlistUid));
 
     // refresh position attribute for playlist nodes to prevent gaps

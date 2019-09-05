@@ -1,11 +1,7 @@
 package ru.push.caudioplayer.core.facades;
 
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
-import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
-import ru.push.caudioplayer.core.facades.domain.PlaylistData;
-
-import java.io.File;
-import java.util.List;
+import ru.push.caudioplayer.core.playlist.domain.PlaylistItem;
 
 /**
  * @author push <mez.e.s@yandex.ru>
@@ -17,7 +13,7 @@ public interface AudioPlayerFacade {
 
   void removeEventListener(AudioPlayerEventListener listener);
 
-  void playTrack(String playlistUid, int trackPosition);
+  void playTrack(String playlistUid, int trackIndex);
 
   void playCurrentTrack();
 
@@ -25,7 +21,7 @@ public interface AudioPlayerFacade {
 
   void playPrevTrack();
 
-  AudioTrackData getCurrentTrackInfo();
+  PlaylistItem getActivePlaylistTrack();
 
 	void stopApplication();
 

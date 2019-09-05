@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
 import ru.push.caudioplayer.core.mediaplayer.domain.LastFmTrackData;
-import ru.push.caudioplayer.ui.AudioTrackPlaylistItem;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -109,20 +108,20 @@ public class LastFmPanelController {
 
 			MenuItem addToDeezerPlaylistMenuItem = new MenuItem("Add to Deezer playlist");
 			addToDeezerPlaylistMenuItem.setOnAction(event -> {
-				LastFmTrackData data = tableRow.getItem();
-				boolean result = musicLibraryLogicFacade.addLastFmTrackToCurrentDeezerPlaylist(data);
-				if (!result) {
-					LOG.error("Failed to add track to Deezer playlist: track = {}", data);
-				}
+//				LastFmTrackData data = tableRow.getItem();
+//				boolean result = musicLibraryLogicFacade.addLastFmTrackDeezerPlaylist(data);
+//				if (!result) {
+//					LOG.error("Failed to add track to Deezer playlist: track = {}", data);
+//				}
 			});
 
 			MenuItem addToDeezerLovedTracksMenuItem = new MenuItem("Add to Deezer loved tracks");
 			addToDeezerLovedTracksMenuItem.setOnAction(event -> {
-				LastFmTrackData data = tableRow.getItem();
-				boolean result = musicLibraryLogicFacade.addLastFmTrackToDeezerLovedTracks(data);
-				if (!result) {
-					LOG.error("Failed to add track to Deezer favorites playlist: track = {}", data);
-				}
+//				LastFmTrackData data = tableRow.getItem();
+//				boolean result = musicLibraryLogicFacade.addLastFmTrackToDeezerLovedTracks(data);
+//				if (!result) {
+//					LOG.error("Failed to add track to Deezer favorites playlist: track = {}", data);
+//				}
 			});
 
 			contextMenu.getItems().addAll(

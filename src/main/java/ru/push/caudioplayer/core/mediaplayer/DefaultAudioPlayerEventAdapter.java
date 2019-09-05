@@ -1,7 +1,7 @@
 package ru.push.caudioplayer.core.mediaplayer;
 
-import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
-import ru.push.caudioplayer.core.facades.domain.PlaylistData;
+import ru.push.caudioplayer.core.playlist.domain.Playlist;
+import ru.push.caudioplayer.core.playlist.domain.PlaylistItem;
 
 /**
  * @author push <mez.e.s@yandex.ru>
@@ -10,22 +10,22 @@ import ru.push.caudioplayer.core.facades.domain.PlaylistData;
 public abstract class DefaultAudioPlayerEventAdapter implements AudioPlayerEventListener {
 
   @Override
-  public void changedPlaylist(PlaylistData playlist) {
+  public void changedPlaylist(Playlist playlist) {
   }
 
   @Override
-  public void createdNewPlaylist(PlaylistData newPlaylist) {
+  public void createdNewPlaylist(Playlist newPlaylist) {
   }
 
   @Override
-  public void changedTrackPosition(PlaylistData playlist, int trackPosition) {
+  public void changedTrackPosition(Playlist playlist, int trackPosition) {
   }
 
   @Override
-  public void refreshTrackMediaInfo(int trackPosition, AudioTrackData mediaInfo) {
+  public void changedPlaylistItemTrack(int trackPosition, PlaylistItem mediaInfo) {
   }
 
   @Override
-  public void renamedPlaylist(PlaylistData playlistData) {
+  public void renamedPlaylist(Playlist playlist) {
   }
 }

@@ -75,22 +75,22 @@ public class MainController {
 
   @FXML
   public void addLocation(ActionEvent actionEvent) {
-		musicLibraryLogicFacade.addLocationsToPlaylist(Collections.singletonList("http://ice1.somafm.com/groovesalad-128.mp3"));
+//		musicLibraryLogicFacade.addLocationsToPlaylist(Collections.singletonList("http://ice1.somafm.com/groovesalad-128.mp3"));
   }
 
   @FXML
   public void createNewPlaylist(ActionEvent actionEvent) {
-		musicLibraryLogicFacade.createNewPlaylist();
+//		musicLibraryLogicFacade.createNewPlaylist();
   }
 
   @FXML
   public void openFiles(ActionEvent actionEvent) {
-    FileChooser fileChooser = new FileChooser();
-    fileChooser.setTitle("Open file(s)");
-    // WARNING: if this code throws JVM crashing, add JVM option '-DVLCJ_INITX=no'
-    List<File> files = fileChooser.showOpenMultipleDialog(mainContainer.getScene().getWindow());
-    // todo: add cancel action handling
-		musicLibraryLogicFacade.addFilesToPlaylist(files);
+//    FileChooser fileChooser = new FileChooser();
+//    fileChooser.setTitle("Open file(s)");
+//    // WARNING: if this code throws JVM crashing, add JVM option '-DVLCJ_INITX=no'
+//    List<File> files = fileChooser.showOpenMultipleDialog(mainContainer.getScene().getWindow());
+//    // todo: add cancel action handling
+//		musicLibraryLogicFacade.addFilesToPlaylist(files);
   }
 
   @FXML

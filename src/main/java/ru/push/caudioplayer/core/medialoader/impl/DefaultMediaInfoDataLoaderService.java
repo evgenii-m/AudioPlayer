@@ -7,6 +7,8 @@ import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
 import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
 import ru.push.caudioplayer.core.mediaplayer.domain.MediaSourceType;
 import ru.push.caudioplayer.core.medialoader.MediaInfoDataLoaderService;
+import ru.push.caudioplayer.core.playlist.domain.Playlist;
+import ru.push.caudioplayer.core.playlist.domain.PlaylistItem;
 import uk.co.caprica.vlcj.player.MediaMeta;
 
 import java.io.IOException;
@@ -29,21 +31,21 @@ public class DefaultMediaInfoDataLoaderService implements MediaInfoDataLoaderSer
   }
 
   @Override
-  public List<AudioTrackData> load(List<String> mediaPaths, MediaSourceType sourceType) {
+  public List<PlaylistItem> load(Playlist playlist, List<String> mediaPaths, MediaSourceType sourceType) {
     return mediaPaths.stream()
-        .map(mediaPath -> load(mediaPath, sourceType))
+        .map(mediaPath -> load(playlist, mediaPath, sourceType))
         .collect(Collectors.toList());
   }
 
   @Override
-  public AudioTrackData load(String mediaPath, MediaSourceType sourceType) {
-    AudioTrackData audioTrackData = new AudioTrackData();
+  public PlaylistItem load(Playlist playlist, String mediaPath, MediaSourceType sourceType) {
+		PlaylistItem mediaData = new PlaylistItem(playlist);
 
     switch (sourceType) {
       case FILE:
         MediaMeta mediaMeta = mediaPlayerFactory.getMediaMeta(mediaPath, true);
         if (mediaMeta != null) {
-          fillMediaInfoFromFile(audioTrackData, mediaMeta);
+          fillMediaInfoFromFile(mediaData, mediaMeta);
           mediaMeta.release();
         } else {
           LOG.error("Media info load fails!");
@@ -51,7 +53,7 @@ public class DefaultMediaInfoDataLoaderService implements MediaInfoDataLoaderSer
         break;
 
       case HTTP_STREAM:
-        fillMediaInfoFromHttpStreamByDecoder(audioTrackData, mediaPath);
+        fillMediaInfoFromHttpStreamByDecoder(mediaData, mediaPath);
         break;
 
       default:
@@ -59,21 +61,21 @@ public class DefaultMediaInfoDataLoaderService implements MediaInfoDataLoaderSer
         break;
     }
 
-    audioTrackData.setTrackPath(mediaPath);
-    audioTrackData.setSourceType(sourceType);
-    return audioTrackData;
+		mediaData.setTrackPath(mediaPath);
+		mediaData.setSourceType(sourceType);
+    return mediaData;
   }
 
   @Override
-  public void fillMediaInfoFromMediaMeta(AudioTrackData audioTrackData, MediaMeta mediaMeta,
+  public void fillMediaInfoFromMediaMeta(PlaylistItem mediaData, MediaMeta mediaMeta,
 																				 MediaSourceType sourceType) {
     switch (sourceType) {
       case FILE:
-        fillMediaInfoFromFile(audioTrackData, mediaMeta);
+        fillMediaInfoFromFile(mediaData, mediaMeta);
         break;
 
       case HTTP_STREAM:
-        fillMediaInfoFromHttpStream(audioTrackData, mediaMeta);
+        fillMediaInfoFromHttpStream(mediaData, mediaMeta);
         break;
 
       default:
@@ -83,47 +85,47 @@ public class DefaultMediaInfoDataLoaderService implements MediaInfoDataLoaderSer
   }
 
   @Override
-  public void fillMediaInfoFromHttpStream(AudioTrackData audioTrackData, MediaMeta mediaMeta) {
-    setMediaInfoFromStreamTitle(audioTrackData, mediaMeta.getNowPlaying(), audioTrackData.getTrackPath());
-    audioTrackData.setAlbum(mediaMeta.getTitle());
+  public void fillMediaInfoFromHttpStream(PlaylistItem mediaData, MediaMeta mediaMeta) {
+    setMediaInfoFromStreamTitle(mediaData, mediaMeta.getNowPlaying(), mediaData.getTrackPath());
+		mediaData.setAlbum(mediaMeta.getTitle());
   }
 
   @Override
-  public void fillMediaInfoFromHttpStreamByDecoder(AudioTrackData audioTrackData, String streamPath) {
+  public void fillMediaInfoFromHttpStreamByDecoder(PlaylistItem mediaData, String streamPath) {
     try {
       IcyStreamMetaDecoder metaDecoder = new IcyStreamMetaDecoder(streamPath);
-      setMediaInfoFromStreamTitle(audioTrackData, metaDecoder.getStreamTitle(), streamPath);
-      audioTrackData.setAlbum(metaDecoder.getStationName());
+      setMediaInfoFromStreamTitle(mediaData, metaDecoder.getStreamTitle(), streamPath);
+			mediaData.setAlbum(metaDecoder.getStationName());
     } catch (IOException e) {
       LOG.error("Decode meta from Icy stream fails [streamPath = " + streamPath + "]", e);
     }
   }
 
   @Override
-  public void fillMediaInfoFromFile(AudioTrackData audioTrackData, MediaMeta mediaMeta) {
-    audioTrackData.setAlbum(mediaMeta.getAlbum());
-    audioTrackData.setArtist(mediaMeta.getArtist());
-    audioTrackData.setDate(mediaMeta.getDate());
-    audioTrackData.setLength(mediaMeta.getLength());
-    audioTrackData.setTitle(mediaMeta.getTitle());
-    audioTrackData.setTrackId(mediaMeta.getTrackId());
-    audioTrackData.setTrackNumber(mediaMeta.getTrackNumber());
+  public void fillMediaInfoFromFile(PlaylistItem mediaData, MediaMeta mediaMeta) {
+		mediaData.setAlbum(mediaMeta.getAlbum());
+		mediaData.setArtist(mediaMeta.getArtist());
+		mediaData.setDate(mediaMeta.getDate());
+		mediaData.setLength(mediaMeta.getLength());
+		mediaData.setTitle(mediaMeta.getTitle());
+		mediaData.setTrackId(mediaMeta.getTrackId());
+		mediaData.setTrackNumber(mediaMeta.getTrackNumber());
   }
 
-  private void setMediaInfoFromStreamTitle(AudioTrackData audioTrackData, String streamTitle, String defaultTitle) {
+  private void setMediaInfoFromStreamTitle(PlaylistItem mediaData, String streamTitle, String defaultTitle) {
     if (StringUtils.isNotEmpty(streamTitle)) {
       String[] ss = streamTitle.split(STREAM_TITLE_SEPARATOR);
       if (ss.length > 0) {
         if (ss.length < 1) {
-          audioTrackData.setTitle(ss[0]);
+					mediaData.setTitle(ss[0]);
         } else {
-          audioTrackData.setArtist(ss[0]);
-          audioTrackData.setTitle(ss[1]);
+					mediaData.setArtist(ss[0]);
+					mediaData.setTitle(ss[1]);
         }
       }
     } else {
       LOG.info("Empty StreamTitle obtained.");
-      audioTrackData.setTitle(defaultTitle);
+			mediaData.setTitle(defaultTitle);
     }
 
   }

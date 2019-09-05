@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
-import ru.push.caudioplayer.core.facades.domain.PlaylistData;
+import ru.push.caudioplayer.core.playlist.domain.Playlist;
 
 import javax.annotation.PostConstruct;
 
@@ -32,7 +32,7 @@ public class RenamePopupController {
 	@Autowired
 	private MusicLibraryLogicFacade musicLibraryLogicFacade;
 
-  private PlaylistData renamedPlaylist;
+  private Playlist renamedPlaylist;
 
   @FXML
   public void initialize() {
@@ -44,7 +44,7 @@ public class RenamePopupController {
     LOG.debug("init bean {}", this.getClass().getName());
   }
 
-  public void setRenamedPlaylist(PlaylistData playlist) {
+  public void setRenamedPlaylist(Playlist playlist) {
     Assert.notNull(playlist);
 
     renamedPlaylist = playlist;

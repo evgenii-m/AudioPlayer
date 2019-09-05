@@ -1,7 +1,7 @@
 package ru.push.caudioplayer.core.mediaplayer;
 
-import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
-import ru.push.caudioplayer.core.facades.domain.PlaylistData;
+import ru.push.caudioplayer.core.playlist.domain.Playlist;
+import ru.push.caudioplayer.core.playlist.domain.PlaylistItem;
 
 /**
  * @author push <mez.e.s@yandex.ru>
@@ -9,13 +9,13 @@ import ru.push.caudioplayer.core.facades.domain.PlaylistData;
  */
 public interface AudioPlayerEventListener {
 
-  void changedPlaylist(PlaylistData playlist);
+  void changedPlaylist(Playlist playlist);
 
-  void createdNewPlaylist(PlaylistData newPlaylist);
+  void createdNewPlaylist(Playlist newPlaylist);
 
-  void changedTrackPosition(PlaylistData playlist, int trackPosition);
+  void changedTrackPosition(Playlist playlist, int trackPosition);
 
-  void refreshTrackMediaInfo(int trackPosition, AudioTrackData mediaInfo);
+  void changedPlaylistItemTrack(int trackPosition, PlaylistItem playlistItem);
 
-  void renamedPlaylist(PlaylistData playlistData);
+  void renamedPlaylist(Playlist playlist);
 }

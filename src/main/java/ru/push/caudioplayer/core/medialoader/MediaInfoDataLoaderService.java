@@ -1,7 +1,8 @@
 package ru.push.caudioplayer.core.medialoader;
 
-import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
 import ru.push.caudioplayer.core.mediaplayer.domain.MediaSourceType;
+import ru.push.caudioplayer.core.playlist.domain.Playlist;
+import ru.push.caudioplayer.core.playlist.domain.PlaylistItem;
 import uk.co.caprica.vlcj.player.MediaMeta;
 
 import java.util.List;
@@ -12,15 +13,15 @@ import java.util.List;
  */
 public interface MediaInfoDataLoaderService {
 
-  List<AudioTrackData> load(List<String> mediaPaths, MediaSourceType sourceType);
+  List<PlaylistItem> load(Playlist playlist, List<String> mediaPaths, MediaSourceType sourceType);
 
-  AudioTrackData load(String mediaPath, MediaSourceType sourceType);
+	PlaylistItem load(Playlist playlist, String mediaPath, MediaSourceType sourceType);
 
-  void fillMediaInfoFromMediaMeta(AudioTrackData audioTrackData, MediaMeta mediaMeta, MediaSourceType sourceType);
+  void fillMediaInfoFromMediaMeta(PlaylistItem mediaData, MediaMeta mediaMeta, MediaSourceType sourceType);
 
-  void fillMediaInfoFromHttpStream(AudioTrackData audioTrackData, MediaMeta mediaMeta);
+  void fillMediaInfoFromHttpStream(PlaylistItem mediaData, MediaMeta mediaMeta);
 
-  void fillMediaInfoFromHttpStreamByDecoder(AudioTrackData audioTrackData, String streamPath);
+  void fillMediaInfoFromHttpStreamByDecoder(PlaylistItem mediaData, String streamPath);
 
-  void fillMediaInfoFromFile(AudioTrackData audioTrackData, MediaMeta mediaMeta);
+  void fillMediaInfoFromFile(PlaylistItem mediaData, MediaMeta mediaMeta);
 }

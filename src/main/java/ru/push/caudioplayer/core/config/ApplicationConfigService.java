@@ -18,17 +18,15 @@ public interface ApplicationConfigService {
 
   String getDisplayedPlaylistUid();
 
-  List<PlaylistData> getPlaylists();
+  List<String> getLocalPlaylistsUid();
 
   void saveActivePlaylist(PlaylistData activePlaylist);
 
   void saveDisplayedPlaylist(PlaylistData displayedPlaylist);
 
-  void savePlaylist(PlaylistData playlistData);
+  void appendPlaylist(String playlistUid);
 
-  void renamePlaylist(PlaylistData playlistData);
-
-  void deletePlaylist(PlaylistData playlistData);
+  void removePlaylist(String playlistUid);
 
 
   // user configuration methods
