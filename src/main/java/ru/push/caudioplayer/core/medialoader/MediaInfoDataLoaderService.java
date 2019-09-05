@@ -1,6 +1,6 @@
 package ru.push.caudioplayer.core.medialoader;
 
-import ru.push.caudioplayer.core.mediaplayer.domain.MediaSourceType;
+import ru.push.caudioplayer.core.playlist.domain.MediaSourceType;
 import ru.push.caudioplayer.core.playlist.domain.Playlist;
 import ru.push.caudioplayer.core.playlist.domain.PlaylistItem;
 import uk.co.caprica.vlcj.player.MediaMeta;

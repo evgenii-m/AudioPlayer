@@ -1,8 +1,7 @@
 package ru.push.caudioplayer.core.config;
 
 import ru.push.caudioplayer.core.lastfm.LastFmSessionData;
-import ru.push.caudioplayer.core.facades.domain.PlaylistData;
-import ru.push.caudioplayer.core.facades.domain.configuration.PlaylistContainerViewConfigurations;
+import ru.push.caudioplayer.core.config.dto.PlaylistContainerViewConfigurations;
 
 import java.util.List;
 
@@ -20,9 +19,9 @@ public interface ApplicationConfigService {
 
   List<String> getLocalPlaylistsUid();
 
-  void saveActivePlaylist(PlaylistData activePlaylist);
+  void saveActivePlaylist(String playlistUid);
 
-  void saveDisplayedPlaylist(PlaylistData displayedPlaylist);
+  void saveDisplayedPlaylist(String playlistUid);
 
   void appendPlaylist(String playlistUid);
 

@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
-import ru.push.caudioplayer.core.playlist.domain.Playlist;
+import ru.push.caudioplayer.core.facades.dto.PlaylistData;
 
 import javax.annotation.PostConstruct;
 
@@ -32,7 +32,7 @@ public class RenamePopupController {
 	@Autowired
 	private MusicLibraryLogicFacade musicLibraryLogicFacade;
 
-  private Playlist renamedPlaylist;
+  private PlaylistData renamedPlaylist;
 
   @FXML
   public void initialize() {
@@ -44,11 +44,11 @@ public class RenamePopupController {
     LOG.debug("init bean {}", this.getClass().getName());
   }
 
-  public void setRenamedPlaylist(Playlist playlist) {
+  public void setRenamedPlaylist(PlaylistData playlist) {
     Assert.notNull(playlist);
 
     renamedPlaylist = playlist;
-    nameTextField.setText(renamedPlaylist.getName());
+    nameTextField.setText(renamedPlaylist.getTitle());
   }
 
   public void cancelRename(ActionEvent actionEvent) {
@@ -56,12 +56,8 @@ public class RenamePopupController {
   }
 
   public void applyRename(ActionEvent actionEvent) {
-		boolean result = musicLibraryLogicFacade.renamePlaylist(renamedPlaylist.getUid(), nameTextField.getText());
-		if (result) {
-			closePopup();
-		} else {
-			LOG.error("Failed to rename playlist");
-		}
+		musicLibraryLogicFacade.renamePlaylist(renamedPlaylist.getUid(), nameTextField.getText());
+		closePopup();
   }
 
   private void closePopup() {

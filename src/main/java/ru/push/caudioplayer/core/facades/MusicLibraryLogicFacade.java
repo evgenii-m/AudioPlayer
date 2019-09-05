@@ -1,10 +1,8 @@
 package ru.push.caudioplayer.core.facades;
 
-import ru.push.caudioplayer.core.deezer.DeezerNeedAuthorizationException;
-import ru.push.caudioplayer.core.facades.domain.PlaylistData;
+import ru.push.caudioplayer.core.facades.dto.PlaylistData;
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
-import ru.push.caudioplayer.core.mediaplayer.domain.LastFmTrackData;
-import ru.push.caudioplayer.core.playlist.domain.PlaylistType;
+import ru.push.caudioplayer.core.facades.dto.LastFmTrackData;
 
 import java.io.File;
 import java.util.List;
@@ -34,13 +32,25 @@ public interface MusicLibraryLogicFacade {
 	 */
 	List<LastFmTrackData> getRecentTracksFromLastFm();
 
-	void createPlaylist(PlaylistType type);
+	void reloadPlaylists();
+
+	List<PlaylistData> getLocalPlaylists();
+
+	List<PlaylistData> getDeezerPlaylists();
+
+	PlaylistData getActivePlaylist();
+
+	void createLocalPlaylist();
+
+	void createDeezerPlaylist();
 
 	void deletePlaylist(String playlistUid);
 
 	void renamePlaylist(String playlistUid, String newTitle);
 
 	void backupPlaylists(String folderName);
+
+	void exportPlaylistToFile(String playlistUid, String folderPath);
 
 	void addFilesToPlaylist(String playlistUid, List<File> files);
 

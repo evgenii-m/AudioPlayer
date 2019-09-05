@@ -1,6 +1,6 @@
 package ru.push.caudioplayer.core.playlist.impl;
 
-import ru.push.caudioplayer.core.mediaplayer.domain.MediaSourceType;
+import ru.push.caudioplayer.core.playlist.domain.MediaSourceType;
 import ru.push.caudioplayer.core.playlist.dao.model.PlaylistEntity;
 import ru.push.caudioplayer.core.playlist.dao.model.PlaylistItemEntity;
 import ru.push.caudioplayer.core.playlist.domain.Playlist;

@@ -1,4 +1,4 @@
-package ru.push.caudioplayer.core.facades.domain.configuration;
+package ru.push.caudioplayer.core.config.dto;
 
 import java.util.List;
 

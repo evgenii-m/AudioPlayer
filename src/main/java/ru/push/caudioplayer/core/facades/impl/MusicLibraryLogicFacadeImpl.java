@@ -8,10 +8,11 @@ import org.springframework.util.CollectionUtils;
 import ru.push.caudioplayer.core.deezer.DeezerApiErrorException;
 import ru.push.caudioplayer.core.deezer.DeezerApiService;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
+import ru.push.caudioplayer.core.facades.dto.PlaylistData;
 import ru.push.caudioplayer.core.lastfm.LastFmService;
 import ru.push.caudioplayer.core.lastfm.domain.Track;
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
-import ru.push.caudioplayer.core.mediaplayer.domain.LastFmTrackData;
+import ru.push.caudioplayer.core.facades.dto.LastFmTrackData;
 import ru.push.caudioplayer.core.config.ApplicationConfigService;
 import ru.push.caudioplayer.core.playlist.PlaylistService;
 import ru.push.caudioplayer.core.playlist.domain.Playlist;
@@ -41,6 +42,8 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	private DeezerApiService deezerApiService;
 	@Autowired
 	private ApplicationConfigService applicationConfigService;
+	@Autowired
+	private DtoMapper dtoMapper;
 
 
 	public MusicLibraryLogicFacadeImpl() {
@@ -113,10 +116,48 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	}
 
 	@Override
-	public void createPlaylist(PlaylistType type) {
-		Playlist result = playlistService.createPlaylist(type);
+	public void reloadPlaylists() {
+		playlistService.reloadPlaylists();
+	}
+
+	@Override
+	public List<PlaylistData> getLocalPlaylists() {
+		return dtoMapper.mapPlaylistData(
+				playlistService.getPlaylists().stream()
+						.filter(Playlist::isLocal)
+						.collect(Collectors.toList())
+		);
+	}
+
+	@Override
+	public List<PlaylistData> getDeezerPlaylists() {
+		return dtoMapper.mapPlaylistData(
+				playlistService.getPlaylists().stream()
+						.filter(Playlist::isDeezer)
+						.collect(Collectors.toList())
+		);
+	}
+
+	@Override
+	public PlaylistData getActivePlaylist() {
+		return dtoMapper.mapPlaylistData(playlistService.getActivePlaylist());
+	}
+
+	@Override
+	public void createLocalPlaylist() {
+		Playlist result = playlistService.createPlaylist(PlaylistType.LOCAL);
 		if (result != null) {
-			eventListeners.forEach(l -> l.createdNewPlaylist(result));
+			eventListeners.forEach(l -> l.createdNewPlaylist(dtoMapper.mapPlaylistData(result)));
+		} else {
+			// TODO: add event for display error
+		}
+	}
+
+	@Override
+	public void createDeezerPlaylist() {
+		Playlist result = playlistService.createPlaylist(PlaylistType.DEEZER);
+		if (result != null) {
+			eventListeners.forEach(l -> l.createdNewPlaylist(dtoMapper.mapPlaylistData(result)));
 		} else {
 			// TODO: add event for display error
 		}
@@ -136,7 +177,7 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	public void renamePlaylist(String playlistUid, String newTitle) {
 		Playlist result = playlistService.renamePlaylist(playlistUid, newTitle);
 		if (result != null) {
-			eventListeners.forEach(l -> l.renamedPlaylist(result));
+			eventListeners.forEach(l -> l.renamedPlaylist(dtoMapper.mapPlaylistData(result)));
 		} else {
 			// TODO: add event for display error
 		}
@@ -144,16 +185,21 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 
 	@Override
 	public void backupPlaylists(String folderName) {
-		List<Playlist> playlists = playlistService.getAllPlaylists();
+		List<Playlist> playlists = playlistService.getPlaylists();
 		playlists.forEach(p -> playlistService.exportPlaylistToFile(p.getUid(), folderName));
 		LOG.info("Playlists backups to folder '{}'", folderName);
+	}
+
+	@Override
+	public void exportPlaylistToFile(String playlistUid, String folderPath) {
+		playlistService.exportPlaylistToFile(playlistUid, folderPath);
 	}
 
 	@Override
 	public void addFilesToPlaylist(String playlistUid, List<File> files) {
 		Playlist result = playlistService.addFilesToLocalPlaylist(playlistUid, files);
 		if (result != null) {
-			eventListeners.forEach(listener -> listener.changedPlaylist(result));
+			eventListeners.forEach(listener -> listener.changedPlaylist(dtoMapper.mapPlaylistData(result)));
 		} else {
 			// TODO: add event for display error
 		}
@@ -163,7 +209,7 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	public void deleteItemsFromPlaylist(String playlistUid, List<Integer> itemsIndexes) {
 		Playlist result = playlistService.deleteItemsFromPlaylist(playlistUid, itemsIndexes);
 		if (result != null) {
-			eventListeners.forEach(listener -> listener.changedPlaylist(result));
+			eventListeners.forEach(listener -> listener.changedPlaylist(dtoMapper.mapPlaylistData(result)));
 		} else {
 			// TODO: add event for display error
 		}
@@ -173,7 +219,7 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	public void addLocationsToPlaylist(String playlistUid, List<String> locations) {
 		Playlist result = playlistService.addLocationsToLocalPlaylist(playlistUid, locations);
 		if (result != null) {
-			eventListeners.forEach(listener -> listener.changedPlaylist(result));
+			eventListeners.forEach(listener -> listener.changedPlaylist(dtoMapper.mapPlaylistData(result)));
 		} else {
 			// TODO: add event for display error
 		}
@@ -184,7 +230,7 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 		Playlist result = playlistService.addTrackToDeezerPlaylist(playlistUid,
 				new TrackData(trackData.getArtist(), trackData.getAlbum(), trackData.getTitle()));
 		if (result != null) {
-			eventListeners.forEach(listener -> listener.changedPlaylist(result));
+			eventListeners.forEach(listener -> listener.changedPlaylist(dtoMapper.mapPlaylistData(result)));
 		} else {
 			// TODO: add event for display error
 		}
@@ -195,7 +241,7 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 		Playlist result = playlistService.addTrackToDeezerFavoritesPlaylist(
 				new TrackData(trackData.getArtist(), trackData.getAlbum(), trackData.getTitle()));
 		if (result != null) {
-			eventListeners.forEach(listener -> listener.changedPlaylist(result));
+			eventListeners.forEach(listener -> listener.changedPlaylist(dtoMapper.mapPlaylistData(result)));
 		} else {
 			// TODO: add event for display error
 		}

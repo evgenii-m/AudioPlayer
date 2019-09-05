@@ -1,10 +1,5 @@
-package ru.push.caudioplayer.core.config.domain;
+package ru.push.caudioplayer.core.facades.dto;
 
-import javax.xml.bind.annotation.XmlEnum;
-import javax.xml.bind.annotation.XmlType;
-
-@XmlType
-@XmlEnum
 public enum PlaylistType {
 	LOCAL, DEEZER;
 

@@ -10,7 +10,7 @@ import ru.push.caudioplayer.core.deezer.DeezerApiErrorException;
 import ru.push.caudioplayer.core.deezer.DeezerApiService;
 import ru.push.caudioplayer.core.deezer.domain.Track;
 import ru.push.caudioplayer.core.medialoader.MediaInfoDataLoaderService;
-import ru.push.caudioplayer.core.mediaplayer.domain.MediaSourceType;
+import ru.push.caudioplayer.core.playlist.domain.MediaSourceType;
 import ru.push.caudioplayer.core.playlist.PlaylistService;
 import ru.push.caudioplayer.core.playlist.dao.LocalPlaylistRepository;
 import ru.push.caudioplayer.core.playlist.dao.model.PlaylistEntity;
@@ -114,21 +114,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 	}
 
 	@Override
-	public List<Playlist> getLocalPlaylists() {
-		return playlistMap.values().stream()
-				.filter(Playlist::isLocal)
-				.collect(Collectors.toList());
-	}
-
-	@Override
-	public List<Playlist> getDeezerPlaylists() {
-		return playlistMap.values().stream()
-				.filter(Playlist::isDeezer)
-				.collect(Collectors.toList());
-	}
-
-	@Override
-	public List<Playlist> getAllPlaylists() {
+	public List<Playlist> getPlaylists() {
 		return (List<Playlist>) playlistMap.values();
 	}
 

@@ -13,7 +13,6 @@ public class Playlist {
 	private String link;
 	private boolean readOnly;
 	private List<PlaylistItem> items;
-
 //	private Date createDate;
 //	private Date lastUpdateDate;
 
@@ -36,6 +35,7 @@ public class Playlist {
 		this.link = link;
 		this.readOnly = readOnly;
 		this.items = items;
+		this.items.forEach(o -> o.setPlaylist(this));
 	}
 
 	public String getUid() {
@@ -92,6 +92,7 @@ public class Playlist {
 
 	public void setItems(List<PlaylistItem> items) {
 		this.items = items;
+		this.items.forEach(o -> o.setPlaylist(this));
 	}
 
 	public String getExportFileName() {

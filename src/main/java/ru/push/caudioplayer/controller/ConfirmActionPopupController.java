@@ -6,10 +6,9 @@ import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.push.caudioplayer.core.facades.domain.PlaylistData;
 
 import javax.annotation.PostConstruct;
-import java.util.function.Supplier;
+import java.util.function.Consumer;
 
 public class ConfirmActionPopupController {
 	private static final Logger LOG = LoggerFactory.getLogger(ConfirmActionPopupController.class);
@@ -19,7 +18,7 @@ public class ConfirmActionPopupController {
 	@FXML
 	public Label messageLabel;
 
-	private Supplier<PlaylistData> actionSupplier;
+	private Consumer<Object> actionSupplier;
 
 
 	public ConfirmActionPopupController() {
@@ -36,12 +35,12 @@ public class ConfirmActionPopupController {
 		LOG.debug("init bean {}", this.getClass().getName());
 	}
 
-	public void setAction(Supplier<PlaylistData> actionSupplier, String message) {
+	public void setAction(Consumer<Object> actionSupplier, String message) {
 		this.actionSupplier = actionSupplier;
 		messageLabel.setText(message);
 	}
 
-	public void setAction(Supplier<PlaylistData> actionSupplier) {
+	public void setAction(Consumer<Object> actionSupplier) {
 		this.actionSupplier = actionSupplier;
 	}
 
@@ -53,12 +52,8 @@ public class ConfirmActionPopupController {
 	@FXML
 	public void confirmAction(ActionEvent actionEvent) {
 		if (actionSupplier != null) {
-			PlaylistData playlistData = actionSupplier.get();
-			if (playlistData != null) {
-				closePopup();
-			} else {
-				LOG.error("Failed to playlist delete");
-			}
+			actionSupplier.accept(null);
+			closePopup();
 		} else {
 			LOG.error("Action supplier not defined");
 		}

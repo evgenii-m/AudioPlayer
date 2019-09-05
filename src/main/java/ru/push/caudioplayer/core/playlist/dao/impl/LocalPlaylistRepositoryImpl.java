@@ -3,7 +3,6 @@ package ru.push.caudioplayer.core.playlist.dao.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import ru.push.caudioplayer.core.config.domain.PlaylistConfig;
 import ru.push.caudioplayer.core.playlist.dao.LocalPlaylistRepository;
 import ru.push.caudioplayer.core.playlist.dao.model.PlaylistEntity;
 import ru.push.caudioplayer.utils.XmlUtils;
@@ -79,9 +78,9 @@ public class LocalPlaylistRepositoryImpl implements LocalPlaylistRepository {
 				.filter(uid -> {
 					if (!playlistStoreMap.containsKey(uid)) {
 						LOG.warn("Playlist not found in local store: uid = {}", uid);
-						return true;
+						return false;
 					}
-					return false;
+					return true;
 				})
 				.map(playlistStoreMap::get)
 				.collect(Collectors.toList());

@@ -12,11 +12,7 @@ public interface PlaylistService {
 
 	void reloadPlaylists();
 
-	List<Playlist> getLocalPlaylists();
-
-	List<Playlist> getDeezerPlaylists();
-
-	List<Playlist> getAllPlaylists();
+	List<Playlist> getPlaylists();
 
 	Playlist getActivePlaylist();
 

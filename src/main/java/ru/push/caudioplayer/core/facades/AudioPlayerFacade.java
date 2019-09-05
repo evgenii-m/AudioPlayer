@@ -1,7 +1,7 @@
 package ru.push.caudioplayer.core.facades;
 
+import ru.push.caudioplayer.core.facades.dto.TrackData;
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
-import ru.push.caudioplayer.core.playlist.domain.PlaylistItem;
 
 /**
  * @author push <mez.e.s@yandex.ru>
@@ -21,7 +21,7 @@ public interface AudioPlayerFacade {
 
   void playPrevTrack();
 
-  PlaylistItem getActivePlaylistTrack();
+	TrackData getActivePlaylistTrack();
 
 	void stopApplication();
 

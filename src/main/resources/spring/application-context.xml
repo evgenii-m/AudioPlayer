@@ -25,11 +25,6 @@
     <constructor-arg ref="mediaPlayerFactory"/>
   </bean>
 
-  <bean name="playlistComponent"
-        class="ru.push.caudioplayer.core.mediaplayer.components.impl.DefaultCustomPlaylistComponent">
-    <constructor-arg ref="mediaPlayerFactory"/>
-  </bean>
-
   <bean name="appConfigurationService"
         class="ru.push.caudioplayer.core.config.impl.CommonsApplicationConfigService">
     <constructor-arg value="mediaplayer-app-configuration.xml"/>

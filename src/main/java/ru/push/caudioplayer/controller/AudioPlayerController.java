@@ -13,8 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
+import ru.push.caudioplayer.core.facades.dto.TrackData;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
-import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
 import ru.push.caudioplayer.core.playlist.domain.PlaylistItem;
 import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
 
@@ -136,7 +136,7 @@ public class AudioPlayerController {
       }
     }
 
-    PlaylistItem playlistTrack = audioPlayerFacade.getActivePlaylistTrack();
+    TrackData playlistTrack = audioPlayerFacade.getActivePlaylistTrack();
     float playbackPosition = playerComponent.getPlaybackPosition();
 
     updatePlaybackPosition(playbackPosition, playlistTrack.getLength());

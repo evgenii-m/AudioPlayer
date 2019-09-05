@@ -1,4 +1,4 @@
-package ru.push.caudioplayer.core.mediaplayer.domain;
+package ru.push.caudioplayer.core.playlist.domain;
 
 /**
  * @author push <mez.e.s@yandex.ru>

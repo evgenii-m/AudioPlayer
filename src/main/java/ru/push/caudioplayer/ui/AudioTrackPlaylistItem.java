@@ -14,6 +14,14 @@ public class AudioTrackPlaylistItem {
   private final SimpleStringProperty title;
   private final SimpleStringProperty length;
 
+	public AudioTrackPlaylistItem() {
+		this.number = new SimpleStringProperty();
+		this.artist = new SimpleStringProperty();
+		this.album = new SimpleStringProperty();
+		this.title = new SimpleStringProperty();
+		this.length = new SimpleStringProperty();
+	}
+
   public AudioTrackPlaylistItem(String number, String artist, String album, String title, String length) {
     this.number = new SimpleStringProperty(number);
     this.artist = new SimpleStringProperty(artist);

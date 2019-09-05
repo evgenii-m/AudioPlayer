@@ -1,4 +1,4 @@
-package ru.push.caudioplayer.core.mediaplayer.domain;
+package ru.push.caudioplayer.core.facades.dto;
 
 
 import java.util.Date;

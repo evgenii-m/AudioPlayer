@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import ru.push.caudioplayer.core.converter.ImportExportConverter;
 import ru.push.caudioplayer.core.deezer.DeezerApiAdapter;
 import ru.push.caudioplayer.core.deezer.DeezerApiConst;
 import ru.push.caudioplayer.core.deezer.DeezerApiErrorException;
@@ -17,8 +16,6 @@ import ru.push.caudioplayer.core.deezer.domain.Track;
 import ru.push.caudioplayer.core.config.ApplicationConfigService;
 import ru.push.caudioplayer.core.deezer.domain.Tracks;
 import ru.push.caudioplayer.core.deezer.domain.internal.PlaylistId;
-import ru.push.caudioplayer.core.facades.domain.AudioTrackData;
-import ru.push.caudioplayer.core.facades.domain.PlaylistData;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;

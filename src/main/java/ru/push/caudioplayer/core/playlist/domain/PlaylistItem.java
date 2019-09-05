@@ -1,7 +1,6 @@
 package ru.push.caudioplayer.core.playlist.domain;
 
 import org.apache.commons.lang3.StringUtils;
-import ru.push.caudioplayer.core.mediaplayer.domain.MediaSourceType;
 
 
 public class PlaylistItem {
@@ -25,7 +24,7 @@ public class PlaylistItem {
 	}
 
 	public PlaylistItem(MediaSourceType sourceType, String artist, String album, String date, String title,
-											String trackId, String trackNumber, long length, String trackPath, Playlist playlist) {
+											String trackId, String trackNumber, long length, String trackPath) {
 		this.sourceType = sourceType;
 		this.artist = artist;
 		this.album = album;
@@ -35,7 +34,6 @@ public class PlaylistItem {
 		this.trackNumber = trackNumber;
 		this.length = length;
 		this.trackPath = trackPath;
-		this.playlist = playlist;
 	}
 
 	public String getTrackPath() {
@@ -114,6 +112,10 @@ public class PlaylistItem {
 		return playlist;
 	}
 
+	protected void setPlaylist(Playlist playlist) {
+		this.playlist = playlist;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -159,7 +161,7 @@ public class PlaylistItem {
 				", trackId='" + trackId + '\'' +
 				", trackNumber='" + trackNumber + '\'' +
 				", length=" + length +
-				", playlistUid=" + playlist.getUid() +
+				", playlistUid=" + ((playlist != null) ? playlist.getUid() : null) +
 				'}';
 	}
 }

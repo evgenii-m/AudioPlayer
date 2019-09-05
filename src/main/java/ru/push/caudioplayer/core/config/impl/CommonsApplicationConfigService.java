@@ -7,7 +7,6 @@ import org.springframework.util.Assert;
 import ru.push.caudioplayer.core.config.domain.Configuration;
 import ru.push.caudioplayer.core.config.domain.DeezerSessionData;
 import ru.push.caudioplayer.core.config.domain.LastfmSessionData;
-import ru.push.caudioplayer.core.config.domain.PlaylistConfig;
 import ru.push.caudioplayer.core.config.domain.PlaylistItem;
 import ru.push.caudioplayer.core.config.domain.Playlists;
 import ru.push.caudioplayer.core.config.domain.view.Column;
@@ -15,9 +14,8 @@ import ru.push.caudioplayer.core.config.domain.view.Columns;
 import ru.push.caudioplayer.core.config.domain.view.PlaylistContainer;
 import ru.push.caudioplayer.core.config.domain.view.View;
 import ru.push.caudioplayer.core.lastfm.LastFmSessionData;
-import ru.push.caudioplayer.core.facades.domain.PlaylistData;
 import ru.push.caudioplayer.core.config.ApplicationConfigService;
-import ru.push.caudioplayer.core.facades.domain.configuration.PlaylistContainerViewConfigurations;
+import ru.push.caudioplayer.core.config.dto.PlaylistContainerViewConfigurations;
 import ru.push.caudioplayer.utils.XmlUtils;
 
 import javax.xml.bind.JAXBException;
@@ -44,7 +42,6 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
   private static final String DEFAULT_CONFIG_FILE_NAME = "mediaplayer-app-configuration.xml";
 
   private Configuration config;
-  private Map<String, PlaylistConfig> playlistConfigMap;
   private final String configurationPath;
 
 
@@ -130,16 +127,16 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
 	}
 
   @Override
-  public void saveActivePlaylist(PlaylistData activePlaylist) {
-    Assert.notNull(activePlaylist);
-    config.getPlaylists().setActiveUid(activePlaylist.getUid());
+  public void saveActivePlaylist(String playlistUid) {
+    Assert.notNull(playlistUid);
+    config.getPlaylists().setActiveUid(playlistUid);
     saveConfiguration();
   }
 
   @Override
-  public void saveDisplayedPlaylist(PlaylistData displayedPlaylist) {
-    Assert.notNull(displayedPlaylist);
-    config.getPlaylists().setDisplayedUid(displayedPlaylist.getUid());
+  public void saveDisplayedPlaylist(String playlistUid) {
+    Assert.notNull(playlistUid);
+    config.getPlaylists().setDisplayedUid(playlistUid);
     saveConfiguration();
   }
 

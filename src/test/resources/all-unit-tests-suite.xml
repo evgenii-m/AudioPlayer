@@ -5,8 +5,6 @@
   <test name="mediaplayer">
     <classes>
       <class name="ru.push.caudioplayer.core.medialoader.AudioTrackDataLoaderServiceUnitTest" />
-      <class name="ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponentUnitTest" />
-      <class name="ru.push.caudioplayer.core.mediaplayer.components.CustomPlaylistComponentUnitTest" />
     </classes>
   </test>
 

@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import ru.push.caudioplayer.core.facades.impl.DefaultAudioPlayerFacade;
 import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
 import ru.push.caudioplayer.core.mediaplayer.components.impl.DefaultCustomAudioPlayerComponent;
-import ru.push.caudioplayer.core.mediaplayer.components.impl.DefaultCustomPlaylistComponent;
 import ru.push.caudioplayer.core.medialoader.impl.DefaultMediaInfoDataLoaderService;
 import ru.push.caudioplayer.core.config.impl.CommonsApplicationConfigService;
 
@@ -26,7 +25,6 @@ public class SpyWrapperBeanPostProcessor implements BeanPostProcessor {
   private static final Collection<Class> wrappedClasses = Arrays.asList(
       CustomMediaPlayerFactory.class,
       DefaultCustomAudioPlayerComponent.class,
-      DefaultCustomPlaylistComponent.class,
       CommonsApplicationConfigService.class,
       DefaultMediaInfoDataLoaderService.class,
       DefaultAudioPlayerFacade.class

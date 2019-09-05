@@ -16,25 +16,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.ConfigurationControllers;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
+import ru.push.caudioplayer.core.facades.dto.PlaylistData;
+import ru.push.caudioplayer.core.facades.dto.PlaylistType;
+import ru.push.caudioplayer.core.facades.dto.TrackData;
 import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
 import ru.push.caudioplayer.core.config.ApplicationConfigService;
-import ru.push.caudioplayer.core.playlist.PlaylistService;
-import ru.push.caudioplayer.core.playlist.domain.Playlist;
-import ru.push.caudioplayer.core.playlist.domain.PlaylistItem;
 import ru.push.caudioplayer.ui.AudioTrackPlaylistItem;
-import ru.push.caudioplayer.core.facades.domain.configuration.PlaylistContainerViewConfigurations;
+import ru.push.caudioplayer.core.config.dto.PlaylistContainerViewConfigurations;
 import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
-import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -56,9 +56,9 @@ public class PlaylistController {
 	@FXML
 	private Tab deezerPlaylistsTab;
 	@FXML
-	private ListView<Playlist> localPlaylistBrowserContainer;
+	private ListView<PlaylistData> localPlaylistBrowserContainer;
 	@FXML
-	private ListView<Playlist> deezerPlaylistBrowserContainer;
+	private ListView<PlaylistData> deezerPlaylistBrowserContainer;
 	@FXML
 	private TableView<AudioTrackPlaylistItem> playlistContentContainer;
   @FXML
@@ -73,13 +73,11 @@ public class PlaylistController {
   @Autowired
 	private MusicLibraryLogicFacade musicLibraryLogicFacade;
   @Autowired
-	private PlaylistService playlistService;
-  @Autowired
   private TrackTimeLabelBuilder trackTimeLabelBuilder;
   @Autowired
   private ApplicationConfigService applicationConfigService;
 
-  private Playlist displayedPlaylist;
+  private PlaylistData displayedPlaylist;
 
   private Scene renamePopupScene;
   private Scene confirmActionPopupScene;
@@ -100,8 +98,10 @@ public class PlaylistController {
   public void init() {
 		LOG.debug("init bean {}", this.getClass().getName());
 
-		List<Playlist> playlists = playlistService.getAllPlaylists();
-		displayedPlaylist = playlists.get(0);
+		List<PlaylistData> localPlaylists = musicLibraryLogicFacade.getLocalPlaylists();
+		List<PlaylistData> deezerPlaylists = musicLibraryLogicFacade.getDeezerPlaylists();
+		displayedPlaylist = localPlaylists.get(0);
+
 		renamePopupScene = new Scene(renamePopupView.getView());
 		confirmActionPopupScene = new Scene(confirmActionPopupView.getView());
 
@@ -110,15 +110,17 @@ public class PlaylistController {
 		musicLibraryLogicFacade.addEventListener(eventAdapter);
 
 		// switch browser container to tab with displayed playlist
-		playlistBrowserTabPane.getSelectionModel().select(getCurrentPlaylistTab(displayedPlaylist));
+		selectPlaylistBrowserTab(displayedPlaylist);
 
 		// configure playlist browser container
 		setPlaylistBrowserContainerCellFactory(localPlaylistBrowserContainer);
 		setPlaylistBrowserContainerCellFactory(deezerPlaylistBrowserContainer);
-		fillPlaylistBrowserContainers(playlists, displayedPlaylist);
+		setPlaylistBrowserContainerItems(localPlaylistBrowserContainer, localPlaylists);
+		setPlaylistBrowserContainerItems(deezerPlaylistBrowserContainer, deezerPlaylists);
 
 		// configure playlist content container
-    setPlaylistContainerColumns(playlistContentContainer, applicationConfigService.getPlaylistContainerViewConfigurations());
+    setPlaylistContainerColumns(playlistContentContainer,
+				applicationConfigService.getPlaylistContainerViewConfigurations());
 		setPlaylistContentContainerRowFactory();
 		setPlaylistContainerItems(displayedPlaylist);
 
@@ -156,11 +158,11 @@ public class PlaylistController {
 		savePlaylistContainerViewConfiguration();
 	}
 
-  private void setPlaylistBrowserContainerCellFactory(ListView<Playlist> playlistBrowserContainer) {
+  private void setPlaylistBrowserContainerCellFactory(ListView<PlaylistData> playlistBrowserContainer) {
     playlistBrowserContainer.setCellFactory(lv -> {
-      ListCell<Playlist> cell = new ListCell<Playlist>() {
+      ListCell<PlaylistData> cell = new ListCell<PlaylistData>() {
         @Override
-        protected void updateItem(Playlist item, boolean empty) {
+        protected void updateItem(PlaylistData item, boolean empty) {
           super.updateItem(item, empty);
           if (empty || item == null || item.getTitle() == null) {
             setText(null);
@@ -207,39 +209,35 @@ public class PlaylistController {
 		return popupStage;
 	}
 
-  private void renamePlaylistAction(ActionEvent event, ListCell<Playlist> cell) {
+  private void renamePlaylistAction(ActionEvent event, ListCell<PlaylistData> cell) {
     assert renamePopupView.getController() instanceof RenamePopupController;
 
-		Playlist itemPlaylist = cell.getItem();
-		if (itemPlaylist.isReadOnly()) {
-			LOG.warn("For read only playlists renaming disabled");
+		PlaylistData playlistData = cell.getItem();
+		if (playlistData.isReadOnly()) {
+			LOG.warn("For read only playlists rename disabled");
 			return;
 		}
 
 		Stage popupStage = createPopup("Rename", renamePopupScene);
-		((RenamePopupController) renamePopupView.getController()).setRenamedPlaylist(itemPlaylist);
+		((RenamePopupController) renamePopupView.getController()).setRenamedPlaylist(playlistData);
     popupStage.show();
   }
 
   private void removePlaylistAction(ActionEvent event, ListCell<PlaylistData> cell) {
-		PlaylistData deletedPlaylist = cell.getItem();
+		PlaylistData playlistData = cell.getItem();
 
-		if (!deletedPlaylist.getEditable()) {
-			LOG.warn("Not editable playlist rename blocked");
+		if (playlistData.isReadOnly()) {
+			LOG.warn("For read only playlists delete disabled");
 			return;
 		}
 
 		Stage popupStage = createPopup("Confirm action", confirmActionPopupScene);
 
-		Supplier<PlaylistData> actionSupplier = () -> {
-			if (musicLibraryLogicFacade.deletePlaylist(deletedPlaylist.getUid())) {
-				getCurrentPlaylistContainer(deletedPlaylist).getItems().remove(deletedPlaylist);
-				return deletedPlaylist;
-			}
-			return null;
+		Consumer<Object> action = (o) -> {
+			musicLibraryLogicFacade.deletePlaylist(playlistData.getUid());
 		};
-		String message = String.format("Remove playlist \'%s\'?", deletedPlaylist.getName());
-		((ConfirmActionPopupController) confirmActionPopupView.getController()).setAction(actionSupplier, message);
+		String message = String.format("Remove playlist \'%s\'?", playlistData.getTitle());
+		((ConfirmActionPopupController) confirmActionPopupView.getController()).setAction(action, message);
 		popupStage.show();
 
   }
@@ -253,24 +251,17 @@ public class PlaylistController {
 				Files.createDirectories(exportFolderPath);
 			}
 			musicLibraryLogicFacade.exportPlaylistToFile(playlist.getUid(), DEFAULT_PLAYLIST_EXPORT_FOLDER);
-		} catch (IOException | JAXBException e) {
+		} catch (IOException e) {
 			LOG.error("Export playlist error", e);
 		}
 	}
 
-	private void fillPlaylistBrowserContainers(List<PlaylistData> playlists, PlaylistData displayedPlaylist) {
-  	assert displayedPlaylist != null;
-
+	private void setPlaylistBrowserContainerItems(ListView<PlaylistData> container, List<PlaylistData> playlists) {
 		if (CollectionUtils.isNotEmpty(playlists)) {
-			localPlaylistBrowserContainer.getItems().clear();
-			deezerPlaylistBrowserContainer.getItems().clear();
-
-			for (PlaylistData playlist : playlists) {
-				getCurrentPlaylistContainer(playlist).getItems().add(playlist);
-				if (playlist.equals(displayedPlaylist)) {
-					getCurrentPlaylistContainer(playlist).getSelectionModel().select(playlist);
-				}
-			}
+			container.getItems().clear();
+			container.getItems().addAll(playlists);
+			if ((displayedPlaylist != null) && playlists.contains(displayedPlaylist))
+			container.getSelectionModel().select(displayedPlaylist);
 		}
 	}
 
@@ -331,7 +322,8 @@ public class PlaylistController {
 
       MenuItem removeMenuItem = new MenuItem("Delete");
       removeMenuItem.setOnAction(event ->
-					musicLibraryLogicFacade.deleteItemsFromPlaylist(playlistContentContainer.getSelectionModel().getSelectedIndices())
+					musicLibraryLogicFacade.deleteItemsFromPlaylist(displayedPlaylist.getUid(),
+							playlistContentContainer.getSelectionModel().getSelectedIndices())
       );
 
       MenuItem propertiesMenuItem = new MenuItem("Properties");
@@ -355,15 +347,13 @@ public class PlaylistController {
     playlistContentContainer.getItems().clear();
     playlistContentContainer.getItems().addAll(
         playlistData.getTracks().stream()
-            .map(mediaInfoData -> {
-              if ((mediaInfoData != null) && (mediaInfoData.getTitle() != null)) {
-                return new AudioTrackPlaylistItem(mediaInfoData.getTrackNumber(),
-                    mediaInfoData.getArtist(), mediaInfoData.getAlbum(), mediaInfoData.getTitle(),
-                    trackTimeLabelBuilder.buildTimeString(mediaInfoData.getLength()));
+            .map(trackData -> {
+              if ((trackData != null) && (trackData.getTitle() != null)) {
+                return new AudioTrackPlaylistItem(trackData.getTrackNumber(),
+                    trackData.getArtist(), trackData.getAlbum(), trackData.getTitle(),
+                    trackTimeLabelBuilder.buildTimeString(trackData.getLength()));
               } else {
-                String trackPath = (mediaInfoData != null) ? mediaInfoData.getTrackPath() : "NULL";
-                LOG.warn("Media info not loaded for track '" + trackPath + "'");
-                return new AudioTrackPlaylistItem("", "", "", trackPath, trackTimeLabelBuilder.buildTimeString(0));
+                return new AudioTrackPlaylistItem();
               }
             }).collect(Collectors.toList())
     );
@@ -384,70 +374,81 @@ public class PlaylistController {
 
   @FXML
 	public void createNewPlaylist(ActionEvent actionEvent) {
-		musicLibraryLogicFacade.createNewPlaylist();
+  	if (PlaylistType.LOCAL.equals(displayedPlaylist.getType())) {
+			musicLibraryLogicFacade.createLocalPlaylist();
+		} else if (PlaylistType.DEEZER.equals(displayedPlaylist.getType())) {
+  		musicLibraryLogicFacade.createDeezerPlaylist();
+		}
 	}
 
 	@FXML
 	public void refreshPlaylists(ActionEvent actionEvent) {
-		musicLibraryLogicFacade.refreshPlaylists();
+		musicLibraryLogicFacade.reloadPlaylists();
 
-		List<PlaylistData> playlists = musicLibraryLogicFacade.getPlaylists();
-		PlaylistData displayedPlaylist = musicLibraryLogicFacade.getDisplayedPlaylist();
+		List<PlaylistData> localPlaylists = musicLibraryLogicFacade.getLocalPlaylists();
+		List<PlaylistData> deezerPlaylists = musicLibraryLogicFacade.getDeezerPlaylists();
+		displayedPlaylist = localPlaylists.get(0);
 
-		playlistBrowserTabPane.getSelectionModel().select(getCurrentPlaylistTab(displayedPlaylist));
-		fillPlaylistBrowserContainers(playlists, displayedPlaylist);
+		selectPlaylistBrowserTab(displayedPlaylist);
+		setPlaylistBrowserContainerItems(localPlaylistBrowserContainer, localPlaylists);
+		setPlaylistBrowserContainerItems(deezerPlaylistBrowserContainer, deezerPlaylists);
 		setPlaylistContainerItems(displayedPlaylist);
 	}
 
 	private ListView<PlaylistData> getCurrentPlaylistContainer(PlaylistData playlistData) {
-  	return PlaylistType.LOCAL.equals(playlistData.getPlaylistType()) ?
+  	return PlaylistType.LOCAL.equals(playlistData.getType()) ?
 				localPlaylistBrowserContainer : deezerPlaylistBrowserContainer;
 	}
 
-	private Tab getCurrentPlaylistTab(Playlist playlist) {
-		return PlaylistType.LOCAL.equals(playlist.getType()) ?
-				localPlaylistsTab : deezerPlaylistsTab;
+	private void selectPlaylistBrowserTab(PlaylistData playlistData) {
+  	if (playlistData != null) {
+			Tab activeTab = PlaylistType.LOCAL.equals(playlistData.getType()) ?
+					localPlaylistsTab : deezerPlaylistsTab;
+			playlistBrowserTabPane.getSelectionModel().select(activeTab);
+		}
 	}
 
 	private final class AudioPlayerEventAdapter extends DefaultAudioPlayerEventAdapter {
 
     @Override
-    public void changedPlaylist(Playlist playlist) {
-      setPlaylistContainerItems(playlist);
+    public void changedPlaylist(PlaylistData playlistData) {
+      setPlaylistContainerItems(playlistData);
     }
 
     @Override
-    public void createdNewPlaylist(Playlist newPlaylist) {
-			getCurrentPlaylistContainer(newPlaylist).getItems().add(newPlaylist);
-			getCurrentPlaylistContainer(newPlaylist).getSelectionModel().select(newPlaylist);
-			playlistBrowserTabPane.getSelectionModel().select(getCurrentPlaylistTab(newPlaylist));
-			setPlaylistContainerItems(newPlaylist);
+    public void createdNewPlaylist(PlaylistData playlistData) {
+			selectPlaylistBrowserTab(playlistData);
+    	getCurrentPlaylistContainer(playlistData).getItems().add(playlistData);
+			getCurrentPlaylistContainer(playlistData).getSelectionModel().select(playlistData);
+			setPlaylistContainerItems(playlistData);
     }
 
     @Override
-    public void changedTrackPosition(Playlist playlist, int trackPosition) {
-      if (playlist.equals(localPlaylistBrowserContainer.getSelectionModel().getSelectedItem())) {
-//        playlistContainer.getSelectionModel().select(trackPosition);
+    public void changedTrackPosition(PlaylistData playlistData, int trackIndex) {
+      if (playlistData.equals(localPlaylistBrowserContainer.getSelectionModel().getSelectedItem())) {
+//        playlistContainer.getSelectionModel().select(trackIndex);
         LOG.debug("Track position changed!");
       }
     }
 
     @Override
-    public void changedPlaylistItemTrack(int trackPosition, PlaylistItem mediaInfo) {
-      if ((trackPosition > 0) && (trackPosition < playlistContentContainer.getItems().size())) {
-        AudioTrackPlaylistItem playlistItem = (AudioTrackPlaylistItem) playlistContentContainer.getItems().get(trackPosition);
-        playlistItem.setNumber(mediaInfo.getTrackNumber());
-        playlistItem.setArtist(mediaInfo.getArtist());
-        playlistItem.setAlbum(mediaInfo.getAlbum());
-        playlistItem.setTitle(mediaInfo.getTitle());
-        playlistItem.setLength(trackTimeLabelBuilder.buildTimeString(mediaInfo.getLength()));
+    public void changedPlaylistTrackData(PlaylistData playlistData, TrackData trackData, int trackIndex) {
+    	// TODO: add check for display playlist
+      if ((trackIndex > 0) && (trackIndex < playlistContentContainer.getItems().size())) {
+        AudioTrackPlaylistItem playlistItem = playlistContentContainer.getItems().get(trackIndex);
+        playlistItem.setNumber(trackData.getTrackNumber());
+        playlistItem.setArtist(trackData.getArtist());
+        playlistItem.setAlbum(trackData.getAlbum());
+        playlistItem.setTitle(trackData.getTitle());
+        playlistItem.setLength(trackTimeLabelBuilder.buildTimeString(trackData.getLength()));
       } else {
-        LOG.error("Invalid track position [trackPosition = " + trackPosition + "], refresh track media info skipped");
+        LOG.error("Invalid track index, refresh track media info skipped: trackIndex = {}, playlist = {}",
+						trackIndex, playlistData);
       }
     }
 
     @Override
-    public void renamedPlaylist(Playlist playlistData) {
+    public void renamedPlaylist(PlaylistData playlistData) {
     	getCurrentPlaylistContainer(playlistData).refresh();
     }
 
