@@ -120,7 +120,7 @@ public class BussinesLogicFacadesIntegrationTest extends AbstractTestNGSpringCon
     assertTrue(CollectionUtils.isNotEmpty(secondPlaylist.getTracks()),
         "Tracks of playlist [" + SECOND_PLAYLIST_UID + "] null or empty.");
 
-    PlaylistData activePlaylist = musicLibraryLogicFacade.getActivePlaylist();
+    PlaylistData activePlaylist = musicLibraryLogicFacade.getActivePlaylist().orElse(null);
     assertNotNull(activePlaylist, "Active playlist must be specified.");
   }
 
@@ -200,7 +200,7 @@ public class BussinesLogicFacadesIntegrationTest extends AbstractTestNGSpringCon
    */
   @Test
   public void shouldAddAndDeletePlaylistItems() {
-    PlaylistData activePlaylist = musicLibraryLogicFacade.getActivePlaylist();
+    PlaylistData activePlaylist = musicLibraryLogicFacade.getActivePlaylist().orElse(null);
     assertNotNull(activePlaylist, "Active playlist is null.");
 
     int tracklistSize = activePlaylist.getTracks().size();

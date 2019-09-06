@@ -21,6 +21,7 @@ import javax.annotation.PostConstruct;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 
 /**
@@ -66,42 +67,48 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 
   @Override
   public void playTrack(String playlistUid, int trackIndex) {
-		PlaylistItem playlistTrack = playlistService.setActivePlaylistTrack(playlistUid, trackIndex);
+		Optional<PlaylistItem> playlistTrack = playlistService.setActivePlaylistTrack(playlistUid, trackIndex);
     playTrack(playlistTrack);
   }
 
   @Override
   public void playCurrentTrack() {
-		PlaylistItem playlistTrack = playlistService.getActivePlaylistTrack();
+		Optional<PlaylistItem> playlistTrack = playlistService.getActivePlaylistTrack();
 		playTrack(playlistTrack);
   }
 
   @Override
   public void playNextTrack() {
-		PlaylistItem playlistTrack = playlistService.nextActivePlaylistTrack();
+		Optional<PlaylistItem> playlistTrack = playlistService.nextActivePlaylistTrack();
 		playTrack(playlistTrack);
   }
 
   @Override
   public void playPrevTrack() {
-		PlaylistItem playlistTrack = playlistService.prevActivePlaylistTrack();
+		Optional<PlaylistItem> playlistTrack = playlistService.prevActivePlaylistTrack();
 		playTrack(playlistTrack);
   }
 
-  private void playTrack(PlaylistItem playlistTrack) {
-    String resourceUri = MediaSourceType.FILE.equals(playlistTrack.getSourceType()) ?
-        Paths.get(playlistTrack.getTrackPath()).toString() : playlistTrack.getTrackPath();
-    playerComponent.playMedia(resourceUri);
-    eventListeners.forEach(listener ->{
-    	Playlist playlist = playlistTrack.getPlaylist();
-			PlaylistData playlistData = dtoMapper.mapPlaylistData(playlist);
-			listener.changedTrackPosition(playlistData, playlist.getItems().indexOf(playlistTrack));
-    });
+  private void playTrack(Optional<PlaylistItem> playlistTrack) {
+  	if (playlistTrack.isPresent()) {
+			PlaylistItem track = playlistTrack.get();
+				String resourceUri = MediaSourceType.FILE.equals(track.getSourceType()) ?
+						Paths.get(track.getTrackPath()).toString() : track.getTrackPath();
+				playerComponent.playMedia(resourceUri);
+				eventListeners.forEach(listener -> {
+					Playlist playlist = track.getPlaylist();
+					PlaylistData playlistData = dtoMapper.mapPlaylistData(playlist);
+					listener.changedTrackPosition(playlistData, playlist.getItems().indexOf(track));
+				});
+		} else {
+  		LOG.error("No track set to play.");
+			// TODO: add event for empty track
+		}
   }
 
   @Override
-  public TrackData getActivePlaylistTrack() {
-    return dtoMapper.mapTrackData(playlistService.getActivePlaylistTrack());
+  public Optional<TrackData> getActivePlaylistTrack() {
+    return playlistService.getActivePlaylistTrack().map(o -> dtoMapper.mapTrackData(o));
   }
 
 	@Override
@@ -115,18 +122,18 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
     public void mediaMetaChanged(MediaPlayer mediaPlayer, int metaType) {
       if (mediaPlayer.isPlaying()) {  // media changes actual only when playing media
         LOG.debug("mediaMetaChanged");
-				PlaylistItem playlistTrack = playlistService.getActivePlaylistTrack();
-				if (playlistTrack != null) {
+				Optional<PlaylistItem> playlistTrack = playlistService.getActivePlaylistTrack();
+				playlistTrack.ifPresent(track -> {
 					MediaMeta mediaMeta = mediaPlayer.getMediaMeta();
 					if (mediaMeta != null) {
-						MediaSourceType sourceType = (playlistTrack.getSourceType() != null) ?
-								playlistTrack.getSourceType() : MediaSourceType.FILE;
-						mediaInfoDataLoaderService.fillMediaInfoFromMediaMeta(playlistTrack, mediaMeta, sourceType);
+						MediaSourceType sourceType = (track.getSourceType() != null) ?
+								track.getSourceType() : MediaSourceType.FILE;
+						mediaInfoDataLoaderService.fillMediaInfoFromMediaMeta(track, mediaMeta, sourceType);
 						mediaMeta.release();
 					} else {
 						LOG.error("Media info is null!");
 					}
-				}
+				});
       }
     }
   }

@@ -7,6 +7,7 @@ import ru.push.caudioplayer.core.playlist.dto.TrackData;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 
 public interface PlaylistService {
 
@@ -14,15 +15,15 @@ public interface PlaylistService {
 
 	List<Playlist> getPlaylists();
 
-	Playlist getActivePlaylist();
+	Optional<Playlist> getActivePlaylist();
 
-	PlaylistItem setActivePlaylistTrack(String playlistUid, int trackIndex);
+	Optional<PlaylistItem> setActivePlaylistTrack(String playlistUid, int trackIndex);
 
-	PlaylistItem getActivePlaylistTrack();
+	Optional<PlaylistItem> getActivePlaylistTrack();
 
-	PlaylistItem nextActivePlaylistTrack();
+	Optional<PlaylistItem> nextActivePlaylistTrack();
 
-	PlaylistItem prevActivePlaylistTrack();
+	Optional<PlaylistItem> prevActivePlaylistTrack();
 
 	Playlist createPlaylist(PlaylistType type);
 

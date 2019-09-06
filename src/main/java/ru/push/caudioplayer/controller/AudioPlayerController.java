@@ -20,6 +20,7 @@ import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -136,10 +137,11 @@ public class AudioPlayerController {
       }
     }
 
-    TrackData playlistTrack = audioPlayerFacade.getActivePlaylistTrack();
-    float playbackPosition = playerComponent.getPlaybackPosition();
-
-    updatePlaybackPosition(playbackPosition, playlistTrack.getLength());
+    Optional<TrackData> playlistTrack = audioPlayerFacade.getActivePlaylistTrack();
+		playlistTrack.ifPresent(track -> {
+			float playbackPosition = playerComponent.getPlaybackPosition();
+			updatePlaybackPosition(playbackPosition, track.getLength());
+		});
   }
 
   private final class UpdateUiRunnable implements Runnable {

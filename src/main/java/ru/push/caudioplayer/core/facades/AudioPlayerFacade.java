@@ -3,6 +3,8 @@ package ru.push.caudioplayer.core.facades;
 import ru.push.caudioplayer.core.facades.dto.TrackData;
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
 
+import java.util.Optional;
+
 /**
  * @author push <mez.e.s@yandex.ru>
  * @date 2/26/17
@@ -21,7 +23,7 @@ public interface AudioPlayerFacade {
 
   void playPrevTrack();
 
-	TrackData getActivePlaylistTrack();
+	Optional<TrackData> getActivePlaylistTrack();
 
 	void stopApplication();
 

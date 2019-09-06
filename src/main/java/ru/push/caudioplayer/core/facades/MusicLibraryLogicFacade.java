@@ -6,6 +6,7 @@ import ru.push.caudioplayer.core.facades.dto.LastFmTrackData;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public interface MusicLibraryLogicFacade {
@@ -38,7 +39,7 @@ public interface MusicLibraryLogicFacade {
 
 	List<PlaylistData> getDeezerPlaylists();
 
-	PlaylistData getActivePlaylist();
+	Optional<PlaylistData> getActivePlaylist();
 
 	void createLocalPlaylist();
 

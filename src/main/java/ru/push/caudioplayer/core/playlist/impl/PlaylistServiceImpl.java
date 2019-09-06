@@ -115,46 +115,46 @@ public class PlaylistServiceImpl implements PlaylistService {
 
 	@Override
 	public List<Playlist> getPlaylists() {
-		return (List<Playlist>) playlistMap.values();
+		return playlistMap.values().stream().collect(Collectors.toList());
 	}
 
 	@Override
-	public Playlist getActivePlaylist() {
-		return activePlaylist;
+	public Optional<Playlist> getActivePlaylist() {
+		return Optional.ofNullable(activePlaylist);
 	}
 
 	@Override
-	public PlaylistItem setActivePlaylistTrack(String playlistUid, int trackIndex) {
+	public Optional<PlaylistItem> setActivePlaylistTrack(String playlistUid, int trackIndex) {
 		if (!playlistMap.containsKey(playlistUid)) {
 			LOG.error("Playlist not found: uid = {}", playlistUid);
-			return null;
+			return Optional.empty();
 		}
 
 		Playlist playlist = playlistMap.get(playlistUid);
 		int playlistSize = playlist.getItems().size();
 		if ((trackIndex < 0) || (trackIndex >= playlistSize)) {
 			LOG.error("Invalid track index for playlist: playlist = {}, trackIndex = {}", playlist, trackIndex);
-			return null;
+			return Optional.empty();
 		}
 
 		activePlaylist = playlist;
 		activePlaylistTrackIndex = trackIndex;
 
-		return activePlaylist.getItems().get(activePlaylistTrackIndex);
+		return Optional.of(activePlaylist.getItems().get(activePlaylistTrackIndex));
 	}
 
 	@Override
-	public PlaylistItem getActivePlaylistTrack() {
+	public Optional<PlaylistItem> getActivePlaylistTrack() {
 		if ((activePlaylist == null) || (activePlaylistTrackIndex == null)) {
-			return null;
+			return Optional.empty();
 		}
-		return activePlaylist.getItems().get(activePlaylistTrackIndex);
+		return Optional.of(activePlaylist.getItems().get(activePlaylistTrackIndex));
 	}
 
 	@Override
-	public PlaylistItem nextActivePlaylistTrack() {
+	public Optional<PlaylistItem> nextActivePlaylistTrack() {
 		if ((activePlaylist == null) || (activePlaylistTrackIndex == null)) {
-			return null;
+			return Optional.empty();
 		}
 
 		if (activePlaylistTrackIndex < (activePlaylist.getItems().size() - 1)) {
@@ -163,13 +163,13 @@ public class PlaylistServiceImpl implements PlaylistService {
 			activePlaylistTrackIndex = 0;
 		}
 
-		return activePlaylist.getItems().get(activePlaylistTrackIndex);
+		return Optional.of(activePlaylist.getItems().get(activePlaylistTrackIndex));
 	}
 
 	@Override
-	public PlaylistItem prevActivePlaylistTrack() {
+	public Optional<PlaylistItem> prevActivePlaylistTrack() {
 		if ((activePlaylist == null) || (activePlaylistTrackIndex == null)) {
-			return null;
+			return Optional.empty();
 		}
 
 		if (activePlaylistTrackIndex > 0) {
@@ -178,7 +178,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 			activePlaylistTrackIndex = activePlaylist.getItems().size() - 1;
 		}
 
-		return activePlaylist.getItems().get(activePlaylistTrackIndex);
+		return Optional.of(activePlaylist.getItems().get(activePlaylistTrackIndex));
 	}
 
 	@Override

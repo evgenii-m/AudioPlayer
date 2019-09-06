@@ -100,7 +100,7 @@ public class PlaylistController {
 
 		List<PlaylistData> localPlaylists = musicLibraryLogicFacade.getLocalPlaylists();
 		List<PlaylistData> deezerPlaylists = musicLibraryLogicFacade.getDeezerPlaylists();
-		displayedPlaylist = localPlaylists.get(0);
+//		displayedPlaylist = localPlaylists.get(0);
 
 		renamePopupScene = new Scene(renamePopupView.getView());
 		confirmActionPopupScene = new Scene(confirmActionPopupView.getView());
@@ -127,8 +127,10 @@ public class PlaylistController {
 		// bind playlist container mouse click event to play track action
     playlistContentContainer.setOnMouseClicked(mouseEvent -> {
       if (mouseEvent.getButton().equals(MouseButton.PRIMARY) && (mouseEvent.getClickCount() == 2)) {
-        int trackPosition = playlistContentContainer.getFocusModel().getFocusedCell().getRow();
-        audioPlayerFacade.playTrack(displayedPlaylist.getUid(), trackPosition);
+      	if (displayedPlaylist != null) {
+					int trackPosition = playlistContentContainer.getFocusModel().getFocusedCell().getRow();
+					audioPlayerFacade.playTrack(displayedPlaylist.getUid(), trackPosition);
+				}
       }
     });
 
@@ -260,8 +262,9 @@ public class PlaylistController {
 		if (CollectionUtils.isNotEmpty(playlists)) {
 			container.getItems().clear();
 			container.getItems().addAll(playlists);
-			if ((displayedPlaylist != null) && playlists.contains(displayedPlaylist))
-			container.getSelectionModel().select(displayedPlaylist);
+			if ((displayedPlaylist != null) && playlists.contains(displayedPlaylist)) {
+				container.getSelectionModel().select(displayedPlaylist);
+			}
 		}
 	}
 
@@ -320,11 +323,13 @@ public class PlaylistController {
       ContextMenu contextMenu = new ContextMenu();
       MenuItem lookupOnLastfmMenuItem = new MenuItem("Lookup on last.fm");
 
-      MenuItem removeMenuItem = new MenuItem("Delete");
-      removeMenuItem.setOnAction(event ->
+			MenuItem removeMenuItem = new MenuItem("Delete");
+			removeMenuItem.setOnAction(event -> {
+				if (displayedPlaylist != null) {
 					musicLibraryLogicFacade.deleteItemsFromPlaylist(displayedPlaylist.getUid(),
-							playlistContentContainer.getSelectionModel().getSelectedIndices())
-      );
+							playlistContentContainer.getSelectionModel().getSelectedIndices());
+				}
+			});
 
       MenuItem propertiesMenuItem = new MenuItem("Properties");
       MenuItem moveToNewMenuItem = new MenuItem("Move to new playlist");
@@ -344,19 +349,21 @@ public class PlaylistController {
   }
 
   private void setPlaylistContainerItems(PlaylistData playlistData) {
-    playlistContentContainer.getItems().clear();
-    playlistContentContainer.getItems().addAll(
-        playlistData.getTracks().stream()
-            .map(trackData -> {
-              if ((trackData != null) && (trackData.getTitle() != null)) {
-                return new AudioTrackPlaylistItem(trackData.getTrackNumber(),
-                    trackData.getArtist(), trackData.getAlbum(), trackData.getTitle(),
-                    trackTimeLabelBuilder.buildTimeString(trackData.getLength()));
-              } else {
-                return new AudioTrackPlaylistItem();
-              }
-            }).collect(Collectors.toList())
-    );
+  	if (playlistData != null) {
+			playlistContentContainer.getItems().clear();
+			playlistContentContainer.getItems().addAll(
+					playlistData.getTracks().stream()
+							.map(trackData -> {
+								if ((trackData != null) && (trackData.getTitle() != null)) {
+									return new AudioTrackPlaylistItem(trackData.getTrackNumber(),
+											trackData.getArtist(), trackData.getAlbum(), trackData.getTitle(),
+											trackTimeLabelBuilder.buildTimeString(trackData.getLength()));
+								} else {
+									return new AudioTrackPlaylistItem();
+								}
+							}).collect(Collectors.toList())
+			);
+		}
   }
 
   private void savePlaylistContainerViewConfiguration() {
@@ -374,7 +381,7 @@ public class PlaylistController {
 
   @FXML
 	public void createNewPlaylist(ActionEvent actionEvent) {
-  	if (PlaylistType.LOCAL.equals(displayedPlaylist.getType())) {
+  	if ((displayedPlaylist == null) || PlaylistType.LOCAL.equals(displayedPlaylist.getType())) {
 			musicLibraryLogicFacade.createLocalPlaylist();
 		} else if (PlaylistType.DEEZER.equals(displayedPlaylist.getType())) {
   		musicLibraryLogicFacade.createDeezerPlaylist();
@@ -387,7 +394,7 @@ public class PlaylistController {
 
 		List<PlaylistData> localPlaylists = musicLibraryLogicFacade.getLocalPlaylists();
 		List<PlaylistData> deezerPlaylists = musicLibraryLogicFacade.getDeezerPlaylists();
-		displayedPlaylist = localPlaylists.get(0);
+//		displayedPlaylist = localPlaylists.get(0);
 
 		selectPlaylistBrowserTab(displayedPlaylist);
 		setPlaylistBrowserContainerItems(localPlaylistBrowserContainer, localPlaylists);
