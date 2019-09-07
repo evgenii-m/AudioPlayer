@@ -5,8 +5,9 @@ import ru.push.caudioplayer.core.facades.dto.PlaylistData;
 import ru.push.caudioplayer.core.facades.dto.PlaylistType;
 import ru.push.caudioplayer.core.facades.dto.TrackData;
 import ru.push.caudioplayer.core.playlist.domain.Playlist;
-import ru.push.caudioplayer.core.playlist.domain.PlaylistItem;
+import ru.push.caudioplayer.core.playlist.domain.PlaylistTrack;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,14 +20,18 @@ class DtoMapper {
 	}
 
 	List<PlaylistData> mapPlaylistData(List<Playlist> list) {
-		return list.stream().map(this::mapPlaylistData).collect(Collectors.toList());
+		return (list != null) ?
+				list.stream().map(this::mapPlaylistData).collect(Collectors.toList()) :
+				new ArrayList<>();
 	}
 
-	TrackData mapTrackData(PlaylistItem o) {
+	TrackData mapTrackData(PlaylistTrack o) {
 		return new TrackData(o.getArtist(), o.getAlbum(), o.getDate(), o.getTitle(), o.getTrackNumber(), o.getLength());
 	}
 
-	List<TrackData> mapTrackData(List<PlaylistItem> list) {
-		return list.stream().map(this::mapTrackData).collect(Collectors.toList());
+	List<TrackData> mapTrackData(List<PlaylistTrack> list) {
+		return (list != null) ?
+				list.stream().map(this::mapTrackData).collect(Collectors.toList()) :
+				new ArrayList<>();
 	}
 }

@@ -166,9 +166,9 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 
 	@Override
 	public void deletePlaylist(String playlistUid) {
-		boolean result = playlistService.deletePlaylist(playlistUid);
-		if (result) {
-			// TODO: add event for delete playlist
+		Playlist result = playlistService.deletePlaylist(playlistUid);
+		if (result != null) {
+			eventListeners.forEach(l -> l.deletedPlaylist(dtoMapper.mapPlaylistData(result)));
 		} else {
 			// TODO: add event for display error
 		}

@@ -1,7 +1,6 @@
 package ru.push.caudioplayer.core.playlist.domain;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -12,7 +11,7 @@ public class Playlist {
 	private PlaylistType type;
 	private String link;
 	private boolean readOnly;
-	private List<PlaylistItem> items;
+	private List<PlaylistTrack> items;
 //	private Date createDate;
 //	private Date lastUpdateDate;
 
@@ -28,7 +27,7 @@ public class Playlist {
 		this.items = new ArrayList<>();
 	}
 
-	public Playlist(String uid, String title, PlaylistType type, String link, boolean readOnly, List<PlaylistItem> items) {
+	public Playlist(String uid, String title, PlaylistType type, String link, boolean readOnly, List<PlaylistTrack> items) {
 		this.uid = uid;
 		this.title = title;
 		this.type = type;
@@ -86,11 +85,11 @@ public class Playlist {
 		this.readOnly = readOnly;
 	}
 
-	public List<PlaylistItem> getItems() {
+	public List<PlaylistTrack> getItems() {
 		return items;
 	}
 
-	public void setItems(List<PlaylistItem> items) {
+	public void setItems(List<PlaylistTrack> items) {
 		this.items = items;
 		this.items.forEach(o -> o.setPlaylist(this));
 	}

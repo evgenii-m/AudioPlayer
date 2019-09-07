@@ -18,4 +18,6 @@ public interface AudioPlayerEventListener {
   void changedPlaylistTrackData(PlaylistData playlistData, TrackData trackData, int trackIndex);
 
   void renamedPlaylist(PlaylistData playlistData);
+
+  void deletedPlaylist(PlaylistData playlistData);
 }

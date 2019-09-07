@@ -10,7 +10,7 @@ import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
 import ru.push.caudioplayer.core.medialoader.impl.DefaultMediaInfoDataLoaderService;
 import ru.push.caudioplayer.core.playlist.domain.MediaSourceType;
 import ru.push.caudioplayer.core.playlist.domain.Playlist;
-import ru.push.caudioplayer.core.playlist.domain.PlaylistItem;
+import ru.push.caudioplayer.core.playlist.domain.PlaylistTrack;
 import uk.co.caprica.vlcj.discovery.NativeDiscovery;
 
 import java.io.IOException;
@@ -72,7 +72,7 @@ public class AudioTrackDataLoaderServiceUnitTest {
   @Test(dataProvider = "correctMediaFilesData")
   public void testLoadFromFile(String mediaFilePath, String expectedArtist, String expectedAlbum,
                                String expectedTitle) throws Exception {
-    PlaylistItem audioTrackData = mediaInfoDataLoaderService.load(new Playlist(), mediaFilePath, MediaSourceType.FILE);
+    PlaylistTrack audioTrackData = mediaInfoDataLoaderService.load(new Playlist(), mediaFilePath, MediaSourceType.FILE);
 
     assertEquals(audioTrackData.getTrackPath(), mediaFilePath, "Unexpected track path.");
     assertEquals(audioTrackData.getArtist(), expectedArtist, "Unexpected artist.");
@@ -83,7 +83,7 @@ public class AudioTrackDataLoaderServiceUnitTest {
 
   @Test(dataProvider = "correctMediaHttpStreamsData")
   public void testLoadFromHttpStream(String mediaHttpStreamPath, String expectedStationName) throws Exception {
-		PlaylistItem audioTrackData = mediaInfoDataLoaderService.load(new Playlist(), mediaHttpStreamPath, MediaSourceType.HTTP_STREAM);
+		PlaylistTrack audioTrackData = mediaInfoDataLoaderService.load(new Playlist(), mediaHttpStreamPath, MediaSourceType.HTTP_STREAM);
 
     assertEquals(audioTrackData.getTrackPath(), mediaHttpStreamPath, "Unexpected track path.");
     assertTrue(StringUtils.isNotEmpty(audioTrackData.getArtist()), "Artist field must not be empty.");

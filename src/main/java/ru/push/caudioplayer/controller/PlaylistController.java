@@ -122,7 +122,7 @@ public class PlaylistController {
     setPlaylistContainerColumns(playlistContentContainer,
 				applicationConfigService.getPlaylistContainerViewConfigurations());
 		setPlaylistContentContainerRowFactory();
-		setPlaylistContainerItems(displayedPlaylist);
+		setPlaylistContentContainerItems(displayedPlaylist);
 
 		// bind playlist container mouse click event to play track action
     playlistContentContainer.setOnMouseClicked(mouseEvent -> {
@@ -148,7 +148,7 @@ public class PlaylistController {
 						.addListener((observable, oldValue, newValue) -> {
 							if (newValue != null) {
 								displayedPlaylist = newValue;
-								setPlaylistContainerItems(displayedPlaylist);
+								setPlaylistContentContainerItems(displayedPlaylist);
 							}
 						})
 		);
@@ -348,7 +348,7 @@ public class PlaylistController {
     });
   }
 
-  private void setPlaylistContainerItems(PlaylistData playlistData) {
+  private void setPlaylistContentContainerItems(PlaylistData playlistData) {
   	if (playlistData != null) {
 			playlistContentContainer.getItems().clear();
 			playlistContentContainer.getItems().addAll(
@@ -399,7 +399,7 @@ public class PlaylistController {
 		selectPlaylistBrowserTab(displayedPlaylist);
 		setPlaylistBrowserContainerItems(localPlaylistBrowserContainer, localPlaylists);
 		setPlaylistBrowserContainerItems(deezerPlaylistBrowserContainer, deezerPlaylists);
-		setPlaylistContainerItems(displayedPlaylist);
+		setPlaylistContentContainerItems(displayedPlaylist);
 	}
 
 	private ListView<PlaylistData> getCurrentPlaylistContainer(PlaylistData playlistData) {
@@ -419,7 +419,7 @@ public class PlaylistController {
 
     @Override
     public void changedPlaylist(PlaylistData playlistData) {
-      setPlaylistContainerItems(playlistData);
+      setPlaylistContentContainerItems(playlistData);
     }
 
     @Override
@@ -427,7 +427,7 @@ public class PlaylistController {
 			selectPlaylistBrowserTab(playlistData);
     	getCurrentPlaylistContainer(playlistData).getItems().add(playlistData);
 			getCurrentPlaylistContainer(playlistData).getSelectionModel().select(playlistData);
-			setPlaylistContainerItems(playlistData);
+			setPlaylistContentContainerItems(playlistData);
     }
 
     @Override
@@ -456,8 +456,24 @@ public class PlaylistController {
 
     @Override
     public void renamedPlaylist(PlaylistData playlistData) {
-    	getCurrentPlaylistContainer(playlistData).refresh();
+			ListView<PlaylistData> container = getCurrentPlaylistContainer(playlistData);
+			container.getItems().stream()
+					.filter(p -> p.getUid().equals(playlistData.getUid())).findFirst()
+					.ifPresent(p -> {
+						int itemIndex = container.getItems().indexOf(p);
+						container.getItems().set(itemIndex, playlistData);
+					});
+			container.refresh();
     }
 
-  }
+		@Override
+		public void deletedPlaylist(PlaylistData playlistData) {
+			ListView<PlaylistData> container = getCurrentPlaylistContainer(playlistData);
+			container.getItems().stream()
+					.filter(p -> p.getUid().equals(playlistData.getUid())).findFirst()
+					.ifPresent(p -> container.getItems().remove(p));
+			container.refresh();
+		}
+
+	}
 }

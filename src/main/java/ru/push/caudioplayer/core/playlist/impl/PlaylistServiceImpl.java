@@ -15,7 +15,7 @@ import ru.push.caudioplayer.core.playlist.PlaylistService;
 import ru.push.caudioplayer.core.playlist.dao.LocalPlaylistRepository;
 import ru.push.caudioplayer.core.playlist.dao.model.PlaylistEntity;
 import ru.push.caudioplayer.core.playlist.domain.Playlist;
-import ru.push.caudioplayer.core.playlist.domain.PlaylistItem;
+import ru.push.caudioplayer.core.playlist.domain.PlaylistTrack;
 import ru.push.caudioplayer.core.playlist.domain.PlaylistType;
 import ru.push.caudioplayer.core.playlist.dto.TrackData;
 import ru.push.caudioplayer.utils.DateTimeUtils;
@@ -53,7 +53,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 	@Autowired
 	private MediaInfoDataLoaderService mediaInfoDataLoaderService;
 
-	private PlaylistConverter playlistConverter = new PlaylistConverter();
+	private PlaylistMapper playlistMapper = new PlaylistMapper();
 
 	private Map<String, Playlist> playlistMap = new HashMap<>();
 	private Playlist deezerFavoritesPlaylist;
@@ -75,7 +75,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 
 		List<String> localPlaylistsUid = applicationConfigService.getLocalPlaylistsUid();
 		List<PlaylistEntity> playlistsEntity = localPlaylistRepository.findPlaylists(localPlaylistsUid);
-		List<Playlist> playlists = playlistConverter.mapPlaylist(playlistsEntity);
+		List<Playlist> playlists = playlistMapper.mapPlaylist(playlistsEntity);
 		return playlists;
 	}
 
@@ -85,7 +85,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 			Optional<Long> favoritesPlaylistId = playlistsDeezer.stream()
 					.filter(p -> p.getIs_loved_track())
 					.map(p -> p.getId()).findFirst();
-			List<Playlist> playlists = playlistConverter.mapPlaylistDeezer(playlistsDeezer);
+			List<Playlist> playlists = playlistMapper.mapPlaylistDeezer(playlistsDeezer);
 
 			favoritesPlaylistId.ifPresent(
 					id -> playlists.stream()
@@ -124,7 +124,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 	}
 
 	@Override
-	public Optional<PlaylistItem> setActivePlaylistTrack(String playlistUid, int trackIndex) {
+	public Optional<PlaylistTrack> setActivePlaylistTrack(String playlistUid, int trackIndex) {
 		if (!playlistMap.containsKey(playlistUid)) {
 			LOG.error("Playlist not found: uid = {}", playlistUid);
 			return Optional.empty();
@@ -144,7 +144,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 	}
 
 	@Override
-	public Optional<PlaylistItem> getActivePlaylistTrack() {
+	public Optional<PlaylistTrack> getActivePlaylistTrack() {
 		if ((activePlaylist == null) || (activePlaylistTrackIndex == null)) {
 			return Optional.empty();
 		}
@@ -152,7 +152,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 	}
 
 	@Override
-	public Optional<PlaylistItem> nextActivePlaylistTrack() {
+	public Optional<PlaylistTrack> nextActivePlaylistTrack() {
 		if ((activePlaylist == null) || (activePlaylistTrackIndex == null)) {
 			return Optional.empty();
 		}
@@ -167,7 +167,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 	}
 
 	@Override
-	public Optional<PlaylistItem> prevActivePlaylistTrack() {
+	public Optional<PlaylistTrack> prevActivePlaylistTrack() {
 		if ((activePlaylist == null) || (activePlaylistTrackIndex == null)) {
 			return Optional.empty();
 		}
@@ -191,7 +191,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 			case LOCAL:
 				uid = UUID.randomUUID().toString();
 				newPlaylist = new Playlist(uid, newPlaylistTitle, PlaylistType.LOCAL, null);
-				PlaylistEntity newPlaylistEntity = playlistConverter.inverseMapPlaylist(newPlaylist);
+				PlaylistEntity newPlaylistEntity = playlistMapper.inverseMapPlaylist(newPlaylist);
 				boolean saveResult = localPlaylistRepository.savePlaylist(newPlaylistEntity);
 				if (saveResult) {
 					playlistMap.put(uid, newPlaylist);
@@ -217,16 +217,16 @@ public class PlaylistServiceImpl implements PlaylistService {
 	}
 
 	@Override
-	public boolean deletePlaylist(String playlistUid) {
+	public Playlist deletePlaylist(String playlistUid) {
 		if (!playlistMap.containsKey(playlistUid)) {
 			LOG.error("Playlist not found: uid = {}", playlistUid);
-			return false;
+			return null;
 		}
 
 		Playlist playlist = playlistMap.get(playlistUid);
 		if (playlist.isReadOnly()) {
 			LOG.warn("Read only playlist cannot be deleted: uid = {}", playlistUid);
-			return false;
+			return null;
 		}
 
 		boolean deleteResult = false;
@@ -252,8 +252,11 @@ public class PlaylistServiceImpl implements PlaylistService {
 		if (deleteResult) {
 			playlistMap.remove(playlistUid);
 			LOG.info("Deleted playlist: {}", playlist);
+			return playlist;
+		} else {
+			LOG.warn("Delete playlist fails: {}", playlistUid);
+			return null;
 		}
-		return deleteResult;
 	}
 
 	@Override
@@ -273,7 +276,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 		switch (playlist.getType()) {
 
 			case LOCAL:
-				PlaylistEntity playlistEntity = playlistConverter.inverseMapPlaylist(playlist);
+				PlaylistEntity playlistEntity = playlistMapper.inverseMapPlaylist(playlist);
 				playlistEntity.setTitle(newTitle);
 				renameResult = localPlaylistRepository.savePlaylist(playlistEntity);
 				break;
@@ -300,7 +303,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 	@Override
 	public boolean exportPlaylistToFile(String playlistUid, String folderPath) {
 		Playlist playlist = playlistMap.get(playlistUid);
-		PlaylistEntity playlistEntity = playlistConverter.inverseMapPlaylist(playlist);
+		PlaylistEntity playlistEntity = playlistMapper.inverseMapPlaylist(playlist);
 		File file = new File(folderPath + playlist.getExportFileName());
 		try {
 			XmlUtils.marshalDocument(playlistEntity, file, PlaylistEntity.class.getPackage().getName());
@@ -332,10 +335,10 @@ public class PlaylistServiceImpl implements PlaylistService {
 		List<String> mediaPaths = files.stream()
 				.map(File::getAbsolutePath)
 				.collect(Collectors.toList());
-		List<PlaylistItem> newItems = mediaInfoDataLoaderService.load(playlist, mediaPaths, MediaSourceType.FILE);
+		List<PlaylistTrack> newItems = mediaInfoDataLoaderService.load(playlist, mediaPaths, MediaSourceType.FILE);
 
 		playlist.getItems().addAll(newItems);
-		localPlaylistRepository.savePlaylist(playlistConverter.inverseMapPlaylist(playlist));
+		localPlaylistRepository.savePlaylist(playlistMapper.inverseMapPlaylist(playlist));
 
 		LOG.info("New items added to playlist: playlist = {}", playlist);
 		return playlist;
@@ -370,10 +373,10 @@ public class PlaylistServiceImpl implements PlaylistService {
 				})
 				.filter(Objects::nonNull)
 				.collect(Collectors.toList());
-		List<PlaylistItem> newItems = mediaInfoDataLoaderService.load(playlist, mediaPaths, MediaSourceType.HTTP_STREAM);
+		List<PlaylistTrack> newItems = mediaInfoDataLoaderService.load(playlist, mediaPaths, MediaSourceType.HTTP_STREAM);
 
 		playlist.getItems().addAll(newItems);
-		localPlaylistRepository.savePlaylist(playlistConverter.inverseMapPlaylist(playlist));
+		localPlaylistRepository.savePlaylist(playlistMapper.inverseMapPlaylist(playlist));
 
 		LOG.info("New items added to playlist: {}", playlist);
 		return playlist;
@@ -418,7 +421,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 				Long trackId = searchedTrack.getId();
 				boolean result = deezerApiService.addTrackToPlaylist(playlistId, trackId);
 				if (result) {
-					PlaylistItem newItem = playlistConverter.mapPlaylistItemDeezer(searchedTrack);
+					PlaylistTrack newItem = playlistMapper.mapPlaylistItemDeezer(searchedTrack);
 					playlist.getItems().add(newItem);
 					LOG.info("New items added to playlist: {}", playlist);
 				} else {
@@ -456,7 +459,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 				itemsIndexes.stream()
 						.filter(itemIndex -> (itemIndex >= 0) && (itemIndex < playlist.getItems().size()))
 						.forEach(itemIndex -> playlist.getItems().remove(itemIndex.intValue()));
-				localPlaylistRepository.savePlaylist(playlistConverter.inverseMapPlaylist(playlist));
+				localPlaylistRepository.savePlaylist(playlistMapper.inverseMapPlaylist(playlist));
 				break;
 
 			case DEEZER:

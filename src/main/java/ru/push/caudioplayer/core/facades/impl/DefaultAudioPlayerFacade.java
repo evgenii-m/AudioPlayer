@@ -12,7 +12,7 @@ import ru.push.caudioplayer.core.medialoader.MediaInfoDataLoaderService;
 import ru.push.caudioplayer.core.playlist.domain.MediaSourceType;
 import ru.push.caudioplayer.core.playlist.PlaylistService;
 import ru.push.caudioplayer.core.playlist.domain.Playlist;
-import ru.push.caudioplayer.core.playlist.domain.PlaylistItem;
+import ru.push.caudioplayer.core.playlist.domain.PlaylistTrack;
 import uk.co.caprica.vlcj.player.MediaMeta;
 import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
@@ -67,31 +67,31 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 
   @Override
   public void playTrack(String playlistUid, int trackIndex) {
-		Optional<PlaylistItem> playlistTrack = playlistService.setActivePlaylistTrack(playlistUid, trackIndex);
+		Optional<PlaylistTrack> playlistTrack = playlistService.setActivePlaylistTrack(playlistUid, trackIndex);
     playTrack(playlistTrack);
   }
 
   @Override
   public void playCurrentTrack() {
-		Optional<PlaylistItem> playlistTrack = playlistService.getActivePlaylistTrack();
+		Optional<PlaylistTrack> playlistTrack = playlistService.getActivePlaylistTrack();
 		playTrack(playlistTrack);
   }
 
   @Override
   public void playNextTrack() {
-		Optional<PlaylistItem> playlistTrack = playlistService.nextActivePlaylistTrack();
+		Optional<PlaylistTrack> playlistTrack = playlistService.nextActivePlaylistTrack();
 		playTrack(playlistTrack);
   }
 
   @Override
   public void playPrevTrack() {
-		Optional<PlaylistItem> playlistTrack = playlistService.prevActivePlaylistTrack();
+		Optional<PlaylistTrack> playlistTrack = playlistService.prevActivePlaylistTrack();
 		playTrack(playlistTrack);
   }
 
-  private void playTrack(Optional<PlaylistItem> playlistTrack) {
+  private void playTrack(Optional<PlaylistTrack> playlistTrack) {
   	if (playlistTrack.isPresent()) {
-			PlaylistItem track = playlistTrack.get();
+			PlaylistTrack track = playlistTrack.get();
 				String resourceUri = MediaSourceType.FILE.equals(track.getSourceType()) ?
 						Paths.get(track.getTrackPath()).toString() : track.getTrackPath();
 				playerComponent.playMedia(resourceUri);
@@ -122,7 +122,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
     public void mediaMetaChanged(MediaPlayer mediaPlayer, int metaType) {
       if (mediaPlayer.isPlaying()) {  // media changes actual only when playing media
         LOG.debug("mediaMetaChanged");
-				Optional<PlaylistItem> playlistTrack = playlistService.getActivePlaylistTrack();
+				Optional<PlaylistTrack> playlistTrack = playlistService.getActivePlaylistTrack();
 				playlistTrack.ifPresent(track -> {
 					MediaMeta mediaMeta = mediaPlayer.getMediaMeta();
 					if (mediaMeta != null) {

@@ -1,7 +1,7 @@
 package ru.push.caudioplayer.core.playlist;
 
 import ru.push.caudioplayer.core.playlist.domain.Playlist;
-import ru.push.caudioplayer.core.playlist.domain.PlaylistItem;
+import ru.push.caudioplayer.core.playlist.domain.PlaylistTrack;
 import ru.push.caudioplayer.core.playlist.domain.PlaylistType;
 import ru.push.caudioplayer.core.playlist.dto.TrackData;
 
@@ -17,17 +17,17 @@ public interface PlaylistService {
 
 	Optional<Playlist> getActivePlaylist();
 
-	Optional<PlaylistItem> setActivePlaylistTrack(String playlistUid, int trackIndex);
+	Optional<PlaylistTrack> setActivePlaylistTrack(String playlistUid, int trackIndex);
 
-	Optional<PlaylistItem> getActivePlaylistTrack();
+	Optional<PlaylistTrack> getActivePlaylistTrack();
 
-	Optional<PlaylistItem> nextActivePlaylistTrack();
+	Optional<PlaylistTrack> nextActivePlaylistTrack();
 
-	Optional<PlaylistItem> prevActivePlaylistTrack();
+	Optional<PlaylistTrack> prevActivePlaylistTrack();
 
 	Playlist createPlaylist(PlaylistType type);
 
-	boolean deletePlaylist(String playlistUid);
+	Playlist deletePlaylist(String playlistUid);
 
 	Playlist renamePlaylist(String playlistUid, String newTitle);
 
