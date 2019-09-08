@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import ru.push.caudioplayer.core.playlist.dao.LocalPlaylistRepository;
-import ru.push.caudioplayer.core.playlist.dao.model.PlaylistEntity;
+import ru.push.caudioplayer.core.playlist.dao.entity.PlaylistEntity;
 import ru.push.caudioplayer.utils.XmlUtils;
 
 import javax.xml.bind.JAXBException;

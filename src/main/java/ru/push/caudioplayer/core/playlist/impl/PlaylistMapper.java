@@ -1,9 +1,12 @@
 package ru.push.caudioplayer.core.playlist.impl;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import ru.push.caudioplayer.core.config.dto.PlaylistItemData;
+import ru.push.caudioplayer.core.medialoader.MediaInfoDataLoaderService;
 import ru.push.caudioplayer.core.playlist.model.MediaSourceType;
-import ru.push.caudioplayer.core.playlist.dao.model.PlaylistEntity;
-import ru.push.caudioplayer.core.playlist.dao.model.PlaylistItemEntity;
+import ru.push.caudioplayer.core.playlist.dao.entity.PlaylistEntity;
+import ru.push.caudioplayer.core.playlist.dao.entity.PlaylistItemEntity;
 import ru.push.caudioplayer.core.playlist.model.Playlist;
 import ru.push.caudioplayer.core.playlist.model.PlaylistTrack;
 import ru.push.caudioplayer.core.playlist.model.PlaylistType;
@@ -13,9 +16,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Component
 class PlaylistMapper {
 
 	private static final long DEEZER_DURATION_FACTOR = 1000;
+
+	@Autowired
+	private MediaInfoDataLoaderService mediaLoaderService;
+
 
 	// Playlist mapping
 
@@ -72,10 +80,17 @@ class PlaylistMapper {
 	// PlaylistTrack mapping
 
 	PlaylistTrack mapPlaylistItem(PlaylistItemEntity o) {
-		return new PlaylistTrack(MediaSourceType.valueOf(o.getSourceType()),
-				o.getArtist(), o.getAlbum(), o.getDate(), o.getTitle(),
-				o.getTrackId(), o.getTrackNumber(), o.getLength(), o.getTrackPath()
-		);
+		MediaSourceType sourceType = MediaSourceType.valueOf(o.getSourceType());
+		if (MediaSourceType.HTTP_STREAM.equals(sourceType)) {
+			PlaylistTrack track = new PlaylistTrack(sourceType, o.getTrackPath());
+			mediaLoaderService.fillMediaInfoFromHttpStreamByDecoder(track, track.getTrackPath());
+			return track;
+		} else {
+			return new PlaylistTrack(sourceType,
+					o.getArtist(), o.getAlbum(), o.getDate(), o.getTitle(),
+					o.getTrackId(), o.getTrackNumber(), o.getLength(), o.getTrackPath()
+			);
+		}
 	}
 
 	PlaylistTrack mapPlaylistItemDeezer(ru.push.caudioplayer.core.deezer.model.Track o) {
@@ -86,9 +101,14 @@ class PlaylistMapper {
 	}
 
 	PlaylistItemEntity inverseMapPlaylistItem(PlaylistTrack o) {
-		return new PlaylistItemEntity(o.getSourceType().value(),
-				o.getArtist(), o.getAlbum(), o.getDate(), o.getTitle(),
-				o.getTrackId(), o.getTrackNumber(), o.getLength(), o.getTrackPath());
+		MediaSourceType sourceType = o.getSourceType();
+		if (MediaSourceType.HTTP_STREAM.equals(sourceType)) {
+			return new PlaylistItemEntity(sourceType.value(), o.getTrackPath());
+		} else {
+			return new PlaylistItemEntity(sourceType.value(),
+					o.getArtist(), o.getAlbum(), o.getDate(), o.getTitle(),
+					o.getTrackId(), o.getTrackNumber(), o.getLength(), o.getTrackPath());
+		}
 	}
 
 	List<PlaylistTrack> mapPlaylistItem(List<PlaylistItemEntity> list) {

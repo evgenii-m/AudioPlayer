@@ -23,6 +23,11 @@ public class PlaylistTrack {
 		this.playlist = playlist;
 	}
 
+	public PlaylistTrack(MediaSourceType sourceType, String trackPath) {
+		this.sourceType = sourceType;
+		this.trackPath = trackPath;
+	}
+
 	public PlaylistTrack(MediaSourceType sourceType, String artist, String album, String date, String title,
 											 String trackId, String trackNumber, long length, String trackPath) {
 		this.sourceType = sourceType;

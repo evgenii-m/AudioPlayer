@@ -1,4 +1,4 @@
-package ru.push.caudioplayer.core.playlist.dao.model;
+package ru.push.caudioplayer.core.playlist.dao.entity;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -42,6 +42,11 @@ public class PlaylistItemEntity implements Serializable {
 
 
 	public PlaylistItemEntity() {
+	}
+
+	public PlaylistItemEntity(String sourceType, String trackPath) {
+		this.sourceType = sourceType;
+		this.trackPath = trackPath;
 	}
 
 	public PlaylistItemEntity(String sourceType, String artist, String album, String date, String title,

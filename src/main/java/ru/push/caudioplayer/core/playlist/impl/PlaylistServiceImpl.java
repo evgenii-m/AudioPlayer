@@ -14,7 +14,7 @@ import ru.push.caudioplayer.core.medialoader.MediaInfoDataLoaderService;
 import ru.push.caudioplayer.core.playlist.model.MediaSourceType;
 import ru.push.caudioplayer.core.playlist.PlaylistService;
 import ru.push.caudioplayer.core.playlist.dao.LocalPlaylistRepository;
-import ru.push.caudioplayer.core.playlist.dao.model.PlaylistEntity;
+import ru.push.caudioplayer.core.playlist.dao.entity.PlaylistEntity;
 import ru.push.caudioplayer.core.playlist.model.Playlist;
 import ru.push.caudioplayer.core.playlist.model.PlaylistTrack;
 import ru.push.caudioplayer.core.playlist.model.PlaylistType;
@@ -53,8 +53,8 @@ public class PlaylistServiceImpl implements PlaylistService {
 	private LocalPlaylistRepository localPlaylistRepository;
 	@Autowired
 	private MediaInfoDataLoaderService mediaInfoDataLoaderService;
-
-	private PlaylistMapper playlistMapper = new PlaylistMapper();
+	@Autowired
+	private PlaylistMapper playlistMapper;
 
 	private Map<String, Playlist> playlistMap = new HashMap<>();
 	private Playlist deezerFavoritesPlaylist;

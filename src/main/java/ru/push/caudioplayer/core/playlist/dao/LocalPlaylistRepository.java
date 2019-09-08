@@ -1,6 +1,6 @@
 package ru.push.caudioplayer.core.playlist.dao;
 
-import ru.push.caudioplayer.core.playlist.dao.model.PlaylistEntity;
+import ru.push.caudioplayer.core.playlist.dao.entity.PlaylistEntity;
 
 import java.util.List;
 

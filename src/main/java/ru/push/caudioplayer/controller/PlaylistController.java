@@ -480,18 +480,19 @@ public class PlaylistController {
 
     @Override
     public void changedPlaylistTrackData(PlaylistData playlistData, TrackData trackData, int trackIndex) {
-    	// TODO: add check for display playlist
-      if ((trackIndex > 0) && (trackIndex < playlistContentContainer.getItems().size())) {
-        AudioTrackPlaylistItem playlistItem = playlistContentContainer.getItems().get(trackIndex);
-        playlistItem.setNumber(trackData.getTrackNumber());
-        playlistItem.setArtist(trackData.getArtist());
-        playlistItem.setAlbum(trackData.getAlbum());
-        playlistItem.setTitle(trackData.getTitle());
-        playlistItem.setLength(trackTimeLabelBuilder.buildTimeString(trackData.getLength()));
-      } else {
-        LOG.error("Invalid track index, refresh track media info skipped: trackIndex = {}, playlist = {}",
-						trackIndex, playlistData);
-      }
+    	if ((displayedPlaylist != null) && (displayedPlaylist.equals(playlistData))) {
+				if ((trackIndex >= 0) && (trackIndex < playlistContentContainer.getItems().size())) {
+					AudioTrackPlaylistItem playlistItem = playlistContentContainer.getItems().get(trackIndex);
+					playlistItem.setNumber(trackData.getTrackNumber());
+					playlistItem.setArtist(trackData.getArtist());
+					playlistItem.setAlbum(trackData.getAlbum());
+					playlistItem.setTitle(trackData.getTitle());
+					playlistItem.setLength(trackTimeLabelBuilder.buildTimeString(trackData.getLength()));
+				} else {
+					LOG.error("Invalid track index, refresh track media info skipped: trackIndex = {}, playlist = {}",
+							trackIndex, playlistData);
+				}
+			}
     }
 
     @Override

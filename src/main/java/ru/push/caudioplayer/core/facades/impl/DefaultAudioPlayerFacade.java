@@ -128,6 +128,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
       if (mediaPlayer.isPlaying()) {  // media changes actual only when playing media
         LOG.debug("mediaMetaChanged");
 				Optional<PlaylistTrack> playlistTrack = playlistService.getActivePlaylistTrack();
+
 				playlistTrack.ifPresent(track -> {
 					MediaMeta mediaMeta = mediaPlayer.getMediaMeta();
 					if (mediaMeta != null) {
@@ -135,6 +136,12 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 								track.getSourceType() : MediaSourceType.FILE;
 						mediaInfoDataLoaderService.fillMediaInfoFromMediaMeta(track, mediaMeta, sourceType);
 						mediaMeta.release();
+
+						PlaylistData playlistData = dtoMapper.mapPlaylistData(track.getPlaylist());
+						TrackData trackData = dtoMapper.mapTrackData(track);
+						int trackIndex = playlistData.getTracks().indexOf(trackData);
+						eventListeners.forEach(listener -> listener.changedPlaylistTrackData(playlistData, trackData, trackIndex));
+
 					} else {
 						LOG.error("Media info is null!");
 					}

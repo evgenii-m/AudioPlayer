@@ -1,4 +1,4 @@
-package ru.push.caudioplayer.core.playlist.dao.model;
+package ru.push.caudioplayer.core.playlist.dao.entity;
 
 
 import javax.xml.bind.annotation.XmlRegistry;
