@@ -4,15 +4,16 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
-import ru.push.caudioplayer.core.config.domain.Configuration;
-import ru.push.caudioplayer.core.config.domain.DeezerSessionData;
-import ru.push.caudioplayer.core.config.domain.LastfmSessionData;
-import ru.push.caudioplayer.core.config.domain.PlaylistItem;
-import ru.push.caudioplayer.core.config.domain.Playlists;
-import ru.push.caudioplayer.core.config.domain.view.Column;
-import ru.push.caudioplayer.core.config.domain.view.Columns;
-import ru.push.caudioplayer.core.config.domain.view.PlaylistContainer;
-import ru.push.caudioplayer.core.config.domain.view.View;
+import ru.push.caudioplayer.core.config.dto.PlaylistItemData;
+import ru.push.caudioplayer.core.config.model.Configuration;
+import ru.push.caudioplayer.core.config.model.DeezerSessionData;
+import ru.push.caudioplayer.core.config.model.LastfmSessionData;
+import ru.push.caudioplayer.core.config.model.PlaylistItem;
+import ru.push.caudioplayer.core.config.model.Playlists;
+import ru.push.caudioplayer.core.config.model.view.Column;
+import ru.push.caudioplayer.core.config.model.view.Columns;
+import ru.push.caudioplayer.core.config.model.view.PlaylistContainer;
+import ru.push.caudioplayer.core.config.model.view.View;
 import ru.push.caudioplayer.core.lastfm.LastFmSessionData;
 import ru.push.caudioplayer.core.config.ApplicationConfigService;
 import ru.push.caudioplayer.core.config.dto.PlaylistContainerViewConfigurations;
@@ -25,8 +26,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -119,10 +120,9 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
   }
 
 	@Override
-	public List<String> getLocalPlaylistsUid() {
+	public List<PlaylistItemData> getLocalPlaylistItemsData() {
 		return config.getPlaylists().getPlaylists().stream()
-				.sorted((o1, o2) -> Long.compare(o1.getPosition(), o2.getPosition()))
-				.map(PlaylistItem::getPlaylistUid)
+				.map(o -> new PlaylistItemData(o.getPlaylistUid(), o.getPosition()))
 				.collect(Collectors.toList());
 	}
 
@@ -141,14 +141,14 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
   }
 
   @Override
-  public void appendPlaylist(String playlistUid) {
+  public void appendPlaylist(String playlistUid, String playlistTitle) {
 		List<String> playlistItemsUid = config.getPlaylists().getPlaylists().stream()
 				.map(PlaylistItem::getPlaylistUid)
 				.collect(Collectors.toList());
 
 		// added new playlist item
 		if (CollectionUtils.isEmpty(playlistItemsUid) || !playlistItemsUid.contains(playlistUid)) {
-			config.getPlaylists().getPlaylists().add(new PlaylistItem(playlistUid, playlistItemsUid.size()));
+			config.getPlaylists().getPlaylists().add(new PlaylistItem(playlistUid, playlistItemsUid.size(), playlistTitle));
 			saveConfiguration();
 		}
   }
@@ -157,25 +157,26 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
   public void removePlaylist(String playlistUid) {
     config.getPlaylists().getPlaylists().removeIf(playlist -> playlist.getPlaylistUid().equals(playlistUid));
 
-    // refresh position attribute for playlist nodes to prevent gaps
-		List<PlaylistItem> playlistItems = config.getPlaylists().getPlaylists();
-		Map<Integer, Long> nodeIdxPositionMap = playlistItems.stream()
-				.collect(Collectors.toMap(
-						playlistItems::indexOf,
-						PlaylistItem::getPosition,
-						(e1, e2) -> e1
-				));
-		final List<Integer> nodeIdxList = nodeIdxPositionMap.entrySet().stream()
-				.sorted((e1, e2) -> Long.compare(e1.getValue(), e2.getValue()))
-				.map(Map.Entry::getKey)
+		// refresh position attribute for playlist nodes to prevent gaps
+    List<PlaylistItem> sortedPlaylists = config.getPlaylists().getPlaylists().stream()
+				.sorted(Comparator.comparingLong(PlaylistItem::getPosition))
 				.collect(Collectors.toList());
-		for (int i = 0; i < nodeIdxList.size(); i++) {
-			playlistItems.get(nodeIdxList.get(i)).setPosition(i);
+    for (PlaylistItem item : sortedPlaylists) {
+    	item.setPosition(sortedPlaylists.indexOf(item));
 		}
+		config.getPlaylists().setPlaylists(sortedPlaylists);
     saveConfiguration();
   }
 
-  @Override
+	@Override
+	public void renamePlaylist(String playlistUid, String newPlaylistTitle) {
+		config.getPlaylists().getPlaylists().stream()
+				.filter(p -> p.getPlaylistUid().equals(playlistUid))
+				.forEach(p -> p.setTitle(newPlaylistTitle));
+		saveConfiguration();
+	}
+
+	@Override
   public void saveLastFmSessionData(LastFmSessionData sessionData) {
     Assert.notNull(sessionData);
     Assert.notNull(sessionData.getUsername());

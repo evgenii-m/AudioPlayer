@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 import ru.push.caudioplayer.core.lastfm.LastFmApiAdapter;
 import ru.push.caudioplayer.core.lastfm.LastFmService;
 import ru.push.caudioplayer.core.lastfm.LastFmSessionData;
-import ru.push.caudioplayer.core.lastfm.domain.RecentTracks;
-import ru.push.caudioplayer.core.lastfm.domain.Track;
+import ru.push.caudioplayer.core.lastfm.model.RecentTracks;
+import ru.push.caudioplayer.core.lastfm.model.Track;
 import ru.push.caudioplayer.core.config.ApplicationConfigService;
 
 import javax.annotation.PostConstruct;

@@ -1,5 +1,6 @@
 package ru.push.caudioplayer.core.config;
 
+import ru.push.caudioplayer.core.config.dto.PlaylistItemData;
 import ru.push.caudioplayer.core.lastfm.LastFmSessionData;
 import ru.push.caudioplayer.core.config.dto.PlaylistContainerViewConfigurations;
 
@@ -17,15 +18,17 @@ public interface ApplicationConfigService {
 
   String getDisplayedPlaylistUid();
 
-  List<String> getLocalPlaylistsUid();
+  List<PlaylistItemData> getLocalPlaylistItemsData();
 
   void saveActivePlaylist(String playlistUid);
 
   void saveDisplayedPlaylist(String playlistUid);
 
-  void appendPlaylist(String playlistUid);
+  void appendPlaylist(String playlistUid, String playlistTitle);
 
   void removePlaylist(String playlistUid);
+
+  void renamePlaylist(String playlistUid, String newPlaylistTitle);
 
 
   // user configuration methods

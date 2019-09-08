@@ -4,10 +4,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
-import ru.push.caudioplayer.core.playlist.domain.MediaSourceType;
+import ru.push.caudioplayer.core.playlist.model.MediaSourceType;
 import ru.push.caudioplayer.core.medialoader.MediaInfoDataLoaderService;
-import ru.push.caudioplayer.core.playlist.domain.Playlist;
-import ru.push.caudioplayer.core.playlist.domain.PlaylistTrack;
+import ru.push.caudioplayer.core.playlist.model.Playlist;
+import ru.push.caudioplayer.core.playlist.model.PlaylistTrack;
 import uk.co.caprica.vlcj.player.MediaMeta;
 
 import java.io.IOException;

@@ -8,9 +8,9 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import ru.push.caudioplayer.core.mediaplayer.CustomMediaPlayerFactory;
 import ru.push.caudioplayer.core.medialoader.impl.DefaultMediaInfoDataLoaderService;
-import ru.push.caudioplayer.core.playlist.domain.MediaSourceType;
-import ru.push.caudioplayer.core.playlist.domain.Playlist;
-import ru.push.caudioplayer.core.playlist.domain.PlaylistTrack;
+import ru.push.caudioplayer.core.playlist.model.MediaSourceType;
+import ru.push.caudioplayer.core.playlist.model.Playlist;
+import ru.push.caudioplayer.core.playlist.model.PlaylistTrack;
 import uk.co.caprica.vlcj.discovery.NativeDiscovery;
 
 import java.io.IOException;

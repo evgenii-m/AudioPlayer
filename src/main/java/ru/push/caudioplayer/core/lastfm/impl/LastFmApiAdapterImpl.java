@@ -18,8 +18,8 @@ import ru.push.caudioplayer.core.lastfm.LastFmApiAdapter;
 import ru.push.caudioplayer.core.lastfm.LastFmApiMethod;
 import ru.push.caudioplayer.core.lastfm.LastFmApiParam;
 import ru.push.caudioplayer.core.lastfm.LastFmSessionData;
-import ru.push.caudioplayer.core.lastfm.domain.LastFmResponse;
-import ru.push.caudioplayer.core.lastfm.domain.RecentTracks;
+import ru.push.caudioplayer.core.lastfm.model.LastFmResponse;
+import ru.push.caudioplayer.core.lastfm.model.RecentTracks;
 import ru.push.caudioplayer.utils.StreamUtils;
 import ru.push.caudioplayer.utils.XmlUtils;
 

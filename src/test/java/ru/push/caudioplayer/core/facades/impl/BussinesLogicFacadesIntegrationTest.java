@@ -74,7 +74,7 @@ public class BussinesLogicFacadesIntegrationTest extends AbstractTestNGSpringCon
 
     doNothing().when(applicationConfigService).saveActivePlaylist(anyString());
     doNothing().when(applicationConfigService).saveDisplayedPlaylist(anyString());
-    doNothing().when(applicationConfigService).appendPlaylist(anyString());
+    doNothing().when(applicationConfigService).appendPlaylist(anyString(), anyString());
 		doNothing().when(applicationConfigService).removePlaylist(anyString());
     doNothing().when(applicationConfigService).saveLastFmSessionData(any());
 		doNothing().when(applicationConfigService).saveDeezerAccessToken(anyString());

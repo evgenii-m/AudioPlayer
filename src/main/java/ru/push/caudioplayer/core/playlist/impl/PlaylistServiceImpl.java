@@ -6,17 +6,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import ru.push.caudioplayer.core.config.ApplicationConfigService;
+import ru.push.caudioplayer.core.config.dto.PlaylistItemData;
 import ru.push.caudioplayer.core.deezer.DeezerApiErrorException;
 import ru.push.caudioplayer.core.deezer.DeezerApiService;
-import ru.push.caudioplayer.core.deezer.domain.Track;
+import ru.push.caudioplayer.core.deezer.model.Track;
 import ru.push.caudioplayer.core.medialoader.MediaInfoDataLoaderService;
-import ru.push.caudioplayer.core.playlist.domain.MediaSourceType;
+import ru.push.caudioplayer.core.playlist.model.MediaSourceType;
 import ru.push.caudioplayer.core.playlist.PlaylistService;
 import ru.push.caudioplayer.core.playlist.dao.LocalPlaylistRepository;
 import ru.push.caudioplayer.core.playlist.dao.model.PlaylistEntity;
-import ru.push.caudioplayer.core.playlist.domain.Playlist;
-import ru.push.caudioplayer.core.playlist.domain.PlaylistTrack;
-import ru.push.caudioplayer.core.playlist.domain.PlaylistType;
+import ru.push.caudioplayer.core.playlist.model.Playlist;
+import ru.push.caudioplayer.core.playlist.model.PlaylistTrack;
+import ru.push.caudioplayer.core.playlist.model.PlaylistType;
 import ru.push.caudioplayer.core.playlist.dto.TrackData;
 import ru.push.caudioplayer.utils.DateTimeUtils;
 import ru.push.caudioplayer.utils.XmlUtils;
@@ -73,15 +74,18 @@ public class PlaylistServiceImpl implements PlaylistService {
 			return new ArrayList<>();
 		}
 
-		List<String> localPlaylistsUid = applicationConfigService.getLocalPlaylistsUid();
-		List<PlaylistEntity> playlistsEntity = localPlaylistRepository.findPlaylists(localPlaylistsUid);
-		List<Playlist> playlists = playlistMapper.mapPlaylist(playlistsEntity);
+		List<PlaylistItemData> playlistItemsData = applicationConfigService.getLocalPlaylistItemsData();
+		List<String> playlistsUid = playlistItemsData.stream()
+				.map(PlaylistItemData::getPlaylistUid)
+				.collect(Collectors.toList());
+		List<PlaylistEntity> playlistsEntity = localPlaylistRepository.findPlaylists(playlistsUid);
+		List<Playlist> playlists = playlistMapper.mapPlaylist(playlistsEntity, playlistItemsData);
 		return playlists;
 	}
 
 	private List<Playlist> loadDeezerPlaylists() {
 		try {
-			List<ru.push.caudioplayer.core.deezer.domain.Playlist> playlistsDeezer = deezerApiService.getPlaylists();
+			List<ru.push.caudioplayer.core.deezer.model.Playlist> playlistsDeezer = deezerApiService.getPlaylists();
 			Optional<Long> favoritesPlaylistId = playlistsDeezer.stream()
 					.filter(p -> p.getIs_loved_track())
 					.map(p -> p.getId()).findFirst();
@@ -195,7 +199,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 				boolean saveResult = localPlaylistRepository.savePlaylist(newPlaylistEntity);
 				if (saveResult) {
 					playlistMap.put(uid, newPlaylist);
-					applicationConfigService.appendPlaylist(uid);
+					applicationConfigService.appendPlaylist(newPlaylist.getUid(), newPlaylist.getTitle());
 				} else {
 					newPlaylist = null;
 				}
@@ -279,6 +283,9 @@ public class PlaylistServiceImpl implements PlaylistService {
 				PlaylistEntity playlistEntity = playlistMapper.inverseMapPlaylist(playlist);
 				playlistEntity.setTitle(newTitle);
 				renameResult = localPlaylistRepository.savePlaylist(playlistEntity);
+				if (renameResult) {
+					applicationConfigService.renamePlaylist(playlistEntity.getUid(), playlistEntity.getTitle());
+				}
 				break;
 
 			case DEEZER:

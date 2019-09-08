@@ -1,7 +1,7 @@
 package ru.push.caudioplayer.core.deezer;
 
-import ru.push.caudioplayer.core.deezer.domain.Playlist;
-import ru.push.caudioplayer.core.deezer.domain.Track;
+import ru.push.caudioplayer.core.deezer.model.Playlist;
+import ru.push.caudioplayer.core.deezer.model.Track;
 
 import java.util.List;
 

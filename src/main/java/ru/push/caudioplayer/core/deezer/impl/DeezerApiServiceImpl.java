@@ -10,12 +10,12 @@ import ru.push.caudioplayer.core.deezer.DeezerApiAdapter;
 import ru.push.caudioplayer.core.deezer.DeezerApiConst;
 import ru.push.caudioplayer.core.deezer.DeezerApiErrorException;
 import ru.push.caudioplayer.core.deezer.DeezerApiService;
-import ru.push.caudioplayer.core.deezer.domain.Playlist;
-import ru.push.caudioplayer.core.deezer.domain.Playlists;
-import ru.push.caudioplayer.core.deezer.domain.Track;
+import ru.push.caudioplayer.core.deezer.model.Playlist;
+import ru.push.caudioplayer.core.deezer.model.Playlists;
+import ru.push.caudioplayer.core.deezer.model.Track;
 import ru.push.caudioplayer.core.config.ApplicationConfigService;
-import ru.push.caudioplayer.core.deezer.domain.Tracks;
-import ru.push.caudioplayer.core.deezer.domain.internal.PlaylistId;
+import ru.push.caudioplayer.core.deezer.model.Tracks;
+import ru.push.caudioplayer.core.deezer.model.internal.PlaylistId;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -161,7 +161,7 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 	}
 
 	private void fetchPlaylistsTracks(List<Playlist> playlists) {
-		List<ru.push.caudioplayer.core.playlist.domain.Playlist> playlistData = new ArrayList<>();
+		List<ru.push.caudioplayer.core.playlist.model.Playlist> playlistData = new ArrayList<>();
 		LOG.debug("Deezer fetching playlists tracks begin");
 
 		List<Callable<ImmutablePair<Playlist, List<Track>>>> tasks = playlists.stream()

@@ -1,6 +1,6 @@
 package ru.push.caudioplayer.core.lastfm;
 
-import ru.push.caudioplayer.core.lastfm.domain.Track;
+import ru.push.caudioplayer.core.lastfm.model.Track;
 
 import java.util.List;
 import java.util.function.Consumer;

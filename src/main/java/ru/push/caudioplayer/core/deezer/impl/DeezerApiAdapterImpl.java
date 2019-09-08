@@ -25,11 +25,11 @@ import ru.push.caudioplayer.core.deezer.DeezerApiErrorException;
 import ru.push.caudioplayer.core.deezer.DeezerApiMethod;
 import ru.push.caudioplayer.core.deezer.DeezerApiParam;
 import ru.push.caudioplayer.core.deezer.DeezerApiRequestMethodType;
-import ru.push.caudioplayer.core.deezer.domain.Playlist;
-import ru.push.caudioplayer.core.deezer.domain.Playlists;
-import ru.push.caudioplayer.core.deezer.domain.Track;
-import ru.push.caudioplayer.core.deezer.domain.Tracks;
-import ru.push.caudioplayer.core.deezer.domain.internal.PlaylistId;
+import ru.push.caudioplayer.core.deezer.model.Playlist;
+import ru.push.caudioplayer.core.deezer.model.Playlists;
+import ru.push.caudioplayer.core.deezer.model.Track;
+import ru.push.caudioplayer.core.deezer.model.Tracks;
+import ru.push.caudioplayer.core.deezer.model.internal.PlaylistId;
 import ru.push.caudioplayer.utils.StreamUtils;
 import ru.push.caudioplayer.utils.XmlUtils;
 

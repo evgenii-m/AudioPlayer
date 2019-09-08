@@ -1,8 +1,8 @@
 package ru.push.caudioplayer.core.playlist;
 
-import ru.push.caudioplayer.core.playlist.domain.Playlist;
-import ru.push.caudioplayer.core.playlist.domain.PlaylistTrack;
-import ru.push.caudioplayer.core.playlist.domain.PlaylistType;
+import ru.push.caudioplayer.core.playlist.model.Playlist;
+import ru.push.caudioplayer.core.playlist.model.PlaylistTrack;
+import ru.push.caudioplayer.core.playlist.model.PlaylistType;
 import ru.push.caudioplayer.core.playlist.dto.TrackData;
 
 import java.io.File;

@@ -27,6 +27,8 @@ public class LastFmPanelController {
 
 	private static final Logger LOG = LoggerFactory.getLogger(LastFmPanelController.class);
 
+	private static final long UPDATE_RECENT_TRACKS_PERIOD = 10L;
+	private static final TimeUnit UPDATE_RECENT_TRACKS_PERIOD_TIME_UNIT = TimeUnit.SECONDS;
 	private static final String LASTFM_PANEL_COLUMN_TITLE_ARTIST = "Artist";
 	private static final double LASTFM_PANEL_COLUMN_WIDTH_ARTIST = 135;
 	private static final String LASTFM_PANEL_COLUMN_TITLE_TRACK_TITLE = "Title";
@@ -54,14 +56,14 @@ public class LastFmPanelController {
 
 		recentTracksContainer.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 		recentTracksContainer.setEditable(false);
-
 	}
 
 	@PostConstruct
 	public void init() {
 		LOG.debug("init bean {}", this.getClass().getName());
 
-		updateRecentTracksScheduler.scheduleAtFixedRate(new UpdateUiRunnable(), 0L, 10L, TimeUnit.SECONDS);
+		updateRecentTracksScheduler.scheduleAtFixedRate(new UpdateUiRunnable(), UPDATE_RECENT_TRACKS_PERIOD,
+				UPDATE_RECENT_TRACKS_PERIOD, UPDATE_RECENT_TRACKS_PERIOD_TIME_UNIT);
 
 		setRecentTracksContainerColumns();
 		setRecentTracksContainerRowFactory();

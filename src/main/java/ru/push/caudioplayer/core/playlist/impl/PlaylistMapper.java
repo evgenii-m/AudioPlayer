@@ -1,14 +1,16 @@
 package ru.push.caudioplayer.core.playlist.impl;
 
-import ru.push.caudioplayer.core.playlist.domain.MediaSourceType;
+import ru.push.caudioplayer.core.config.dto.PlaylistItemData;
+import ru.push.caudioplayer.core.playlist.model.MediaSourceType;
 import ru.push.caudioplayer.core.playlist.dao.model.PlaylistEntity;
 import ru.push.caudioplayer.core.playlist.dao.model.PlaylistItemEntity;
-import ru.push.caudioplayer.core.playlist.domain.Playlist;
-import ru.push.caudioplayer.core.playlist.domain.PlaylistTrack;
-import ru.push.caudioplayer.core.playlist.domain.PlaylistType;
+import ru.push.caudioplayer.core.playlist.model.Playlist;
+import ru.push.caudioplayer.core.playlist.model.PlaylistTrack;
+import ru.push.caudioplayer.core.playlist.model.PlaylistType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 class PlaylistMapper {
@@ -22,7 +24,7 @@ class PlaylistMapper {
 				o.getLink(), o.isReadOnly(), mapPlaylistItem(o.getItems()));
 	}
 
-	Playlist mapPlaylistDeezer(ru.push.caudioplayer.core.deezer.domain.Playlist o) {
+	Playlist mapPlaylistDeezer(ru.push.caudioplayer.core.deezer.model.Playlist o) {
 		return new Playlist(String.valueOf(o.getId()), o.getTitle(), PlaylistType.DEEZER,
 				o.getLink(), o.getIs_loved_track(), mapPlaylistItemDeezer(o.getTracks().getData()));
 	}
@@ -38,7 +40,23 @@ class PlaylistMapper {
 				new ArrayList<>();
 	}
 
-	List<Playlist> mapPlaylistDeezer(List<ru.push.caudioplayer.core.deezer.domain.Playlist> list) {
+	List<Playlist> mapPlaylist(List<PlaylistEntity> list, List<PlaylistItemData> itemsData) {
+		if (list != null) {
+			Map<String, Playlist> playlistsMap = list.stream()
+					.map(this::mapPlaylist)
+					.collect(Collectors.toMap(Playlist::getUid, o -> o));
+			itemsData.forEach(o -> {
+				if (playlistsMap.containsKey(o.getPlaylistUid())) {
+					playlistsMap.get(o.getPlaylistUid()).setPosition(o.getPosition());
+				}
+			});
+			return new ArrayList<>(playlistsMap.values());
+		} else {
+			return new ArrayList<>();
+		}
+	}
+
+	List<Playlist> mapPlaylistDeezer(List<ru.push.caudioplayer.core.deezer.model.Playlist> list) {
 		return (list != null) ?
 				list.stream().map(this::mapPlaylistDeezer).collect(Collectors.toList()) :
 				new ArrayList<>();
@@ -60,7 +78,7 @@ class PlaylistMapper {
 		);
 	}
 
-	PlaylistTrack mapPlaylistItemDeezer(ru.push.caudioplayer.core.deezer.domain.Track o) {
+	PlaylistTrack mapPlaylistItemDeezer(ru.push.caudioplayer.core.deezer.model.Track o) {
 		return new PlaylistTrack(MediaSourceType.DEEZER_MEDIA,
 				o.getArtist().getName(), o.getAlbum().getTitle(), null, o.getTitle(),
 				String.valueOf(o.getId()), null, o.getDuration() * DEEZER_DURATION_FACTOR, o.getPreview()
@@ -79,7 +97,7 @@ class PlaylistMapper {
 				new ArrayList<>();
 	}
 
-	List<PlaylistTrack> mapPlaylistItemDeezer(List<ru.push.caudioplayer.core.deezer.domain.Track> list) {
+	List<PlaylistTrack> mapPlaylistItemDeezer(List<ru.push.caudioplayer.core.deezer.model.Track> list) {
 		return (list != null) ?
 				list.stream().map(this::mapPlaylistItemDeezer).collect(Collectors.toList()) :
 				new ArrayList<>();

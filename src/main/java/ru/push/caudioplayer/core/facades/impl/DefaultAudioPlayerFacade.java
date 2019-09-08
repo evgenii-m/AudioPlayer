@@ -9,15 +9,16 @@ import ru.push.caudioplayer.core.facades.dto.TrackData;
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
 import ru.push.caudioplayer.core.medialoader.MediaInfoDataLoaderService;
-import ru.push.caudioplayer.core.playlist.domain.MediaSourceType;
+import ru.push.caudioplayer.core.playlist.model.MediaSourceType;
 import ru.push.caudioplayer.core.playlist.PlaylistService;
-import ru.push.caudioplayer.core.playlist.domain.Playlist;
-import ru.push.caudioplayer.core.playlist.domain.PlaylistTrack;
+import ru.push.caudioplayer.core.playlist.model.Playlist;
+import ru.push.caudioplayer.core.playlist.model.PlaylistTrack;
 import uk.co.caprica.vlcj.player.MediaMeta;
 import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +55,11 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 
     playerComponent.addEventListener(new AudioPlayerFacadeEventListener());
   }
+
+  @PreDestroy
+	public void stop() {
+		playerComponent.releaseComponent();
+	}
 
 	@Override
   public synchronized void addEventListener(AudioPlayerEventListener listener) {
@@ -113,7 +119,6 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 
 	@Override
   public void stopApplication() {
-    playerComponent.releaseComponent();
   }
 
   private class AudioPlayerFacadeEventListener extends MediaPlayerEventAdapter {

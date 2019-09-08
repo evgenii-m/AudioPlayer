@@ -4,8 +4,8 @@ import org.springframework.stereotype.Component;
 import ru.push.caudioplayer.core.facades.dto.PlaylistData;
 import ru.push.caudioplayer.core.facades.dto.PlaylistType;
 import ru.push.caudioplayer.core.facades.dto.TrackData;
-import ru.push.caudioplayer.core.playlist.domain.Playlist;
-import ru.push.caudioplayer.core.playlist.domain.PlaylistTrack;
+import ru.push.caudioplayer.core.playlist.model.Playlist;
+import ru.push.caudioplayer.core.playlist.model.PlaylistTrack;
 
 import java.util.ArrayList;
 import java.util.List;

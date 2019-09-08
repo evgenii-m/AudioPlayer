@@ -10,18 +10,19 @@ import ru.push.caudioplayer.core.deezer.DeezerApiService;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
 import ru.push.caudioplayer.core.facades.dto.PlaylistData;
 import ru.push.caudioplayer.core.lastfm.LastFmService;
-import ru.push.caudioplayer.core.lastfm.domain.Track;
+import ru.push.caudioplayer.core.lastfm.model.Track;
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
 import ru.push.caudioplayer.core.facades.dto.LastFmTrackData;
 import ru.push.caudioplayer.core.config.ApplicationConfigService;
 import ru.push.caudioplayer.core.playlist.PlaylistService;
-import ru.push.caudioplayer.core.playlist.domain.Playlist;
-import ru.push.caudioplayer.core.playlist.domain.PlaylistType;
+import ru.push.caudioplayer.core.playlist.model.Playlist;
+import ru.push.caudioplayer.core.playlist.model.PlaylistType;
 import ru.push.caudioplayer.core.playlist.dto.TrackData;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -126,6 +127,7 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 		return dtoMapper.mapPlaylistData(
 				playlistService.getPlaylists().stream()
 						.filter(Playlist::isLocal)
+						.sorted(Comparator.comparingLong(Playlist::getPosition))
 						.collect(Collectors.toList())
 		);
 	}
