@@ -19,8 +19,8 @@
 						</Menu>
 						<Menu mnemonicParsing="false" text="Playlist">
 							<MenuItem mnemonicParsing="false" onAction="#createNewPlaylist" text="New playlist" />
-							<MenuItem mnemonicParsing="false" onAction="#openFiles" text="Open file(s)" />
-							<MenuItem mnemonicParsing="false" onAction="#addLocation" text="Add location" />
+							<MenuItem mnemonicParsing="false" onAction="#addFilesToPlaylist" text="Add file(s)" />
+							<MenuItem mnemonicParsing="false" onAction="#addStreamToActivePlaylist" text="Add stream" />
 							<MenuItem mnemonicParsing="false" onAction="#backupPlaylists" text="Backup playlists" />
 						</Menu>
 						<Menu mnemonicParsing="false" text="Last.fm">

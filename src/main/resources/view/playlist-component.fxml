@@ -16,22 +16,24 @@
 				<Pane prefHeight="300" prefWidth="290.0">
 					<HBox prefHeight="25.0" prefWidth="290.0" spacing="7.0">
 						<children>
-							<Button prefWidth="60.0" onAction="#createNewPlaylist">New</Button>
-							<Button prefWidth="60.0" onAction="#refreshPlaylists">Refresh</Button>
+							<Button onAction="#createNewPlaylist" styleClass="playlist-browser-control-button">New</Button>
+							<Button onAction="#refreshPlaylists" styleClass="playlist-browser-control-button">Refresh</Button>
+							<Button onAction="#addFilesToPlaylist" styleClass="playlist-browser-control-button">Add file(s)</Button>
+							<Button onAction="#addStreamToPlaylist" styleClass="playlist-browser-control-button">Add stream</Button>
 						</children>
 						<padding>
-							<Insets left="5.0" right="5.0"/>
+							<Insets left="5.0" right="5.0" />
 						</padding>
 					</HBox>
-					<TabPane fx:id="playlistBrowserTabPane" nodeOrientation="LEFT_TO_RIGHT" pickOnBounds="false" layoutY="30.0" prefHeight="270.0" prefWidth="290.0" rotateGraphic="true" side="LEFT" tabClosingPolicy="UNAVAILABLE">
+					<TabPane fx:id="playlistBrowserTabPane" layoutY="30.0" nodeOrientation="LEFT_TO_RIGHT" pickOnBounds="false" prefHeight="270.0" prefWidth="290.0" rotateGraphic="true" side="LEFT" tabClosingPolicy="UNAVAILABLE">
 						<tabs>
-							<Tab fx:id="localPlaylistsTab" closable="false" styleClass="tabPaneItem" text="LOCAL">
+							<Tab fx:id="localPlaylistsTab" closable="false" styleClass="tab-pane-item" text="LOCAL">
 								<content>
 									<ListView fx:id="localPlaylistBrowserContainer" prefHeight="300.0" prefWidth="250.0" styleClass="playlist-browser-container">
 									</ListView>
 								</content>
 							</Tab>
-							<Tab fx:id="deezerPlaylistsTab" closable="false" styleClass="tabPaneItem" text="DEEZER">
+							<Tab fx:id="deezerPlaylistsTab" closable="false" styleClass="tab-pane-item" text="DEEZER">
 								<content>
 									<ListView fx:id="deezerPlaylistBrowserContainer" prefHeight="300.0" prefWidth="250.0" styleClass="playlist-browser-container">
 									</ListView>

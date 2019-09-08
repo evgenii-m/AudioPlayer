@@ -7,6 +7,8 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.apache.commons.collections4.CollectionUtils;
@@ -28,10 +30,13 @@ import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -49,6 +54,8 @@ public class PlaylistController {
 
   private static final String DEFAULT_PLAYLIST_EXPORT_FOLDER = "export/";
 
+  @FXML
+  public HBox playlistBlockContainer;
 	@FXML
   private TabPane playlistBrowserTabPane;
 	@FXML
@@ -100,7 +107,6 @@ public class PlaylistController {
 
 		List<PlaylistData> localPlaylists = musicLibraryLogicFacade.getLocalPlaylists();
 		List<PlaylistData> deezerPlaylists = musicLibraryLogicFacade.getDeezerPlaylists();
-//		displayedPlaylist = localPlaylists.get(0);
 
 		renamePopupScene = new Scene(renamePopupView.getView());
 		confirmActionPopupScene = new Scene(confirmActionPopupView.getView());
@@ -108,6 +114,12 @@ public class PlaylistController {
 		AudioPlayerEventAdapter eventAdapter = new AudioPlayerEventAdapter();
 		audioPlayerFacade.addEventListener(eventAdapter);
 		musicLibraryLogicFacade.addEventListener(eventAdapter);
+
+		String displayedPlaylistUid = applicationConfigService.getDisplayedPlaylistUid();
+		displayedPlaylist = Stream.of(localPlaylists, deezerPlaylists)
+				.flatMap(Collection::stream)
+				.filter(o -> o.getUid().equals(displayedPlaylistUid))
+				.findFirst().orElse(null);
 
 		// switch browser container to tab with displayed playlist
 		selectPlaylistBrowserTab(displayedPlaylist);
@@ -155,11 +167,6 @@ public class PlaylistController {
 
   }
 
-	@PreDestroy
-	public void stop() {
-		savePlaylistContainerViewConfiguration();
-	}
-
   private void setPlaylistBrowserContainerCellFactory(ListView<PlaylistData> playlistBrowserContainer) {
     playlistBrowserContainer.setCellFactory(lv -> {
       ListCell<PlaylistData> cell = new ListCell<PlaylistData>() {
@@ -199,6 +206,19 @@ public class PlaylistController {
       return cell;
     });
   }
+
+	@PreDestroy
+	public void stop() {
+		// save active and displayed playlists UID
+		musicLibraryLogicFacade.getActivePlaylist()
+				.ifPresent(o -> applicationConfigService.saveActivePlaylist(o.getUid()));
+		if (displayedPlaylist != null) {
+			applicationConfigService.saveDisplayedPlaylist(displayedPlaylist.getUid());
+		}
+
+		// save view configuration
+		savePlaylistContainerViewConfiguration();
+	}
 
 	private Stage createPopup(String title, Scene scene) {
 		Stage popupStage = new Stage();
@@ -394,7 +414,6 @@ public class PlaylistController {
 
 		List<PlaylistData> localPlaylists = musicLibraryLogicFacade.getLocalPlaylists();
 		List<PlaylistData> deezerPlaylists = musicLibraryLogicFacade.getDeezerPlaylists();
-//		displayedPlaylist = localPlaylists.get(0);
 
 		selectPlaylistBrowserTab(displayedPlaylist);
 		setPlaylistBrowserContainerItems(localPlaylistBrowserContainer, localPlaylists);
@@ -412,6 +431,27 @@ public class PlaylistController {
 			Tab activeTab = PlaylistType.LOCAL.equals(playlistData.getType()) ?
 					localPlaylistsTab : deezerPlaylistsTab;
 			playlistBrowserTabPane.getSelectionModel().select(activeTab);
+		}
+	}
+
+	@FXML
+	public void addFilesToPlaylist(ActionEvent actionEvent) {
+  	if (displayedPlaylist != null) {
+			FileChooser fileChooser = new FileChooser();
+			fileChooser.setTitle("Open file(s)");
+			// WARNING: if this code throws JVM crashing, need to add JVM option '-DVLCJ_INITX=no'
+			List<File> files = fileChooser.showOpenMultipleDialog(playlistBlockContainer.getScene().getWindow());
+			if (CollectionUtils.isNotEmpty(files)) {
+				musicLibraryLogicFacade.addFilesToPlaylist(displayedPlaylist.getUid(), files);
+			}
+		}
+	}
+
+	@FXML
+	public void addStreamToPlaylist(ActionEvent actionEvent) {
+		if (displayedPlaylist != null) {
+			musicLibraryLogicFacade.addLocationsToPlaylist(displayedPlaylist.getUid(),
+					Collections.singletonList("http://ice1.somafm.com/groovesalad-128.mp3"));
 		}
 	}
 

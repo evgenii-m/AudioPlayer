@@ -23,10 +23,13 @@
  -fx-background-color: #6E6E6E;
 }
 
-.tabPaneItem {
+.tab-pane-item {
  -fx-padding: 3px 12px 3px 12px;
  -fx-text-fill: #828282;
  -fx-font-size: 12px;
  -fx-font-weight: bold;
 }
 
+.playlist-browser-control-button {
+    -fx-padding: 3px 10px 3px 10px;
+}

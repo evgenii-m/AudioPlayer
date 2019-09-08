@@ -7,8 +7,10 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
+import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +20,15 @@ import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author push <mez.e.s@yandex.ru>
@@ -70,23 +75,29 @@ public class MainController {
   }
 
   @FXML
-  public void addLocation(ActionEvent actionEvent) {
-//		musicLibraryLogicFacade.addLocationsToPlaylist(Collections.singletonList("http://ice1.somafm.com/groovesalad-128.mp3"));
+  public void addStreamToActivePlaylist(ActionEvent actionEvent) {
+		musicLibraryLogicFacade.getActivePlaylist().ifPresent(p -> {
+			musicLibraryLogicFacade.addLocationsToPlaylist(p.getUid(),
+					Collections.singletonList("http://ice1.somafm.com/groovesalad-128.mp3"));
+		});
   }
 
   @FXML
   public void createNewPlaylist(ActionEvent actionEvent) {
-//		musicLibraryLogicFacade.createNewPlaylist();
+		musicLibraryLogicFacade.createLocalPlaylist();
   }
 
   @FXML
-  public void openFiles(ActionEvent actionEvent) {
-//    FileChooser fileChooser = new FileChooser();
-//    fileChooser.setTitle("Open file(s)");
-//    // WARNING: if this code throws JVM crashing, add JVM option '-DVLCJ_INITX=no'
-//    List<File> files = fileChooser.showOpenMultipleDialog(mainContainer.getScene().getWindow());
-//    // todo: add cancel action handling
-//		musicLibraryLogicFacade.addFilesToPlaylist(files);
+  public void addFilesToPlaylist(ActionEvent actionEvent) {
+		musicLibraryLogicFacade.getActivePlaylist().ifPresent(p -> {
+			FileChooser fileChooser = new FileChooser();
+			fileChooser.setTitle("Open file(s)");
+			// WARNING: if this code throws JVM crashing, add JVM option '-DVLCJ_INITX=no'
+			List<File> files = fileChooser.showOpenMultipleDialog(mainContainer.getScene().getWindow());
+			if (CollectionUtils.isNotEmpty(files)) {
+				musicLibraryLogicFacade.addFilesToPlaylist(p.getUid(), files);
+			}
+		});
   }
 
   @FXML
@@ -138,7 +149,6 @@ public class MainController {
 
 	@FXML
 	public void backupPlaylists(ActionEvent actionEvent) {
-  	// TODO: move logic to facade
 		String currentTimeString = new SimpleDateFormat(DEFAULT_PLAYLIST_BACKUP_FOLDER_TIMESTAMP_FORMAT).format(new Date());
 		String backupFolderName = String.format(DEFAULT_PLAYLIST_BACKUP_FOLDER_NAME, currentTimeString);
 		Path exportFolderPath = Paths.get(backupFolderName);
