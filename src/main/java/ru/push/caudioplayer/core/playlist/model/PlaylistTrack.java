@@ -4,20 +4,20 @@ import org.apache.commons.lang3.StringUtils;
 
 
 public class PlaylistTrack {
-
+	private String trackId;
 	private MediaSourceType sourceType;
+	private String trackPath;
+	private Playlist playlist;
 	private String artist;
 	private String album;
 	private String date;
 	private String title;
-	private String trackId;
 	private String trackNumber;
 	private long length;
-	private String trackPath;
-	private Playlist playlist;
 
 
-	public PlaylistTrack(Playlist playlist) {
+	public PlaylistTrack(String trackId, Playlist playlist) {
+		this.trackId = trackId;
 		this.trackPath = StringUtils.EMPTY;
 		this.sourceType = MediaSourceType.FILE;
 		this.playlist = playlist;
@@ -28,8 +28,8 @@ public class PlaylistTrack {
 		this.trackPath = trackPath;
 	}
 
-	public PlaylistTrack(MediaSourceType sourceType, String artist, String album, String date, String title,
-											 String trackId, String trackNumber, long length, String trackPath) {
+	public PlaylistTrack(String trackId, MediaSourceType sourceType, String trackPath, String artist,
+											 String album, String date, String title, String trackNumber, long length) {
 		this.sourceType = sourceType;
 		this.artist = artist;
 		this.album = album;

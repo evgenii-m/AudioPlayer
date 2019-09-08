@@ -138,9 +138,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 						mediaMeta.release();
 
 						PlaylistData playlistData = dtoMapper.mapPlaylistData(track.getPlaylist());
-						TrackData trackData = dtoMapper.mapTrackData(track);
-						int trackIndex = playlistData.getTracks().indexOf(trackData);
-						eventListeners.forEach(listener -> listener.changedPlaylistTrackData(playlistData, trackData, trackIndex));
+						eventListeners.forEach(listener -> listener.changedPlaylist(playlistData));
 
 					} else {
 						LOG.error("Media info is null!");

@@ -86,17 +86,17 @@ class PlaylistMapper {
 			mediaLoaderService.fillMediaInfoFromHttpStreamByDecoder(track, track.getTrackPath());
 			return track;
 		} else {
-			return new PlaylistTrack(sourceType,
-					o.getArtist(), o.getAlbum(), o.getDate(), o.getTitle(),
-					o.getTrackId(), o.getTrackNumber(), o.getLength(), o.getTrackPath()
+			return new PlaylistTrack(
+					o.getTrackId(), sourceType, o.getTrackPath(), o.getArtist(),
+					o.getAlbum(), o.getDate(), o.getTitle(), o.getTrackNumber(), o.getLength()
 			);
 		}
 	}
 
 	PlaylistTrack mapPlaylistItemDeezer(ru.push.caudioplayer.core.deezer.model.Track o) {
-		return new PlaylistTrack(MediaSourceType.DEEZER_MEDIA,
-				o.getArtist().getName(), o.getAlbum().getTitle(), null, o.getTitle(),
-				String.valueOf(o.getId()), null, o.getDuration() * DEEZER_DURATION_FACTOR, o.getPreview()
+		return new PlaylistTrack(
+				String.valueOf(o.getId()), MediaSourceType.DEEZER_MEDIA, o.getPreview(), o.getArtist().getName(),
+				o.getAlbum().getTitle(), null, o.getTitle(), null, o.getDuration() * DEEZER_DURATION_FACTOR
 		);
 	}
 

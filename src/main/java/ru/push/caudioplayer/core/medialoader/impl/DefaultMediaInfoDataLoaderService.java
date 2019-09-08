@@ -12,6 +12,7 @@ import uk.co.caprica.vlcj.player.MediaMeta;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -38,7 +39,8 @@ public class DefaultMediaInfoDataLoaderService implements MediaInfoDataLoaderSer
 
   @Override
   public PlaylistTrack load(Playlist playlist, String mediaPath, MediaSourceType sourceType) {
-		PlaylistTrack mediaData = new PlaylistTrack(playlist);
+		String uid = UUID.randomUUID().toString();
+		PlaylistTrack mediaData = new PlaylistTrack(uid, playlist);
 
     switch (sourceType) {
       case FILE:

@@ -18,10 +18,12 @@
 							</items>
 						</Menu>
 						<Menu mnemonicParsing="false" text="Playlist">
-							<MenuItem mnemonicParsing="false" onAction="#createNewPlaylist" text="New playlist" />
-							<MenuItem mnemonicParsing="false" onAction="#addFilesToPlaylist" text="Add file(s)" />
-							<MenuItem mnemonicParsing="false" onAction="#addStreamToActivePlaylist" text="Add stream" />
-							<MenuItem mnemonicParsing="false" onAction="#backupPlaylists" text="Backup playlists" />
+							<items>
+								<MenuItem mnemonicParsing="false" onAction="#createNewPlaylist" text="New playlist" />
+								<MenuItem mnemonicParsing="false" onAction="#addFilesToPlaylist" text="Add file(s)" />
+								<MenuItem mnemonicParsing="false" onAction="#addStreamToActivePlaylist" text="Add stream" />
+								<MenuItem mnemonicParsing="false" onAction="#backupPlaylists" text="Backup playlists" />
+							</items>
 						</Menu>
 						<Menu mnemonicParsing="false" text="Last.fm">
 							<items>

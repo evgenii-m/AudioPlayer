@@ -140,6 +140,7 @@ public class PlaylistController {
     playlistContentContainer.setOnMouseClicked(mouseEvent -> {
       if (mouseEvent.getButton().equals(MouseButton.PRIMARY) && (mouseEvent.getClickCount() == 2)) {
       	if (displayedPlaylist != null) {
+					playlistContentContainer.getFocusModel().getFocusedItem();
 					int trackPosition = playlistContentContainer.getFocusModel().getFocusedCell().getRow();
 					audioPlayerFacade.playTrack(displayedPlaylist.getUid(), trackPosition);
 				}
@@ -459,7 +460,10 @@ public class PlaylistController {
 
     @Override
     public void changedPlaylist(PlaylistData playlistData) {
-      setPlaylistContentContainerItems(playlistData);
+			updateContainerItemPlaylistData(playlistData);
+			if ((displayedPlaylist != null) && (displayedPlaylist.equals(playlistData))) {
+				setPlaylistContentContainerItems(playlistData);
+			}
     }
 
     @Override
@@ -480,6 +484,8 @@ public class PlaylistController {
 
     @Override
     public void changedPlaylistTrackData(PlaylistData playlistData, TrackData trackData, int trackIndex) {
+			updateContainerItemPlaylistData(playlistData);
+
     	if ((displayedPlaylist != null) && (displayedPlaylist.equals(playlistData))) {
 				if ((trackIndex >= 0) && (trackIndex < playlistContentContainer.getItems().size())) {
 					AudioTrackPlaylistItem playlistItem = playlistContentContainer.getItems().get(trackIndex);
@@ -497,14 +503,7 @@ public class PlaylistController {
 
     @Override
     public void renamedPlaylist(PlaylistData playlistData) {
-			ListView<PlaylistData> container = getCurrentPlaylistContainer(playlistData);
-			container.getItems().stream()
-					.filter(p -> p.getUid().equals(playlistData.getUid())).findFirst()
-					.ifPresent(p -> {
-						int itemIndex = container.getItems().indexOf(p);
-						container.getItems().set(itemIndex, playlistData);
-					});
-			container.refresh();
+			updateContainerItemPlaylistData(playlistData);
     }
 
 		@Override
@@ -516,5 +515,15 @@ public class PlaylistController {
 			container.refresh();
 		}
 
+		private void updateContainerItemPlaylistData(PlaylistData playlistData) {
+			ListView<PlaylistData> container = getCurrentPlaylistContainer(playlistData);
+			container.getItems().stream()
+					.filter(p -> p.getUid().equals(playlistData.getUid())).findFirst()
+					.ifPresent(p -> {
+						int itemIndex = container.getItems().indexOf(p);
+						container.getItems().set(itemIndex, playlistData);
+					});
+			container.refresh();
+		}
 	}
 }

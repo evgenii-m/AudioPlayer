@@ -15,6 +15,7 @@ public interface AudioPlayerEventListener {
 
   void changedTrackPosition(PlaylistData playlistData, int trackIndex);
 
+  // TODO: remove?
   void changedPlaylistTrackData(PlaylistData playlistData, TrackData trackData, int trackIndex);
 
   void renamedPlaylist(PlaylistData playlistData);
