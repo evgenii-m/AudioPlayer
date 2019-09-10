@@ -13,10 +13,7 @@ public interface AudioPlayerEventListener {
 
   void createdNewPlaylist(PlaylistData playlistData);
 
-  void changedTrackPosition(PlaylistData playlistData, int trackIndex);
-
-  // TODO: remove?
-  void changedPlaylistTrackData(PlaylistData playlistData, TrackData trackData, int trackIndex);
+  void changedTrackData(PlaylistData playlistData, TrackData trackData);
 
   void renamedPlaylist(PlaylistData playlistData);
 

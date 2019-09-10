@@ -399,9 +399,9 @@ public class PlaylistController {
 
   @FXML
 	public void createNewPlaylist(ActionEvent actionEvent) {
-  	if ((displayedPlaylist == null) || PlaylistType.LOCAL.equals(displayedPlaylist.getType())) {
+  	if ((displayedPlaylist == null) || displayedPlaylist.isLocal()) {
 			musicLibraryLogicFacade.createLocalPlaylist();
-		} else if (PlaylistType.DEEZER.equals(displayedPlaylist.getType())) {
+		} else if (displayedPlaylist.isDeezer()) {
   		musicLibraryLogicFacade.createDeezerPlaylist();
 		}
 	}
@@ -420,21 +420,19 @@ public class PlaylistController {
 	}
 
 	private ListView<PlaylistData> getCurrentPlaylistContainer(PlaylistData playlistData) {
-  	return PlaylistType.LOCAL.equals(playlistData.getType()) ?
-				localPlaylistBrowserContainer : deezerPlaylistBrowserContainer;
+  	return playlistData.isLocal() ? localPlaylistBrowserContainer : deezerPlaylistBrowserContainer;
 	}
 
 	private void selectPlaylistBrowserTab(PlaylistData playlistData) {
   	if (playlistData != null) {
-			Tab activeTab = PlaylistType.LOCAL.equals(playlistData.getType()) ?
-					localPlaylistsTab : deezerPlaylistsTab;
+			Tab activeTab = playlistData.isLocal() ? localPlaylistsTab : deezerPlaylistsTab;
 			playlistBrowserTabPane.getSelectionModel().select(activeTab);
 		}
 	}
 
 	@FXML
 	public void addFilesToPlaylist(ActionEvent actionEvent) {
-  	if (displayedPlaylist != null) {
+  	if ((displayedPlaylist != null) && (displayedPlaylist.isLocal())) {
 			FileChooser fileChooser = new FileChooser();
 			fileChooser.setTitle("Open file(s)");
 			// WARNING: if this code throws JVM crashing, need to add JVM option '-DVLCJ_INITX=no'
@@ -447,7 +445,7 @@ public class PlaylistController {
 
 	@FXML
 	public void addStreamToPlaylist(ActionEvent actionEvent) {
-		if (displayedPlaylist != null) {
+		if ((displayedPlaylist != null) && (displayedPlaylist.isLocal())) {
 			Stage popupStage = createPopup("Add HTTP stream(s) source", textInputActionPopupScene);
 			Consumer<String> action = inputText -> {
 				String[] inputLines = inputText.split("\n");
@@ -477,30 +475,17 @@ public class PlaylistController {
     }
 
     @Override
-    public void changedTrackPosition(PlaylistData playlistData, int trackIndex) {
-      if (playlistData.equals(localPlaylistBrowserContainer.getSelectionModel().getSelectedItem())) {
-//        playlistContainer.getSelectionModel().select(trackIndex);
-        LOG.debug("Track position changed!");
-      }
-    }
-
-    @Override
-    public void changedPlaylistTrackData(PlaylistData playlistData, TrackData trackData, int trackIndex) {
+    public void changedTrackData(PlaylistData playlistData, TrackData trackData) {
 			updateContainerItemPlaylistData(playlistData);
-
-//    	if ((displayedPlaylist != null) && (displayedPlaylist.equals(playlistData))) {
-//				if ((trackIndex >= 0) && (trackIndex < playlistContentContainer.getItems().size())) {
-//					AudioTrackPlaylistItem playlistItem = playlistContentContainer.getItems().get(trackIndex);
-//					playlistItem.setNumber(trackData.getTrackNumber());
-//					playlistItem.setArtist(trackData.getArtist());
-//					playlistItem.setAlbum(trackData.getAlbum());
-//					playlistItem.setTitle(trackData.getTitle());
-//					playlistItem.setLength(trackTimeLabelBuilder.buildTimeString(trackData.getLength()));
-//				} else {
-//					LOG.error("Invalid track index, refresh track media info skipped: trackIndex = {}, playlist = {}",
-//							trackIndex, playlistData);
-//				}
-//			}
+			if ((displayedPlaylist != null) && (displayedPlaylist.equals(playlistData))) {
+				playlistContentContainer.getItems().stream()
+						.filter(o -> o.equals(trackData)).findFirst()
+						.ifPresent(o -> {
+							int itemIndex = playlistContentContainer.getItems().indexOf(o);
+							playlistContentContainer.getItems().set(itemIndex, trackData);
+							playlistContentContainer.getFocusModel().focus(itemIndex);
+						});
+			}
     }
 
     @Override

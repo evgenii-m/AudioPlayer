@@ -58,6 +58,14 @@ public class PlaylistData {
 		this.tracks = tracks;
 	}
 
+	public boolean isLocal() {
+		return PlaylistType.LOCAL.equals(type);
+	}
+
+	public boolean isDeezer() {
+		return PlaylistType.DEEZER.equals(type);
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;

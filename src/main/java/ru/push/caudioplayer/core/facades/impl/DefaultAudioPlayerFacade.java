@@ -101,11 +101,6 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 				String resourceUri = MediaSourceType.FILE.equals(track.getSourceType()) ?
 						Paths.get(track.getTrackPath()).toString() : track.getTrackPath();
 				playerComponent.playMedia(resourceUri);
-				eventListeners.forEach(listener -> {
-					Playlist playlist = track.getPlaylist();
-					PlaylistData playlistData = dtoMapper.mapPlaylistData(playlist);
-					listener.changedTrackPosition(playlistData, playlist.getItems().indexOf(track));
-				});
 		} else {
   		LOG.error("No track set to play.");
 			// TODO: add event for empty track
@@ -138,7 +133,8 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 						mediaMeta.release();
 
 						PlaylistData playlistData = dtoMapper.mapPlaylistData(track.getPlaylist());
-						eventListeners.forEach(listener -> listener.changedPlaylist(playlistData));
+						TrackData trackData = dtoMapper.mapTrackData(track);
+						eventListeners.forEach(listener -> listener.changedTrackData(playlistData, trackData));
 
 					} else {
 						LOG.error("Media info is null!");

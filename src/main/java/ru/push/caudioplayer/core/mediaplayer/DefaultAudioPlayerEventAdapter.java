@@ -18,11 +18,7 @@ public abstract class DefaultAudioPlayerEventAdapter implements AudioPlayerEvent
   }
 
   @Override
-  public void changedTrackPosition(PlaylistData playlistData, int trackIndex) {
-  }
-
-  @Override
-  public void changedPlaylistTrackData(PlaylistData playlistData, TrackData trackData, int trackIndex) {
+  public void changedTrackData(PlaylistData playlistData, TrackData trackData) {
   }
 
   @Override
