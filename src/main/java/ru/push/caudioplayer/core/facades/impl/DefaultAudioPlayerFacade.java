@@ -72,8 +72,8 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   }
 
   @Override
-  public void playTrack(String playlistUid, int trackIndex) {
-		Optional<PlaylistTrack> playlistTrack = playlistService.setActivePlaylistTrack(playlistUid, trackIndex);
+  public void playTrack(String playlistUid, String trackUid) {
+		Optional<PlaylistTrack> playlistTrack = playlistService.setActivePlaylistTrack(playlistUid, trackUid);
     playTrack(playlistTrack);
   }
 

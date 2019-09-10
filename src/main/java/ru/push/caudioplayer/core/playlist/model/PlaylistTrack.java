@@ -2,9 +2,11 @@ package ru.push.caudioplayer.core.playlist.model;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Objects;
+
 
 public class PlaylistTrack {
-	private String trackId;
+	private final String uid;
 	private MediaSourceType sourceType;
 	private String trackPath;
 	private Playlist playlist;
@@ -16,26 +18,27 @@ public class PlaylistTrack {
 	private long length;
 
 
-	public PlaylistTrack(String trackId, Playlist playlist) {
-		this.trackId = trackId;
+	public PlaylistTrack(String uid, Playlist playlist) {
+		this.uid = uid;
 		this.trackPath = StringUtils.EMPTY;
 		this.sourceType = MediaSourceType.FILE;
 		this.playlist = playlist;
 	}
 
-	public PlaylistTrack(MediaSourceType sourceType, String trackPath) {
+	public PlaylistTrack(String uid, MediaSourceType sourceType, String trackPath) {
+		this.uid = uid;
 		this.sourceType = sourceType;
 		this.trackPath = trackPath;
 	}
 
-	public PlaylistTrack(String trackId, MediaSourceType sourceType, String trackPath, String artist,
+	public PlaylistTrack(String uid, MediaSourceType sourceType, String trackPath, String artist,
 											 String album, String date, String title, String trackNumber, long length) {
 		this.sourceType = sourceType;
 		this.artist = artist;
 		this.album = album;
 		this.date = date;
 		this.title = title;
-		this.trackId = trackId;
+		this.uid = uid;
 		this.trackNumber = trackNumber;
 		this.length = length;
 		this.trackPath = trackPath;
@@ -81,12 +84,8 @@ public class PlaylistTrack {
 		this.title = title;
 	}
 
-	public String getTrackId() {
-		return trackId;
-	}
-
-	public void setTrackId(String trackId) {
-		this.trackId = trackId;
+	public String getUid() {
+		return uid;
 	}
 
 	public String getTrackNumber() {
@@ -125,45 +124,28 @@ public class PlaylistTrack {
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
-
 		PlaylistTrack that = (PlaylistTrack) o;
-
-		if (length != that.length) return false;
-		if (trackPath != null ? !trackPath.equals(that.trackPath) : that.trackPath != null) return false;
-		if (sourceType != that.sourceType) return false;
-		if (artist != null ? !artist.equals(that.artist) : that.artist != null) return false;
-		if (album != null ? !album.equals(that.album) : that.album != null) return false;
-		if (date != null ? !date.equals(that.date) : that.date != null) return false;
-		if (title != null ? !title.equals(that.title) : that.title != null) return false;
-		if (trackId != null ? !trackId.equals(that.trackId) : that.trackId != null) return false;
-		return trackNumber != null ? trackNumber.equals(that.trackNumber) : that.trackNumber == null;
-
+		return Objects.equals(uid, that.uid) &&
+				sourceType == that.sourceType &&
+				Objects.equals(trackPath, that.trackPath) &&
+				Objects.equals(playlist, that.playlist);
 	}
 
 	@Override
 	public int hashCode() {
-		int result = trackPath != null ? trackPath.hashCode() : 0;
-		result = 31 * result + (sourceType != null ? sourceType.hashCode() : 0);
-		result = 31 * result + (artist != null ? artist.hashCode() : 0);
-		result = 31 * result + (album != null ? album.hashCode() : 0);
-		result = 31 * result + (date != null ? date.hashCode() : 0);
-		result = 31 * result + (title != null ? title.hashCode() : 0);
-		result = 31 * result + (trackId != null ? trackId.hashCode() : 0);
-		result = 31 * result + (trackNumber != null ? trackNumber.hashCode() : 0);
-		result = 31 * result + (int) (length ^ (length >>> 32));
-		return result;
+		return Objects.hash(uid, sourceType, trackPath, playlist);
 	}
 
 	@Override
 	public String toString() {
 		return "PlaylistTrack{" +
-				"trackPath='" + trackPath + '\'' +
+				"uid='" + uid + '\'' +
+				", trackPath='" + trackPath + '\'' +
 				", sourceType=" + sourceType +
 				", artist='" + artist + '\'' +
 				", album='" + album + '\'' +
 				", date='" + date + '\'' +
 				", title='" + title + '\'' +
-				", trackId='" + trackId + '\'' +
 				", trackNumber='" + trackNumber + '\'' +
 				", length=" + length +
 				", playlistUid=" + ((playlist != null) ? playlist.getUid() : null) +

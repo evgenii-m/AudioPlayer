@@ -3,6 +3,8 @@ package ru.push.caudioplayer.core.facades.dto;
 import java.util.Objects;
 
 public class TrackData {
+	private String trackUid;
+	private String playlistUid;
 	private String artist;
 	private String album;
 	private String date;
@@ -10,13 +12,32 @@ public class TrackData {
 	private String trackNumber;
 	private long length;
 
-	public TrackData(String artist, String album, String date, String title, String trackNumber, long length) {
+	public TrackData(String trackUid, String playlistUid, String artist, String album,
+									 String date, String title, String trackNumber, long length) {
+		this.trackUid = trackUid;
+		this.playlistUid = playlistUid;
 		this.artist = artist;
 		this.album = album;
 		this.date = date;
 		this.title = title;
 		this.trackNumber = trackNumber;
 		this.length = length;
+	}
+
+	public String getTrackUid() {
+		return trackUid;
+	}
+
+	public void setTrackUid(String trackUid) {
+		this.trackUid = trackUid;
+	}
+
+	public String getPlaylistUid() {
+		return playlistUid;
+	}
+
+	public void setPlaylistUid(String playlistUid) {
+		this.playlistUid = playlistUid;
 	}
 
 	public String getArtist() {
@@ -72,23 +93,21 @@ public class TrackData {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		TrackData trackData = (TrackData) o;
-		return length == trackData.length &&
-				Objects.equals(artist, trackData.artist) &&
-				Objects.equals(album, trackData.album) &&
-				Objects.equals(date, trackData.date) &&
-				Objects.equals(title, trackData.title);
+		return Objects.equals(trackUid, trackData.trackUid) &&
+				Objects.equals(playlistUid, trackData.playlistUid);
 	}
 
 	@Override
 	public int hashCode() {
-
-		return Objects.hash(artist, album, date, title, length);
+		return Objects.hash(trackUid, playlistUid);
 	}
 
 	@Override
 	public String toString() {
 		return "TrackData{" +
-				"artist='" + artist + '\'' +
+				"trackUid='" + trackUid + '\'' +
+				", playlistUid='" + playlistUid + '\'' +
+				", artist='" + artist + '\'' +
 				", album='" + album + '\'' +
 				", date='" + date + '\'' +
 				", title='" + title + '\'' +

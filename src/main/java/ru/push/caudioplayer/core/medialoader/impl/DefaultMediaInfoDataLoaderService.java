@@ -109,7 +109,6 @@ public class DefaultMediaInfoDataLoaderService implements MediaInfoDataLoaderSer
 		mediaData.setDate(mediaMeta.getDate());
 		mediaData.setLength(mediaMeta.getLength());
 		mediaData.setTitle(mediaMeta.getTitle());
-		mediaData.setTrackId(mediaMeta.getTrackId());
 		mediaData.setTrackNumber(mediaMeta.getTrackNumber());
   }
 

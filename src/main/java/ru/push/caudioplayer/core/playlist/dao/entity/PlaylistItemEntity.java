@@ -14,6 +14,9 @@ import java.io.Serializable;
 public class PlaylistItemEntity implements Serializable {
 
 	@XmlAttribute
+	private String uid;
+
+	@XmlAttribute
 	private String sourceType;
 
 	@XmlAttribute
@@ -29,9 +32,6 @@ public class PlaylistItemEntity implements Serializable {
 	private String title;
 
 	@XmlAttribute
-	private String trackId;
-
-	@XmlAttribute
 	private String trackNumber;
 
 	@XmlAttribute
@@ -44,19 +44,20 @@ public class PlaylistItemEntity implements Serializable {
 	public PlaylistItemEntity() {
 	}
 
-	public PlaylistItemEntity(String sourceType, String trackPath) {
+	public PlaylistItemEntity(String uid, String sourceType, String trackPath) {
+		this.uid = uid;
 		this.sourceType = sourceType;
 		this.trackPath = trackPath;
 	}
 
-	public PlaylistItemEntity(String sourceType, String artist, String album, String date, String title,
-														String trackId, String trackNumber, long length, String trackPath) {
+	public PlaylistItemEntity(String uid, String sourceType, String artist, String album, String date, String title,
+														String trackNumber, long length, String trackPath) {
+		this.uid = uid;
 		this.sourceType = sourceType;
 		this.artist = artist;
 		this.album = album;
 		this.date = date;
 		this.title = title;
-		this.trackId = trackId;
 		this.trackNumber = trackNumber;
 		this.length = length;
 		this.trackPath = trackPath;
@@ -102,12 +103,12 @@ public class PlaylistItemEntity implements Serializable {
 		this.title = title;
 	}
 
-	public String getTrackId() {
-		return trackId;
+	public String getUid() {
+		return uid;
 	}
 
-	public void setTrackId(String trackId) {
-		this.trackId = trackId;
+	public void setUid(String uid) {
+		this.uid = uid;
 	}
 
 	public String getTrackNumber() {
@@ -137,13 +138,13 @@ public class PlaylistItemEntity implements Serializable {
 	@Override
 	public String toString() {
 		return "PlaylistItemEntity{" +
-				"trackPath='" + trackPath + '\'' +
+				"uid='" + uid + '\'' +
+				", trackPath='" + trackPath + '\'' +
 				", sourceType=" + sourceType +
 				", artist='" + artist + '\'' +
 				", album='" + album + '\'' +
 				", date='" + date + '\'' +
 				", title='" + title + '\'' +
-				", trackId='" + trackId + '\'' +
 				", trackNumber='" + trackNumber + '\'' +
 				", length=" + length +
 				'}';

@@ -59,7 +59,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 	private Map<String, Playlist> playlistMap = new HashMap<>();
 	private Playlist deezerFavoritesPlaylist;
 	private Playlist activePlaylist;
-	private Integer activePlaylistTrackIndex;
+	private PlaylistTrack activePlaylistTrack;
 
 	@PostConstruct
 	public void init() {
@@ -114,7 +114,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 				.flatMap(Collection::stream)
 				.collect(Collectors.toMap(Playlist::getUid, o -> o));
 
-		setActivePlaylistTrack(applicationConfigService.getActivePlaylistUid(), 0);
+		setActivePlaylist(applicationConfigService.getActivePlaylistUid());
 	}
 
 	@Override
@@ -127,40 +127,57 @@ public class PlaylistServiceImpl implements PlaylistService {
 		return Optional.ofNullable(activePlaylist);
 	}
 
-	@Override
-	public Optional<PlaylistTrack> setActivePlaylistTrack(String playlistUid, int trackIndex) {
+	private Optional<PlaylistTrack> setActivePlaylist(String playlistUid) {
 		if (!playlistMap.containsKey(playlistUid)) {
 			LOG.error("Playlist not found: uid = {}", playlistUid);
 			return Optional.empty();
 		}
 
 		Playlist playlist = playlistMap.get(playlistUid);
-		int playlistSize = playlist.getItems().size();
-		if ((trackIndex < 0) || (trackIndex >= playlistSize)) {
-			LOG.error("Invalid track index for playlist: playlist = {}, trackIndex = {}", playlist, trackIndex);
+		activePlaylist = playlist;
+
+		Optional<PlaylistTrack> playlistTrack = playlist.getItems().stream()
+				.findFirst();
+		if (playlistTrack.isPresent()) {
+			activePlaylistTrack = playlistTrack.get();
+		}
+
+		return playlistTrack;
+	}
+
+	@Override
+	public Optional<PlaylistTrack> setActivePlaylistTrack(String playlistUid, String trackUid) {
+		if (!playlistMap.containsKey(playlistUid)) {
+			LOG.error("Playlist not found: uid = {}", playlistUid);
 			return Optional.empty();
 		}
 
-		activePlaylist = playlist;
-		activePlaylistTrackIndex = trackIndex;
+		Playlist playlist = playlistMap.get(playlistUid);
+		Optional<PlaylistTrack> playlistTrack = playlist.getItems().stream()
+				.filter(o -> o.getUid().equals(trackUid))
+				.findFirst();
+		if (playlistTrack.isPresent()) {
+			activePlaylist = playlist;
+			activePlaylistTrack = playlistTrack.get();
+		} else {
+			LOG.error("Playlist track not found: playlistUid = {}, trackUid = {}", playlistUid, trackUid);
+		}
 
-		return Optional.of(activePlaylist.getItems().get(activePlaylistTrackIndex));
+		return playlistTrack;
 	}
 
 	@Override
 	public Optional<PlaylistTrack> getActivePlaylistTrack() {
-		if ((activePlaylist == null) || (activePlaylistTrackIndex == null)) {
-			return Optional.empty();
-		}
-		return Optional.of(activePlaylist.getItems().get(activePlaylistTrackIndex));
+		return Optional.ofNullable(activePlaylistTrack);
 	}
 
 	@Override
 	public Optional<PlaylistTrack> nextActivePlaylistTrack() {
-		if ((activePlaylist == null) || (activePlaylistTrackIndex == null)) {
+		if ((activePlaylist == null) || (activePlaylistTrack == null)) {
 			return Optional.empty();
 		}
 
+		int activePlaylistTrackIndex = activePlaylist.getItems().indexOf(activePlaylistTrack);
 		if (activePlaylistTrackIndex < (activePlaylist.getItems().size() - 1)) {
 			activePlaylistTrackIndex++;
 		} else {
@@ -172,10 +189,11 @@ public class PlaylistServiceImpl implements PlaylistService {
 
 	@Override
 	public Optional<PlaylistTrack> prevActivePlaylistTrack() {
-		if ((activePlaylist == null) || (activePlaylistTrackIndex == null)) {
+		if ((activePlaylist == null) || (activePlaylistTrack == null)) {
 			return Optional.empty();
 		}
 
+		int activePlaylistTrackIndex = activePlaylist.getItems().indexOf(activePlaylistTrack);
 		if (activePlaylistTrackIndex > 0) {
 			activePlaylistTrackIndex--;
 		} else {
@@ -448,7 +466,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 	}
 
 	@Override
-	public Playlist deleteItemsFromPlaylist(String playlistUid, List<Integer> itemsIndexes) {
+	public Playlist deleteItemsFromPlaylist(String playlistUid, List<String> tracksUid) {
 		if (!playlistMap.containsKey(playlistUid)) {
 			LOG.error("Playlist not found: uid = {}", playlistUid);
 			return null;
@@ -460,35 +478,55 @@ public class PlaylistServiceImpl implements PlaylistService {
 			return null;
 		}
 
+		List<PlaylistTrack> deletedTracks = tracksUid.stream()
+				.map(uid -> {
+					Optional<PlaylistTrack> track = playlist.getItems().stream()
+							.filter(o -> Objects.equals(uid, o.getUid())).findFirst();
+					if (track.isPresent()) {
+						return track.get();
+					} else {
+						LOG.error("Deleted track not found in playlist: playlistUid = {}, trackUid = {}", playlistUid, uid);
+						return null;
+					}
+				})
+				.filter(Objects::nonNull)
+				.collect(Collectors.toList());
+
+		if (deletedTracks.isEmpty()) {
+			return null;
+		}
+
+		boolean deleteResult = false;
 		switch (playlist.getType()) {
 
 			case LOCAL:
-				itemsIndexes.stream()
-						.filter(itemIndex -> (itemIndex >= 0) && (itemIndex < playlist.getItems().size()))
-						.forEach(itemIndex -> playlist.getItems().remove(itemIndex.intValue()));
-				localPlaylistRepository.savePlaylist(playlistMapper.inverseMapPlaylist(playlist));
+				PlaylistEntity playlistEntity = playlistMapper.inverseMapPlaylist(playlist);
+				playlistEntity.getItems().removeIf(o ->
+						deletedTracks.stream().anyMatch(t -> Objects.equals(o.getUid(), t.getUid())));
+				deleteResult = localPlaylistRepository.savePlaylist(playlistEntity);
 				break;
 
 			case DEEZER:
 				Long playlistId = Long.valueOf(playlist.getUid());
-				List<Long> removedTrackIds = itemsIndexes.stream()
-						.filter(idx -> idx < playlist.getItems().size())
-						.map(idx -> playlist.getItems().get(idx).getTrackId())
-						.filter(Objects::nonNull)
-						.map(Long::valueOf)
+				List<Long> removedTrackIds = deletedTracks.stream()
+						.map(o -> Long.valueOf(o.getUid()))
 						.collect(Collectors.toList());
 				try {
-					deezerApiService.removeTracksFromPlaylist(playlistId, removedTrackIds);
+					deleteResult = deezerApiService.removeTracksFromPlaylist(playlistId, removedTrackIds);
 				} catch (DeezerApiErrorException e) {
 					LOG.error("Remove track from Deezer error: playlist id = {}, track ids = {}, error = {}",
 							playlist.getUid(), removedTrackIds, e);
-					return null;
 				}
 				break;
 		}
 
-		LOG.info("Items deleted from playlist: {}", playlist);
-		return playlist;
+		if (deleteResult) {
+			playlist.getItems().removeAll(deletedTracks);
+			LOG.info("Items deleted from playlist: playlistUid = {}, deleted tracks = {}", playlist.getUid(), deletedTracks);
+			return playlist;
+		} else {
+			return null;
+		}
 	}
 
 

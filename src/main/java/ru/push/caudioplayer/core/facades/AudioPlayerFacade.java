@@ -15,7 +15,7 @@ public interface AudioPlayerFacade {
 
   void removeEventListener(AudioPlayerEventListener listener);
 
-  void playTrack(String playlistUid, int trackIndex);
+  void playTrack(String playlistUid, String trackUid);
 
   void playCurrentTrack();
 

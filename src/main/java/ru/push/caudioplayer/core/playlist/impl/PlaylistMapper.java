@@ -82,12 +82,12 @@ class PlaylistMapper {
 	PlaylistTrack mapPlaylistItem(PlaylistItemEntity o) {
 		MediaSourceType sourceType = MediaSourceType.valueOf(o.getSourceType());
 		if (MediaSourceType.HTTP_STREAM.equals(sourceType)) {
-			PlaylistTrack track = new PlaylistTrack(sourceType, o.getTrackPath());
+			PlaylistTrack track = new PlaylistTrack(o.getUid(), sourceType, o.getTrackPath());
 			mediaLoaderService.fillMediaInfoFromHttpStreamByDecoder(track, track.getTrackPath());
 			return track;
 		} else {
 			return new PlaylistTrack(
-					o.getTrackId(), sourceType, o.getTrackPath(), o.getArtist(),
+					o.getUid(), sourceType, o.getTrackPath(), o.getArtist(),
 					o.getAlbum(), o.getDate(), o.getTitle(), o.getTrackNumber(), o.getLength()
 			);
 		}
@@ -103,11 +103,11 @@ class PlaylistMapper {
 	PlaylistItemEntity inverseMapPlaylistItem(PlaylistTrack o) {
 		MediaSourceType sourceType = o.getSourceType();
 		if (MediaSourceType.HTTP_STREAM.equals(sourceType)) {
-			return new PlaylistItemEntity(sourceType.value(), o.getTrackPath());
+			return new PlaylistItemEntity(o.getUid(), sourceType.value(), o.getTrackPath());
 		} else {
-			return new PlaylistItemEntity(sourceType.value(),
+			return new PlaylistItemEntity(o.getUid(), sourceType.value(),
 					o.getArtist(), o.getAlbum(), o.getDate(), o.getTitle(),
-					o.getTrackId(), o.getTrackNumber(), o.getLength(), o.getTrackPath());
+					o.getTrackNumber(), o.getLength(), o.getTrackPath());
 		}
 	}
 

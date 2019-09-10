@@ -55,7 +55,7 @@ public interface MusicLibraryLogicFacade {
 
 	void addFilesToPlaylist(String playlistUid, List<File> files);
 
-	void deleteItemsFromPlaylist(String playlistUid, List<Integer> itemsIndexes);
+	void deleteItemsFromPlaylist(String playlistUid, List<String> tracksUid);
 
 	void addLocationsToPlaylist(String playlistUid, List<String> locations);
 
