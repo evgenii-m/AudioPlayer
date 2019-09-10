@@ -184,7 +184,8 @@ public class PlaylistServiceImpl implements PlaylistService {
 			activePlaylistTrackIndex = 0;
 		}
 
-		return Optional.of(activePlaylist.getItems().get(activePlaylistTrackIndex));
+		activePlaylistTrack = activePlaylist.getItems().get(activePlaylistTrackIndex);
+		return Optional.of(activePlaylistTrack);
 	}
 
 	@Override
@@ -200,7 +201,8 @@ public class PlaylistServiceImpl implements PlaylistService {
 			activePlaylistTrackIndex = activePlaylist.getItems().size() - 1;
 		}
 
-		return Optional.of(activePlaylist.getItems().get(activePlaylistTrackIndex));
+		activePlaylistTrack = activePlaylist.getItems().get(activePlaylistTrackIndex);
+		return Optional.of(activePlaylistTrack);
 	}
 
 	@Override
