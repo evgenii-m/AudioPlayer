@@ -24,10 +24,6 @@ public class RenamePopupController {
 
   @FXML
   private TextField nameTextField;
-  @FXML
-  private Button cancelButton;
-  @FXML
-  private Button applyButton;
 
 	@Autowired
 	private MusicLibraryLogicFacade musicLibraryLogicFacade;

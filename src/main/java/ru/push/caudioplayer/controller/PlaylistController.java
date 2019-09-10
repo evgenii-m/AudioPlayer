@@ -35,6 +35,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -74,6 +76,9 @@ public class PlaylistController {
 	@FXML
 	@Resource(name = "confirmActionPopupView")
 	private ConfigurationControllers.View confirmActionPopupView;
+	@FXML
+	@Resource(name = "textInputActionPopupView")
+	private ConfigurationControllers.View textInputActionPopupView;
 
   @Autowired
   private AudioPlayerFacade audioPlayerFacade;
@@ -88,7 +93,7 @@ public class PlaylistController {
 
   private Scene renamePopupScene;
   private Scene confirmActionPopupScene;
-
+	private Scene textInputActionPopupScene;
 
   @FXML
   public void initialize() {
@@ -110,6 +115,7 @@ public class PlaylistController {
 
 		renamePopupScene = new Scene(renamePopupView.getView());
 		confirmActionPopupScene = new Scene(confirmActionPopupView.getView());
+		textInputActionPopupScene = new Scene(textInputActionPopupView.getView());
 
 		AudioPlayerEventAdapter eventAdapter = new AudioPlayerEventAdapter();
 		audioPlayerFacade.addEventListener(eventAdapter);
@@ -255,7 +261,7 @@ public class PlaylistController {
 
 		Stage popupStage = createPopup("Confirm action", confirmActionPopupScene);
 
-		Consumer<Object> action = (o) -> {
+		Consumer<Void> action = (o) -> {
 			musicLibraryLogicFacade.deletePlaylist(playlistData.getUid());
 		};
 		String message = String.format("Remove playlist \'%s\'?", playlistData.getTitle());
@@ -442,8 +448,13 @@ public class PlaylistController {
 	@FXML
 	public void addStreamToPlaylist(ActionEvent actionEvent) {
 		if (displayedPlaylist != null) {
-			musicLibraryLogicFacade.addLocationsToPlaylist(displayedPlaylist.getUid(),
-					Collections.singletonList("http://ice1.somafm.com/groovesalad-128.mp3"));
+			Stage popupStage = createPopup("Add HTTP stream(s) source", textInputActionPopupScene);
+			Consumer<String> action = inputText -> {
+				String[] inputLines = inputText.split("\n");
+				musicLibraryLogicFacade.addLocationsToPlaylist(displayedPlaylist.getUid(), Arrays.asList(inputLines));
+			};
+			((TextInputActionPopupController) textInputActionPopupView.getController()).setAction(action);
+			popupStage.show();
 		}
 	}
 

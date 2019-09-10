@@ -76,10 +76,11 @@ public class MainController {
 
   @FXML
   public void addStreamToActivePlaylist(ActionEvent actionEvent) {
-		musicLibraryLogicFacade.getActivePlaylist().ifPresent(p -> {
-			musicLibraryLogicFacade.addLocationsToPlaylist(p.getUid(),
-					Collections.singletonList("http://ice1.somafm.com/groovesalad-128.mp3"));
-		});
+  	// TODO: use code from ru.push.caudioplayer.controller.PlaylistController.addStreamToPlaylist
+//		musicLibraryLogicFacade.getActivePlaylist().ifPresent(p -> {
+//			musicLibraryLogicFacade.addLocationsToPlaylist(p.getUid(),
+//					Collections.singletonList("http://ice1.somafm.com/groovesalad-128.mp3"));
+//		});
   }
 
   @FXML

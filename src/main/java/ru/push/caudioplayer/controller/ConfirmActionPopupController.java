@@ -18,7 +18,7 @@ public class ConfirmActionPopupController {
 	@FXML
 	public Label messageLabel;
 
-	private Consumer<Object> actionSupplier;
+	private Consumer<Void> action;
 
 
 	public ConfirmActionPopupController() {
@@ -35,13 +35,13 @@ public class ConfirmActionPopupController {
 		LOG.debug("init bean {}", this.getClass().getName());
 	}
 
-	public void setAction(Consumer<Object> actionSupplier, String message) {
-		this.actionSupplier = actionSupplier;
+	public void setAction(Consumer<Void> action, String message) {
+		this.action = action;
 		messageLabel.setText(message);
 	}
 
-	public void setAction(Consumer<Object> actionSupplier) {
-		this.actionSupplier = actionSupplier;
+	public void setAction(Consumer<Void> action) {
+		this.action = action;
 	}
 
 	@FXML
@@ -51,11 +51,11 @@ public class ConfirmActionPopupController {
 
 	@FXML
 	public void confirmAction(ActionEvent actionEvent) {
-		if (actionSupplier != null) {
-			actionSupplier.accept(null);
+		if (action != null) {
+			action.accept(null);
 			closePopup();
 		} else {
-			LOG.error("Action supplier not defined");
+			LOG.error("Action consumer not defined");
 		}
 	}
 

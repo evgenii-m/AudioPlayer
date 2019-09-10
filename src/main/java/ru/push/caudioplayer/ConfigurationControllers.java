@@ -12,6 +12,7 @@ import ru.push.caudioplayer.controller.MainController;
 import ru.push.caudioplayer.controller.AudioPlayerController;
 import ru.push.caudioplayer.controller.PlaylistController;
 import ru.push.caudioplayer.controller.RenamePopupController;
+import ru.push.caudioplayer.controller.TextInputActionPopupController;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -83,6 +84,16 @@ public class ConfigurationControllers {
 	@Bean
 	public ConfirmActionPopupController getConfirmActionPopupController() {
   	return (ConfirmActionPopupController) getConfirmActionPopupView().getController();
+	}
+
+	@Bean(name = "textInputActionPopupView")
+	public View getTextInputActionPopupView() {
+		return loadView("view/text-input-action-popup.fxml");
+	}
+
+	@Bean
+	public TextInputActionPopupController getTextInputActionPopupController() {
+		return (TextInputActionPopupController) getTextInputActionPopupView().getController();
 	}
 
   protected View loadView(String url) {

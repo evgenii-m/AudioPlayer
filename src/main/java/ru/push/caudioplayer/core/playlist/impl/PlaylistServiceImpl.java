@@ -398,7 +398,12 @@ public class PlaylistServiceImpl implements PlaylistService {
 				})
 				.filter(Objects::nonNull)
 				.collect(Collectors.toList());
+
 		List<PlaylistTrack> newItems = mediaInfoDataLoaderService.load(playlist, mediaPaths, MediaSourceType.HTTP_STREAM);
+		if (CollectionUtils.isEmpty(newItems)) {
+			LOG.error("No correct stream locations have been set");
+			return null;
+		}
 
 		playlist.getItems().addAll(newItems);
 		localPlaylistRepository.savePlaylist(playlistMapper.inverseMapPlaylist(playlist));
