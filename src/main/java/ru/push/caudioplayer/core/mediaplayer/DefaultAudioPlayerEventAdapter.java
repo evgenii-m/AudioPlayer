@@ -28,4 +28,8 @@ public abstract class DefaultAudioPlayerEventAdapter implements AudioPlayerEvent
 	@Override
 	public void deletedPlaylist(PlaylistData playlistData) {
 	}
+
+	@Override
+	public void changedNowPlayingTrack(TrackData trackData) {
+	}
 }

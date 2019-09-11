@@ -7,6 +7,7 @@ import java.util.List;
  * @date 6/27/17
  */
 public class PlaylistContainerViewConfigurations {
+	public final static String COLUMN_NOW_PLAYING_NAME = "nowPlaying";
   public final static String COLUMN_NUMBER_NAME = "number";
   public final static String COLUMN_ARTIST_NAME = "artist";
   public final static String COLUMN_ALBUM_NAME = "album";

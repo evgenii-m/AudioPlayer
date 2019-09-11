@@ -5,7 +5,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
@@ -20,7 +19,6 @@ import ru.push.caudioplayer.ConfigurationControllers;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
 import ru.push.caudioplayer.core.facades.dto.PlaylistData;
-import ru.push.caudioplayer.core.facades.dto.PlaylistType;
 import ru.push.caudioplayer.core.facades.dto.TrackData;
 import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
 import ru.push.caudioplayer.core.config.ApplicationConfigService;
@@ -35,10 +33,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -55,6 +51,7 @@ public class PlaylistController {
   private static final Logger LOG = LoggerFactory.getLogger(PlaylistController.class);
 
   private static final String DEFAULT_PLAYLIST_EXPORT_FOLDER = "export/";
+  private static final String NOW_PLAYING_MARKER = ">>";
 
   @FXML
   public HBox playlistBlockContainer;
@@ -142,6 +139,7 @@ public class PlaylistController {
 		setPlaylistContentContainerRowFactory();
 		setPlaylistContentContainerItems(displayedPlaylist);
 
+
 		// bind playlist container mouse click event to play track action
     playlistContentContainer.setOnMouseClicked(mouseEvent -> {
       if (mouseEvent.getButton().equals(MouseButton.PRIMARY) && (mouseEvent.getClickCount() == 2)) {
@@ -152,14 +150,7 @@ public class PlaylistController {
       }
     });
 
-		// skip unused mouse press action for playlist browser containers
-		Stream.of(localPlaylistBrowserContainer, deezerPlaylistBrowserContainer).forEach(o ->
-				o.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
-					if (!event.isPrimaryButtonDown()) {
-						event.consume();
-					}
-				})
-		);
+
     // bind selected item of playlist browser changes to show playlist action
 		Stream.of(localPlaylistBrowserContainer, deezerPlaylistBrowserContainer).forEach(o ->
 				o.getSelectionModel().selectedItemProperty()
@@ -169,6 +160,15 @@ public class PlaylistController {
 								setPlaylistContentContainerItems(displayedPlaylist);
 							}
 						})
+		);
+
+		// skip unused mouse press action for playlist browser containers
+		Stream.of(localPlaylistBrowserContainer, deezerPlaylistBrowserContainer).forEach(o ->
+				o.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
+					if (!event.isPrimaryButtonDown()) {
+						event.consume();
+					}
+				})
 		);
 
   }
@@ -308,6 +308,14 @@ public class PlaylistController {
 
 		PlaylistContainerViewConfigurations.PlaylistContainerColumn columnConfiguration;
 
+		columnConfiguration = columnsConfigurations.get(PlaylistContainerViewConfigurations.COLUMN_NOW_PLAYING_NAME);
+		TableColumn<TrackData, String> nowPlayingCol = new TableColumn<>(columnConfiguration.getTitle());
+		nowPlayingCol.setUserData(columnConfiguration.getName());
+		nowPlayingCol.setPrefWidth(columnConfiguration.getWidth());
+		nowPlayingCol.setCellValueFactory(data -> new SimpleStringProperty(
+				data.getValue().isNowPlaying() ? NOW_PLAYING_MARKER : ""
+		));
+
 		columnConfiguration = columnsConfigurations.get(PlaylistContainerViewConfigurations.COLUMN_NUMBER_NAME);
 		TableColumn<TrackData, String> numberCol = new TableColumn<>(columnConfiguration.getTitle());
 		numberCol.setUserData(columnConfiguration.getName());
@@ -339,7 +347,7 @@ public class PlaylistController {
 		lengthCol.setCellValueFactory(data ->
 				new SimpleStringProperty(trackTimeLabelBuilder.buildTimeString(data.getValue().getLength())));
 
-		playlistContainer.getColumns().addAll(numberCol, artistCol, albumCol, titleCol, lengthCol);
+		playlistContainer.getColumns().addAll(nowPlayingCol, numberCol, artistCol, albumCol, titleCol, lengthCol);
 	}
 
   private void setPlaylistContentContainerRowFactory() {
@@ -476,15 +484,19 @@ public class PlaylistController {
 
     @Override
     public void changedTrackData(PlaylistData playlistData, TrackData trackData) {
-			updateContainerItemPlaylistData(playlistData);
+			ListView<PlaylistData> container = getCurrentPlaylistContainer(playlistData);
+			container.getItems().stream()
+					.filter(o -> o.equals(playlistData)).findFirst()
+					.ifPresent(p -> {
+						p.getTracks().stream()
+								.filter(o -> o.equals(trackData)).findFirst()
+								.ifPresent(t -> {
+									int trackIndex = p.getTracks().indexOf(t);
+									p.getTracks().set(trackIndex, trackData);
+								});
+					});
 			if ((displayedPlaylist != null) && (displayedPlaylist.equals(playlistData))) {
-				playlistContentContainer.getItems().stream()
-						.filter(o -> o.equals(trackData)).findFirst()
-						.ifPresent(o -> {
-							int itemIndex = playlistContentContainer.getItems().indexOf(o);
-							playlistContentContainer.getItems().set(itemIndex, trackData);
-							playlistContentContainer.getFocusModel().focus(itemIndex);
-						});
+				updateContainerItemTrackData(trackData);
 			}
     }
 
@@ -502,6 +514,18 @@ public class PlaylistController {
 			container.refresh();
 		}
 
+		@Override
+		public void changedNowPlayingTrack(TrackData trackData) {
+			Stream.of(localPlaylistBrowserContainer.getItems(), deezerPlaylistBrowserContainer.getItems())
+					.flatMap(Collection::stream)
+					.map(PlaylistData::getTracks)
+					.flatMap(Collection::stream)
+					.forEach(o -> o.setNowPlaying(o.equals(trackData) && trackData.isNowPlaying()));
+			if ((displayedPlaylist != null) && (displayedPlaylist.getUid().equals(trackData.getPlaylistUid()))) {
+				playlistContentContainer.refresh();
+			}
+		}
+
 		private void updateContainerItemPlaylistData(PlaylistData playlistData) {
 			ListView<PlaylistData> container = getCurrentPlaylistContainer(playlistData);
 			container.getItems().stream()
@@ -510,7 +534,16 @@ public class PlaylistController {
 						int itemIndex = container.getItems().indexOf(p);
 						container.getItems().set(itemIndex, playlistData);
 					});
-			container.refresh();
+		}
+
+		private void updateContainerItemTrackData(TrackData trackData) {
+			playlistContentContainer.getItems().stream()
+					.filter(o -> o.equals(trackData)).findFirst()
+					.ifPresent(o -> {
+						int itemIndex = playlistContentContainer.getItems().indexOf(o);
+						playlistContentContainer.getItems().set(itemIndex, trackData);
+						playlistContentContainer.getFocusModel().focus(itemIndex);
+					});
 		}
 	}
 }

@@ -46,7 +46,5 @@ public interface ApplicationConfigService {
 
   PlaylistContainerViewConfigurations getPlaylistContainerViewConfigurations();
 
-	PlaylistContainerViewConfigurations getDeezerPlaylistContainerViewConfigurations();
-
   void savePlaylistContainerViewConfigurations(PlaylistContainerViewConfigurations viewConfigurations);
 }

@@ -73,23 +73,15 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
 
 		PlaylistContainer localPlaylistContainer = new PlaylistContainer(new Columns(
 				Arrays.asList(
-						new Column("number", "#", 120),
+						new Column("nowPlaying", " ", 33),
+						new Column("number", "#", 33),
 						new Column("artist", "Artist", 140),
 						new Column("album", "Album", 160),
 						new Column("title", "Title", 245),
-						new Column("Length", "Length", 77)
+						new Column("length", "Length", 77)
 				)
 		));
-		PlaylistContainer deezerPlaylistContainer = new PlaylistContainer(new Columns(
-				Arrays.asList(
-						new Column("number", "#", 120),
-						new Column("artist", "Artist", 140),
-						new Column("album", "Album", 160),
-						new Column("title", "Title", 245),
-						new Column("Length", "Length", 77)
-				)
-		));
-		View viewConfig = new View(localPlaylistContainer, deezerPlaylistContainer);
+		View viewConfig = new View(localPlaylistContainer);
   	defaultConfiguration.setView(viewConfig);
   	return defaultConfiguration;
   }
@@ -229,13 +221,6 @@ public class CommonsApplicationConfigService implements ApplicationConfigService
 				getContainerColumnsViewConfiguration(config.getView().getLocalPlaylistContainer().getColumns())
 		);
   }
-
-	@Override
-	public PlaylistContainerViewConfigurations getDeezerPlaylistContainerViewConfigurations() {
-		return new PlaylistContainerViewConfigurations(
-				getContainerColumnsViewConfiguration(config.getView().getDeezerPlaylistContainer().getColumns())
-		);
-	}
 
 	private List<PlaylistContainerViewConfigurations.PlaylistContainerColumn> getContainerColumnsViewConfiguration(Columns columnsConfig) {
 		return columnsConfig.getColumns().stream()

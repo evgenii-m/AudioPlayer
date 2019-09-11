@@ -74,7 +74,6 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 	public void resumePlayingTrack() {
 		playlistService.getActivePlaylistTrack().ifPresent(o -> {
 			playerComponent.resume();
-			o.setNowPlaying(true);
 		});
 	}
 
@@ -102,6 +101,10 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 			String resourceUri = MediaSourceType.FILE.equals(track.getSourceType()) ?
 					Paths.get(track.getTrackPath()).toString() : track.getTrackPath();
 			playerComponent.playMedia(resourceUri);
+
+			TrackData trackData = dtoMapper.mapTrackData(track);
+			eventListeners.forEach(listener -> listener.changedNowPlayingTrack(trackData));
+
 		} else {
 			LOG.error("No track set to play.");
 			// TODO: add event for empty track
@@ -117,14 +120,17 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 	public void pauseCurrentTrack() {
 		playlistService.getActivePlaylistTrack().ifPresent(o -> {
 			playerComponent.pause();
-			o.setNowPlaying(false);
 		});
 	}
 
 	@Override
 	public void stopPlaying() {
 		playerComponent.stop();
-		playlistService.resetActivePlaylistTrack();
+		playlistService.getActivePlaylistTrack().ifPresent(track -> {
+			playlistService.resetActivePlaylistTrack();
+			TrackData trackData = dtoMapper.mapTrackData(track);
+			eventListeners.forEach(listener -> listener.changedNowPlayingTrack(trackData));
+		});
 	}
 
 	@Override

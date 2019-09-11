@@ -14,7 +14,7 @@ public class TrackData {
 	private boolean nowPlaying;
 
 	public TrackData(String trackUid, String playlistUid, String artist, String album,
-									 String date, String title, String trackNumber, long length) {
+									 String date, String title, String trackNumber, long length, boolean nowPlaying) {
 		this.trackUid = trackUid;
 		this.playlistUid = playlistUid;
 		this.artist = artist;
@@ -23,6 +23,7 @@ public class TrackData {
 		this.title = title;
 		this.trackNumber = trackNumber;
 		this.length = length;
+		this.nowPlaying = nowPlaying;
 	}
 
 	public String getTrackUid() {

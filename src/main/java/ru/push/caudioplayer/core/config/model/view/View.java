@@ -17,16 +17,11 @@ public class View implements Serializable {
 	@XmlElement
 	private PlaylistContainer localPlaylistContainer;
 
-	@NotNull
-	@XmlElement
-	private PlaylistContainer deezerPlaylistContainer;
-
 	public View() {
 	}
 
-	public View(PlaylistContainer localPlaylistContainer, PlaylistContainer deezerPlaylistContainer) {
+	public View(PlaylistContainer localPlaylistContainer) {
 		this.localPlaylistContainer = localPlaylistContainer;
-		this.deezerPlaylistContainer = deezerPlaylistContainer;
 	}
 
 	public PlaylistContainer getLocalPlaylistContainer() {
@@ -37,19 +32,10 @@ public class View implements Serializable {
 		this.localPlaylistContainer = localPlaylistContainer;
 	}
 
-	public PlaylistContainer getDeezerPlaylistContainer() {
-		return deezerPlaylistContainer;
-	}
-
-	public void setDeezerPlaylistContainer(PlaylistContainer deezerPlaylistContainer) {
-		this.deezerPlaylistContainer = deezerPlaylistContainer;
-	}
-
 	@Override
 	public String toString() {
 		return "View{" +
 				"localPlaylistContainer=" + localPlaylistContainer +
-				",deezerPlaylistContainer=" + deezerPlaylistContainer +
 				'}';
 	}
 }
