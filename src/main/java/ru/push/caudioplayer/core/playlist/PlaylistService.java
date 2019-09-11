@@ -25,6 +25,8 @@ public interface PlaylistService {
 
 	Optional<PlaylistTrack> prevActivePlaylistTrack();
 
+	void resetActivePlaylistTrack();
+
 	Playlist createPlaylist(PlaylistType type);
 
 	Playlist deletePlaylist(String playlistUid);

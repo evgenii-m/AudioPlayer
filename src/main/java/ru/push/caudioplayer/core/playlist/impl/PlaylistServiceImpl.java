@@ -127,7 +127,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 		return Optional.ofNullable(activePlaylist);
 	}
 
-	private Optional<PlaylistTrack> setActivePlaylist(String playlistUid) {
+	private Optional<Playlist> setActivePlaylist(String playlistUid) {
 		if (!playlistMap.containsKey(playlistUid)) {
 			LOG.error("Playlist not found: uid = {}", playlistUid);
 			return Optional.empty();
@@ -135,14 +135,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 
 		Playlist playlist = playlistMap.get(playlistUid);
 		activePlaylist = playlist;
-
-		Optional<PlaylistTrack> playlistTrack = playlist.getItems().stream()
-				.findFirst();
-		if (playlistTrack.isPresent()) {
-			activePlaylistTrack = playlistTrack.get();
-		}
-
-		return playlistTrack;
+		return Optional.of(playlist);
 	}
 
 	@Override
@@ -158,7 +151,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 				.findFirst();
 		if (playlistTrack.isPresent()) {
 			activePlaylist = playlist;
-			activePlaylistTrack = playlistTrack.get();
+			setActivePlaylistTrackNowPlaying(playlistTrack.get());
 		} else {
 			LOG.error("Playlist track not found: playlistUid = {}, trackUid = {}", playlistUid, trackUid);
 		}
@@ -184,7 +177,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 			activePlaylistTrackIndex = 0;
 		}
 
-		activePlaylistTrack = activePlaylist.getItems().get(activePlaylistTrackIndex);
+		setActivePlaylistTrackNowPlaying(activePlaylist.getItems().get(activePlaylistTrackIndex));
 		return Optional.of(activePlaylistTrack);
 	}
 
@@ -201,8 +194,24 @@ public class PlaylistServiceImpl implements PlaylistService {
 			activePlaylistTrackIndex = activePlaylist.getItems().size() - 1;
 		}
 
-		activePlaylistTrack = activePlaylist.getItems().get(activePlaylistTrackIndex);
+		setActivePlaylistTrackNowPlaying(activePlaylist.getItems().get(activePlaylistTrackIndex));
 		return Optional.of(activePlaylistTrack);
+	}
+
+	@Override
+	public void resetActivePlaylistTrack() {
+		if (activePlaylistTrack != null) {
+			activePlaylistTrack.setNowPlaying(false);
+			activePlaylistTrack = null;
+		}
+	}
+
+	private void setActivePlaylistTrackNowPlaying(PlaylistTrack playlistTrack) {
+		if (activePlaylistTrack != null) {
+			activePlaylistTrack.setNowPlaying(false);
+		}
+		playlistTrack.setNowPlaying(true);
+		activePlaylistTrack = playlistTrack;
 	}
 
 	@Override

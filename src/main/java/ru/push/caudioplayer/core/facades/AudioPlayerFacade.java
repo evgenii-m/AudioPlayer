@@ -15,15 +15,19 @@ public interface AudioPlayerFacade {
 
   void removeEventListener(AudioPlayerEventListener listener);
 
-  void playTrack(String playlistUid, String trackUid);
+	void resumePlayingTrack();
 
-  void playCurrentTrack();
+  void playTrack(String playlistUid, String trackUid);
 
   void playNextTrack();
 
   void playPrevTrack();
 
 	Optional<TrackData> getActivePlaylistTrack();
+
+	void pauseCurrentTrack();
+
+	void stopPlaying();
 
 	void stopApplication();
 

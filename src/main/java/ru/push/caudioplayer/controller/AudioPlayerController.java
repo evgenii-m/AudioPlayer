@@ -178,19 +178,19 @@ public class AudioPlayerController {
 
   @FXML
   void stopAction(ActionEvent event) {
-    playerComponent.stop();
+  	audioPlayerFacade.stopPlaying();
     updatePlaybackPosition();
   }
 
   @FXML
   void playAction(ActionEvent event) {
-    audioPlayerFacade.playCurrentTrack();
+    audioPlayerFacade.resumePlayingTrack();
     updatePlaybackPosition();
   }
 
   @FXML
   void pauseAction(ActionEvent event) {
-    playerComponent.pause();
+  	audioPlayerFacade.pauseCurrentTrack();
   }
 
   @FXML

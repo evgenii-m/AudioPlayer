@@ -11,6 +11,7 @@ public class TrackData {
 	private String title;
 	private String trackNumber;
 	private long length;
+	private boolean nowPlaying;
 
 	public TrackData(String trackUid, String playlistUid, String artist, String album,
 									 String date, String title, String trackNumber, long length) {
@@ -86,6 +87,14 @@ public class TrackData {
 
 	public void setLength(long length) {
 		this.length = length;
+	}
+
+	public boolean isNowPlaying() {
+		return nowPlaying;
+	}
+
+	public void setNowPlaying(boolean nowPlaying) {
+		this.nowPlaying = nowPlaying;
 	}
 
 	@Override

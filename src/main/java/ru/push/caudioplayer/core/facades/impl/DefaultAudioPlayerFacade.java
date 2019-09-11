@@ -11,7 +11,6 @@ import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerCompone
 import ru.push.caudioplayer.core.medialoader.MediaInfoDataLoaderService;
 import ru.push.caudioplayer.core.playlist.model.MediaSourceType;
 import ru.push.caudioplayer.core.playlist.PlaylistService;
-import ru.push.caudioplayer.core.playlist.model.Playlist;
 import ru.push.caudioplayer.core.playlist.model.PlaylistTrack;
 import uk.co.caprica.vlcj.player.MediaMeta;
 import uk.co.caprica.vlcj.player.MediaPlayer;
@@ -71,16 +70,18 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
     eventListeners.remove(listener);
   }
 
+	@Override
+	public void resumePlayingTrack() {
+		playlistService.getActivePlaylistTrack().ifPresent(o -> {
+			playerComponent.resume();
+			o.setNowPlaying(true);
+		});
+	}
+
   @Override
   public void playTrack(String playlistUid, String trackUid) {
 		Optional<PlaylistTrack> playlistTrack = playlistService.setActivePlaylistTrack(playlistUid, trackUid);
     playTrack(playlistTrack);
-  }
-
-  @Override
-  public void playCurrentTrack() {
-		Optional<PlaylistTrack> playlistTrack = playlistService.getActivePlaylistTrack();
-		playTrack(playlistTrack);
   }
 
   @Override
@@ -96,21 +97,35 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   }
 
   private void playTrack(Optional<PlaylistTrack> playlistTrack) {
-  	if (playlistTrack.isPresent()) {
+		if (playlistTrack.isPresent()) {
 			PlaylistTrack track = playlistTrack.get();
-				String resourceUri = MediaSourceType.FILE.equals(track.getSourceType()) ?
-						Paths.get(track.getTrackPath()).toString() : track.getTrackPath();
-				playerComponent.playMedia(resourceUri);
+			String resourceUri = MediaSourceType.FILE.equals(track.getSourceType()) ?
+					Paths.get(track.getTrackPath()).toString() : track.getTrackPath();
+			playerComponent.playMedia(resourceUri);
 		} else {
-  		LOG.error("No track set to play.");
+			LOG.error("No track set to play.");
 			// TODO: add event for empty track
 		}
-  }
+	}
 
-  @Override
+	@Override
   public Optional<TrackData> getActivePlaylistTrack() {
     return playlistService.getActivePlaylistTrack().map(o -> dtoMapper.mapTrackData(o));
   }
+
+	@Override
+	public void pauseCurrentTrack() {
+		playlistService.getActivePlaylistTrack().ifPresent(o -> {
+			playerComponent.pause();
+			o.setNowPlaying(false);
+		});
+	}
+
+	@Override
+	public void stopPlaying() {
+		playerComponent.stop();
+		playlistService.resetActivePlaylistTrack();
+	}
 
 	@Override
   public void stopApplication() {

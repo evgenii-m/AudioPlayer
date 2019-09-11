@@ -16,12 +16,11 @@ public class PlaylistTrack {
 	private String title;
 	private String trackNumber;
 	private long length;
+	private boolean nowPlaying;
 
 
 	public PlaylistTrack(String uid, Playlist playlist) {
-		this.uid = uid;
-		this.trackPath = StringUtils.EMPTY;
-		this.sourceType = MediaSourceType.FILE;
+		this(uid, MediaSourceType.FILE, StringUtils.EMPTY);
 		this.playlist = playlist;
 	}
 
@@ -29,6 +28,7 @@ public class PlaylistTrack {
 		this.uid = uid;
 		this.sourceType = sourceType;
 		this.trackPath = trackPath;
+		this.nowPlaying = false;
 	}
 
 	public PlaylistTrack(String uid, MediaSourceType sourceType, String trackPath, String artist,
@@ -42,6 +42,7 @@ public class PlaylistTrack {
 		this.trackNumber = trackNumber;
 		this.length = length;
 		this.trackPath = trackPath;
+		this.nowPlaying = false;
 	}
 
 	public String getTrackPath() {
@@ -118,6 +119,14 @@ public class PlaylistTrack {
 
 	protected void setPlaylist(Playlist playlist) {
 		this.playlist = playlist;
+	}
+
+	public boolean isNowPlaying() {
+		return nowPlaying;
+	}
+
+	public void setNowPlaying(boolean nowPlaying) {
+		this.nowPlaying = nowPlaying;
 	}
 
 	@Override
