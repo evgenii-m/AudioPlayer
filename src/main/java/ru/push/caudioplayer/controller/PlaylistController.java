@@ -254,11 +254,6 @@ public class PlaylistController {
   private void removePlaylistAction(ActionEvent event, ListCell<PlaylistData> cell) {
 		PlaylistData playlistData = cell.getItem();
 
-		if (playlistData.isReadOnly()) {
-			LOG.warn("For read only playlists delete disabled");
-			return;
-		}
-
 		Stage popupStage = createPopup("Confirm action", confirmActionPopupScene);
 
 		Consumer<Void> action = (o) -> {

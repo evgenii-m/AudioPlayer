@@ -108,8 +108,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 	@Override
 	public void reloadPlaylists() {
 		List<Playlist> localPlaylists = loadLocalPlaylists();
-//		List<Playlist> deezerPlalists = loadDeezerPlaylists();
-		List<Playlist> deezerPlalists = new ArrayList<>();
+		List<Playlist> deezerPlalists = loadDeezerPlaylists();
 		playlistMap = Stream.of(localPlaylists, deezerPlalists)
 				.flatMap(Collection::stream)
 				.collect(Collectors.toMap(Playlist::getUid, o -> o));
