@@ -6,11 +6,12 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-<Pane xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1"
-	  fx:controller="ru.push.caudioplayer.controller.MainController" stylesheets="/css/style.css">
+<Pane stylesheets="/css/style.css" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1"
+	  fx:controller="ru.push.caudioplayer.controller.MainController">
 	<children>
 		<VBox fx:id="mainContainer" prefHeight="630" prefWidth="1010">
 			<children>
@@ -52,14 +53,19 @@
 				</Pane>
 
 				<TabPane fx:id="extraPanelsTabPane" prefHeight="220.0" prefWidth="1000.0" side="BOTTOM"
-						 tabClosingPolicy="UNAVAILABLE" styleClass="extra-panels-tab-pane">
+						 styleClass="extra-panels-tab-pane" tabClosingPolicy="UNAVAILABLE">
 					<tabs>
-						<Tab fx:id="lastfmPanelTab" closable="false" text="Last.m" styleClass="tab-pane-item">
+						<Tab fx:id="lastfmPanelTab" closable="false" styleClass="tab-pane-item" text="Last.m">
 						</Tab>
-						<Tab fx:id="notificationsPanelTab" closable="false" text="Notifications"
-							 styleClass="tab-pane-item">
+						<Tab fx:id="notificationsPanelTab" closable="false" styleClass="tab-pane-item"
+							 text="Notifications">
 							<content>
-								<Pane prefHeight="30.0" styleClass="notification-panel"/>
+								<Pane pickOnBounds="false" prefHeight="180.0" prefWidth="1000.0">
+									<children>
+										<TextArea fx:id="notificationOutputTextArea" editable="false" layoutX="5.0" layoutY="5.0" prefHeight="170.0"
+												  prefWidth="980.0" styleClass="notification-output-area"/>
+									</children>
+								</Pane>
 							</content>
 						</Tab>
 					</tabs>

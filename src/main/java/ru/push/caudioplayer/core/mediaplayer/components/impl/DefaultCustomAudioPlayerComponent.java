@@ -104,6 +104,7 @@ public class DefaultCustomAudioPlayerComponent implements CustomAudioPlayerCompo
 
   @Override
   public boolean isPlaying() {
+		LOG.debug("isPlaying");
     return mediaPlayer.isPlaying();
   }
 

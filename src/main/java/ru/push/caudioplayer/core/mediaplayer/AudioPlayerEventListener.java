@@ -1,5 +1,6 @@
 package ru.push.caudioplayer.core.mediaplayer;
 
+import ru.push.caudioplayer.core.facades.dto.NotificationData;
 import ru.push.caudioplayer.core.facades.dto.PlaylistData;
 import ru.push.caudioplayer.core.facades.dto.TrackData;
 
@@ -20,4 +21,6 @@ public interface AudioPlayerEventListener {
   void deletedPlaylist(PlaylistData playlistData);
 
   void changedNowPlayingTrack(TrackData trackData);
+
+  void obtainedNotification(NotificationData notificationData);
 }

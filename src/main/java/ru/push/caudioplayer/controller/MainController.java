@@ -1,11 +1,13 @@
 package ru.push.caudioplayer.controller;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebEngine;
@@ -19,7 +21,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.AppMain;
 import ru.push.caudioplayer.ConfigurationControllers;
+import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
+import ru.push.caudioplayer.core.facades.dto.NotificationData;
+import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -55,6 +60,8 @@ public class MainController {
 	public Tab notificationsPanelTab;
 	@FXML
 	public TabPane extraPanelsTabPane;
+	@FXML
+	public TextArea notificationOutputTextArea;
   @FXML
   @Resource(name = "audioPlayerView")
   private ConfigurationControllers.View audioPlayerView;
@@ -65,6 +72,8 @@ public class MainController {
 	@Resource(name = "lastfmPanelView")
 	private ConfigurationControllers.View lastfmPanelView;
 
+	@Autowired
+	private AudioPlayerFacade audioPlayerFacade;
 	@Autowired
 	private MusicLibraryLogicFacade musicLibraryLogicFacade;
 	@Autowired
@@ -80,6 +89,10 @@ public class MainController {
 		LOG.debug("init bean {}", this.getClass().getName());
 
 		System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
+
+		AudioPlayerEventAdapter eventAdapter = new AudioPlayerEventAdapter();
+		audioPlayerFacade.addEventListener(eventAdapter);
+		musicLibraryLogicFacade.addEventListener(eventAdapter);
 
 		audioPlayerComponentPane.getChildren().add(audioPlayerView.getView());
 		playlistComponentPane.getChildren().add(playlistView.getView());
@@ -172,6 +185,17 @@ public class MainController {
 			musicLibraryLogicFacade.backupPlaylists(backupFolderName);
 		} catch (IOException e) {
 			LOG.error("Export playlist error", e);
+		}
+	}
+
+	private final class AudioPlayerEventAdapter extends DefaultAudioPlayerEventAdapter {
+
+		@Override
+		public void obtainedNotification(NotificationData notificationData) {
+			Platform.runLater(() -> {
+				notificationOutputTextArea.appendText(notificationData.getMessage() + "\n");
+				extraPanelsTabPane.getSelectionModel().select(notificationsPanelTab);
+			});
 		}
 	}
 }

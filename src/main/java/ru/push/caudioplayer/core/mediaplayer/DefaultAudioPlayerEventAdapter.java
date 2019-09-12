@@ -1,5 +1,6 @@
 package ru.push.caudioplayer.core.mediaplayer;
 
+import ru.push.caudioplayer.core.facades.dto.NotificationData;
 import ru.push.caudioplayer.core.facades.dto.PlaylistData;
 import ru.push.caudioplayer.core.facades.dto.TrackData;
 
@@ -31,5 +32,10 @@ public abstract class DefaultAudioPlayerEventAdapter implements AudioPlayerEvent
 
 	@Override
 	public void changedNowPlayingTrack(TrackData trackData) {
+	}
+
+	@Override
+	public void obtainedNotification(NotificationData notificationData) {
+
 	}
 }

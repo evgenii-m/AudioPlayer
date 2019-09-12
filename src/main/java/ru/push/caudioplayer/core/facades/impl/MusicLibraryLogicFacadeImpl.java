@@ -8,6 +8,7 @@ import org.springframework.util.CollectionUtils;
 import ru.push.caudioplayer.core.deezer.DeezerApiErrorException;
 import ru.push.caudioplayer.core.deezer.DeezerApiService;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
+import ru.push.caudioplayer.core.facades.dto.NotificationData;
 import ru.push.caudioplayer.core.facades.dto.PlaylistData;
 import ru.push.caudioplayer.core.lastfm.LastFmService;
 import ru.push.caudioplayer.core.lastfm.model.Track;
@@ -180,7 +181,12 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	public void renamePlaylist(String playlistUid, String newTitle) {
 		Playlist result = playlistService.renamePlaylist(playlistUid, newTitle);
 		if (result != null) {
-			eventListeners.forEach(l -> l.renamedPlaylist(dtoMapper.mapPlaylistData(result)));
+			eventListeners.forEach(l -> {
+				l.renamedPlaylist(dtoMapper.mapPlaylistData(result));
+				l.obtainedNotification(new NotificationData(
+						String.format(NotificationMessages.RENAMED_PLAYLIST, playlistUid, newTitle)
+				));
+			});
 		} else {
 			// TODO: add event for display error
 		}

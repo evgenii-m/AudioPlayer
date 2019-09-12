@@ -67,3 +67,9 @@
 .tab:selected .tab-label {
  -fx-text-fill: #D8E6E4;
 }
+
+.notification-output-area {
+ -fx-control-inner-background: #BAD1E8;
+ -fx-text-fill: #747474;
+ -fx-font-size: 14px;
+}
