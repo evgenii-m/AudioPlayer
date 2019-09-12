@@ -3,7 +3,7 @@
 	<timestamp key="CURRENT_DATE" datePattern="yyyy_MM_dd"/>
 
 	<property name="LOG_MSG_PATTERN" value="%d{HH:mm:ss.SSS} %-5level [%thread] %logger:%n %msg%n"/>
-	<property name="LOG_FILE_PATH" value="logs/application-${CURRENT_DATE}.log"/>
+	<property name="LOG_FILE_PATH" value="logs/application.log"/>
 
 	<appender name="FILE" class="ch.qos.logback.core.FileAppender">
 		<file>${LOG_FILE_PATH}</file>
