@@ -202,7 +202,7 @@ public class AudioPlayerController {
 
   private void updateNowPlayingLabel(TrackData trackData) {
 		Platform.runLater(() -> {
-			if (trackData != null) {
+			if ((trackData != null) && trackData.isNowPlaying()) {
 				nowPlayingLabel.setText(
 						String.format(NOW_PLAYING_LABEL_FORMAT, trackData.getArtist(), trackData.getTitle(), trackData.getPlaylistTitle())
 				);
