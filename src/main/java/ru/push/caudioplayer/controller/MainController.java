@@ -4,6 +4,9 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
@@ -40,8 +43,18 @@ public class MainController {
   private static final String DEFAULT_PLAYLIST_BACKUP_FOLDER_NAME = "export/backup_%s/";
   private static final String DEFAULT_PLAYLIST_BACKUP_FOLDER_TIMESTAMP_FORMAT = "yyyy-MM-dd_HH-mm-ss";
 
-  @FXML
+	@FXML
   private VBox mainContainer;
+	@FXML
+	public Pane audioPlayerComponentPane;
+	@FXML
+	public Pane playlistComponentPane;
+	@FXML
+	public Tab lastfmPanelTab;
+	@FXML
+	public Tab notificationsPanelTab;
+	@FXML
+	public TabPane extraPanelsTabPane;
   @FXML
   @Resource(name = "audioPlayerView")
   private ConfigurationControllers.View audioPlayerView;
@@ -68,9 +81,9 @@ public class MainController {
 
 		System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
 
-    mainContainer.getChildren().add(audioPlayerView.getView());
-    mainContainer.getChildren().add(playlistView.getView());
-    mainContainer.getChildren().add(lastfmPanelView.getView());
+		audioPlayerComponentPane.getChildren().add(audioPlayerView.getView());
+		playlistComponentPane.getChildren().add(playlistView.getView());
+		lastfmPanelTab.setContent(lastfmPanelView.getView());
   }
 
   @FXML

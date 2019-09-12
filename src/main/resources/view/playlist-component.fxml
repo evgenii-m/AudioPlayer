@@ -11,7 +11,7 @@
 
 <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" stylesheets="/css/style.css" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.push.caudioplayer.controller.PlaylistController">
 	<children>
-		<HBox fx:id="playlistBlockContainer" prefWidth="1000.0" spacing="5.0">
+		<HBox fx:id="playlistBlockContainer" prefWidth="1010.0" spacing="5.0">
 			<children>
 				<Pane prefHeight="300" prefWidth="290.0">
 					<HBox prefHeight="25.0" prefWidth="290.0" spacing="7.0">

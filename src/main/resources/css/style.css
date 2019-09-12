@@ -23,7 +23,7 @@
 }
 
 .playlist-browser-container {
- -fx-background-color: #C4C4C4;
+ -fx-background-color: #747474;
  -fx-border-color: #A0A0A0;
  -fx-border-insets: 0;
  -fx-border-width: 1;
@@ -36,11 +36,34 @@
 
 .tab-pane-item {
  -fx-padding: 3px 12px 3px 12px;
- -fx-text-fill: #828282;
  -fx-font-size: 12px;
  -fx-font-weight: bold;
 }
 
 .playlist-browser-control-button {
-    -fx-padding: 3px 10px 3px 10px;
+ -fx-padding: 3px 10px 3px 10px;
+}
+
+.extra-panels-tab-pane {
+ -fx-background-color: #747474;
+}
+
+.tab-header-background {
+ -fx-background-color: #B9B9B9;
+}
+
+.tab-pane .tab {
+ -fx-background-color: #D5D5D5;
+}
+
+.tab-pane .tab:selected {
+ -fx-background-color: #747474;
+}
+
+.tab .tab-label {
+ -fx-text-fill: #6D6D6D
+}
+
+.tab:selected .tab-label {
+ -fx-text-fill: #D8E6E4;
 }
