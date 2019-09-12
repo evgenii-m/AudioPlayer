@@ -111,7 +111,7 @@ public class AudioPlayerController {
 
   @PreDestroy
 	public void stop() {
-		playerScheduler.shutdown();
+		playerScheduler.shutdownNow();
 		audioPlayerFacade.releaseAudioPlayer();
 	}
 
