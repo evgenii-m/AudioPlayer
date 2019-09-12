@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
+import ru.push.caudioplayer.core.facades.dto.NotificationData;
 import ru.push.caudioplayer.core.facades.dto.PlaylistData;
 import ru.push.caudioplayer.core.facades.dto.TrackData;
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
@@ -107,7 +108,6 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 
 		} else {
 			LOG.error("No track set to play.");
-			// TODO: add event for empty track
 		}
 	}
 
@@ -133,6 +133,10 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 		});
 	}
 
+	private void sendNotification(String messageText) {
+		eventListeners.forEach(l -> l.obtainedNotification(new NotificationData(messageText)));
+	}
+
   private class AudioPlayerFacadeEventListener extends MediaPlayerEventAdapter {
 
     @Override
@@ -155,6 +159,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 
 					} else {
 						LOG.error("Media info is null!");
+						sendNotification(NotificationMessages.TRACK_MEDIA_DATA_INCORRECT);
 					}
 				});
       }

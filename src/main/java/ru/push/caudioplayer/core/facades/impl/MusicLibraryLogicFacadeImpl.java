@@ -152,8 +152,11 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 		Playlist result = playlistService.createPlaylist(PlaylistType.LOCAL);
 		if (result != null) {
 			eventListeners.forEach(l -> l.createdNewPlaylist(dtoMapper.mapPlaylistData(result)));
+			sendNotification(
+					String.format(NotificationMessages.CREATE_PLAYLIST_SUCCESS, result.getUid(), result.getTitle())
+			);
 		} else {
-			// TODO: add event for display error
+			sendNotification(NotificationMessages.CREATE_PLAYLIST_FAIL);
 		}
 	}
 
@@ -162,8 +165,11 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 		Playlist result = playlistService.createPlaylist(PlaylistType.DEEZER);
 		if (result != null) {
 			eventListeners.forEach(l -> l.createdNewPlaylist(dtoMapper.mapPlaylistData(result)));
+			sendNotification(
+					String.format(NotificationMessages.CREATE_PLAYLIST_SUCCESS, result.getUid(), result.getTitle())
+			);
 		} else {
-			// TODO: add event for display error
+			sendNotification(NotificationMessages.CREATE_PLAYLIST_FAIL);
 		}
 	}
 
@@ -172,8 +178,13 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 		Playlist result = playlistService.deletePlaylist(playlistUid);
 		if (result != null) {
 			eventListeners.forEach(l -> l.deletedPlaylist(dtoMapper.mapPlaylistData(result)));
+			sendNotification(
+					String.format(NotificationMessages.DELETE_PLAYLIST_SUCCESS, result.getUid())
+			);
 		} else {
-			// TODO: add event for display error
+			sendNotification(
+					String.format(NotificationMessages.DELETE_PLAYLIST_FAIL, playlistUid)
+			);
 		}
 	}
 
@@ -181,14 +192,14 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	public void renamePlaylist(String playlistUid, String newTitle) {
 		Playlist result = playlistService.renamePlaylist(playlistUid, newTitle);
 		if (result != null) {
-			eventListeners.forEach(l -> {
-				l.renamedPlaylist(dtoMapper.mapPlaylistData(result));
-				l.obtainedNotification(new NotificationData(
-						String.format(NotificationMessages.RENAMED_PLAYLIST, playlistUid, newTitle)
-				));
-			});
+			eventListeners.forEach(l -> l.renamedPlaylist(dtoMapper.mapPlaylistData(result)));
+			sendNotification(
+					String.format(NotificationMessages.RENAME_PLAYLIST_SUCCESS, playlistUid, newTitle)
+			);
 		} else {
-			// TODO: add event for display error
+			sendNotification(
+					String.format(NotificationMessages.RENAME_PLAYLIST_FAIL, playlistUid, newTitle)
+			);
 		}
 	}
 
@@ -209,8 +220,13 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 		Playlist result = playlistService.addFilesToLocalPlaylist(playlistUid, files);
 		if (result != null) {
 			eventListeners.forEach(listener -> listener.changedPlaylist(dtoMapper.mapPlaylistData(result)));
+			sendNotification(
+					String.format(NotificationMessages.ADD_TRACKS_TO_PLAYLIST_SUCCESS, playlistUid)
+			);
 		} else {
-			// TODO: add event for display error
+			sendNotification(
+					String.format(NotificationMessages.ADD_TRACKS_TO_PLAYLIST_FAIL, playlistUid)
+			);
 		}
 	}
 
@@ -219,8 +235,13 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 		Playlist result = playlistService.deleteItemsFromPlaylist(playlistUid, tracksUid);
 		if (result != null) {
 			eventListeners.forEach(listener -> listener.changedPlaylist(dtoMapper.mapPlaylistData(result)));
+			sendNotification(
+					String.format(NotificationMessages.DELETE_TRACKS_FROM_PLAYLIST_SUCCESS, playlistUid)
+			);
 		} else {
-			// TODO: add event for display error
+			sendNotification(
+					String.format(NotificationMessages.DELETE_TRACKS_FROM_PLAYLIST_FAIL, playlistUid)
+			);
 		}
 	}
 
@@ -229,8 +250,13 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 		Playlist result = playlistService.addLocationsToLocalPlaylist(playlistUid, locations);
 		if (result != null) {
 			eventListeners.forEach(listener -> listener.changedPlaylist(dtoMapper.mapPlaylistData(result)));
+			sendNotification(
+					String.format(NotificationMessages.ADD_TRACKS_TO_PLAYLIST_SUCCESS, playlistUid)
+			);
 		} else {
-			// TODO: add event for display error
+			sendNotification(
+					String.format(NotificationMessages.ADD_TRACKS_TO_PLAYLIST_FAIL, playlistUid)
+			);
 		}
 	}
 
@@ -240,8 +266,13 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 				new TrackData(trackData.getArtist(), trackData.getAlbum(), trackData.getTitle()));
 		if (result != null) {
 			eventListeners.forEach(listener -> listener.changedPlaylist(dtoMapper.mapPlaylistData(result)));
+			sendNotification(
+					String.format(NotificationMessages.ADD_TRACKS_TO_PLAYLIST_SUCCESS, playlistUid)
+			);
 		} else {
-			// TODO: add event for display error
+			sendNotification(
+					String.format(NotificationMessages.ADD_TRACKS_TO_PLAYLIST_FAIL, playlistUid)
+			);
 		}
 	}
 
@@ -251,8 +282,13 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 				new TrackData(trackData.getArtist(), trackData.getAlbum(), trackData.getTitle()));
 		if (result != null) {
 			eventListeners.forEach(listener -> listener.changedPlaylist(dtoMapper.mapPlaylistData(result)));
+			sendNotification(NotificationMessages.ADD_TRACK_TO_DEEZER_LOVED_TRACKS_SUCCESS);
 		} else {
-			// TODO: add event for display error
+			sendNotification(NotificationMessages.ADD_TRACK_TO_DEEZER_LOVED_TRACKS_FAIL);
 		}
+	}
+
+	private void sendNotification(String messageText) {
+		eventListeners.forEach(l -> l.obtainedNotification(new NotificationData(messageText)));
 	}
 }

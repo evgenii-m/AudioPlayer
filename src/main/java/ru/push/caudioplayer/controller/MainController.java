@@ -194,7 +194,6 @@ public class MainController {
 		public void obtainedNotification(NotificationData notificationData) {
 			Platform.runLater(() -> {
 				notificationOutputTextArea.appendText(notificationData.getMessage() + "\n");
-				extraPanelsTabPane.getSelectionModel().select(notificationsPanelTab);
 			});
 		}
 	}
