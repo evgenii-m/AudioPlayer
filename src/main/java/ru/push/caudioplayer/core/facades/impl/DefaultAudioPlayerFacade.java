@@ -55,11 +55,6 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
     playerComponent.addEventListener(new AudioPlayerFacadeEventListener());
   }
 
-  @PreDestroy
-	public void stop() {
-		playerComponent.releaseComponent();
-	}
-
 	@Override
   public synchronized void addEventListener(AudioPlayerEventListener listener) {
     eventListeners.add(listener);
@@ -69,6 +64,11 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   public synchronized void removeEventListener(AudioPlayerEventListener listener) {
     eventListeners.remove(listener);
   }
+
+	@Override
+	public void releaseAudioPlayer() {
+		playerComponent.releaseComponent();
+	}
 
 	@Override
 	public void resumePlayingTrack() {
@@ -132,10 +132,6 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 			eventListeners.forEach(listener -> listener.changedNowPlayingTrack(trackData));
 		});
 	}
-
-	@Override
-  public void stopApplication() {
-  }
 
   private class AudioPlayerFacadeEventListener extends MediaPlayerEventAdapter {
 

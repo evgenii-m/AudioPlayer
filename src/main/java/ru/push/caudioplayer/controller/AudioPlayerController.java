@@ -112,6 +112,7 @@ public class AudioPlayerController {
   @PreDestroy
 	public void stop() {
 		playerScheduler.shutdown();
+		audioPlayerFacade.releaseAudioPlayer();
 	}
 
   private void addPositionSliderMouseListeners() {

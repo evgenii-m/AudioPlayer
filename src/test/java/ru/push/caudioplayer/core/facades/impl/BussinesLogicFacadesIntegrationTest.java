@@ -1,7 +1,6 @@
 package ru.push.caudioplayer.core.facades.impl;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections4.IterableUtils;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -83,7 +82,7 @@ public class BussinesLogicFacadesIntegrationTest extends AbstractTestNGSpringCon
 
   @AfterMethod
   public void tearDown() throws Exception {
-    audioPlayerFacade.stopApplication();
+    audioPlayerFacade.releaseAudioPlayer();
     audioPlayerFacade.removeEventListener(eventListener);
   }
 

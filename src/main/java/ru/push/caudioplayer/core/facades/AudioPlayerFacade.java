@@ -15,6 +15,8 @@ public interface AudioPlayerFacade {
 
   void removeEventListener(AudioPlayerEventListener listener);
 
+	void releaseAudioPlayer();
+
 	void resumePlayingTrack();
 
   void playTrack(String playlistUid, String trackUid);
@@ -28,7 +30,4 @@ public interface AudioPlayerFacade {
 	void pauseCurrentTrack();
 
 	void stopPlaying();
-
-	void stopApplication();
-
 }

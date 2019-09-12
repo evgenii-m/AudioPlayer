@@ -43,7 +43,6 @@ public class AppMain extends AbstractJavaFxApplicationSupport {
 
   @Override
   public void stop() throws Exception {
-    audioPlayerFacade.stopApplication();
     super.stop();
   }
 
