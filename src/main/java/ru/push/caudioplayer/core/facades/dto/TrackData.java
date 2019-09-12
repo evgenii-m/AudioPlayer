@@ -12,9 +12,11 @@ public class TrackData {
 	private String trackNumber;
 	private long length;
 	private boolean nowPlaying;
+	private String playlistTitle;
 
 	public TrackData(String trackUid, String playlistUid, String artist, String album,
-									 String date, String title, String trackNumber, long length, boolean nowPlaying) {
+									 String date, String title, String trackNumber, long length, boolean nowPlaying,
+									 String playlistTitle) {
 		this.trackUid = trackUid;
 		this.playlistUid = playlistUid;
 		this.artist = artist;
@@ -24,6 +26,7 @@ public class TrackData {
 		this.trackNumber = trackNumber;
 		this.length = length;
 		this.nowPlaying = nowPlaying;
+		this.playlistTitle = playlistTitle;
 	}
 
 	public String getTrackUid() {
@@ -98,6 +101,10 @@ public class TrackData {
 		this.nowPlaying = nowPlaying;
 	}
 
+	public String getPlaylistTitle() {
+		return playlistTitle;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -123,6 +130,8 @@ public class TrackData {
 				", title='" + title + '\'' +
 				", trackNumber='" + trackNumber + '\'' +
 				", length=" + length +
+				", nowPlaying=" + nowPlaying +
+				", playlistTitle='" + playlistTitle + '\'' +
 				'}';
 	}
 }

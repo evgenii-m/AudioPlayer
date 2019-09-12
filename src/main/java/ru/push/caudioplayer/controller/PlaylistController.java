@@ -107,16 +107,16 @@ public class PlaylistController {
   public void init() {
 		LOG.debug("init bean {}", this.getClass().getName());
 
+		AudioPlayerEventAdapter eventAdapter = new AudioPlayerEventAdapter();
+		audioPlayerFacade.addEventListener(eventAdapter);
+		musicLibraryLogicFacade.addEventListener(eventAdapter);
+
 		List<PlaylistData> localPlaylists = musicLibraryLogicFacade.getLocalPlaylists();
 		List<PlaylistData> deezerPlaylists = musicLibraryLogicFacade.getDeezerPlaylists();
 
 		renamePopupScene = new Scene(renamePopupView.getView());
 		confirmActionPopupScene = new Scene(confirmActionPopupView.getView());
 		textInputActionPopupScene = new Scene(textInputActionPopupView.getView());
-
-		AudioPlayerEventAdapter eventAdapter = new AudioPlayerEventAdapter();
-		audioPlayerFacade.addEventListener(eventAdapter);
-		musicLibraryLogicFacade.addEventListener(eventAdapter);
 
 		String displayedPlaylistUid = applicationConfigService.getDisplayedPlaylistUid();
 		displayedPlaylist = Stream.of(localPlaylists, deezerPlaylists)

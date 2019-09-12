@@ -13,7 +13,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
+import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
+import ru.push.caudioplayer.core.facades.dto.PlaylistData;
 import ru.push.caudioplayer.core.facades.dto.TrackData;
+import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
 import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
 
@@ -33,8 +36,10 @@ public class AudioPlayerController {
 
   private static final double POSITION_SLIDER_MAX_VALUE = 100;  // track position determined in percentage
   private static final float POSITION_SLIDER_SCALE_COEF = 100;
+  private static final String NOW_PLAYING_LABEL_FORMAT = ">>\t%s - %s\t[from: %s]"; // >> {artist} - {track title} [from: {playlist title}]
+  private static final String NOW_PLAYING_EMPTY_LABEL = ">>";
 
-  @FXML
+	@FXML
   private HBox mediaButtonsControl;
   @FXML
   private Button stopButton;
@@ -52,9 +57,13 @@ public class AudioPlayerController {
   private Label trackTimeLabel;
   @FXML
   private Slider volumeSlider;
+  @FXML
+	private Label nowPlayingLabel;
 
   @Autowired
   private AudioPlayerFacade audioPlayerFacade;
+  @Autowired
+	private MusicLibraryLogicFacade musicLibraryLogicFacade;
   @Autowired
   private CustomAudioPlayerComponent playerComponent;
   @Autowired
@@ -82,6 +91,10 @@ public class AudioPlayerController {
   public void init() {
 		LOG.debug("init bean {}", this.getClass().getName());
 
+		AudioPlayerEventAdapter eventAdapter = new AudioPlayerEventAdapter();
+		audioPlayerFacade.addEventListener(eventAdapter);
+		musicLibraryLogicFacade.addEventListener(eventAdapter);
+
     updatePlaybackPosition(0, 0);
     addPositionSliderMouseListeners();
 
@@ -92,6 +105,8 @@ public class AudioPlayerController {
     });
 
     playerScheduler.scheduleAtFixedRate(new UpdateUiRunnable(playerComponent), 0L, 1L, TimeUnit.SECONDS);
+
+		updateNowPlayingLabel(null);
   }
 
   @PreDestroy
@@ -143,26 +158,6 @@ public class AudioPlayerController {
 		});
   }
 
-  private final class UpdateUiRunnable implements Runnable {
-    private final CustomAudioPlayerComponent playerComponent;
-
-    private UpdateUiRunnable(CustomAudioPlayerComponent playerComponent) {
-      this.playerComponent = playerComponent;
-    }
-
-    @Override
-    public void run() {
-      long currentTrackLength = playerComponent.getCurrentTrackLength();
-      float playbackPosition = playerComponent.getPlaybackPosition();
-
-      Platform.runLater(() -> {
-        if (playerComponent.isPlaying()) {
-          updatePlaybackPosition(playbackPosition, currentTrackLength);
-        }
-      });
-    }
-  }
-
   private void updatePlaybackPosition(float playbackPosition, long trackDuration) {
     long trackCurrentTime = (long) ((float) trackDuration * playbackPosition);
     trackTimeLabel.setText(trackTimeLabelBuilder.buildTimeLabel(trackCurrentTime, trackDuration));
@@ -204,4 +199,51 @@ public class AudioPlayerController {
     audioPlayerFacade.playNextTrack();
     updatePlaybackPosition();
   }
+
+  private void updateNowPlayingLabel(TrackData trackData) {
+		Platform.runLater(() -> {
+			if (trackData != null) {
+				nowPlayingLabel.setText(
+						String.format(NOW_PLAYING_LABEL_FORMAT, trackData.getArtist(), trackData.getTitle(), trackData.getPlaylistTitle())
+				);
+			} else {
+				nowPlayingLabel.setText(NOW_PLAYING_EMPTY_LABEL);
+			}
+		});
+	}
+
+
+	private final class UpdateUiRunnable implements Runnable {
+		private final CustomAudioPlayerComponent playerComponent;
+
+		private UpdateUiRunnable(CustomAudioPlayerComponent playerComponent) {
+			this.playerComponent = playerComponent;
+		}
+
+		@Override
+		public void run() {
+			long currentTrackLength = playerComponent.getCurrentTrackLength();
+			float playbackPosition = playerComponent.getPlaybackPosition();
+
+			Platform.runLater(() -> {
+				if (playerComponent.isPlaying()) {
+					updatePlaybackPosition(playbackPosition, currentTrackLength);
+				}
+			});
+		}
+	}
+
+	private final class AudioPlayerEventAdapter extends DefaultAudioPlayerEventAdapter {
+
+		@Override
+		public void changedTrackData(PlaylistData playlistData, TrackData trackData) {
+			updateNowPlayingLabel(trackData);
+		}
+
+		@Override
+		public void changedNowPlayingTrack(TrackData trackData) {
+			updateNowPlayingLabel(trackData);
+		}
+	}
+
 }

@@ -11,6 +11,17 @@
   -fx-spacing: 5px;
 }
 
+.now-playing-panel {
+ -fx-background-color: #3E3E3E;
+ -fx-border-width: 2 0 1 0;
+ -fx-border-style: solid;
+ -fx-border-color: #A5AEAD;
+}
+
+.now-playing-panel-label {
+ -fx-text-fill: #D8E6E4;
+}
+
 .playlist-browser-container {
  -fx-background-color: #C4C4C4;
  -fx-border-color: #A0A0A0;

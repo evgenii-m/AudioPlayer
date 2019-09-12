@@ -27,7 +27,8 @@ class DtoMapper {
 
 	TrackData mapTrackData(PlaylistTrack o) {
 		return new TrackData(o.getUid(), o.getPlaylist().getUid(), o.getArtist(), o.getAlbum(),
-				o.getDate(), o.getTitle(), o.getTrackNumber(), o.getLength(), o.isNowPlaying());
+				o.getDate(), o.getTitle(), o.getTrackNumber(), o.getLength(), o.isNowPlaying(),
+				o.getPlaylist().getTitle());
 	}
 
 	List<TrackData> mapTrackData(List<PlaylistTrack> list) {
