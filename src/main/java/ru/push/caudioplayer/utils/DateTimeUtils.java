@@ -10,4 +10,8 @@ public class DateTimeUtils {
 	public static String getCurrentTimestamp() {
 		return new SimpleDateFormat(DEFAULT_TIMESTAMP_FROMAT).format(new Date());
 	}
+
+	public static String getCurrentTimestamp(String formatPattern) {
+		return new SimpleDateFormat(formatPattern).format(new Date());
+	}
 }

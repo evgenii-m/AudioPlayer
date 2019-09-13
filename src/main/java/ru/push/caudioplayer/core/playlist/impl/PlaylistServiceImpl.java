@@ -1,5 +1,6 @@
 package ru.push.caudioplayer.core.playlist.impl;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +45,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 	private static final Logger LOG = LoggerFactory.getLogger(PlaylistServiceImpl.class);
 
 	private static final String DEFAULT_PLAYLIST_TITLE = "New playlist";
+	private static final String MONTHLY_PLAYLIST_DATE_FORMAT = "yyyy-MM";
 
 	@Autowired
 	private DeezerApiService deezerApiService;
@@ -216,13 +218,17 @@ public class PlaylistServiceImpl implements PlaylistService {
 	@Override
 	public Playlist createPlaylist(PlaylistType type) {
 		String newPlaylistTitle = DEFAULT_PLAYLIST_TITLE + " " + DateTimeUtils.getCurrentTimestamp();
+		return createPlaylist(type, newPlaylistTitle);
+	}
+
+	private Playlist createPlaylist(PlaylistType type, String playlistTitle) {
 		String uid;
 		Playlist newPlaylist = null;
 
 		switch (type) {
 			case LOCAL:
 				uid = UUID.randomUUID().toString();
-				newPlaylist = new Playlist(uid, newPlaylistTitle, PlaylistType.LOCAL, null);
+				newPlaylist = new Playlist(uid, playlistTitle, PlaylistType.LOCAL, null);
 				PlaylistEntity newPlaylistEntity = playlistMapper.inverseMapPlaylist(newPlaylist);
 				boolean saveResult = localPlaylistRepository.savePlaylist(newPlaylistEntity);
 				if (saveResult) {
@@ -235,9 +241,9 @@ public class PlaylistServiceImpl implements PlaylistService {
 
 			case DEEZER:
 				try {
-					Long newPlaylistId = deezerApiService.createPlaylist(newPlaylistTitle);
+					Long newPlaylistId = deezerApiService.createPlaylist(playlistTitle);
 					uid = String.valueOf(newPlaylistId);
-					newPlaylist = new Playlist(uid, newPlaylistTitle, PlaylistType.DEEZER, null);
+					newPlaylist = new Playlist(uid, playlistTitle, PlaylistType.DEEZER, null);
 					playlistMap.put(uid, newPlaylist);
 				} catch (DeezerApiErrorException e) {
 					LOG.error("Deezer api error", e);
@@ -246,6 +252,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 		}
 
 		return newPlaylist;
+
 	}
 
 	@Override
@@ -428,10 +435,39 @@ public class PlaylistServiceImpl implements PlaylistService {
 	}
 
 	@Override
-	public Playlist addTrackToDeezerFavoritesPlaylist(TrackData trackData) {
-		return (deezerFavoritesPlaylist != null) ?
-				addTrackToDeezerPlaylist(deezerFavoritesPlaylist.getUid(), trackData, true) :
-				null;
+	public Pair<Playlist, Playlist> addTrackToDeezerFavoritesPlaylist(TrackData trackData) {
+		if (deezerFavoritesPlaylist != null) {
+			Playlist playlist = addTrackToDeezerPlaylist(deezerFavoritesPlaylist.getUid(), trackData, true);
+			Playlist monthlyPlaylist = getDeezerMonthlyPlaylist();
+			if (monthlyPlaylist != null) {
+				addTrackToDeezerPlaylist(monthlyPlaylist.getUid(), trackData, false);
+			}
+			return Pair.of(playlist, monthlyPlaylist);
+		} else {
+			return null;
+		}
+	}
+
+	private Playlist getDeezerMonthlyPlaylist() {
+		String monthlyPlaylistName = DateTimeUtils.getCurrentTimestamp(MONTHLY_PLAYLIST_DATE_FORMAT);
+
+		Optional<Playlist> monthlyPlaylist = playlistMap.values().stream()
+				.filter(Playlist::isDeezer)
+				.filter(p -> p.getTitle().equals(monthlyPlaylistName))
+				.findFirst();
+
+		if (!monthlyPlaylist.isPresent()) {
+			Playlist playlist = createPlaylist(PlaylistType.DEEZER, monthlyPlaylistName);
+			if (playlist != null) {
+				playlistMap.put(playlist.getUid(), playlist);
+				LOG.info("Monthly playlist not found, create new: {}", playlist);
+				return playlist;
+			} else {
+				return null;
+			}
+		}
+
+		return monthlyPlaylist.get();
 	}
 
 	private Playlist addTrackToDeezerPlaylist(String playlistUid, TrackData trackData, boolean force) {

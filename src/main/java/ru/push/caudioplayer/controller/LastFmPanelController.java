@@ -124,7 +124,7 @@ public class LastFmPanelController {
 			MenuItem addToDeezerLovedTracksMenuItem = new MenuItem("Add to Deezer loved tracks");
 			addToDeezerLovedTracksMenuItem.setOnAction(event -> {
 				LastFmTrackData data = tableRow.getItem();
-				musicLibraryLogicFacade.addLastFmTrackToDeezerLovedTracks(data);
+				musicLibraryLogicFacade.addLastFmTrackToDeezerLovedTracksAndMonthlyPlaylist(data);
 			});
 
 			contextMenu.getItems().addAll(

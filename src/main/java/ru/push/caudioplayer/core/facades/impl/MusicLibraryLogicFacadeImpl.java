@@ -1,5 +1,6 @@
 package ru.push.caudioplayer.core.facades.impl;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -295,14 +296,24 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	}
 
 	@Override
-	public void addLastFmTrackToDeezerLovedTracks(LastFmTrackData trackData) {
-		Playlist result = playlistService.addTrackToDeezerFavoritesPlaylist(
+	public void addLastFmTrackToDeezerLovedTracksAndMonthlyPlaylist(LastFmTrackData trackData) {
+		Pair<Playlist, Playlist> result = playlistService.addTrackToDeezerFavoritesPlaylist(
 				new TrackData(trackData.getArtist(), trackData.getAlbum(), trackData.getTitle()));
-		if (result != null) {
-			eventListeners.forEach(listener -> listener.changedPlaylist(dtoMapper.mapPlaylistData(result)));
+
+		// on left side - loved tracks playlist
+		if ((result != null) && (result.getLeft() != null)) {
+			eventListeners.forEach(listener -> listener.changedPlaylist(dtoMapper.mapPlaylistData(result.getLeft())));
 			sendNotification(NotificationMessages.ADD_TRACK_TO_DEEZER_LOVED_TRACKS_SUCCESS);
 		} else {
 			sendNotification(NotificationMessages.ADD_TRACK_TO_DEEZER_LOVED_TRACKS_FAIL);
+		}
+
+		// on right side - monthly playlist
+		if ((result != null) && (result.getRight() != null)) {
+			eventListeners.forEach(listener -> listener.changedPlaylist(dtoMapper.mapPlaylistData(result.getRight())));
+			sendNotification(NotificationMessages.ADD_TRACKS_TO_PLAYLIST_SUCCESS);
+		} else {
+			sendNotification(NotificationMessages.ADD_TRACKS_TO_PLAYLIST_FAIL);
 		}
 	}
 

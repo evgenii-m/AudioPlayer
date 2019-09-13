@@ -18,7 +18,6 @@ import uk.co.caprica.vlcj.player.MediaPlayer;
 import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
