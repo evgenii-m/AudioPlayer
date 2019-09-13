@@ -69,8 +69,24 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	}
 
 	@Override
-	public void connectLastFm(Consumer<String> openAuthPageConsumer) {
-		lastFmService.connectLastFm(openAuthPageConsumer);
+	public String getLastFmToken() {
+		return lastFmService.getToken();
+	}
+
+	@Override
+	public String getLastFmAuthorizationPageUrl(String token) {
+		return lastFmService.getUserAuthorizationPageUrl(token);
+	}
+
+	@Override
+	public boolean processLastFmAuthorization(String token, String pageUrl) {
+		boolean result = lastFmService.setSessionByToken(token, pageUrl);
+		if (result) {
+			sendNotification(NotificationMessages.LAST_FM_AUTHORIZATION_SUCCESS);
+		} else {
+			sendNotification(NotificationMessages.LAST_FM_AUTHORIZATION_FAIL);
+		}
+		return result;
 	}
 
 	@Override
@@ -87,14 +103,16 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 				String accessToken = deezerApiService.getAccessToken(authorizationCode);
 				if (accessToken != null) {
 					LOG.info("Deezer access token: {}", accessToken);
-					// if access token received - authorization process ends
-					return true;
+					sendNotification(NotificationMessages.DEEZER_AUTHORIZATION_SUCCESS);
 				} else {
 					LOG.error("Deezer access token is NULL");
+					sendNotification(NotificationMessages.DEEZER_AUTHORIZATION_FAIL);
 				}
+				return true;
 			}
 		} catch (DeezerApiErrorException e) {
 			LOG.error("Deezer authorization fails: {}", e);
+			sendNotification(NotificationMessages.DEEZER_AUTHORIZATION_FAIL);
 			// if access error received - authorization process also ends
 			return true;
 		}

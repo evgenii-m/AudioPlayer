@@ -11,7 +11,11 @@ import java.util.function.Consumer;
  */
 public interface LastFmService {
 
-	void connectLastFm(Consumer<String> openAuthPageConsumer);
+	String getToken();
+
+	String getUserAuthorizationPageUrl(String token);
+
+	boolean setSessionByToken(String token, String pageUrl);
 
 	List<Track> getUserRecentTracks();
 

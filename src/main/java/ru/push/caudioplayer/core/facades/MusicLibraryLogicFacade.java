@@ -7,7 +7,6 @@ import ru.push.caudioplayer.core.facades.dto.LastFmTrackData;
 import java.io.File;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 public interface MusicLibraryLogicFacade {
 
@@ -15,7 +14,11 @@ public interface MusicLibraryLogicFacade {
 
 	void removeEventListener(AudioPlayerEventListener listener);
 
-	void connectLastFm(Consumer<String> openAuthPageConsumer);
+	String getLastFmToken();
+
+	String getLastFmAuthorizationPageUrl(String token);
+
+	boolean processLastFmAuthorization(String token, String pageUrl);
 
 	String getDeezerUserAuthorizationPageUrl();
 

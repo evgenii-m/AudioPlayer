@@ -1,6 +1,8 @@
 package ru.push.caudioplayer.controller;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
@@ -36,6 +38,9 @@ import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * @author push <mez.e.s@yandex.ru>
@@ -78,6 +83,8 @@ public class MainController {
 	private MusicLibraryLogicFacade musicLibraryLogicFacade;
 	@Autowired
 	private AppMain appMain;
+	@Autowired
+	private PlaylistController playlistController;
 
   @FXML
   public void initialize() {
@@ -101,40 +108,37 @@ public class MainController {
 
   @FXML
   public void addStreamToActivePlaylist(ActionEvent actionEvent) {
-  	// TODO: use code from ru.push.caudioplayer.controller.PlaylistController.addStreamToPlaylist
-//		musicLibraryLogicFacade.getActivePlaylist().ifPresent(p -> {
-//			musicLibraryLogicFacade.addLocationsToPlaylist(p.getUid(),
-//					Collections.singletonList("http://ice1.somafm.com/groovesalad-128.mp3"));
-//		});
+		playlistController.addStreamToPlaylist(actionEvent);
   }
 
   @FXML
   public void createNewPlaylist(ActionEvent actionEvent) {
-		musicLibraryLogicFacade.createLocalPlaylist();
+		playlistController.createNewPlaylist(actionEvent);
   }
 
   @FXML
   public void addFilesToPlaylist(ActionEvent actionEvent) {
-		musicLibraryLogicFacade.getActivePlaylist().ifPresent(p -> {
-			FileChooser fileChooser = new FileChooser();
-			fileChooser.setTitle("Open file(s)");
-			// WARNING: if this code throws JVM crashing, add JVM option '-DVLCJ_INITX=no'
-			List<File> files = fileChooser.showOpenMultipleDialog(mainContainer.getScene().getWindow());
-			if (CollectionUtils.isNotEmpty(files)) {
-				musicLibraryLogicFacade.addFilesToPlaylist(p.getUid(), files);
-			}
-		});
+		playlistController.addFilesToPlaylist(actionEvent);
   }
 
   @FXML
 	public void connectLastFm(ActionEvent actionEvent) {
-		musicLibraryLogicFacade.connectLastFm(
-				(pageUrl) -> appMain.openWebPage(pageUrl)
-		);
+  	String lastfmToken = musicLibraryLogicFacade.getLastFmToken();
+		String webPageUrl = musicLibraryLogicFacade.getLastFmAuthorizationPageUrl(lastfmToken);
+		Function<String, Boolean> actionHandler = (value) ->
+				musicLibraryLogicFacade.processLastFmAuthorization(lastfmToken, value);
+		displayWebPageWindow(webPageUrl, "Last.fm authorization", false, actionHandler);
 	}
 
 	@FXML
 	public void connectDeezer(ActionEvent actionEvent) {
+		String webPageUrl = musicLibraryLogicFacade.getDeezerUserAuthorizationPageUrl();
+		Function<String, Boolean> actionHandler = (value) -> musicLibraryLogicFacade.processDeezerAuthorization(value);
+		displayWebPageWindow(webPageUrl, "Deezer authorization", true, actionHandler);
+	}
+
+	private void displayWebPageWindow(String pageUrl, String windowTitle, boolean changeLocationHandling,
+																		Function<String, Boolean> actionHandler) {
 		final WebView browser = new WebView();
 		final WebEngine webEngine = browser.getEngine();
 
@@ -146,29 +150,37 @@ public class MainController {
 
 		com.sun.javafx.webkit.WebConsoleListener.setDefaultListener(
 				(webView, message, lineNumber, sourceId) ->
-						LOG.info("JS Console: [" + sourceId + ":" + lineNumber + "] " + message)
+						LOG.debug("JS Console: [" + sourceId + ":" + lineNumber + "] " + message)
 		);
 
-		webEngine.load(musicLibraryLogicFacade.getDeezerUserAuthorizationPageUrl());
+		webEngine.load(pageUrl);
 
 		Scene webPageWindowScene = new Scene(browser);
 		Stage webPageWindowStage = new Stage();
 		Stage primaryStage = (Stage) mainContainer.getScene().getWindow();
-		webPageWindowStage.setTitle("Deezer authorization");
+		webPageWindowStage.setTitle(windowTitle);
 		webPageWindowStage.setScene(webPageWindowScene);
 		webPageWindowStage.initModality(Modality.WINDOW_MODAL);
 		webPageWindowStage.setResizable(true);
 
 		webPageWindowStage.initOwner(primaryStage);
 
-		// append listener for web browser location URI changes for checking authorization code
-		webEngine.locationProperty().addListener((observable, oldValue, newValue) -> {
-			LOG.debug("Location change event: observable = {}, oldValue = {}, newValue = {}", observable, oldValue, newValue);
-			boolean result = musicLibraryLogicFacade.processDeezerAuthorization(newValue);
-			if (result) {
-				webPageWindowStage.close();
-			}
-		});
+		if (changeLocationHandling) {
+			// append listener for web browser location URI changes for process authorization
+			webEngine.locationProperty().addListener((observable, oldValue, newValue) -> {
+				LOG.debug("Location change event: observable = {}, oldValue = {}, newValue = {}", observable, oldValue, newValue);
+				boolean result = actionHandler.apply(newValue);
+				if (result) {
+					webPageWindowStage.close();
+				}
+			});
+		} else {
+			// append listener for web window close for process authorization
+			webPageWindowStage.setOnCloseRequest(event -> {
+				LOG.debug("Last.fm authorization page close with URL: {}", webEngine.getLocation());
+				actionHandler.apply(webEngine.getLocation());
+			});
+		}
 
 		webPageWindowStage.show();
 	}

@@ -14,6 +14,7 @@ import ru.push.caudioplayer.core.config.ApplicationConfigService;
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -47,9 +48,7 @@ public class DefaultLastFmService implements LastFmService {
 	/**
 	 * See https://www.last.fm/api/desktopauth
 	 */
-	@Override
-	public void connectLastFm(Consumer<String> openAuthPageConsumer) {
-
+	public String getToken() {
 		LastFmSessionData sessionData = applicationConfigService.getLastFmSessionData();
 		if (sessionData != null) {
 			LOG.warn("Last.fm user data already set in configuration, they will be overwritten: username = {}, session key = {}",
@@ -61,13 +60,37 @@ public class DefaultLastFmService implements LastFmService {
 		// 2. Fetch a request token
 		String token = apiAdapter.authGetToken();
 
+		return token;
+	}
+
+	/**
+	 * See https://www.last.fm/api/desktopauth
+	 */
+	@Override
+	public String getUserAuthorizationPageUrl(String token) {
 		// 3. Request authorization from the user
 		String authPageUrl = apiAdapter.getUserAuthorizationPageUrl(token);
-		openAuthPageConsumer.accept(authPageUrl);
+		return authPageUrl;
+	}
+
+	/**
+	 * See https://www.last.fm/api/desktopauth
+	 */
+	@Override
+	public boolean setSessionByToken(String token, String pageUrl) {
+		boolean validUrl = apiAdapter.validatePageUrlForGetSession(token, pageUrl);
+		if (!validUrl) {
+			LOG.warn("Invalid authorization page URL: {}", pageUrl);
+		}
 
 		// 4. Fetch A Web Service Session
-		currentSessionData = apiAdapter.authGetSession(token);
-		applicationConfigService.saveLastFmSessionData(currentSessionData);
+		Optional<LastFmSessionData> sessionData = apiAdapter.authGetSession(token);
+		if (sessionData.isPresent()) {
+			currentSessionData = sessionData.get();
+			applicationConfigService.saveLastFmSessionData(currentSessionData);
+			return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -76,9 +99,9 @@ public class DefaultLastFmService implements LastFmService {
 			return new ArrayList<>();
 		}
 
-		RecentTracks recentTracks = apiAdapter.userGetRecentTracks(RECENT_TRACKS_COUNT, currentSessionData.getUsername(),
-				null, null, null, null);
-		return recentTracks.getTracks();
+		Optional<RecentTracks> recentTracks = apiAdapter.userGetRecentTracks(RECENT_TRACKS_COUNT,
+				currentSessionData.getUsername(), null, null, null, null);
+		return recentTracks.map(RecentTracks::getTracks).orElse(new ArrayList<>());
 	}
 
 	@Override

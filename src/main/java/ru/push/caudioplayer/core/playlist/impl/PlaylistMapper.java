@@ -93,10 +93,18 @@ class PlaylistMapper {
 		}
 	}
 
-	PlaylistTrack mapPlaylistItemDeezer(ru.push.caudioplayer.core.deezer.model.Track o) {
+	private PlaylistTrack mapPlaylistItemDeezer(ru.push.caudioplayer.core.deezer.model.Track o) {
 		return new PlaylistTrack(
 				String.valueOf(o.getId()), MediaSourceType.DEEZER_MEDIA, o.getPreview(), o.getArtist().getName(),
 				o.getAlbum().getTitle(), null, o.getTitle(), null, o.getDuration() * DEEZER_DURATION_FACTOR
+		);
+	}
+
+	PlaylistTrack mapPlaylistItemDeezer(Playlist playlist, ru.push.caudioplayer.core.deezer.model.Track track) {
+		long length = track.getDuration() * DEEZER_DURATION_FACTOR;
+		return new PlaylistTrack(
+				String.valueOf(track.getId()), MediaSourceType.DEEZER_MEDIA, track.getPreview(), playlist,
+				track.getArtist().getName(), track.getAlbum().getTitle(), null, track.getTitle(), null, length
 		);
 	}
 

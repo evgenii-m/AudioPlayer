@@ -33,15 +33,21 @@ public class PlaylistTrack {
 
 	public PlaylistTrack(String uid, MediaSourceType sourceType, String trackPath, String artist,
 											 String album, String date, String title, String trackNumber, long length) {
+		this(uid, sourceType, trackPath, null, artist, album, date, title, trackNumber, length);
+	}
+
+	public PlaylistTrack(String uid, MediaSourceType sourceType, String trackPath, Playlist playlist,
+											 String artist, String album, String date, String title, String trackNumber, long length) {
+		this.uid = uid;
 		this.sourceType = sourceType;
+		this.trackPath = trackPath;
+		this.playlist = playlist;
 		this.artist = artist;
 		this.album = album;
 		this.date = date;
 		this.title = title;
-		this.uid = uid;
 		this.trackNumber = trackNumber;
 		this.length = length;
-		this.trackPath = trackPath;
 		this.nowPlaying = false;
 	}
 

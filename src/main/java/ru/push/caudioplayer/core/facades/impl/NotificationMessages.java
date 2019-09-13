@@ -2,6 +2,11 @@ package ru.push.caudioplayer.core.facades.impl;
 
 interface NotificationMessages {
 
+	String LAST_FM_AUTHORIZATION_SUCCESS = "Last.fm authorization success";
+	String LAST_FM_AUTHORIZATION_FAIL = "Last.fm authorization fail";
+	String DEEZER_AUTHORIZATION_SUCCESS = "Deezer authorization success";
+	String DEEZER_AUTHORIZATION_FAIL = "Deezer authorization fail";
+
 	String CREATE_PLAYLIST_SUCCESS = "Created new playlist: uid = '%s', title = '%s'";
 	String CREATE_PLAYLIST_FAIL = "Failed to create new playlist";
 	String DELETE_PLAYLIST_SUCCESS = "Delete playlist: uid = '%s'";

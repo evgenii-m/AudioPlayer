@@ -37,6 +37,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -85,6 +86,10 @@ public class PlaylistController {
   private TrackTimeLabelBuilder trackTimeLabelBuilder;
   @Autowired
   private ApplicationConfigService applicationConfigService;
+	@Autowired
+	private RenamePopupController renamePopupController;
+	@Autowired
+	private ConfirmActionPopupController confirmActionPopupController;
 
   private PlaylistData displayedPlaylist;
 
@@ -92,7 +97,7 @@ public class PlaylistController {
   private Scene confirmActionPopupScene;
 	private Scene textInputActionPopupScene;
 
-  @FXML
+	@FXML
   public void initialize() {
 		LOG.debug("initialize FXML for {}", this.getClass().getName());
 
@@ -238,8 +243,6 @@ public class PlaylistController {
 	}
 
   private void renamePlaylistAction(ActionEvent event, ListCell<PlaylistData> cell) {
-    assert renamePopupView.getController() instanceof RenamePopupController;
-
 		PlaylistData playlistData = cell.getItem();
 		if (playlistData.isReadOnly()) {
 			LOG.warn("For read only playlists rename disabled");
@@ -247,7 +250,7 @@ public class PlaylistController {
 		}
 
 		Stage popupStage = createPopup("Rename", renamePopupScene);
-		((RenamePopupController) renamePopupView.getController()).setRenamedPlaylist(playlistData);
+		renamePopupController.setRenamedPlaylist(playlistData);
     popupStage.show();
   }
 
@@ -260,7 +263,7 @@ public class PlaylistController {
 			musicLibraryLogicFacade.deletePlaylist(playlistData.getUid());
 		};
 		String message = String.format("Remove playlist \'%s\'?", playlistData.getTitle());
-		((ConfirmActionPopupController) confirmActionPopupView.getController()).setAction(action, message);
+		confirmActionPopupController.setAction(action, message);
 		popupStage.show();
 
   }
@@ -457,6 +460,10 @@ public class PlaylistController {
 			((TextInputActionPopupController) textInputActionPopupView.getController()).setAction(action);
 			popupStage.show();
 		}
+	}
+
+	Optional<PlaylistData> getDisplayedPlaylist() {
+  	return Optional.ofNullable(displayedPlaylist);
 	}
 
 	private final class AudioPlayerEventAdapter extends DefaultAudioPlayerEventAdapter {

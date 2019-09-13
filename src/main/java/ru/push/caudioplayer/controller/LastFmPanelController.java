@@ -14,11 +14,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
 import ru.push.caudioplayer.core.facades.dto.LastFmTrackData;
+import ru.push.caudioplayer.core.facades.dto.PlaylistData;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -45,6 +47,8 @@ public class LastFmPanelController {
 
 	@Autowired
 	private MusicLibraryLogicFacade musicLibraryLogicFacade;
+	@Autowired
+	private PlaylistController playlistController;
 
 	private final ScheduledExecutorService updateRecentTracksScheduler = Executors.newSingleThreadScheduledExecutor();
 	private List<LastFmTrackData> currentRecentTracks;
@@ -62,8 +66,8 @@ public class LastFmPanelController {
 	public void init() {
 		LOG.debug("init bean {}", this.getClass().getName());
 
-		updateRecentTracksScheduler.scheduleAtFixedRate(new UpdateUiRunnable(), UPDATE_RECENT_TRACKS_PERIOD,
-				UPDATE_RECENT_TRACKS_PERIOD, UPDATE_RECENT_TRACKS_PERIOD_TIME_UNIT);
+//		updateRecentTracksScheduler.scheduleAtFixedRate(new UpdateUiRunnable(), UPDATE_RECENT_TRACKS_PERIOD,
+//				UPDATE_RECENT_TRACKS_PERIOD, UPDATE_RECENT_TRACKS_PERIOD_TIME_UNIT);
 
 		setRecentTracksContainerColumns();
 		setRecentTracksContainerRowFactory();
@@ -110,20 +114,17 @@ public class LastFmPanelController {
 
 			MenuItem addToDeezerPlaylistMenuItem = new MenuItem("Add to Deezer playlist");
 			addToDeezerPlaylistMenuItem.setOnAction(event -> {
-//				LastFmTrackData data = tableRow.getItem();
-//				boolean result = musicLibraryLogicFacade.addLastFmTrackDeezerPlaylist(data);
-//				if (!result) {
-//					LOG.error("Failed to add track to Deezer playlist: track = {}", data);
-//				}
+				Optional<PlaylistData> displayedPlaylist = playlistController.getDisplayedPlaylist();
+				displayedPlaylist.ifPresent(playlist -> {
+					LastFmTrackData data = tableRow.getItem();
+					musicLibraryLogicFacade.addLastFmTrackDeezerPlaylist(playlist.getUid(), data);
+				});
 			});
 
 			MenuItem addToDeezerLovedTracksMenuItem = new MenuItem("Add to Deezer loved tracks");
 			addToDeezerLovedTracksMenuItem.setOnAction(event -> {
-//				LastFmTrackData data = tableRow.getItem();
-//				boolean result = musicLibraryLogicFacade.addLastFmTrackToDeezerLovedTracks(data);
-//				if (!result) {
-//					LOG.error("Failed to add track to Deezer favorites playlist: track = {}", data);
-//				}
+				LastFmTrackData data = tableRow.getItem();
+				musicLibraryLogicFacade.addLastFmTrackToDeezerLovedTracks(data);
 			});
 
 			contextMenu.getItems().addAll(

@@ -24,6 +24,7 @@ import ru.push.caudioplayer.utils.StreamUtils;
 import ru.push.caudioplayer.utils.XmlUtils;
 
 import javax.annotation.PostConstruct;
+import javax.swing.text.html.Option;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
@@ -36,6 +37,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
@@ -46,10 +48,11 @@ import java.util.stream.Collectors;
 public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 	private static final Logger LOG = LoggerFactory.getLogger(LastFmApiAdapterImpl.class);
 
-	private static final String LASTFM_API_AUTH_BASE_URL = "http://www.last.fm/api/auth/?api_key=%s&token=%s";
-	private static final String LASTFM_API_SCHEME = "http";
+	private static final String LASTFM_API_AUTH_BASE_URL = "https://www.last.fm/api/auth?api_key=%s&token=%s";
+	private static final String LASTFM_API_SCHEME = "https";
 	private static final String LASTFM_API_HOST = "ws.audioscrobbler.com/";
 	private static final String LASTFM_API_VERSION = "2.0/";
+	private static final String VALID_PAGE_URL_PATTERN_FOR_GET_SESSION = LASTFM_API_AUTH_BASE_URL;
 
 	private final XPathFactory xPathFactory;
 	private final URIBuilder baseApiUriBuilder;		// todo: think about make immutable builder
@@ -86,6 +89,12 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 		return String.format(LASTFM_API_AUTH_BASE_URL, lastfmApiKey, token);
 	}
 
+	@Override
+	public boolean validatePageUrlForGetSession(String token, String pageUrl) {
+		String validPageUrlForGetSession = String.format(VALID_PAGE_URL_PATTERN_FOR_GET_SESSION, lastfmApiKey, token);
+		return validPageUrlForGetSession.equals(pageUrl);
+	}
+
 	/**
 	 * See https://www.last.fm/api/show/auth.getToken
 	 */
@@ -96,57 +105,61 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 
 		try {
 			String response = makeApiRequest(method, methodParameters);
-			Document responseDocument = XmlUtils.convertStringToXmlDocument(response);
+			if (response != null) {
+				Document responseDocument = XmlUtils.convertStringToXmlDocument(response);
 
-			String expression = ".//*[local-name() = 'token']";
-			String token = (String) xPathFactory.newXPath().evaluate(expression, responseDocument, XPathConstants.STRING);
-			LOG.info("API token obtained: " + token);
-			return token;
+				String expression = ".//*[local-name() = 'token']";
+				String token = (String) xPathFactory.newXPath().evaluate(expression, responseDocument, XPathConstants.STRING);
+				LOG.info("API token obtained: " + token);
+				return token;
+			}
 		} catch (IOException| SAXException | ParserConfigurationException e) {
 			LOG.error("parsing xml from response error: ", e);
 		} catch (XPathExpressionException e) {
 			LOG.error("extract element from xml response error: ", e);
 		}
 
-		throw new IllegalStateException("Last.fm api - Not acceptable result from method " + method.getName());
+		return null;
 	}
 
 	/**
 	 * See https://www.last.fm/api/show/auth.getSession
 	 */
 	@Override
-	public LastFmSessionData authGetSession(String token) {
+	public Optional<LastFmSessionData> authGetSession(String token) {
 		LastFmApiMethod method = LastFmApiMethod.AUTH_GET_SESSION;
 		Map<String, String> methodParameters = new HashMap<>();
 		methodParameters.put(LastFmApiParam.TOKEN.getName(), token);
 
 		try {
 			String response = makeApiRequest(method, methodParameters, getSessionRetryCount);
-			Document responseDocument = XmlUtils.convertStringToXmlDocument(response);
+			if (response != null) {
+				Document responseDocument = XmlUtils.convertStringToXmlDocument(response);
 
-			String expression = ".//*[local-name() = 'name']";
-			String username = (String) xPathFactory.newXPath().evaluate(expression, responseDocument, XPathConstants.STRING);
-			LOG.info("session username: " + username);
+				String expression = ".//*[local-name() = 'name']";
+				String username = (String) xPathFactory.newXPath().evaluate(expression, responseDocument, XPathConstants.STRING);
+				LOG.info("session username: " + username);
 
-			expression = ".//*[local-name() = 'key']";
-			String sessionKey = (String) xPathFactory.newXPath().evaluate(expression, responseDocument, XPathConstants.STRING);
-			LOG.info("session key: " + sessionKey);
+				expression = ".//*[local-name() = 'key']";
+				String sessionKey = (String) xPathFactory.newXPath().evaluate(expression, responseDocument, XPathConstants.STRING);
+				LOG.info("session key: " + sessionKey);
 
-			return new LastFmSessionData(username, sessionKey);
+				return Optional.of(new LastFmSessionData(username, sessionKey));
+			}
 		} catch (IOException| SAXException | ParserConfigurationException e) {
 			LOG.error("parsing xml from response error: ", e);
 		} catch (XPathExpressionException e) {
 			LOG.error("extract element from xml response error: ", e);
 		}
 
-		throw new IllegalStateException("Last.fm api - Not acceptable result from method " + method.getName());
+		return Optional.empty();
 	}
 
 	/**
 	 * See https://www.last.fm/api/show/user.getRecentTracks
 	 */
 	@Override
-	public RecentTracks userGetRecentTracks(Integer limit, String username, Integer page, Date from, Boolean extended, Date to) {
+	public Optional<RecentTracks> userGetRecentTracks(Integer limit, String username, Integer page, Date from, Boolean extended, Date to) {
 		LastFmApiMethod method = LastFmApiMethod.USER_GET_RECENT_TRACKS;
 		Map<String, String> methodParameters = new HashMap<>();
 		methodParameters.put(LastFmApiParam.USER.getName(), username);
@@ -168,15 +181,17 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 
 		try {
 			String response = makeApiRequest(method, methodParameters);
-			LastFmResponse lastFmResponse = XmlUtils.unmarshalDocumnet(response, LastFmResponse.class.getPackage().getName());
-			RecentTracks recentTracks = lastFmResponse.getRecentTracks();
-			LOG.debug("obtained recent tracks: {}", recentTracks);
-			return recentTracks;
+			if (response != null) {
+				LastFmResponse lastFmResponse = XmlUtils.unmarshalDocumnet(response, LastFmResponse.class.getPackage().getName());
+				RecentTracks recentTracks = lastFmResponse.getRecentTracks();
+				LOG.debug("obtained recent tracks: {}", recentTracks);
+				return Optional.ofNullable(recentTracks);
+			}
 		} catch (JAXBException e) {
 			LOG.error("parsing xml from response error: ", e);
 		}
 
-		throw new IllegalStateException("Last.fm api - Not acceptable result from method " + method.getName());
+		return Optional.empty();
 	}
 
 	private String makeApiRequest(LastFmApiMethod method, Map<String, String> methodParameters) {
@@ -200,7 +215,7 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 		try {
 			URI apiUri = baseApiUriBuilder.build();
 
-			// TODO: fix GUI application hangs using thread sleep
+			// TODO: make request in other thread, not to delay UI
 			for (; retryCount >= 0; retryCount--, Thread.sleep(retryTimeoutSeconds * 1000)) {
 				request = new HttpGet(apiUri);
 				try {
@@ -227,8 +242,7 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 			LOG.error("timeout error: ", request, e);
 		}
 
-		throw new IllegalStateException("Last.fm api - Not acceptable result from method " + method.getName());
-
+		return null;
 	}
 
 	/**

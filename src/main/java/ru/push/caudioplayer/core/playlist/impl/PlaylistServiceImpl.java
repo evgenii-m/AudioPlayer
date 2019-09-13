@@ -429,7 +429,9 @@ public class PlaylistServiceImpl implements PlaylistService {
 
 	@Override
 	public Playlist addTrackToDeezerFavoritesPlaylist(TrackData trackData) {
-		return addTrackToDeezerPlaylist(deezerFavoritesPlaylist.getUid(), trackData, true);
+		return (deezerFavoritesPlaylist != null) ?
+				addTrackToDeezerPlaylist(deezerFavoritesPlaylist.getUid(), trackData, true) :
+				null;
 	}
 
 	private Playlist addTrackToDeezerPlaylist(String playlistUid, TrackData trackData, boolean force) {
@@ -461,7 +463,7 @@ public class PlaylistServiceImpl implements PlaylistService {
 				Long trackId = searchedTrack.getId();
 				boolean result = deezerApiService.addTrackToPlaylist(playlistId, trackId);
 				if (result) {
-					PlaylistTrack newItem = playlistMapper.mapPlaylistItemDeezer(searchedTrack);
+					PlaylistTrack newItem = playlistMapper.mapPlaylistItemDeezer(playlist, searchedTrack);
 					playlist.getItems().add(newItem);
 					LOG.info("New items added to playlist: {}", playlist);
 				} else {
