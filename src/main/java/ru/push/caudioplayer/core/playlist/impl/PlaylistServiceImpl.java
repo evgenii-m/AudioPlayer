@@ -45,7 +45,6 @@ public class PlaylistServiceImpl implements PlaylistService {
 	private static final Logger LOG = LoggerFactory.getLogger(PlaylistServiceImpl.class);
 
 	private static final String DEFAULT_PLAYLIST_TITLE = "New playlist";
-	private static final String MONTHLY_PLAYLIST_DATE_FORMAT = "yyyy-MM";
 
 	@Autowired
 	private DeezerApiService deezerApiService;
@@ -126,6 +125,14 @@ public class PlaylistServiceImpl implements PlaylistService {
 	@Override
 	public Optional<Playlist> getActivePlaylist() {
 		return Optional.ofNullable(activePlaylist);
+	}
+
+	@Override
+	public Optional<Playlist> getPlaylist(PlaylistType type, String title) {
+		return playlistMap.values().stream()
+				.filter(p -> p.getType().equals(type))
+				.filter(p -> p.getTitle().equals(title))
+				.findFirst();
 	}
 
 	private Optional<Playlist> setActivePlaylist(String playlistUid) {
@@ -221,7 +228,8 @@ public class PlaylistServiceImpl implements PlaylistService {
 		return createPlaylist(type, newPlaylistTitle);
 	}
 
-	private Playlist createPlaylist(PlaylistType type, String playlistTitle) {
+	@Override
+	public Playlist createPlaylist(PlaylistType type, String playlistTitle) {
 		String uid;
 		Playlist newPlaylist = null;
 
@@ -435,39 +443,10 @@ public class PlaylistServiceImpl implements PlaylistService {
 	}
 
 	@Override
-	public Pair<Playlist, Playlist> addTrackToDeezerFavoritesPlaylist(TrackData trackData) {
-		if (deezerFavoritesPlaylist != null) {
-			Playlist playlist = addTrackToDeezerPlaylist(deezerFavoritesPlaylist.getUid(), trackData, true);
-			Playlist monthlyPlaylist = getDeezerMonthlyPlaylist();
-			if (monthlyPlaylist != null) {
-				addTrackToDeezerPlaylist(monthlyPlaylist.getUid(), trackData, false);
-			}
-			return Pair.of(playlist, monthlyPlaylist);
-		} else {
-			return null;
-		}
-	}
-
-	private Playlist getDeezerMonthlyPlaylist() {
-		String monthlyPlaylistName = DateTimeUtils.getCurrentTimestamp(MONTHLY_PLAYLIST_DATE_FORMAT);
-
-		Optional<Playlist> monthlyPlaylist = playlistMap.values().stream()
-				.filter(Playlist::isDeezer)
-				.filter(p -> p.getTitle().equals(monthlyPlaylistName))
-				.findFirst();
-
-		if (!monthlyPlaylist.isPresent()) {
-			Playlist playlist = createPlaylist(PlaylistType.DEEZER, monthlyPlaylistName);
-			if (playlist != null) {
-				playlistMap.put(playlist.getUid(), playlist);
-				LOG.info("Monthly playlist not found, create new: {}", playlist);
-				return playlist;
-			} else {
-				return null;
-			}
-		}
-
-		return monthlyPlaylist.get();
+	public Playlist addTrackToDeezerFavoritesPlaylist(TrackData trackData) {
+		return deezerFavoritesPlaylist != null ?
+				addTrackToDeezerPlaylist(deezerFavoritesPlaylist.getUid(), trackData, true) :
+				null;
 	}
 
 	private Playlist addTrackToDeezerPlaylist(String playlistUid, TrackData trackData, boolean force) {

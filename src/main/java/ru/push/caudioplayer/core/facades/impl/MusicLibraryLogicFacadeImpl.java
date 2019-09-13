@@ -20,6 +20,7 @@ import ru.push.caudioplayer.core.playlist.PlaylistService;
 import ru.push.caudioplayer.core.playlist.model.Playlist;
 import ru.push.caudioplayer.core.playlist.model.PlaylistType;
 import ru.push.caudioplayer.core.playlist.dto.TrackData;
+import ru.push.caudioplayer.utils.DateTimeUtils;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
@@ -28,7 +29,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 @Component
@@ -48,6 +49,10 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	private ApplicationConfigService applicationConfigService;
 	@Autowired
 	private DtoMapper dtoMapper;
+	@Autowired
+	private Properties properties;
+
+	private String monthlyPlaylistDateFormat;
 
 
 	public MusicLibraryLogicFacadeImpl() {
@@ -57,6 +62,7 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	@PostConstruct
 	public void init() {
 		LOG.debug("init bean {}", this.getClass().getName());
+		monthlyPlaylistDateFormat = properties.getProperty("deezer.application.monthly.playlist.title.format");
 	}
 
 	@Override
@@ -240,7 +246,7 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 		if (result != null) {
 			eventListeners.forEach(listener -> listener.changedPlaylist(dtoMapper.mapPlaylistData(result)));
 			sendNotification(
-					String.format(NotificationMessages.ADD_TRACKS_TO_PLAYLIST_SUCCESS, playlistUid)
+					String.format(NotificationMessages.ADD_TRACKS_TO_PLAYLIST_SUCCESS, result.getUid(), result.getTitle())
 			);
 		} else {
 			sendNotification(
@@ -270,7 +276,7 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 		if (result != null) {
 			eventListeners.forEach(listener -> listener.changedPlaylist(dtoMapper.mapPlaylistData(result)));
 			sendNotification(
-					String.format(NotificationMessages.ADD_TRACKS_TO_PLAYLIST_SUCCESS, playlistUid)
+					String.format(NotificationMessages.ADD_TRACKS_TO_PLAYLIST_SUCCESS, result.getUid(), result.getTitle())
 			);
 		} else {
 			sendNotification(
@@ -286,7 +292,7 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 		if (result != null) {
 			eventListeners.forEach(listener -> listener.changedPlaylist(dtoMapper.mapPlaylistData(result)));
 			sendNotification(
-					String.format(NotificationMessages.ADD_TRACKS_TO_PLAYLIST_SUCCESS, playlistUid)
+					String.format(NotificationMessages.ADD_TRACKS_TO_PLAYLIST_SUCCESS, result.getUid(), result.getTitle())
 			);
 		} else {
 			sendNotification(
@@ -296,24 +302,48 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	}
 
 	@Override
-	public void addLastFmTrackToDeezerLovedTracksAndMonthlyPlaylist(LastFmTrackData trackData) {
-		Pair<Playlist, Playlist> result = playlistService.addTrackToDeezerFavoritesPlaylist(
-				new TrackData(trackData.getArtist(), trackData.getAlbum(), trackData.getTitle()));
+	public void addLastFmTrackToDeezerLovedTracksAndMonthlyPlaylist(LastFmTrackData lastFmTrackData) {
+		TrackData trackData = new TrackData(lastFmTrackData.getArtist(), lastFmTrackData.getAlbum(), lastFmTrackData.getTitle());
+		Playlist lovedTracksPlaylist = playlistService.addTrackToDeezerFavoritesPlaylist(trackData);
 
-		// on left side - loved tracks playlist
-		if ((result != null) && (result.getLeft() != null)) {
-			eventListeners.forEach(listener -> listener.changedPlaylist(dtoMapper.mapPlaylistData(result.getLeft())));
+		if (lovedTracksPlaylist != null) {
+			eventListeners.forEach(listener -> listener.changedPlaylist(dtoMapper.mapPlaylistData(lovedTracksPlaylist)));
 			sendNotification(NotificationMessages.ADD_TRACK_TO_DEEZER_LOVED_TRACKS_SUCCESS);
 		} else {
 			sendNotification(NotificationMessages.ADD_TRACK_TO_DEEZER_LOVED_TRACKS_FAIL);
 		}
 
-		// on right side - monthly playlist
-		if ((result != null) && (result.getRight() != null)) {
-			eventListeners.forEach(listener -> listener.changedPlaylist(dtoMapper.mapPlaylistData(result.getRight())));
-			sendNotification(NotificationMessages.ADD_TRACKS_TO_PLAYLIST_SUCCESS);
+		String monthlyPlaylistName = DateTimeUtils.getCurrentTimestamp(monthlyPlaylistDateFormat);
+		Playlist monthlyPlaylist;
+		Optional<Playlist> deezerMonthlyPlaylistOptional = playlistService.getPlaylist(PlaylistType.DEEZER, monthlyPlaylistName);
+
+		if (deezerMonthlyPlaylistOptional.isPresent()) {
+			monthlyPlaylist = deezerMonthlyPlaylistOptional.get();
 		} else {
-			sendNotification(NotificationMessages.ADD_TRACKS_TO_PLAYLIST_FAIL);
+			monthlyPlaylist = playlistService.createPlaylist(PlaylistType.DEEZER, monthlyPlaylistName);
+			if (monthlyPlaylist != null) {
+				eventListeners.forEach(listener -> listener.createdNewPlaylist(dtoMapper.mapPlaylistData(monthlyPlaylist)));
+				sendNotification(
+						String.format(NotificationMessages.CREATE_PLAYLIST_SUCCESS, monthlyPlaylist.getUid(), monthlyPlaylist.getTitle())
+				);
+				LOG.info("Monthly playlist not found, create new: {}", monthlyPlaylist);
+			} else {
+				sendNotification(NotificationMessages.CREATE_PLAYLIST_FAIL);
+			}
+		}
+
+		if (monthlyPlaylist != null) {
+			Playlist resultPlaylist = playlistService.addTrackToDeezerPlaylist(monthlyPlaylist.getUid(), trackData);
+			if (resultPlaylist != null) {
+				eventListeners.forEach(listener -> listener.changedPlaylist(dtoMapper.mapPlaylistData(resultPlaylist)));
+				sendNotification(
+						String.format(NotificationMessages.ADD_TRACKS_TO_PLAYLIST_SUCCESS, resultPlaylist.getUid(), resultPlaylist.getTitle())
+				);
+			} else {
+				sendNotification(
+						String.format(NotificationMessages.ADD_TRACKS_TO_PLAYLIST_FAIL_BY_TITLE, monthlyPlaylistName)
+				);
+			}
 		}
 	}
 

@@ -18,6 +18,8 @@ public interface PlaylistService {
 
 	Optional<Playlist> getActivePlaylist();
 
+	Optional<Playlist> getPlaylist(PlaylistType type, String title);
+
 	Optional<PlaylistTrack> setActivePlaylistTrack(String playlistUid, String trackUid);
 
 	Optional<PlaylistTrack> getActivePlaylistTrack();
@@ -29,6 +31,8 @@ public interface PlaylistService {
 	void resetActivePlaylistTrack();
 
 	Playlist createPlaylist(PlaylistType type);
+
+	Playlist createPlaylist(PlaylistType type, String playlistTitle);
 
 	Playlist deletePlaylist(String playlistUid);
 
@@ -42,7 +46,7 @@ public interface PlaylistService {
 
 	Playlist addTrackToDeezerPlaylist(String playlistUid, TrackData trackData);
 
-	Pair<Playlist, Playlist> addTrackToDeezerFavoritesPlaylist(TrackData trackData);
+	Playlist addTrackToDeezerFavoritesPlaylist(TrackData trackData);
 
 	Playlist deleteItemsFromPlaylist(String playlistUid, List<String> tracksUid);
 }
