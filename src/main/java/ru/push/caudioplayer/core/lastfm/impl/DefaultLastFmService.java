@@ -15,7 +15,6 @@ import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 /**
  * @author push <mez.e.s@yandex.ru>
@@ -25,7 +24,8 @@ import java.util.function.Consumer;
 public class DefaultLastFmService implements LastFmService {
   private static final Logger LOG = LoggerFactory.getLogger(DefaultLastFmService.class);
 
-  private static final int RECENT_TRACKS_COUNT = 15;
+  private static final int RECENT_TRACKS_INITIAL_PAGE_SIZE = 10;
+	private static final int RECENT_TRACKS_PAGE_STEP = 10;
 
   @Autowired
 	private LastFmApiAdapter apiAdapter;
@@ -33,6 +33,7 @@ public class DefaultLastFmService implements LastFmService {
 	private ApplicationConfigService applicationConfigService;
 
 	private LastFmSessionData currentSessionData;
+	private int currentRecentTracksPageSize;
 
 
 	@PostConstruct
@@ -43,6 +44,7 @@ public class DefaultLastFmService implements LastFmService {
 					sessionData.getUsername(), sessionData.getSessionKey());
 			currentSessionData = sessionData;
 		}
+		currentRecentTracksPageSize = RECENT_TRACKS_INITIAL_PAGE_SIZE;
 	}
 
 	/**
@@ -94,12 +96,16 @@ public class DefaultLastFmService implements LastFmService {
 	}
 
 	@Override
-	public List<Track> getUserRecentTracks() {
+	public List<Track> getUserRecentTracks(boolean fetchMore) {
 		if ((currentSessionData == null) || (currentSessionData.getUsername() == null)) {
 			return new ArrayList<>();
 		}
 
-		Optional<RecentTracks> recentTracks = apiAdapter.userGetRecentTracks(RECENT_TRACKS_COUNT,
+		if (fetchMore) {
+			currentRecentTracksPageSize += RECENT_TRACKS_PAGE_STEP;
+		}
+
+		Optional<RecentTracks> recentTracks = apiAdapter.userGetRecentTracks(currentRecentTracksPageSize,
 				currentSessionData.getUsername(), null, null, null, null);
 		return recentTracks.map(RecentTracks::getTracks).orElse(new ArrayList<>());
 	}

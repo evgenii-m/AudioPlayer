@@ -34,7 +34,7 @@ public interface MusicLibraryLogicFacade {
 	 * Return recent tracks list from Last.fm service for current user in chronological order.
 	 * If user account not connected then return empty list.
 	 */
-	List<LastFmTrackData> getRecentTracksFromLastFm();
+	List<LastFmTrackData> getRecentTracksFromLastFm(boolean fetchMore);
 
 	void reloadPlaylists();
 

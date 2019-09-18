@@ -90,7 +90,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   }
 
   @Override
-  public void playPrevTrack() {
+	public void playPrevTrack() {
 		Optional<PlaylistTrack> playlistTrack = playlistService.prevActivePlaylistTrack();
 		playTrack(playlistTrack);
   }

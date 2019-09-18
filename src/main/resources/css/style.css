@@ -34,6 +34,14 @@
  -fx-background-color: #6E6E6E;
 }
 
+.recent-tracks-container {
+ -fx-font-size: 12px;
+}
+
+.recent-tracks-container .table-row-cell {
+ -fx-cell-size: 19px;
+}
+
 .tab-pane-item {
  -fx-padding: 3px 12px 3px 12px;
  -fx-font-size: 12px;

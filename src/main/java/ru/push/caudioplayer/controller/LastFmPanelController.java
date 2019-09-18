@@ -1,6 +1,7 @@
 package ru.push.caudioplayer.controller;
 
 import javafx.beans.property.SimpleStringProperty;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -66,12 +67,12 @@ public class LastFmPanelController {
 	public void init() {
 		LOG.debug("init bean {}", this.getClass().getName());
 
-//		updateRecentTracksScheduler.scheduleAtFixedRate(new UpdateUiRunnable(), UPDATE_RECENT_TRACKS_PERIOD,
-//				UPDATE_RECENT_TRACKS_PERIOD, UPDATE_RECENT_TRACKS_PERIOD_TIME_UNIT);
+		updateRecentTracksScheduler.scheduleAtFixedRate(new UpdateUiRunnable(), UPDATE_RECENT_TRACKS_PERIOD,
+				UPDATE_RECENT_TRACKS_PERIOD, UPDATE_RECENT_TRACKS_PERIOD_TIME_UNIT);
 
 		setRecentTracksContainerColumns();
 		setRecentTracksContainerRowFactory();
-		updateRecentTracksContainer();
+		updateRecentTracksContainer(false);
 	}
 
 	@PreDestroy
@@ -142,19 +143,18 @@ public class LastFmPanelController {
 		});
 	}
 
-	private final class UpdateUiRunnable implements Runnable {
-
-		private UpdateUiRunnable() {
-		}
-
-		@Override
-		public void run() {
-			updateRecentTracksContainer();
-		}
+	@FXML
+	public void loadMoreRecentTracks(ActionEvent actionEvent) {
+		updateRecentTracksContainer(true);
 	}
 
-	private void updateRecentTracksContainer() {
-		List<LastFmTrackData> recentTracks = musicLibraryLogicFacade.getRecentTracksFromLastFm();
+	@FXML
+	public void refreshRecentTracks(ActionEvent actionEvent) {
+		updateRecentTracksContainer(false);
+	}
+
+	synchronized private void updateRecentTracksContainer(boolean fetchMore) {
+		List<LastFmTrackData> recentTracks = musicLibraryLogicFacade.getRecentTracksFromLastFm(fetchMore);
 
 		// update only when the recent tracks list is changed
 		if (!recentTracks.equals(currentRecentTracks)) {
@@ -164,5 +164,15 @@ public class LastFmPanelController {
 		}
 	}
 
+	private final class UpdateUiRunnable implements Runnable {
+
+		private UpdateUiRunnable() {
+		}
+
+		@Override
+		public void run() {
+			updateRecentTracksContainer(false);
+		}
+	}
 
 }

@@ -17,7 +17,7 @@ public interface LastFmService {
 
 	boolean setSessionByToken(String token, String pageUrl);
 
-	List<Track> getUserRecentTracks();
+	List<Track> getUserRecentTracks(boolean fetchMore);
 
   void updateNowPlaying(String artistName, String trackName);
 

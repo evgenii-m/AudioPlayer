@@ -129,16 +129,14 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	}
 
 	@Override
-	public List<LastFmTrackData> getRecentTracksFromLastFm() {
-		List<Track> userRecentTracks = lastFmService.getUserRecentTracks();
+	public List<LastFmTrackData> getRecentTracksFromLastFm(boolean fetchMore) {
+		List<Track> userRecentTracks = lastFmService.getUserRecentTracks(fetchMore);
 
 		if (CollectionUtils.isEmpty(userRecentTracks)) {
 			return new ArrayList<>();
 		}
 
-		return userRecentTracks.stream()
-				.map(o -> new LastFmTrackData(o.getArtist().getName(), o.getAlbum().getName(), o.getName(), o.getNowPlaying(),
-						((o.getDate() != null) && (o.getDate().getUts() != null)) ? new Date(o.getDate().getUts() * 1000) : null))
+		return dtoMapper.mapLastFmTrackData(userRecentTracks).stream()
 				.sorted((o1, o2) -> (o2.getScrobbleDate() != null) ? o2.getScrobbleDate().compareTo(o1.getScrobbleDate()) : 1)
 				.collect(Collectors.toList());
 	}
