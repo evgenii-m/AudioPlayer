@@ -17,7 +17,7 @@ public class Track implements Serializable {
 	private boolean nowPlaying;
 
 	@XmlElement(name = "artist")
-	private Artist artist;
+	private ArtistShort artist;
 
 	@XmlElement(name = "name")
 	private String name;
@@ -26,7 +26,7 @@ public class Track implements Serializable {
 	private String mbid;
 
 	@XmlElement(name = "album")
-	private Album album;
+	private AlbumShort album;
 
 	@XmlElement(name = "url")
 	private String url;
@@ -41,7 +41,7 @@ public class Track implements Serializable {
 	public Track() {
 	}
 
-	public Track(boolean nowPlaying, Artist artist, String name, String mbid, Album album, String url, Date date, String streamable) {
+	public Track(boolean nowPlaying, ArtistShort artist, String name, String mbid, AlbumShort album, String url, Date date, String streamable) {
 		this.nowPlaying = nowPlaying;
 		this.artist = artist;
 		this.name = name;
@@ -60,11 +60,11 @@ public class Track implements Serializable {
 		this.nowPlaying = nowPlaying;
 	}
 
-	public Artist getArtist() {
+	public ArtistShort getArtist() {
 		return artist;
 	}
 
-	public void setArtist(Artist artist) {
+	public void setArtist(ArtistShort artist) {
 		this.artist = artist;
 	}
 
@@ -84,11 +84,11 @@ public class Track implements Serializable {
 		this.mbid = mbid;
 	}
 
-	public Album getAlbum() {
+	public AlbumShort getAlbum() {
 		return album;
 	}
 
-	public void setAlbum(Album album) {
+	public void setAlbum(AlbumShort album) {
 		this.album = album;
 	}
 

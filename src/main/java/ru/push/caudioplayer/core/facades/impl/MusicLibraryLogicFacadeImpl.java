@@ -9,10 +9,12 @@ import org.springframework.util.CollectionUtils;
 import ru.push.caudioplayer.core.deezer.DeezerApiErrorException;
 import ru.push.caudioplayer.core.deezer.DeezerApiService;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
+import ru.push.caudioplayer.core.facades.dto.LastFmTrackInfoData;
 import ru.push.caudioplayer.core.facades.dto.NotificationData;
 import ru.push.caudioplayer.core.facades.dto.PlaylistData;
 import ru.push.caudioplayer.core.lastfm.LastFmService;
 import ru.push.caudioplayer.core.lastfm.model.Track;
+import ru.push.caudioplayer.core.lastfm.model.TrackInfo;
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
 import ru.push.caudioplayer.core.facades.dto.LastFmTrackData;
 import ru.push.caudioplayer.core.config.ApplicationConfigService;
@@ -139,6 +141,12 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 		return dtoMapper.mapLastFmTrackData(userRecentTracks).stream()
 				.sorted((o1, o2) -> (o2.getScrobbleDate() != null) ? o2.getScrobbleDate().compareTo(o1.getScrobbleDate()) : 1)
 				.collect(Collectors.toList());
+	}
+
+	@Override
+	public Optional<LastFmTrackInfoData> getLastFmTrackInfo(LastFmTrackData trackData) {
+		Optional<TrackInfo> trackInfo = lastFmService.getTrackInfo(trackData.getArtist(), trackData.getTitle());
+		return trackInfo.map(o -> dtoMapper.mapLastFmTrackInfoData(o));
 	}
 
 	@Override

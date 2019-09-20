@@ -5,18 +5,24 @@ import java.util.Date;
 import java.util.Objects;
 
 public class LastFmTrackData {
+	private String mbid;
 	private String artist;
 	private String album;
 	private String title;
 	private boolean nowPlaying;
 	private Date scrobbleDate;
 
-	public LastFmTrackData(String artist, String album, String title, boolean nowPlaying, Date scrobbleDate) {
+	public LastFmTrackData(String mbid, String artist, String album, String title, boolean nowPlaying, Date scrobbleDate) {
+		this.mbid = mbid;
 		this.artist = artist;
 		this.album = album;
 		this.title = title;
 		this.nowPlaying = nowPlaying;
 		this.scrobbleDate = scrobbleDate;
+	}
+
+	public String getMbid() {
+		return mbid;
 	}
 
 	public String getArtist() {
@@ -69,6 +75,7 @@ public class LastFmTrackData {
 		if (o == null || getClass() != o.getClass()) return false;
 		LastFmTrackData that = (LastFmTrackData) o;
 		return nowPlaying == that.nowPlaying &&
+				Objects.equals(mbid, that.mbid) &&
 				Objects.equals(artist, that.artist) &&
 				Objects.equals(album, that.album) &&
 				Objects.equals(title, that.title) &&
@@ -77,13 +84,14 @@ public class LastFmTrackData {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(artist, album, title, nowPlaying, scrobbleDate);
+		return Objects.hash(mbid, artist, album, title, nowPlaying, scrobbleDate);
 	}
 
 	@Override
 	public String toString() {
 		return "LastFmTrackData{" +
-				"artist='" + artist + '\'' +
+				"mbid='" + mbid + '\'' +
+				", artist='" + artist + '\'' +
 				", album='" + album + '\'' +
 				", title='" + title + '\'' +
 				", nowPlaying=" + nowPlaying +

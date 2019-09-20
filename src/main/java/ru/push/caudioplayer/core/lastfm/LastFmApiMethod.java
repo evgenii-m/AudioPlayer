@@ -4,7 +4,9 @@ public enum LastFmApiMethod {
 
 	AUTH_GET_TOKEN("auth.getToken"),
 	AUTH_GET_SESSION("auth.getSession"),
-	USER_GET_RECENT_TRACKS("user.getRecentTracks");
+	USER_GET_RECENT_TRACKS("user.getRecentTracks"),
+	TRACK_GET_INFO("track.getInfo"),
+	;
 
 	private String name;
 

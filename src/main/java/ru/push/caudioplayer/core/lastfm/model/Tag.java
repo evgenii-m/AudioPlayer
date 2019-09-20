@@ -9,11 +9,8 @@ import java.io.Serializable;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType
-@XmlRootElement(name = "artist")
-public class Artist implements Serializable {
-
-	@XmlElement
-	private String mbid;
+@XmlRootElement(name = "tag")
+public class Tag implements Serializable {
 
 	@XmlElement
 	private String name;
@@ -21,15 +18,7 @@ public class Artist implements Serializable {
 	@XmlElement
 	private String url;
 
-	public Artist() {
-	}
-
-	public String getMbid() {
-		return mbid;
-	}
-
-	public void setMbid(String mbid) {
-		this.mbid = mbid;
+	public Tag() {
 	}
 
 	public String getName() {
@@ -50,9 +39,8 @@ public class Artist implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Artist{" +
-				"mbid='" + mbid + '\'' +
-				", name='" + name + '\'' +
+		return "Tag{" +
+				"name='" + name + '\'' +
 				", url='" + url + '\'' +
 				'}';
 	}

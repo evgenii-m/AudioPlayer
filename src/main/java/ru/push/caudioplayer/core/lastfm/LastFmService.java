@@ -1,8 +1,10 @@
 package ru.push.caudioplayer.core.lastfm;
 
 import ru.push.caudioplayer.core.lastfm.model.Track;
+import ru.push.caudioplayer.core.lastfm.model.TrackInfo;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -18,6 +20,8 @@ public interface LastFmService {
 	boolean setSessionByToken(String token, String pageUrl);
 
 	List<Track> getUserRecentTracks(boolean fetchMore);
+
+	Optional<TrackInfo> getTrackInfo(String artistName, String trackTitle);
 
   void updateNowPlaying(String artistName, String trackName);
 

@@ -1,6 +1,8 @@
 package ru.push.caudioplayer.core.facades;
 
+import ru.push.caudioplayer.core.facades.dto.LastFmTrackInfoData;
 import ru.push.caudioplayer.core.facades.dto.PlaylistData;
+import ru.push.caudioplayer.core.lastfm.model.TrackInfo;
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
 import ru.push.caudioplayer.core.facades.dto.LastFmTrackData;
 
@@ -35,6 +37,8 @@ public interface MusicLibraryLogicFacade {
 	 * If user account not connected then return empty list.
 	 */
 	List<LastFmTrackData> getRecentTracksFromLastFm(boolean fetchMore);
+
+	Optional<LastFmTrackInfoData> getLastFmTrackInfo(LastFmTrackData trackData);
 
 	void reloadPlaylists();
 

@@ -20,11 +20,13 @@ import ru.push.caudioplayer.core.lastfm.LastFmApiParam;
 import ru.push.caudioplayer.core.lastfm.LastFmSessionData;
 import ru.push.caudioplayer.core.lastfm.model.LastFmResponse;
 import ru.push.caudioplayer.core.lastfm.model.RecentTracks;
+import ru.push.caudioplayer.core.lastfm.model.TrackInfo;
 import ru.push.caudioplayer.utils.StreamUtils;
 import ru.push.caudioplayer.utils.XmlUtils;
 
 import javax.annotation.PostConstruct;
 import javax.swing.text.html.Option;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
@@ -159,7 +161,8 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 	 * See https://www.last.fm/api/show/user.getRecentTracks
 	 */
 	@Override
-	public Optional<RecentTracks> userGetRecentTracks(Integer limit, String username, Integer page, Date from, Boolean extended, Date to) {
+	public Optional<RecentTracks> userGetRecentTracks(Integer limit, @NotNull String username, Integer page,
+																										Date from, Boolean extended, Date to) {
 		LastFmApiMethod method = LastFmApiMethod.USER_GET_RECENT_TRACKS;
 		Map<String, String> methodParameters = new HashMap<>();
 		methodParameters.put(LastFmApiParam.USER.getName(), username);
@@ -186,6 +189,41 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 				RecentTracks recentTracks = lastFmResponse.getRecentTracks();
 				LOG.debug("obtained recent tracks: {}", recentTracks);
 				return Optional.ofNullable(recentTracks);
+			}
+		} catch (JAXBException e) {
+			LOG.error("parsing xml from response error: ", e);
+		}
+
+		return Optional.empty();
+	}
+
+	@Override
+	public Optional<TrackInfo> getTrackInfo(String mbid, String track, String artist, String username, Boolean autocorrect) {
+		LastFmApiMethod method = LastFmApiMethod.TRACK_GET_INFO;
+		Map<String, String> methodParameters = new HashMap<>();
+		if (mbid != null) {
+			methodParameters.put(LastFmApiParam.MBID.getName(), mbid);
+		}
+		if (track != null) {
+			methodParameters.put(LastFmApiParam.TRACK.getName(), track);
+		}
+		if (artist != null) {
+			methodParameters.put(LastFmApiParam.ARTIST.getName(), artist);
+		}
+		if (username != null) {
+			methodParameters.put(LastFmApiParam.USERNAME.getName(), username);
+		}
+		if (autocorrect != null) {
+			methodParameters.put(LastFmApiParam.AUTOCORRECT.getName(), autocorrect ? "1" : "0");
+		}
+
+		try {
+			String response = makeApiRequest(method, methodParameters);
+			if (response != null) {
+				LastFmResponse lastFmResponse = XmlUtils.unmarshalDocumnet(response, LastFmResponse.class.getPackage().getName());
+				TrackInfo trackInfo = lastFmResponse.getTrackInfo();
+				LOG.debug("obtained track info: {}", trackInfo);
+				return Optional.ofNullable(trackInfo);
 			}
 		} catch (JAXBException e) {
 			LOG.error("parsing xml from response error: ", e);

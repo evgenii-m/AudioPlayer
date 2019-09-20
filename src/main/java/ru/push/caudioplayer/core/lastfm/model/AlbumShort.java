@@ -2,26 +2,30 @@ package ru.push.caudioplayer.core.lastfm.model;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlValue;
 import java.io.Serializable;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType
-@XmlRootElement(name = "artist")
-public class Artist implements Serializable {
+@XmlRootElement(name = "album")
+public class AlbumShort implements Serializable {
 
-	@XmlElement
+	@XmlAttribute(name = "mbid")
 	private String mbid;
 
-	@XmlElement
+	@XmlValue
 	private String name;
 
-	@XmlElement
-	private String url;
 
-	public Artist() {
+	public AlbumShort() {
+	}
+
+	public AlbumShort(String mbid, String name) {
+		this.mbid = mbid;
+		this.name = name;
 	}
 
 	public String getMbid() {
@@ -40,20 +44,11 @@ public class Artist implements Serializable {
 		this.name = name;
 	}
 
-	public String getUrl() {
-		return url;
-	}
-
-	public void setUrl(String url) {
-		this.url = url;
-	}
-
 	@Override
 	public String toString() {
-		return "Artist{" +
+		return "AlbumShort{" +
 				"mbid='" + mbid + '\'' +
 				", name='" + name + '\'' +
-				", url='" + url + '\'' +
 				'}';
 	}
 }

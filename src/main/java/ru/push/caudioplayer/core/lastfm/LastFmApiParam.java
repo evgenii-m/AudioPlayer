@@ -12,6 +12,11 @@ public enum LastFmApiParam {
 	FROM("from"),
 	EXTENDED("extended"),
 	TO("to"),
+	MBID("mbid"),
+	TRACK("track"),
+	ARTIST("artist"),
+	USERNAME("username"),
+	AUTOCORRECT("autocorrect"),
 	;
 
 	private String name;

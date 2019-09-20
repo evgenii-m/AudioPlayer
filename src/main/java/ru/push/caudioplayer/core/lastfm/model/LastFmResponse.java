@@ -19,13 +19,11 @@ public class LastFmResponse implements Serializable {
 	@XmlElement(name = "recenttracks")
 	private RecentTracks recentTracks;
 
+	@XmlElement(name = "track")
+	private TrackInfo trackInfo;
+
 
 	public LastFmResponse() {
-	}
-
-	public LastFmResponse(String status, RecentTracks recentTracks) {
-		this.status = status;
-		this.recentTracks = recentTracks;
 	}
 
 	public String getStatus() {
@@ -44,11 +42,11 @@ public class LastFmResponse implements Serializable {
 		this.recentTracks = recentTracks;
 	}
 
-	@Override
-	public String toString() {
-		return "LastFmResponse{" +
-				"status='" + status + '\'' +
-				", recentTracks=" + recentTracks +
-				'}';
+	public TrackInfo getTrackInfo() {
+		return trackInfo;
+	}
+
+	public void setTrackInfo(TrackInfo trackInfo) {
+		this.trackInfo = trackInfo;
 	}
 }

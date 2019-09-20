@@ -10,12 +10,15 @@ import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.input.MouseButton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
 import ru.push.caudioplayer.core.facades.dto.LastFmTrackData;
+import ru.push.caudioplayer.core.facades.dto.LastFmTrackInfoData;
 import ru.push.caudioplayer.core.facades.dto.PlaylistData;
+import ru.push.caudioplayer.core.lastfm.model.TrackInfo;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -73,6 +76,14 @@ public class LastFmPanelController {
 		setRecentTracksContainerColumns();
 		setRecentTracksContainerRowFactory();
 		updateRecentTracksContainer(false);
+
+		recentTracksContainer.setOnMouseClicked(mouseEvent -> {
+			if (mouseEvent.getButton().equals(MouseButton.PRIMARY) && (mouseEvent.getClickCount() == 2)) {
+				LastFmTrackData trackData = recentTracksContainer.getFocusModel().getFocusedItem();
+				Optional<LastFmTrackInfoData> trackInfoData = musicLibraryLogicFacade.getLastFmTrackInfo(trackData);
+				LOG.info("trackInfoData: {}", trackInfoData);
+			}
+		});
 	}
 
 	@PreDestroy

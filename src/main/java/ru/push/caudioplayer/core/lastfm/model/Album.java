@@ -3,29 +3,36 @@ package ru.push.caudioplayer.core.lastfm.model;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.XmlValue;
 import java.io.Serializable;
+import java.util.List;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType
-@XmlRootElement
+@XmlRootElement(name = "album")
 public class Album implements Serializable {
 
-	@XmlAttribute(name = "mbid")
+	@XmlElement
 	private String mbid;
 
-	@XmlValue
-	private String name;
+	@XmlElement
+	private String artist;
 
+	@XmlElement
+	private String title;
+
+	@XmlElement
+	private String url;
+
+	@XmlAttribute
+	private Integer position;
+
+	@XmlElement(name = "image")
+	private List<Image> images;
 
 	public Album() {
-	}
-
-	public Album(String mbid, String name) {
-		this.mbid = mbid;
-		this.name = name;
 	}
 
 	public String getMbid() {
@@ -36,19 +43,43 @@ public class Album implements Serializable {
 		this.mbid = mbid;
 	}
 
-	public String getName() {
-		return name;
+	public String getArtist() {
+		return artist;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setArtist(String artist) {
+		this.artist = artist;
 	}
 
-	@Override
-	public String toString() {
-		return "Album{" +
-				"mbid='" + mbid + '\'' +
-				", name='" + name + '\'' +
-				'}';
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public Integer getPosition() {
+		return position;
+	}
+
+	public void setPosition(Integer position) {
+		this.position = position;
+	}
+
+	public List<Image> getImages() {
+		return images;
+	}
+
+	public void setImages(List<Image> images) {
+		this.images = images;
 	}
 }

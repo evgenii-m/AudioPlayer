@@ -10,6 +10,7 @@ import ru.push.caudioplayer.core.lastfm.LastFmSessionData;
 import ru.push.caudioplayer.core.lastfm.model.RecentTracks;
 import ru.push.caudioplayer.core.lastfm.model.Track;
 import ru.push.caudioplayer.core.config.ApplicationConfigService;
+import ru.push.caudioplayer.core.lastfm.model.TrackInfo;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -108,6 +109,15 @@ public class DefaultLastFmService implements LastFmService {
 		Optional<RecentTracks> recentTracks = apiAdapter.userGetRecentTracks(currentRecentTracksPageSize,
 				currentSessionData.getUsername(), null, null, null, null);
 		return recentTracks.map(RecentTracks::getTracks).orElse(new ArrayList<>());
+	}
+
+	@Override
+	public Optional<TrackInfo> getTrackInfo(String artistName, String trackTitle) {
+		if ((currentSessionData == null) || (currentSessionData.getUsername() == null)) {
+			return Optional.empty();
+		}
+
+		return apiAdapter.getTrackInfo(null, trackTitle, artistName, currentSessionData.getUsername(), null);
 	}
 
 	@Override
