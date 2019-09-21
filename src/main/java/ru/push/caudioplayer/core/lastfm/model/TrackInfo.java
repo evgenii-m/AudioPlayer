@@ -31,6 +31,12 @@ public class TrackInfo implements Serializable {
 	private Long playcount;
 
 	@XmlElement
+	private Long userplaycount;
+
+	@XmlElement
+	private Boolean userloved;
+
+	@XmlElement
 	private Artist artist;
 
 	@XmlElement
@@ -94,6 +100,22 @@ public class TrackInfo implements Serializable {
 		this.playcount = playcount;
 	}
 
+	public Long getUserplaycount() {
+		return userplaycount;
+	}
+
+	public void setUserplaycount(Long userplaycount) {
+		this.userplaycount = userplaycount;
+	}
+
+	public Boolean getUserloved() {
+		return userloved;
+	}
+
+	public void setUserloved(Boolean userloved) {
+		this.userloved = userloved;
+	}
+
 	public Artist getArtist() {
 		return artist;
 	}
@@ -135,6 +157,8 @@ public class TrackInfo implements Serializable {
 				", duration=" + duration +
 				", listeners=" + listeners +
 				", playcount=" + playcount +
+				", userplaycount=" + userplaycount +
+				", userloved=" + userloved +
 				", artist=" + artist +
 				", album=" + album +
 				", topTags=" + topTags +

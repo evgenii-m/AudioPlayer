@@ -1,16 +1,29 @@
 package ru.push.caudioplayer.core.facades.dto;
 
+import javax.validation.constraints.NotNull;
 import java.util.Map;
 
 public class LastFmTrackInfoData {
+	@NotNull
 	private String trackMbid;
+	@NotNull
 	private String trackName;
+	@NotNull
 	private String trackUrl;
+	@NotNull
 	private Long duration;
+	@NotNull
 	private Long listenersCount;
+	@NotNull
 	private Long playCount;
+	private Long userPlayCount;
+	@NotNull
+	private Boolean lovedTrack;
+	@NotNull
 	private String artistMbid;
+	@NotNull
 	private String artistName;
+	@NotNull
 	private String artistUrl;
 	private String albumMbid;
 	private String albumName;
@@ -19,8 +32,8 @@ public class LastFmTrackInfoData {
 	private Map<String, String> tagsUrlMap;
 	private String description;
 
-	public LastFmTrackInfoData(String trackMbid, String trackName, String trackUrl,
-														 Long duration, Long listenersCount, Long playCount,
+	public LastFmTrackInfoData(String trackMbid, String trackName, String trackUrl, Long duration,
+														 Long listenersCount, Long playCount, Long userPlayCount, Boolean lovedTrack,
 														 String artistMbid, String artistName, String artistUrl,
 														 String albumMbid, String albumName, String albumUrl,
 														 String albumImageUrl, Map<String, String> tagsUrlMap,
@@ -31,6 +44,8 @@ public class LastFmTrackInfoData {
 		this.duration = duration;
 		this.listenersCount = listenersCount;
 		this.playCount = playCount;
+		this.userPlayCount = userPlayCount;
+		this.lovedTrack = lovedTrack;
 		this.artistMbid = artistMbid;
 		this.artistName = artistName;
 		this.artistUrl = artistUrl;
@@ -64,6 +79,14 @@ public class LastFmTrackInfoData {
 
 	public Long getPlayCount() {
 		return playCount;
+	}
+
+	public Long getUserPlayCount() {
+		return userPlayCount;
+	}
+
+	public Boolean isLovedTrack() {
+		return lovedTrack;
 	}
 
 	public String getArtistMbid() {
@@ -111,6 +134,8 @@ public class LastFmTrackInfoData {
 				", duration=" + duration +
 				", listenersCount=" + listenersCount +
 				", playCount=" + playCount +
+				", userPlayCount=" + userPlayCount +
+				", lovedTrack=" + lovedTrack +
 				", artistMbid='" + artistMbid + '\'' +
 				", artistName='" + artistName + '\'' +
 				", artistUrl='" + artistUrl + '\'' +

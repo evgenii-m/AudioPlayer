@@ -38,7 +38,7 @@ public interface MusicLibraryLogicFacade {
 	 */
 	List<LastFmTrackData> getRecentTracksFromLastFm(boolean fetchMore);
 
-	Optional<LastFmTrackInfoData> getLastFmTrackInfo(LastFmTrackData trackData);
+	LastFmTrackInfoData getLastFmTrackInfo(LastFmTrackData trackData);
 
 	void reloadPlaylists();
 
@@ -46,7 +46,7 @@ public interface MusicLibraryLogicFacade {
 
 	List<PlaylistData> getDeezerPlaylists();
 
-	Optional<PlaylistData> getActivePlaylist();
+	PlaylistData getActivePlaylist();
 
 	void createLocalPlaylist();
 

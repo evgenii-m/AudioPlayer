@@ -69,8 +69,8 @@ class DtoMapper {
 		Map<String, String> tagsUrlMap = ((o.getTopTags() != null) && (o.getTopTags().getTags() != null)) ?
 				o.getTopTags().getTags().stream().collect(Collectors.toMap(Tag::getName, Tag::getUrl)) :
 				null;
-		return new LastFmTrackInfoData(o.getMbid(), o.getName(), o.getUrl(),
-				o.getDuration(), o.getListeners(), o.getPlaycount(),
+		return new LastFmTrackInfoData(o.getMbid(), o.getName(), o.getUrl(), o.getDuration(),
+				o.getListeners(), o.getPlaycount(), o.getUserplaycount(), o.getUserloved(),
 				o.getArtist().getMbid(), o.getArtist().getName(), o.getArtist().getUrl(),
 				Optional.ofNullable(o.getAlbum()).map(Album::getMbid).orElse(null),
 				Optional.ofNullable(o.getAlbum()).map(Album::getTitle).orElse(null),

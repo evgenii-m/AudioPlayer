@@ -4,13 +4,19 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.Pane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +24,7 @@ import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
 import ru.push.caudioplayer.core.facades.dto.LastFmTrackData;
 import ru.push.caudioplayer.core.facades.dto.LastFmTrackInfoData;
 import ru.push.caudioplayer.core.facades.dto.PlaylistData;
-import ru.push.caudioplayer.core.lastfm.model.TrackInfo;
+import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -28,6 +34,7 @@ import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 public class LastFmPanelController {
 
@@ -43,11 +50,37 @@ public class LastFmPanelController {
 	private static final double LASTFM_PANEL_COLUMN_WIDTH_SCROBBLE_DATE = 125;
 	private static final String LASTFM_PANEL_COLUMN_FORMAT_SCROBBLE_DATE = "dd-MM-yyyy  HH:mm:SS";
 	private static final String LASTFM_PANEL_COLUMN_NOW_PLAYING_PLACEHOLDER = " ~~~~~now~~~~~ ";
+	private static final String TRACK_INFO_IMAGE_STUB_URL = "content/images/image_stub_1.png";
+	private static final String TRACK_INFO_EMPTY_LABEL_PLACEHOLDER = "-";
+	private static final String LOVED_TRACK_TOGGLE_BUTTON_TEXT = "Loved Track";
+	private static final String ADD_TO_LOVED_TRACK_TOGGLE_BUTTON_TEXT = "Add to Loved";
 
 	@FXML
 	public TableView<LastFmTrackData> recentTracksContainer;
 	@FXML
-	public ScrollPane trackInfoContainer;
+	public Pane trackInfoContainer;
+	@FXML
+	public Label artistLinkLabel;
+	@FXML
+	public Label albumLinkLabel;
+	@FXML
+	public Label titleLinkLabel;
+	@FXML
+	public Label trackDurationLabel;
+	@FXML
+	public Label listenersCountLabel;
+	@FXML
+	public Label totalScrobblesLabel;
+	@FXML
+	public Label userScrobblesLabel;
+	@FXML
+	public ToggleButton lovedTrackToggleButton;
+	@FXML
+	public ImageView trackInfoImage;
+	@FXML
+	public TextArea trackInfoDescriptionTextArea;
+	@FXML
+	public ListView trackInfoTagsContainer;
 
 	@Autowired
 	private MusicLibraryLogicFacade musicLibraryLogicFacade;
@@ -76,12 +109,13 @@ public class LastFmPanelController {
 		setRecentTracksContainerColumns();
 		setRecentTracksContainerRowFactory();
 		updateRecentTracksContainer(false);
+		updateTrackInfoContainer(null);
 
 		recentTracksContainer.setOnMouseClicked(mouseEvent -> {
 			if (mouseEvent.getButton().equals(MouseButton.PRIMARY) && (mouseEvent.getClickCount() == 2)) {
 				LastFmTrackData trackData = recentTracksContainer.getFocusModel().getFocusedItem();
-				Optional<LastFmTrackInfoData> trackInfoData = musicLibraryLogicFacade.getLastFmTrackInfo(trackData);
-				LOG.info("trackInfoData: {}", trackInfoData);
+				LastFmTrackInfoData trackInfoData = musicLibraryLogicFacade.getLastFmTrackInfo(trackData);
+				updateTrackInfoContainer(trackInfoData);
 			}
 		});
 	}
@@ -172,6 +206,59 @@ public class LastFmPanelController {
 			recentTracksContainer.getItems().clear();
 			recentTracksContainer.getItems().addAll(recentTracks);
 			currentRecentTracks = recentTracks;
+		}
+	}
+
+	private void updateTrackInfoContainer(LastFmTrackInfoData trackInfoData) {
+		if (trackInfoData != null) {
+			Stream.of(
+					artistLinkLabel, albumLinkLabel, titleLinkLabel, listenersCountLabel,
+					totalScrobblesLabel, userScrobblesLabel, trackDurationLabel
+			).forEach(o -> o.setDisable(false));
+
+			artistLinkLabel.setText(trackInfoData.getArtistName());
+			albumLinkLabel.setText((trackInfoData.getAlbumName() != null) ?
+					trackInfoData.getAlbumName() : TRACK_INFO_EMPTY_LABEL_PLACEHOLDER
+			);
+			titleLinkLabel.setText(trackInfoData.getTrackName());
+			trackDurationLabel.setText(TrackTimeLabelBuilder.buildTimeLabel(trackInfoData.getDuration()));
+			listenersCountLabel.setText(String.valueOf(trackInfoData.getListenersCount()));
+			totalScrobblesLabel.setText(String.valueOf(trackInfoData.getPlayCount()));
+			userScrobblesLabel.setText((trackInfoData.getUserPlayCount() != null) ?
+					String.valueOf(trackInfoData.getUserPlayCount()) : TRACK_INFO_EMPTY_LABEL_PLACEHOLDER
+			);
+
+			trackInfoImage.setImage(new Image((trackInfoData.getAlbumImageUrl() != null) ?
+					trackInfoData.getAlbumImageUrl() : TRACK_INFO_IMAGE_STUB_URL
+			));
+			trackInfoDescriptionTextArea.setText((trackInfoData.getDescription() != null) ?
+					trackInfoData.getDescription() : ""
+			);
+
+			lovedTrackToggleButton.setDisable(false);
+			if (trackInfoData.isLovedTrack()) {
+				lovedTrackToggleButton.setText(LOVED_TRACK_TOGGLE_BUTTON_TEXT);
+				lovedTrackToggleButton.setSelected(true);
+			} else {
+				lovedTrackToggleButton.setText(ADD_TO_LOVED_TRACK_TOGGLE_BUTTON_TEXT);
+				lovedTrackToggleButton.setSelected(false);
+			}
+
+		} else {
+			Stream.of(
+					artistLinkLabel, albumLinkLabel, titleLinkLabel, listenersCountLabel,
+					totalScrobblesLabel, userScrobblesLabel, trackDurationLabel
+			).forEach(o -> {
+				o.setText(TRACK_INFO_EMPTY_LABEL_PLACEHOLDER);
+				o.setDisable(true);
+			});
+
+			trackInfoImage.setImage(new Image(TRACK_INFO_IMAGE_STUB_URL));
+			trackInfoDescriptionTextArea.setText("");
+
+			lovedTrackToggleButton.setDisable(true);
+			lovedTrackToggleButton.setText(ADD_TO_LOVED_TRACK_TOGGLE_BUTTON_TEXT);
+			lovedTrackToggleButton.setSelected(false);
 		}
 	}
 

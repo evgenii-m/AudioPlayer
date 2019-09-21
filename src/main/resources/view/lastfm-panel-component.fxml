@@ -1,32 +1,81 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="180.0"
-	  prefWidth="1000.0" stylesheets="/css/style.css" xmlns="http://javafx.com/javafx/8.0.121"
-	  xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.push.caudioplayer.controller.LastFmPanelController">
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="180.0" prefWidth="990.0" stylesheets="/css/style.css" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.push.caudioplayer.controller.LastFmPanelController">
 	<children>
-		<TableView fx:id="recentTracksContainer" layoutX="5.0" layoutY="5.0" prefHeight="140.0" prefWidth="490.0"
-				   styleClass="recent-tracks-container">
+		<TableView fx:id="recentTracksContainer" layoutX="5.0" layoutY="5.0" prefHeight="140.0" prefWidth="490.0" styleClass="recent-tracks-container">
 		</TableView>
-		<Button fx:id="recentTracksMoreButton" layoutX="435.0" layoutY="150.0" mnemonicParsing="false" prefHeight="12.0"
-				prefWidth="60.0" text="More" onAction="#loadMoreRecentTracks">
+		<Button layoutX="435.0" layoutY="150.0" mnemonicParsing="false" onAction="#loadMoreRecentTracks" prefHeight="12.0" prefWidth="60.0" text="More">
 			<font>
-				<Font name="System Bold" size="11.0"/>
+				<Font name="System Bold" size="11.0" />
 			</font>
 		</Button>
-		<Button fx:id="recentTracksRefreshButton" layoutX="370.0" layoutY="150.0" mnemonicParsing="false" prefHeight="12.0"
-				prefWidth="60.0" text="Refresh" onAction="#refreshRecentTracks">
+		<Button layoutX="370.0" layoutY="150.0" mnemonicParsing="false" onAction="#refreshRecentTracks" prefHeight="12.0" prefWidth="60.0" text="Refresh">
 			<font>
-				<Font name="System Bold" size="11.0"/>
+				<Font name="System Bold" size="11.0" />
 			</font>
 		</Button>
-		<ScrollPane fx:id="trackInfoContainer" layoutX="500.0" layoutY="5.0" prefHeight="170.0" prefWidth="485.0">
+		<ScrollPane layoutX="500.0" layoutY="5.0" prefHeight="170.0" prefWidth="485.0">
 			<content>
+				<Pane fx:id="trackInfoContainer" prefHeight="350.0" prefWidth="470.0">
+					<children>
+						<Label layoutX="10.0" layoutY="5.0" prefHeight="20.0" prefWidth="55.0" styleClass="track-info-label-for-link" text="Artist" />
+						<Label fx:id="artistLinkLabel" layoutX="70.0" layoutY="5.0" prefHeight="20.0" prefWidth="230.0" styleClass="track-info-link" text="artistLink">
+							<cursor>
+								<Cursor fx:constant="HAND" />
+							</cursor>
+						</Label>
+
+						<Label layoutX="10.0" layoutY="28.0" prefHeight="20.0" prefWidth="55.0" styleClass="track-info-label-for-link" text="Album" />
+						<Label fx:id="albumLinkLabel" layoutX="70.0" layoutY="28.0" prefHeight="20.0" prefWidth="230.0" styleClass="track-info-link" text="albumLink">
+							<cursor>
+								<Cursor fx:constant="HAND" />
+							</cursor>
+						</Label>
+
+						<Label layoutX="10.0" layoutY="51.0" prefHeight="20.0" prefWidth="55.0" styleClass="track-info-label-for-link" text="Title" />
+						<Label fx:id="titleLinkLabel" layoutX="70.0" layoutY="51.0" prefHeight="20.0" prefWidth="230.0" styleClass="track-info-link" text="titleLink">
+							<cursor>
+								<Cursor fx:constant="HAND" />
+							</cursor>
+						</Label>
+
+						<Label layoutX="10.0" layoutY="80.0" prefHeight="17.0" prefWidth="95.0" styleClass="track-info-label" text="Listeners:" />
+						<Label fx:id="listenersCountLabel" alignment="CENTER_RIGHT" layoutX="110.0" layoutY="80.0" prefHeight="17.0" prefWidth="50.0" styleClass="track-info-label" text="value" />
+
+						<Label layoutX="10.0" layoutY="100.0" prefHeight="17.0" prefWidth="95.0" styleClass="track-info-label" text="Total Scrobbles:" />
+						<Label fx:id="totalScrobblesLabel" alignment="CENTER_RIGHT" layoutX="110.0" layoutY="100.0" prefHeight="17.0" prefWidth="50.0" styleClass="track-info-label" text="value" />
+
+						<Label layoutX="10.0" layoutY="120.0" prefHeight="17.0" prefWidth="95.0" styleClass="track-info-label" text="My Scrobbles:" />
+						<Label fx:id="userScrobblesLabel" alignment="CENTER_RIGHT" layoutX="110.0" layoutY="120.0" prefHeight="17.0" prefWidth="50.0" styleClass="track-info-label" text="value" />
+
+						<Label layoutX="190.0" layoutY="80.0" prefHeight="17.0" prefWidth="50.0" styleClass="track-info-label" text="Length:" />
+						<Label fx:id="trackDurationLabel" layoutX="260.0" layoutY="80.0" prefHeight="17.0" prefWidth="30.0" text="00:00" />
+
+						<ToggleButton fx:id="lovedTrackToggleButton" layoutX="190.0" layoutY="115.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="100.0" text="Add to Loved" />
+
+						<Pane layoutX="300.0" layoutY="3.0" prefHeight="160.0" prefWidth="160.0" styleClass="track-info-image-container">
+							<ImageView fx:id="trackInfoImage" fitHeight="160.0" fitWidth="160.0" pickOnBounds="true" preserveRatio="true" />
+						</Pane>
+
+						<Label layoutX="10.0" layoutY="150.0" prefHeight="17.0" prefWidth="95.0" styleClass="track-info-label" text="Description:" />
+						<TextArea fx:id="trackInfoDescriptionTextArea" editable="false" layoutX="10.0" layoutY="170.0" prefHeight="150.0" prefWidth="260.0" />
+
+						<Label layoutX="280.0" layoutY="170.0" prefHeight="17.0" prefWidth="95.0" styleClass="track-info-label" text="Tags:" />
+						<ListView fx:id="trackInfoTagsContainer" layoutX="280.0" layoutY="190.0" prefHeight="130.0" prefWidth="180.0" />
+					</children>
+				</Pane>
 			</content>
 		</ScrollPane>
 	</children>

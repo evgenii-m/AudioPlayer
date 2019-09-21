@@ -144,9 +144,9 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	}
 
 	@Override
-	public Optional<LastFmTrackInfoData> getLastFmTrackInfo(LastFmTrackData trackData) {
+	public LastFmTrackInfoData getLastFmTrackInfo(LastFmTrackData trackData) {
 		Optional<TrackInfo> trackInfo = lastFmService.getTrackInfo(trackData.getArtist(), trackData.getTitle());
-		return trackInfo.map(o -> dtoMapper.mapLastFmTrackInfoData(o));
+		return trackInfo.map(o -> dtoMapper.mapLastFmTrackInfoData(o)).orElse(null);
 	}
 
 	@Override
@@ -174,8 +174,8 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	}
 
 	@Override
-	public Optional<PlaylistData> getActivePlaylist() {
-		return playlistService.getActivePlaylist().map(o -> dtoMapper.mapPlaylistData(o));
+	public PlaylistData getActivePlaylist() {
+		return playlistService.getActivePlaylist().map(o -> dtoMapper.mapPlaylistData(o)).orElse(null);
 	}
 
 	@Override

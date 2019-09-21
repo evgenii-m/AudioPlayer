@@ -66,8 +66,6 @@ public class AudioPlayerController {
 	private MusicLibraryLogicFacade musicLibraryLogicFacade;
   @Autowired
   private CustomAudioPlayerComponent playerComponent;
-  @Autowired
-  private TrackTimeLabelBuilder trackTimeLabelBuilder;
 
   private final ScheduledExecutorService playerScheduler = Executors.newSingleThreadScheduledExecutor();
   private boolean positionSliderMousePressed;
@@ -161,7 +159,7 @@ public class AudioPlayerController {
 
   private void updatePlaybackPosition(float playbackPosition, long trackDuration) {
     long trackCurrentTime = (long) ((float) trackDuration * playbackPosition);
-    trackTimeLabel.setText(trackTimeLabelBuilder.buildTimeLabel(trackCurrentTime, trackDuration));
+    trackTimeLabel.setText(TrackTimeLabelBuilder.buildTimeProgressLabel(trackCurrentTime, trackDuration));
     positionSlider.setValue(playbackPosition * POSITION_SLIDER_SCALE_COEF);
   }
 

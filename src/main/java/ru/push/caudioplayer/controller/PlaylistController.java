@@ -83,8 +83,6 @@ public class PlaylistController {
   @Autowired
 	private MusicLibraryLogicFacade musicLibraryLogicFacade;
   @Autowired
-  private TrackTimeLabelBuilder trackTimeLabelBuilder;
-  @Autowired
   private ApplicationConfigService applicationConfigService;
 	@Autowired
 	private RenamePopupController renamePopupController;
@@ -221,8 +219,10 @@ public class PlaylistController {
 	@PreDestroy
 	public void stop() {
 		// save active and displayed playlists UID
-		musicLibraryLogicFacade.getActivePlaylist()
-				.ifPresent(o -> applicationConfigService.saveActivePlaylist(o.getUid()));
+		PlaylistData activePlaylist = musicLibraryLogicFacade.getActivePlaylist();
+		if (activePlaylist != null) {
+			applicationConfigService.saveActivePlaylist(activePlaylist.getUid());
+		}
 		if (displayedPlaylist != null) {
 			applicationConfigService.saveDisplayedPlaylist(displayedPlaylist.getUid());
 		}
@@ -343,7 +343,7 @@ public class PlaylistController {
 		lengthCol.setUserData(columnConfiguration.getName());
 		lengthCol.setPrefWidth(columnConfiguration.getWidth());
 		lengthCol.setCellValueFactory(data ->
-				new SimpleStringProperty(trackTimeLabelBuilder.buildTimeString(data.getValue().getLength())));
+				new SimpleStringProperty(TrackTimeLabelBuilder.buildTimeLabel(data.getValue().getLength())));
 
 		playlistContainer.getColumns().addAll(nowPlayingCol, numberCol, artistCol, albumCol, titleCol, lengthCol);
 	}
