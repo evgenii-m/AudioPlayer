@@ -10,7 +10,6 @@ import java.io.Serializable;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType
-@XmlRootElement
 public class Track implements Serializable {
 
 	@XmlAttribute(name = "nowplaying")

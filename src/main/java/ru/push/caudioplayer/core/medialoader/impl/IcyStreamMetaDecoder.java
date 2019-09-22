@@ -76,12 +76,12 @@ class IcyStreamMetaDecoder {
 
   public String getStreamTitle() throws IOException {
     data = getMetadata();
-    return data.getOrDefault("StreamTitle", "");
+    return data.getOrDefault("StreamTitle", StringUtils.EMPTY);
   }
 
   public String getStationName() throws IOException {
     data = getMetadata();
-    return data.getOrDefault("icy-name", "");
+    return data.getOrDefault("icy-name", StringUtils.EMPTY);
   }
 
 

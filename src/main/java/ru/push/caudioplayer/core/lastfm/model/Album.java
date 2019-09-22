@@ -4,14 +4,12 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import java.io.Serializable;
 import java.util.List;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType
-@XmlRootElement(name = "album")
 public class Album implements Serializable {
 
 	@XmlElement
@@ -81,5 +79,17 @@ public class Album implements Serializable {
 
 	public void setImages(List<Image> images) {
 		this.images = images;
+	}
+
+	@Override
+	public String toString() {
+		return "Album{" +
+				"mbid='" + mbid + '\'' +
+				", artist='" + artist + '\'' +
+				", title='" + title + '\'' +
+				", url='" + url + '\'' +
+				", position=" + position +
+				", images=" + images +
+				'}';
 	}
 }

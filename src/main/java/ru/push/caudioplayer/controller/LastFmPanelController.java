@@ -17,6 +17,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.Pane;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -232,7 +233,7 @@ public class LastFmPanelController {
 					trackInfoData.getAlbumImageUrl() : TRACK_INFO_IMAGE_STUB_URL
 			));
 			trackInfoDescriptionTextArea.setText((trackInfoData.getDescription() != null) ?
-					trackInfoData.getDescription() : ""
+					trackInfoData.getDescription() : StringUtils.EMPTY
 			);
 
 			lovedTrackToggleButton.setDisable(false);
@@ -254,7 +255,7 @@ public class LastFmPanelController {
 			});
 
 			trackInfoImage.setImage(new Image(TRACK_INFO_IMAGE_STUB_URL));
-			trackInfoDescriptionTextArea.setText("");
+			trackInfoDescriptionTextArea.setText(StringUtils.EMPTY);
 
 			lovedTrackToggleButton.setDisable(true);
 			lovedTrackToggleButton.setText(ADD_TO_LOVED_TRACK_TOGGLE_BUTTON_TEXT);
