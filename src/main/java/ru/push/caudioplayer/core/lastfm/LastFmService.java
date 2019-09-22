@@ -21,7 +21,7 @@ public interface LastFmService {
 
 	List<Track> getUserRecentTracks(boolean fetchMore);
 
-	Optional<TrackInfo> getTrackInfo(String artistName, String trackTitle);
+	TrackInfo getTrackInfo(String artistName, String trackTitle);
 
   void updateNowPlaying(String artistName, String trackName);
 

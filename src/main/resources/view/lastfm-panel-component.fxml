@@ -66,7 +66,7 @@
 						<ToggleButton fx:id="lovedTrackToggleButton" layoutX="190.0" layoutY="115.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="100.0" text="Add to Loved" />
 
 						<Pane layoutX="300.0" layoutY="3.0" prefHeight="160.0" prefWidth="160.0" styleClass="track-info-image-container">
-							<ImageView fx:id="trackInfoImage" fitHeight="160.0" fitWidth="160.0" pickOnBounds="true" preserveRatio="true" />
+							<ImageView fx:id="trackInfoImage" fitHeight="160.0" fitWidth="160.0" pickOnBounds="true" preserveRatio="true" smooth="false" />
 						</Pane>
 
 						<Label layoutX="10.0" layoutY="150.0" prefHeight="17.0" prefWidth="95.0" styleClass="track-info-label" text="Description:" />

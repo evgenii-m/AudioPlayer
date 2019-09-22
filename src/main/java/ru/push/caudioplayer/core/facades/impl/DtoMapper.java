@@ -1,13 +1,13 @@
 package ru.push.caudioplayer.core.facades.impl;
 
 import org.springframework.stereotype.Component;
+import ru.push.caudioplayer.core.facades.dto.ImageSize;
 import ru.push.caudioplayer.core.facades.dto.LastFmTrackData;
 import ru.push.caudioplayer.core.facades.dto.LastFmTrackInfoData;
 import ru.push.caudioplayer.core.facades.dto.PlaylistData;
 import ru.push.caudioplayer.core.facades.dto.PlaylistType;
 import ru.push.caudioplayer.core.facades.dto.TrackData;
 import ru.push.caudioplayer.core.lastfm.model.Album;
-import ru.push.caudioplayer.core.lastfm.model.Artist;
 import ru.push.caudioplayer.core.lastfm.model.Image;
 import ru.push.caudioplayer.core.lastfm.model.Tag;
 import ru.push.caudioplayer.core.lastfm.model.Track;
@@ -63,19 +63,21 @@ class DtoMapper {
 	}
 
 	LastFmTrackInfoData mapLastFmTrackInfoData(TrackInfo o) {
-		String albumImageUrl = ((o.getAlbum() != null) && (o.getAlbum().getImages() != null)) ?
-				o.getAlbum().getImages().stream().findFirst().map(Image::getUrl).orElse(null) :
+		Map<ImageSize, String> imagesUrlMap = ((o.getAlbum() != null) && (o.getAlbum().getImages() != null)) ?
+				o.getAlbum().getImages().stream()
+						.collect(Collectors.toMap(e -> ImageSize.fromValue(e.getSize()), Image::getUrl, (e1, e2) -> e1)) :
 				null;
 		Map<String, String> tagsUrlMap = ((o.getTopTags() != null) && (o.getTopTags().getTags() != null)) ?
 				o.getTopTags().getTags().stream().collect(Collectors.toMap(Tag::getName, Tag::getUrl)) :
 				null;
+
 		return new LastFmTrackInfoData(o.getMbid(), o.getName(), o.getUrl(), o.getDuration(),
 				o.getListeners(), o.getPlaycount(), o.getUserplaycount(), o.getUserloved(),
 				o.getArtist().getMbid(), o.getArtist().getName(), o.getArtist().getUrl(),
 				Optional.ofNullable(o.getAlbum()).map(Album::getMbid).orElse(null),
 				Optional.ofNullable(o.getAlbum()).map(Album::getTitle).orElse(null),
 				Optional.ofNullable(o.getAlbum()).map(Album::getUrl).orElse(null),
-				albumImageUrl, tagsUrlMap,
+				imagesUrlMap, tagsUrlMap,
 				Optional.ofNullable(o.getWiki()).map(TrackInfoWiki::getContent).orElse(null)
 		);
 	}

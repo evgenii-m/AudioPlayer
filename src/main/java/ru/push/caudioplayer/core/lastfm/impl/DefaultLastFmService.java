@@ -112,12 +112,13 @@ public class DefaultLastFmService implements LastFmService {
 	}
 
 	@Override
-	public Optional<TrackInfo> getTrackInfo(String artistName, String trackTitle) {
+	public TrackInfo getTrackInfo(String artistName, String trackTitle) {
 		if ((currentSessionData == null) || (currentSessionData.getUsername() == null)) {
-			return Optional.empty();
+			return null;
 		}
 
-		return apiAdapter.getTrackInfo(null, trackTitle, artistName, currentSessionData.getUsername(), null);
+		return apiAdapter.getTrackInfo(null, trackTitle, artistName, currentSessionData.getUsername(), null)
+				.orElse(null);
 	}
 
 	@Override

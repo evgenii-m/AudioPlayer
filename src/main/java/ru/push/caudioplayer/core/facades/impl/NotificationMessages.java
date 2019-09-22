@@ -22,4 +22,6 @@ interface NotificationMessages {
 	String ADD_TRACK_TO_DEEZER_LOVED_TRACKS_FAIL = "Could not add tracks to Deezer loved tracks";
 	String TRACK_MEDIA_DATA_INCORRECT = "Incorrect track media data received";
 
+	String LASTFM_TRACK_INFO_NOT_FOUND = "Track not found on Last.fm: artist = '%s', title = '%s'";
+
 }

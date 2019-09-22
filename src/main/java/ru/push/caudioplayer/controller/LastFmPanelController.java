@@ -55,6 +55,8 @@ public class LastFmPanelController {
 	private static final String TRACK_INFO_EMPTY_LABEL_PLACEHOLDER = "-";
 	private static final String LOVED_TRACK_TOGGLE_BUTTON_TEXT = "Loved Track";
 	private static final String ADD_TO_LOVED_TRACK_TOGGLE_BUTTON_TEXT = "Add to Loved";
+	private static final double TRACK_INFO_IMAGE_WIDTH = 160;
+	private static final double TRACK_INFO_IMAGE_HEIGHT = 160;
 
 	@FXML
 	public TableView<LastFmTrackData> recentTracksContainer;
@@ -229,12 +231,19 @@ public class LastFmPanelController {
 					String.valueOf(trackInfoData.getUserPlayCount()) : TRACK_INFO_EMPTY_LABEL_PLACEHOLDER
 			);
 
-			trackInfoImage.setImage(new Image((trackInfoData.getAlbumImageUrl() != null) ?
-					trackInfoData.getAlbumImageUrl() : TRACK_INFO_IMAGE_STUB_URL
-			));
 			trackInfoDescriptionTextArea.setText((trackInfoData.getDescription() != null) ?
 					trackInfoData.getDescription() : StringUtils.EMPTY
 			);
+
+			String imageUrl = TRACK_INFO_IMAGE_STUB_URL;
+			if (trackInfoData.getLargeImageUrl() != null) {
+				imageUrl = trackInfoData.getLargeImageUrl();
+			} else if (trackInfoData.getMediumImageUrl() != null) {
+				imageUrl = trackInfoData.getMediumImageUrl();
+			} else if (trackInfoData.getSmallImageUrl() != null) {
+				imageUrl = trackInfoData.getSmallImageUrl();
+			}
+			trackInfoImage.setImage(new Image(imageUrl, TRACK_INFO_IMAGE_WIDTH, TRACK_INFO_IMAGE_HEIGHT, false, false));
 
 			lovedTrackToggleButton.setDisable(false);
 			if (trackInfoData.isLovedTrack()) {
@@ -254,7 +263,8 @@ public class LastFmPanelController {
 				o.setDisable(true);
 			});
 
-			trackInfoImage.setImage(new Image(TRACK_INFO_IMAGE_STUB_URL));
+			trackInfoImage.setImage(new Image(TRACK_INFO_IMAGE_STUB_URL, TRACK_INFO_IMAGE_WIDTH,
+					TRACK_INFO_IMAGE_HEIGHT, false, false));
 			trackInfoDescriptionTextArea.setText(StringUtils.EMPTY);
 
 			lovedTrackToggleButton.setDisable(true);

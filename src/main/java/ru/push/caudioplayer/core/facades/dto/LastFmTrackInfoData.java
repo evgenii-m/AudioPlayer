@@ -28,7 +28,7 @@ public class LastFmTrackInfoData {
 	private String albumMbid;
 	private String albumName;
 	private String albumUrl;
-	private String albumImageUrl;
+	private Map<ImageSize, String> imagesUrlMap;
 	private Map<String, String> tagsUrlMap;
 	private String description;
 
@@ -36,7 +36,7 @@ public class LastFmTrackInfoData {
 														 Long listenersCount, Long playCount, Long userPlayCount, Boolean lovedTrack,
 														 String artistMbid, String artistName, String artistUrl,
 														 String albumMbid, String albumName, String albumUrl,
-														 String albumImageUrl, Map<String, String> tagsUrlMap,
+														 Map<ImageSize, String> imagesUrlMap, Map<String, String> tagsUrlMap,
 														 String description) {
 		this.trackMbid = trackMbid;
 		this.trackName = trackName;
@@ -52,7 +52,7 @@ public class LastFmTrackInfoData {
 		this.albumMbid = albumMbid;
 		this.albumName = albumName;
 		this.albumUrl = albumUrl;
-		this.albumImageUrl = albumImageUrl;
+		this.imagesUrlMap = imagesUrlMap;
 		this.tagsUrlMap = tagsUrlMap;
 		this.description = description;
 	}
@@ -113,8 +113,20 @@ public class LastFmTrackInfoData {
 		return albumUrl;
 	}
 
-	public String getAlbumImageUrl() {
-		return albumImageUrl;
+	public Map<ImageSize, String> getImagesUrlMap() {
+		return imagesUrlMap;
+	}
+
+	public String getSmallImageUrl() {
+		return imagesUrlMap.get(ImageSize.SMALL);
+	}
+
+	public String getMediumImageUrl() {
+		return imagesUrlMap.get(ImageSize.MEDIUM);
+	}
+
+	public String getLargeImageUrl() {
+		return imagesUrlMap.get(ImageSize.LARGE);
 	}
 
 	public Map<String, String> getTagsUrlMap() {
@@ -142,7 +154,7 @@ public class LastFmTrackInfoData {
 				", albumMbid='" + albumMbid + '\'' +
 				", albumName='" + albumName + '\'' +
 				", albumUrl='" + albumUrl + '\'' +
-				", albumImageUrl='" + albumImageUrl + '\'' +
+				", imagesUrlMap=" + imagesUrlMap +
 				", tagsUrlMap=" + tagsUrlMap +
 				", description='" + description + '\'' +
 				'}';
