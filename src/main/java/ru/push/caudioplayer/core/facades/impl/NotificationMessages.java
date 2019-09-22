@@ -15,7 +15,9 @@ interface NotificationMessages {
 	String RENAME_PLAYLIST_FAIL = "Failed to rename playlist: uid = '%s', title = '%s'";
 	String ADD_TRACKS_TO_PLAYLIST_SUCCESS = "Tracks added to playlist: uid = '%s', title = '%s'";
 	String ADD_TRACKS_TO_PLAYLIST_FAIL = "Could not add tracks to playlist: uid = '%s'";
-	String ADD_TRACKS_TO_PLAYLIST_FAIL_BY_TITLE = "Could not add tracks to playlist: title = '%s'";
+	String ADD_TRACKS_TO_DEEZER_PLAYLIST_SUCCESS = "Tracks added to Deezer playlist: uid = '%s', title = '%s'";
+	String ADD_TRACKS_TO_DEEZER_PLAYLIST_FAIL = "Could not add tracks to Deezer playlist: uid = '%s'";
+	String ADD_TRACKS_TO_DEEZER_PLAYLIST_FAIL_BY_TITLE = "Could not add tracks to playlist: title = '%s'";
 	String DELETE_TRACKS_FROM_PLAYLIST_SUCCESS = "Tracks deleted from playlist: uid = '%s'";
 	String DELETE_TRACKS_FROM_PLAYLIST_FAIL = "Could not delete tracks from playlist: uid = '%s'";
 	String ADD_TRACK_TO_DEEZER_LOVED_TRACKS_SUCCESS = "Tracks added to Deezer loved tracks";

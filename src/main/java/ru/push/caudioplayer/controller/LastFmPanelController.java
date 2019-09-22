@@ -7,6 +7,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
@@ -85,6 +86,8 @@ public class LastFmPanelController {
 	public TextArea trackInfoDescriptionTextArea;
 	@FXML
 	public ListView trackInfoTagsContainer;
+	@FXML
+	public MenuButton trackInfoActionsMenuButton;
 
 	@Autowired
 	private AppMain appMain;
@@ -225,6 +228,25 @@ public class LastFmPanelController {
 		updateRecentTracksContainer(false);
 	}
 
+	@FXML
+	public void addLastFmTrackDeezerPlaylistAction(ActionEvent actionEvent) {
+		if (trackInfoContainer.getUserData() != null) {
+			LastFmTrackInfoData trackInfoData = (LastFmTrackInfoData) trackInfoContainer.getUserData();
+			Optional<PlaylistData> displayedPlaylist = playlistController.getDisplayedPlaylist();
+			displayedPlaylist.ifPresent(playlist -> {
+				musicLibraryLogicFacade.addLastFmTrackDeezerPlaylist(playlist.getUid(), trackInfoData);
+			});
+		}
+	}
+
+	@FXML
+	public void addLastFmTrackToDeezerLovedTracksAction(ActionEvent actionEvent) {
+		if (trackInfoContainer.getUserData() != null) {
+			LastFmTrackInfoData trackInfoData = (LastFmTrackInfoData) trackInfoContainer.getUserData();
+			musicLibraryLogicFacade.addLastFmTrackToDeezerLovedTracksAndMonthlyPlaylist(trackInfoData);
+		}
+	}
+
 	synchronized private void updateRecentTracksContainer(boolean fetchMore) {
 		List<LastFmTrackData> recentTracks = musicLibraryLogicFacade.getRecentTracksFromLastFm(fetchMore);
 
@@ -265,11 +287,11 @@ public class LastFmPanelController {
 			);
 
 			String imageUrl = TRACK_INFO_IMAGE_STUB_URL;
-			if (trackInfoData.getLargeImageUrl() != null) {
+			if (StringUtils.isNotEmpty(trackInfoData.getLargeImageUrl())) {
 				imageUrl = trackInfoData.getLargeImageUrl();
-			} else if (trackInfoData.getMediumImageUrl() != null) {
+			} else if (StringUtils.isNotEmpty(trackInfoData.getMediumImageUrl())) {
 				imageUrl = trackInfoData.getMediumImageUrl();
-			} else if (trackInfoData.getSmallImageUrl() != null) {
+			} else if (StringUtils.isNotEmpty(trackInfoData.getSmallImageUrl())) {
 				imageUrl = trackInfoData.getSmallImageUrl();
 			}
 			trackInfoImage.setImage(new Image(imageUrl));
@@ -280,6 +302,7 @@ public class LastFmPanelController {
 			lovedTrackButton.setGraphic(new ImageView(
 					new Image(iconUrl, LOVED_TRACK_ICON_SIZE, LOVED_TRACK_ICON_SIZE, true, false)
 			));
+			trackInfoActionsMenuButton.setDisable(false);
 
 		} else {
 			Stream.of(
@@ -297,6 +320,7 @@ public class LastFmPanelController {
 			lovedTrackButton.setGraphic(new ImageView(
 					new Image(LOVED_TRACK_BLANK_ICON, LOVED_TRACK_ICON_SIZE, LOVED_TRACK_ICON_SIZE, true, false)
 			));
+			trackInfoActionsMenuButton.setDisable(true);
 		}
 	}
 

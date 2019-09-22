@@ -69,4 +69,8 @@ public interface MusicLibraryLogicFacade {
 	void addLastFmTrackDeezerPlaylist(String playlistUid, LastFmTrackData trackData);
 
 	void addLastFmTrackToDeezerLovedTracksAndMonthlyPlaylist(LastFmTrackData trackData);
+
+	void addLastFmTrackDeezerPlaylist(String playlistUid, LastFmTrackInfoData trackInfoData);
+
+	void addLastFmTrackToDeezerLovedTracksAndMonthlyPlaylist(LastFmTrackInfoData trackInfoData);
 }

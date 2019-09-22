@@ -299,24 +299,48 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	}
 
 	@Override
-	public void addLastFmTrackDeezerPlaylist(String playlistUid, LastFmTrackData trackData) {
-		Playlist result = playlistService.addTrackToDeezerPlaylist(playlistUid,
-				new TrackData(trackData.getArtist(), trackData.getAlbum(), trackData.getTitle()));
-		if (result != null) {
-			eventListeners.forEach(listener -> listener.changedPlaylist(dtoMapper.mapPlaylistData(result)));
-			sendNotification(
-					String.format(NotificationMessages.ADD_TRACKS_TO_PLAYLIST_SUCCESS, result.getUid(), result.getTitle())
-			);
-		} else {
-			sendNotification(
-					String.format(NotificationMessages.ADD_TRACKS_TO_PLAYLIST_FAIL, playlistUid)
-			);
-		}
+	public void addLastFmTrackDeezerPlaylist(String playlistUid, LastFmTrackData lastFmTrackData) {
+		TrackData trackData = new TrackData(lastFmTrackData.getArtist(), lastFmTrackData.getAlbum(),
+				lastFmTrackData.getTitle());
+		addLastFmTrackDeezerPlaylist(playlistUid, trackData);
 	}
 
 	@Override
 	public void addLastFmTrackToDeezerLovedTracksAndMonthlyPlaylist(LastFmTrackData lastFmTrackData) {
-		TrackData trackData = new TrackData(lastFmTrackData.getArtist(), lastFmTrackData.getAlbum(), lastFmTrackData.getTitle());
+		TrackData trackData = new TrackData(lastFmTrackData.getArtist(), lastFmTrackData.getAlbum(),
+				lastFmTrackData.getTitle());
+		addLastFmTrackToDeezerLovedTracksAndMonthlyPlaylist(trackData);
+	}
+
+	@Override
+	public void addLastFmTrackDeezerPlaylist(String playlistUid, LastFmTrackInfoData trackInfoData) {
+		TrackData trackData = new TrackData(trackInfoData.getArtistName(), trackInfoData.getAlbumName(),
+				trackInfoData.getTrackName());
+		addLastFmTrackDeezerPlaylist(playlistUid, trackData);
+	}
+
+	@Override
+	public void addLastFmTrackToDeezerLovedTracksAndMonthlyPlaylist(LastFmTrackInfoData trackInfoData) {
+		TrackData trackData = new TrackData(trackInfoData.getArtistName(), trackInfoData.getAlbumName(),
+				trackInfoData.getTrackName());
+		addLastFmTrackToDeezerLovedTracksAndMonthlyPlaylist(trackData);
+	}
+
+	private void addLastFmTrackDeezerPlaylist(String playlistUid, TrackData trackData) {
+		Playlist result = playlistService.addTrackToDeezerPlaylist(playlistUid, trackData);
+		if (result != null) {
+			eventListeners.forEach(listener -> listener.changedPlaylist(dtoMapper.mapPlaylistData(result)));
+			sendNotification(
+					String.format(NotificationMessages.ADD_TRACKS_TO_DEEZER_PLAYLIST_SUCCESS, result.getUid(), result.getTitle())
+			);
+		} else {
+			sendNotification(
+					String.format(NotificationMessages.ADD_TRACKS_TO_DEEZER_PLAYLIST_FAIL, playlistUid)
+			);
+		}
+	}
+
+	private void addLastFmTrackToDeezerLovedTracksAndMonthlyPlaylist(TrackData trackData) {
 		Playlist lovedTracksPlaylist = playlistService.addTrackToDeezerFavoritesPlaylist(trackData);
 
 		if (lovedTracksPlaylist != null) {
@@ -350,11 +374,11 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 			if (resultPlaylist != null) {
 				eventListeners.forEach(listener -> listener.changedPlaylist(dtoMapper.mapPlaylistData(resultPlaylist)));
 				sendNotification(
-						String.format(NotificationMessages.ADD_TRACKS_TO_PLAYLIST_SUCCESS, resultPlaylist.getUid(), resultPlaylist.getTitle())
+						String.format(NotificationMessages.ADD_TRACKS_TO_DEEZER_PLAYLIST_SUCCESS, resultPlaylist.getUid(), resultPlaylist.getTitle())
 				);
 			} else {
 				sendNotification(
-						String.format(NotificationMessages.ADD_TRACKS_TO_PLAYLIST_FAIL_BY_TITLE, monthlyPlaylistName)
+						String.format(NotificationMessages.ADD_TRACKS_TO_DEEZER_PLAYLIST_FAIL_BY_TITLE, monthlyPlaylistName)
 				);
 			}
 		}
