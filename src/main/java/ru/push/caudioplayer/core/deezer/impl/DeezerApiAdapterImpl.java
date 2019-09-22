@@ -172,7 +172,11 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 	private <T> T convertJson(final String content, Class<T> targetClass, String methodPath) throws DeezerApiErrorException {
 		try {
 			ObjectMapper mapper = new ObjectMapper();
-			return mapper.readValue(content, targetClass);
+			T result = mapper.readValue(content, targetClass);
+			if (result == null) {
+				LOG.warn("Json converting result is null: content = {}", content);
+			}
+			return result;
 		} catch (IOException e) {
 			LOG.error("convert json response error: responseContent = {}, exception = {}", content, e);
 			throw new DeezerApiErrorException("Deezer api - Not acceptable result for request: " + methodPath);
