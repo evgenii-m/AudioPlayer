@@ -289,6 +289,11 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 		return deezerApiAdapter.removeTrackFromFavorites(trackId, currentAccessToken);
 	}
 
+	@Override
+	public String getDeezerPlaylistWebPageUrl(long playlistId) {
+		return String.format(DeezerApiConst.DEEZER_PLAYLIST_PAGE_URL_PATTER, playlistId);
+	}
+
 	private void checkAccessToken() throws DeezerApiErrorException {
 		if (currentAccessToken == null) {
 			throw new DeezerApiErrorException("Access token not defined.");

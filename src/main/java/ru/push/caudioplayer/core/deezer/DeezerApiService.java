@@ -60,4 +60,6 @@ public interface DeezerApiService {
 	boolean addTrackToFavorites(long trackId) throws DeezerApiErrorException;
 
 	boolean removeTrackFromFavorites(long trackId) throws DeezerApiErrorException;
+
+	String getDeezerPlaylistWebPageUrl(long playlistId);
 }

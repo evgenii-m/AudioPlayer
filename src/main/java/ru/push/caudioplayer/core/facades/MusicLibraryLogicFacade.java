@@ -48,6 +48,8 @@ public interface MusicLibraryLogicFacade {
 
 	PlaylistData getActivePlaylist();
 
+	String getDeezerPlaylistWebPageUrl(String playlistUid);
+
 	void createLocalPlaylist();
 
 	void createDeezerPlaylist();

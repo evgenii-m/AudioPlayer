@@ -128,6 +128,11 @@ public class PlaylistServiceImpl implements PlaylistService {
 	}
 
 	@Override
+	public Optional<Playlist> getPlaylist(String playlistUid) {
+		return Optional.ofNullable(playlistMap.get(playlistUid));
+	}
+
+	@Override
 	public Optional<Playlist> getPlaylist(PlaylistType type, String title) {
 		return playlistMap.values().stream()
 				.filter(p -> p.getType().equals(type))

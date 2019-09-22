@@ -1,6 +1,5 @@
 package ru.push.caudioplayer.core.playlist;
 
-import org.apache.commons.lang3.tuple.Pair;
 import ru.push.caudioplayer.core.playlist.model.Playlist;
 import ru.push.caudioplayer.core.playlist.model.PlaylistTrack;
 import ru.push.caudioplayer.core.playlist.model.PlaylistType;
@@ -17,6 +16,8 @@ public interface PlaylistService {
 	List<Playlist> getPlaylists();
 
 	Optional<Playlist> getActivePlaylist();
+
+	Optional<Playlist> getPlaylist(String playlistUid);
 
 	Optional<Playlist> getPlaylist(PlaylistType type, String title);
 

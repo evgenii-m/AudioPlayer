@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import ru.push.caudioplayer.AppMain;
 import ru.push.caudioplayer.ConfigurationControllers;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
@@ -79,6 +80,8 @@ public class PlaylistController {
 	@Resource(name = "textInputActionPopupView")
 	private ConfigurationControllers.View textInputActionPopupView;
 
+	@Autowired
+	private AppMain appMain;
   @Autowired
   private AudioPlayerFacade audioPlayerFacade;
   @Autowired
@@ -132,8 +135,8 @@ public class PlaylistController {
 		selectPlaylistBrowserTab(displayedPlaylist);
 
 		// configure playlist browser container
-		setPlaylistBrowserContainerCellFactory(localPlaylistBrowserContainer);
-		setPlaylistBrowserContainerCellFactory(deezerPlaylistBrowserContainer);
+		setLocalPlaylistBrowserContainerCellFactory(localPlaylistBrowserContainer);
+		setDeezerPlaylistBrowserContainerCellFactory(deezerPlaylistBrowserContainer);
 		setPlaylistBrowserContainerItems(localPlaylistBrowserContainer, localPlaylists);
 		setPlaylistBrowserContainerItems(deezerPlaylistBrowserContainer, deezerPlaylists);
 
@@ -177,7 +180,22 @@ public class PlaylistController {
 
   }
 
-  private void setPlaylistBrowserContainerCellFactory(ListView<PlaylistData> playlistBrowserContainer) {
+	@PreDestroy
+	public void stop() {
+		// save active and displayed playlists UID
+		PlaylistData activePlaylist = musicLibraryLogicFacade.getActivePlaylist();
+		if (activePlaylist != null) {
+			applicationConfigService.saveActivePlaylist(activePlaylist.getUid());
+		}
+		if (displayedPlaylist != null) {
+			applicationConfigService.saveDisplayedPlaylist(displayedPlaylist.getUid());
+		}
+
+		// save view configuration
+		savePlaylistContainerViewConfiguration();
+	}
+
+  private void setLocalPlaylistBrowserContainerCellFactory(ListView<PlaylistData> playlistBrowserContainer) {
     playlistBrowserContainer.setCellFactory(lv -> {
       ListCell<PlaylistData> cell = new ListCell<PlaylistData>() {
         @Override
@@ -193,18 +211,7 @@ public class PlaylistController {
 
       // prepare context menu
       ContextMenu contextMenu = new ContextMenu();
-
-			MenuItem removeMenuItem = new MenuItem("Delete");
-			removeMenuItem.setOnAction(event -> removePlaylistAction(event, cell));
-
-			MenuItem renameMenuItem = new MenuItem("Rename");
-			renameMenuItem.setOnAction(event -> renamePlaylistAction(event, cell));
-
-
-			MenuItem exportMenuItem = new MenuItem("Export");
-			exportMenuItem.setOnAction(event -> exportPlaylistAction(event, cell));
-
-			contextMenu.getItems().addAll(removeMenuItem, renameMenuItem, exportMenuItem);
+			contextMenu.getItems().addAll(getCommonPlaylistBrowserContainerMenuItems(cell));
 
       cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
         if (isNowEmpty) {
@@ -217,19 +224,51 @@ public class PlaylistController {
     });
   }
 
-	@PreDestroy
-	public void stop() {
-		// save active and displayed playlists UID
-		PlaylistData activePlaylist = musicLibraryLogicFacade.getActivePlaylist();
-		if (activePlaylist != null) {
-			applicationConfigService.saveActivePlaylist(activePlaylist.getUid());
-		}
-		if (displayedPlaylist != null) {
-			applicationConfigService.saveDisplayedPlaylist(displayedPlaylist.getUid());
-		}
+	private void setDeezerPlaylistBrowserContainerCellFactory(ListView<PlaylistData> playlistBrowserContainer) {
+		playlistBrowserContainer.setCellFactory(lv -> {
+			ListCell<PlaylistData> cell = new ListCell<PlaylistData>() {
+				@Override
+				protected void updateItem(PlaylistData item, boolean empty) {
+					super.updateItem(item, empty);
+					if (empty || item == null || item.getTitle() == null) {
+						setText(null);
+					} else {
+						setText(item.getTitle());
+					}
+				}
+			};
 
-		// save view configuration
-		savePlaylistContainerViewConfiguration();
+			// prepare context menu
+			ContextMenu contextMenu = new ContextMenu();
+			contextMenu.getItems().addAll(getCommonPlaylistBrowserContainerMenuItems(cell));
+
+			MenuItem openInWebBrowserMenuItem = new MenuItem("Open in web browser");
+			openInWebBrowserMenuItem.setOnAction(event -> openPlaylistInWebBrowserAction(event, cell));
+
+			contextMenu.getItems().addAll(openInWebBrowserMenuItem);
+
+			cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
+				if (isNowEmpty) {
+					cell.setContextMenu(null);
+				} else {
+					cell.setContextMenu(contextMenu);
+				}
+			});
+			return cell;
+		});
+	}
+
+	private List<MenuItem> getCommonPlaylistBrowserContainerMenuItems(ListCell<PlaylistData> cell) {
+		MenuItem removeMenuItem = new MenuItem("Delete");
+		removeMenuItem.setOnAction(event -> removePlaylistAction(event, cell));
+
+		MenuItem renameMenuItem = new MenuItem("Rename");
+		renameMenuItem.setOnAction(event -> renamePlaylistAction(event, cell));
+
+		MenuItem exportMenuItem = new MenuItem("Export");
+		exportMenuItem.setOnAction(event -> exportPlaylistAction(event, cell));
+
+		return Arrays.asList(removeMenuItem, renameMenuItem, exportMenuItem);
 	}
 
 	private Stage createPopup(String title, Scene scene) {
@@ -280,6 +319,14 @@ public class PlaylistController {
 			musicLibraryLogicFacade.exportPlaylistToFile(playlist.getUid(), DEFAULT_PLAYLIST_EXPORT_FOLDER);
 		} catch (IOException e) {
 			LOG.error("Export playlist error", e);
+		}
+	}
+
+	private void openPlaylistInWebBrowserAction(ActionEvent event, ListCell<PlaylistData> cell) {
+		PlaylistData playlistData = cell.getItem();
+		String webPageUrl = musicLibraryLogicFacade.getDeezerPlaylistWebPageUrl(playlistData.getUid());
+		if (StringUtils.isNotEmpty(webPageUrl)) {
+			appMain.openWebPage(webPageUrl);
 		}
 	}
 
@@ -355,7 +402,7 @@ public class PlaylistController {
 
       // prepare context menu
       ContextMenu contextMenu = new ContextMenu();
-      MenuItem lookupOnLastfmMenuItem = new MenuItem("Lookup on last.fm");
+      MenuItem showLastFmTrackInfoMenuItem = new MenuItem("Show Last.fm track info");
 
 			MenuItem removeMenuItem = new MenuItem("Delete");
 			removeMenuItem.setOnAction(event -> {
@@ -367,11 +414,7 @@ public class PlaylistController {
 				}
 			});
 
-      MenuItem propertiesMenuItem = new MenuItem("Properties");
-      MenuItem moveToNewMenuItem = new MenuItem("Move to new playlist");
-
-      contextMenu.getItems().addAll(lookupOnLastfmMenuItem, removeMenuItem, propertiesMenuItem,
-          moveToNewMenuItem);
+      contextMenu.getItems().addAll(showLastFmTrackInfoMenuItem, removeMenuItem);
 
       tableRow.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
         if (isNowEmpty) {

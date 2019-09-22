@@ -28,7 +28,6 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -183,6 +182,17 @@ public class MusicLibraryLogicFacadeImpl implements MusicLibraryLogicFacade {
 	@Override
 	public PlaylistData getActivePlaylist() {
 		return playlistService.getActivePlaylist().map(o -> dtoMapper.mapPlaylistData(o)).orElse(null);
+	}
+
+	@Override
+	public String getDeezerPlaylistWebPageUrl(String playlistUid) {
+		Optional<Playlist> playlist = playlistService.getPlaylist(playlistUid);
+		if (playlist.isPresent() && playlist.get().isDeezer()) {
+			return deezerApiService.getDeezerPlaylistWebPageUrl(Long.valueOf(playlistUid));
+		} else {
+			LOG.error("Incorrect playlist for open in web browser action: uid = {}", playlistUid);
+			return null;
+		}
 	}
 
 	@Override

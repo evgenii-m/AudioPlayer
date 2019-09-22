@@ -13,4 +13,6 @@ public interface DeezerApiConst {
 
 	String DEEZER_API_SCHEME = "https";
 	String DEEZER_API_HOST = "api.deezer.com";
+
+	String DEEZER_PLAYLIST_PAGE_URL_PATTER = "https://www.deezer.com/playlist/%s";
 }
