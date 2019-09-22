@@ -82,8 +82,6 @@ public class MainController {
 	@Autowired
 	private MusicLibraryLogicFacade musicLibraryLogicFacade;
 	@Autowired
-	private AppMain appMain;
-	@Autowired
 	private PlaylistController playlistController;
 
   @FXML

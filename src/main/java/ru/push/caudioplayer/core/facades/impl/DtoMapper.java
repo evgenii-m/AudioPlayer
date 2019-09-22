@@ -18,6 +18,7 @@ import ru.push.caudioplayer.core.playlist.model.PlaylistTrack;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -66,10 +67,10 @@ class DtoMapper {
 		Map<ImageSize, String> imagesUrlMap = ((o.getAlbum() != null) && (o.getAlbum().getImages() != null)) ?
 				o.getAlbum().getImages().stream()
 						.collect(Collectors.toMap(e -> ImageSize.fromValue(e.getSize()), Image::getUrl, (e1, e2) -> e1)) :
-				null;
+				new HashMap<>();
 		Map<String, String> tagsUrlMap = ((o.getTopTags() != null) && (o.getTopTags().getTags() != null)) ?
 				o.getTopTags().getTags().stream().collect(Collectors.toMap(Tag::getName, Tag::getUrl)) :
-				null;
+				new HashMap<>();
 
 		return new LastFmTrackInfoData(o.getMbid(), o.getName(), o.getUrl(), o.getDuration(),
 				o.getListeners(), o.getPlaycount(), o.getUserplaycount(), o.getUserloved(),

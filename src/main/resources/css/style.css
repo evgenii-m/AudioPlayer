@@ -101,3 +101,11 @@
 .track-info-link:hover {
  -fx-underline: true;
 }
+
+.lastfm-track-info-container {
+ -fx-background-color: #F2F2F2;
+}
+
+.loved-track-button {
+ -fx-background-color: #F2F2F2;
+}

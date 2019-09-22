@@ -3,6 +3,7 @@ package ru.push.caudioplayer.controller;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -12,7 +13,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import ru.push.caudioplayer.AppMain;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
 import ru.push.caudioplayer.core.facades.dto.LastFmTrackData;
 import ru.push.caudioplayer.core.facades.dto.LastFmTrackInfoData;
@@ -51,12 +52,12 @@ public class LastFmPanelController {
 	private static final double LASTFM_PANEL_COLUMN_WIDTH_SCROBBLE_DATE = 125;
 	private static final String LASTFM_PANEL_COLUMN_FORMAT_SCROBBLE_DATE = "dd-MM-yyyy  HH:mm:SS";
 	private static final String LASTFM_PANEL_COLUMN_NOW_PLAYING_PLACEHOLDER = " ~~~~~now~~~~~ ";
-	private static final String TRACK_INFO_IMAGE_STUB_URL = "content/images/image_stub_1.png";
 	private static final String TRACK_INFO_EMPTY_LABEL_PLACEHOLDER = "-";
-	private static final String LOVED_TRACK_TOGGLE_BUTTON_TEXT = "Loved Track";
-	private static final String ADD_TO_LOVED_TRACK_TOGGLE_BUTTON_TEXT = "Add to Loved";
-	private static final double TRACK_INFO_IMAGE_WIDTH = 160;
-	private static final double TRACK_INFO_IMAGE_HEIGHT = 160;
+
+	private static final String TRACK_INFO_IMAGE_STUB_URL = "content/images/image_stub_1.png";
+	private static final double LOVED_TRACK_ICON_SIZE = 16;
+	private static final String LOVED_TRACK_BLANK_ICON = "content/icons/heart_blank.png";
+	private static final String LOVED_TRACK_FILLED_ICON = "content/icons/heart_red.png";
 
 	@FXML
 	public TableView<LastFmTrackData> recentTracksContainer;
@@ -77,7 +78,7 @@ public class LastFmPanelController {
 	@FXML
 	public Label userScrobblesLabel;
 	@FXML
-	public ToggleButton lovedTrackToggleButton;
+	public Button lovedTrackButton;
 	@FXML
 	public ImageView trackInfoImage;
 	@FXML
@@ -85,6 +86,8 @@ public class LastFmPanelController {
 	@FXML
 	public ListView trackInfoTagsContainer;
 
+	@Autowired
+	private AppMain appMain;
 	@Autowired
 	private MusicLibraryLogicFacade musicLibraryLogicFacade;
 	@Autowired
@@ -119,6 +122,27 @@ public class LastFmPanelController {
 				LastFmTrackData trackData = recentTracksContainer.getFocusModel().getFocusedItem();
 				LastFmTrackInfoData trackInfoData = musicLibraryLogicFacade.getLastFmTrackInfo(trackData);
 				updateTrackInfoContainer(trackInfoData);
+			}
+		});
+
+		artistLinkLabel.setOnMouseClicked(mouseEvent -> {
+			if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+				LastFmTrackInfoData trackInfoData = (LastFmTrackInfoData) trackInfoContainer.getUserData();
+				appMain.openWebPage(trackInfoData.getArtistUrl());
+			}
+		});
+
+		albumLinkLabel.setOnMouseClicked(mouseEvent -> {
+			if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+				LastFmTrackInfoData trackInfoData = (LastFmTrackInfoData) trackInfoContainer.getUserData();
+				appMain.openWebPage(trackInfoData.getAlbumUrl());
+			}
+		});
+
+		titleLinkLabel.setOnMouseClicked(mouseEvent -> {
+			if (mouseEvent.getButton().equals(MouseButton.PRIMARY)) {
+				LastFmTrackInfoData trackInfoData = (LastFmTrackInfoData) trackInfoContainer.getUserData();
+				appMain.openWebPage(trackInfoData.getTrackUrl());
 			}
 		});
 	}
@@ -213,6 +237,8 @@ public class LastFmPanelController {
 	}
 
 	private void updateTrackInfoContainer(LastFmTrackInfoData trackInfoData) {
+		trackInfoContainer.setUserData(trackInfoData);
+
 		if (trackInfoData != null) {
 			Stream.of(
 					artistLinkLabel, albumLinkLabel, titleLinkLabel, listenersCountLabel,
@@ -220,9 +246,12 @@ public class LastFmPanelController {
 			).forEach(o -> o.setDisable(false));
 
 			artistLinkLabel.setText(trackInfoData.getArtistName());
-			albumLinkLabel.setText((trackInfoData.getAlbumName() != null) ?
-					trackInfoData.getAlbumName() : TRACK_INFO_EMPTY_LABEL_PLACEHOLDER
-			);
+			if (trackInfoData.getAlbumName() != null) {
+				albumLinkLabel.setText(trackInfoData.getAlbumName());
+			} else {
+				albumLinkLabel.setText(TRACK_INFO_EMPTY_LABEL_PLACEHOLDER);
+				albumLinkLabel.setDisable(true);
+			}
 			titleLinkLabel.setText(trackInfoData.getTrackName());
 			trackDurationLabel.setText(TrackTimeLabelBuilder.buildTimeLabel(trackInfoData.getDuration()));
 			listenersCountLabel.setText(String.valueOf(trackInfoData.getListenersCount()));
@@ -243,16 +272,14 @@ public class LastFmPanelController {
 			} else if (trackInfoData.getSmallImageUrl() != null) {
 				imageUrl = trackInfoData.getSmallImageUrl();
 			}
-			trackInfoImage.setImage(new Image(imageUrl, TRACK_INFO_IMAGE_WIDTH, TRACK_INFO_IMAGE_HEIGHT, false, false));
+			trackInfoImage.setImage(new Image(imageUrl));
 
-			lovedTrackToggleButton.setDisable(false);
-			if (trackInfoData.isLovedTrack()) {
-				lovedTrackToggleButton.setText(LOVED_TRACK_TOGGLE_BUTTON_TEXT);
-				lovedTrackToggleButton.setSelected(true);
-			} else {
-				lovedTrackToggleButton.setText(ADD_TO_LOVED_TRACK_TOGGLE_BUTTON_TEXT);
-				lovedTrackToggleButton.setSelected(false);
-			}
+			lovedTrackButton.setDisable(false);
+			String iconUrl = trackInfoData.isLovedTrack() ?
+					LOVED_TRACK_FILLED_ICON : LOVED_TRACK_BLANK_ICON;
+			lovedTrackButton.setGraphic(new ImageView(
+					new Image(iconUrl, LOVED_TRACK_ICON_SIZE, LOVED_TRACK_ICON_SIZE, true, false)
+			));
 
 		} else {
 			Stream.of(
@@ -263,13 +290,13 @@ public class LastFmPanelController {
 				o.setDisable(true);
 			});
 
-			trackInfoImage.setImage(new Image(TRACK_INFO_IMAGE_STUB_URL, TRACK_INFO_IMAGE_WIDTH,
-					TRACK_INFO_IMAGE_HEIGHT, false, false));
+			trackInfoImage.setImage(new Image(TRACK_INFO_IMAGE_STUB_URL));
 			trackInfoDescriptionTextArea.setText(StringUtils.EMPTY);
 
-			lovedTrackToggleButton.setDisable(true);
-			lovedTrackToggleButton.setText(ADD_TO_LOVED_TRACK_TOGGLE_BUTTON_TEXT);
-			lovedTrackToggleButton.setSelected(false);
+			lovedTrackButton.setDisable(true);
+			lovedTrackButton.setGraphic(new ImageView(
+					new Image(LOVED_TRACK_BLANK_ICON, LOVED_TRACK_ICON_SIZE, LOVED_TRACK_ICON_SIZE, true, false)
+			));
 		}
 	}
 

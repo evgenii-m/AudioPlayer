@@ -28,7 +28,9 @@ public class LastFmTrackInfoData {
 	private String albumMbid;
 	private String albumName;
 	private String albumUrl;
+	@NotNull
 	private Map<ImageSize, String> imagesUrlMap;
+	@NotNull
 	private Map<String, String> tagsUrlMap;
 	private String description;
 

@@ -26,7 +26,7 @@ public class DefaultLastFmService implements LastFmService {
   private static final Logger LOG = LoggerFactory.getLogger(DefaultLastFmService.class);
 
   private static final int RECENT_TRACKS_INITIAL_PAGE_SIZE = 10;
-	private static final int RECENT_TRACKS_PAGE_STEP = 10;
+	private static final int RECENT_TRACKS_PAGE_STEP = 6;
 
   @Autowired
 	private LastFmApiAdapter apiAdapter;
