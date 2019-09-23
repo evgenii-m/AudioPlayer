@@ -1,6 +1,8 @@
 package ru.push.caudioplayer.core.lastfm;
 
 
+import ru.push.caudioplayer.core.lastfm.model.ScrobblesResult;
+import ru.push.caudioplayer.core.lastfm.model.UpdateNowPlayingResult;
 import ru.push.caudioplayer.core.lastfm.model.RecentTracks;
 import ru.push.caudioplayer.core.lastfm.model.TrackInfo;
 
@@ -22,4 +24,10 @@ public interface LastFmApiAdapter {
 																						 Date from, Boolean extended, Date to);
 
 	Optional<TrackInfo> getTrackInfo(String mbid, String track, String artist, String username, Boolean autocorrect);
+
+	Optional<UpdateNowPlayingResult> updateNowPlaying(@NotNull String sessionKey, @NotNull String artist,
+																										@NotNull String track, String album, Long duration);
+
+	Optional<ScrobblesResult> scrobbleTrack(@NotNull String sessionKey, @NotNull String artist, @NotNull String track,
+																					int timestamp, String album, Boolean chosenByUser, Long duration);
 }

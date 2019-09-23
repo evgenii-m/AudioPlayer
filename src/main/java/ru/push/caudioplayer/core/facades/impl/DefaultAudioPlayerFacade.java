@@ -7,6 +7,7 @@ import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.facades.dto.NotificationData;
 import ru.push.caudioplayer.core.facades.dto.PlaylistData;
 import ru.push.caudioplayer.core.facades.dto.TrackData;
+import ru.push.caudioplayer.core.lastfm.LastFmService;
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
 import ru.push.caudioplayer.core.medialoader.MediaInfoDataLoaderService;
@@ -42,6 +43,8 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   private MediaInfoDataLoaderService mediaInfoDataLoaderService;
 	@Autowired
 	private DtoMapper dtoMapper;
+	@Autowired
+	private LastFmService lastFmService;
 
 
   public DefaultAudioPlayerFacade() {
@@ -101,6 +104,8 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 			String resourceUri = MediaSourceType.FILE.equals(track.getSourceType()) ?
 					Paths.get(track.getTrackPath()).toString() : track.getTrackPath();
 			playerComponent.playMedia(resourceUri);
+
+			lastFmService.updateNowPlaying(track.getArtist(), track.getTitle(), track.getAlbum());
 
 			TrackData trackData = dtoMapper.mapTrackData(track);
 			eventListeners.forEach(listener -> listener.changedNowPlayingTrack(trackData));

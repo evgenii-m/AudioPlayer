@@ -4,16 +4,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import ru.push.caudioplayer.core.lastfm.LastFmApiAdapter;
 import ru.push.caudioplayer.core.lastfm.LastFmService;
 import ru.push.caudioplayer.core.lastfm.LastFmSessionData;
 import ru.push.caudioplayer.core.lastfm.model.RecentTracks;
+import ru.push.caudioplayer.core.lastfm.model.ScrobblesResult;
 import ru.push.caudioplayer.core.lastfm.model.Track;
 import ru.push.caudioplayer.core.config.ApplicationConfigService;
 import ru.push.caudioplayer.core.lastfm.model.TrackInfo;
+import ru.push.caudioplayer.core.lastfm.model.UpdateNowPlayingResult;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -122,12 +126,27 @@ public class DefaultLastFmService implements LastFmService {
 	}
 
 	@Override
-  public void updateNowPlaying(String artistName, String trackTitle) {
+	public boolean updateNowPlaying(String artistName, String trackTitle, String albumName) {
+		if ((currentSessionData == null) || (currentSessionData.getSessionKey() == null)) {
+			return false;
+		}
 
-  }
+		Optional<UpdateNowPlayingResult> updateNowPlayingResult = apiAdapter.updateNowPlaying(
+				currentSessionData.getSessionKey(), artistName, trackTitle, albumName, null);
+		return updateNowPlayingResult.isPresent();
+	}
 
-  @Override
-  public void getNowPlaying() {
+	@Override
+	public boolean scrobbleTrack(String artistName, String trackTitle, String albumName, Date timestamp, Boolean chosenByUser) {
+		if ((currentSessionData == null) || (currentSessionData.getSessionKey() == null)) {
+			return false;
+		}
 
-  }
+		Optional<ScrobblesResult> scrobblesResult = apiAdapter.scrobbleTrack(
+				currentSessionData.getSessionKey(), artistName, trackTitle, (int) (timestamp.getTime() / 1000),
+				albumName, chosenByUser, null);
+		return scrobblesResult.isPresent() && (scrobblesResult.get().getAccepted() == 1)
+				&& !CollectionUtils.isEmpty(scrobblesResult.get().getTrackScrobbleResults());
+	}
+
 }

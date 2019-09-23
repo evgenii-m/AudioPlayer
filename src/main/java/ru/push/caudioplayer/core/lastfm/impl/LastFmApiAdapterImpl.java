@@ -5,6 +5,8 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
@@ -19,13 +21,14 @@ import ru.push.caudioplayer.core.lastfm.LastFmApiMethod;
 import ru.push.caudioplayer.core.lastfm.LastFmApiParam;
 import ru.push.caudioplayer.core.lastfm.LastFmSessionData;
 import ru.push.caudioplayer.core.lastfm.model.LastFmResponse;
+import ru.push.caudioplayer.core.lastfm.model.ScrobblesResult;
+import ru.push.caudioplayer.core.lastfm.model.UpdateNowPlayingResult;
 import ru.push.caudioplayer.core.lastfm.model.RecentTracks;
 import ru.push.caudioplayer.core.lastfm.model.TrackInfo;
 import ru.push.caudioplayer.utils.StreamUtils;
 import ru.push.caudioplayer.utils.XmlUtils;
 
 import javax.annotation.PostConstruct;
-import javax.swing.text.html.Option;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
@@ -41,6 +44,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -55,6 +59,7 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 	private static final String LASTFM_API_HOST = "ws.audioscrobbler.com/";
 	private static final String LASTFM_API_VERSION = "2.0/";
 	private static final String VALID_PAGE_URL_PATTERN_FOR_GET_SESSION = LASTFM_API_AUTH_BASE_URL;
+	private static final String LASTFM_RESPONSE_STATUS_OK = "ok";
 
 	private final XPathFactory xPathFactory;
 	private final URIBuilder baseApiUriBuilder;		// todo: think about make immutable builder
@@ -106,7 +111,7 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 		Map<String, String> methodParameters = new HashMap<>();
 
 		try {
-			String response = makeApiRequest(method, methodParameters);
+			String response = makeApiGetRequest(method, methodParameters);
 			if (response != null) {
 				Document responseDocument = XmlUtils.convertStringToXmlDocument(response);
 
@@ -134,7 +139,7 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 		methodParameters.put(LastFmApiParam.TOKEN.getName(), token);
 
 		try {
-			String response = makeApiRequest(method, methodParameters, getSessionRetryCount);
+			String response = makeApiGetRequest(method, methodParameters, getSessionRetryCount);
 			if (response != null) {
 				Document responseDocument = XmlUtils.convertStringToXmlDocument(response);
 
@@ -183,12 +188,14 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 		}
 
 		try {
-			String response = makeApiRequest(method, methodParameters);
+			String response = makeApiGetRequest(method, methodParameters);
 			if (response != null) {
 				LastFmResponse lastFmResponse = XmlUtils.unmarshalDocumnet(response, LastFmResponse.class.getPackage().getName());
-				RecentTracks recentTracks = lastFmResponse.getRecentTracks();
-				LOG.debug("obtained recent tracks: {}", recentTracks);
-				return Optional.ofNullable(recentTracks);
+				if (validateLastFmResponse(lastFmResponse)) {
+					RecentTracks recentTracks = lastFmResponse.getRecentTracks();
+					LOG.debug("obtained recent tracks: {}", recentTracks);
+					return Optional.ofNullable(recentTracks);
+				}
 			}
 		} catch (JAXBException e) {
 			LOG.error("parsing xml from response error: ", e);
@@ -218,12 +225,14 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 		}
 
 		try {
-			String response = makeApiRequest(method, methodParameters);
+			String response = makeApiGetRequest(method, methodParameters);
 			if (response != null) {
 				LastFmResponse lastFmResponse = XmlUtils.unmarshalDocumnet(response, LastFmResponse.class.getPackage().getName());
-				TrackInfo trackInfo = lastFmResponse.getTrackInfo();
-				LOG.debug("obtained track info: {}", trackInfo);
-				return Optional.ofNullable(trackInfo);
+				if (validateLastFmResponse(lastFmResponse)) {
+					TrackInfo trackInfo = lastFmResponse.getTrackInfo();
+					LOG.debug("obtained track info: {}", trackInfo);
+					return Optional.ofNullable(trackInfo);
+				}
 			}
 		} catch (JAXBException e) {
 			LOG.error("parsing xml from response error: ", e);
@@ -232,11 +241,92 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 		return Optional.empty();
 	}
 
-	private String makeApiRequest(LastFmApiMethod method, Map<String, String> methodParameters) {
-		return makeApiRequest(method, methodParameters, 0);
+	@Override
+	public Optional<UpdateNowPlayingResult> updateNowPlaying(@NotNull String sessionKey, @NotNull String artist,
+																													 @NotNull String track, String album, Long duration) {
+		LastFmApiMethod method = LastFmApiMethod.TRACK_UPDATE_NOW_PLAYING;
+		Map<String, String> methodParameters = new HashMap<>();
+		methodParameters.put(LastFmApiParam.SESSION_KEY.getName(), sessionKey);
+		methodParameters.put(LastFmApiParam.ARTIST.getName(), artist);
+		methodParameters.put(LastFmApiParam.TRACK.getName(), track);
+		if (album != null) {
+			methodParameters.put(LastFmApiParam.ALBUM.getName(), album);
+		}
+		if (duration != null) {
+			methodParameters.put(LastFmApiParam.DURATION.getName(), String.valueOf(duration));
+		}
+
+		try {
+			String response = makeApiPostRequest(method, methodParameters);
+			if (response != null) {
+				LastFmResponse lastFmResponse = XmlUtils.unmarshalDocumnet(response, LastFmResponse.class.getPackage().getName());
+				if (validateLastFmResponse(lastFmResponse)) {
+					UpdateNowPlayingResult updateNowPlayingResult = lastFmResponse.getUpdateNowPlayingResult();
+					LOG.debug("obtained updating now playing result: {}", updateNowPlayingResult);
+					return Optional.ofNullable(updateNowPlayingResult);
+				}
+			}
+		} catch (JAXBException e) {
+			LOG.error("parsing xml from response error: ", e);
+		}
+
+		return Optional.empty();
 	}
 
-	private String makeApiRequest(LastFmApiMethod method, Map<String, String> methodParameters, int retryCount) {
+	@Override
+	public Optional<ScrobblesResult> scrobbleTrack(@NotNull String sessionKey, @NotNull String artist, @NotNull String track,
+																								 int timestamp, String album, Boolean chosenByUser, Long duration) {
+		LastFmApiMethod method = LastFmApiMethod.TRACK_SCROBBLE;
+		Map<String, String> methodParameters = new HashMap<>();
+		methodParameters.put(LastFmApiParam.SESSION_KEY.getName(), sessionKey);
+		methodParameters.put(LastFmApiParam.ARTIST.getName(), artist);
+		methodParameters.put(LastFmApiParam.TRACK.getName(), track);
+		methodParameters.put(LastFmApiParam.TIMESTAMP.getName(), String.valueOf(timestamp));
+		if (album != null) {
+			methodParameters.put(LastFmApiParam.ALBUM.getName(), album);
+		}
+		if (chosenByUser != null) {
+			methodParameters.put(LastFmApiParam.CHOSEN_BY_USER.getName(), chosenByUser ? "1" : "0");
+		}
+		if (duration != null) {
+			methodParameters.put(LastFmApiParam.DURATION.getName(), String.valueOf(duration));
+		}
+
+		try {
+			String response = makeApiPostRequest(method, methodParameters);
+			if (response != null) {
+				LastFmResponse lastFmResponse = XmlUtils.unmarshalDocumnet(response, LastFmResponse.class.getPackage().getName());
+				if (validateLastFmResponse(lastFmResponse)) {
+					ScrobblesResult scrobblesResult = lastFmResponse.getScrobblesResult();
+					LOG.debug("obtained scrobbles result: {}", scrobblesResult);
+					return Optional.ofNullable(scrobblesResult);
+				}
+			}
+		} catch (JAXBException e) {
+			LOG.error("parsing xml from response error: ", e);
+		}
+
+		return Optional.empty();
+	}
+
+	private String makeApiGetRequest(LastFmApiMethod method, Map<String, String> methodParameters) {
+		return makeApiRequest(method, methodParameters, 0, HttpGet::new);
+	}
+
+	private String makeApiGetRequest(LastFmApiMethod method, Map<String, String> methodParameters, int retryCount) {
+		return makeApiRequest(method, methodParameters, retryCount, HttpGet::new);
+	}
+
+	private String makeApiPostRequest(LastFmApiMethod method, Map<String, String> methodParameters) {
+		return makeApiRequest(method, methodParameters, 0, HttpPost::new);
+	}
+
+	private String makeApiPostRequest(LastFmApiMethod method, Map<String, String> methodParameters, int retryCount) {
+		return makeApiRequest(method, methodParameters, retryCount, HttpPost::new);
+	}
+
+	private <T extends HttpRequestBase> String makeApiRequest(LastFmApiMethod method, Map<String, String> methodParameters,
+																														int retryCount, Function<URI, T> constructRequestFunction) {
 		// append parameters required for all methods
 		methodParameters.put(LastFmApiParam.METHOD_NAME.getName(), method.getName());
 		methodParameters.put(LastFmApiParam.API_KEY.getName(), lastfmApiKey);
@@ -249,13 +339,13 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 		baseApiUriBuilder.clearParameters();
 		methodParameters.forEach(baseApiUriBuilder::addParameter);
 
-		HttpGet request = null;
+		T request = null;
 		try {
 			URI apiUri = baseApiUriBuilder.build();
 
 			// TODO: make request in other thread, not to delay UI
 			for (; retryCount >= 0; retryCount--, Thread.sleep(retryTimeoutSeconds * 1000)) {
-				request = new HttpGet(apiUri);
+				request = constructRequestFunction.apply(apiUri);
 				try {
 					LOG.info("api request: {}", request);
 					HttpResponse response = httpClient.execute(request);
@@ -295,6 +385,15 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 		signatureString += lastfmApiSharedSecret;
 
 		return DigestUtils.md5Hex(signatureString);
+	}
+
+	private boolean validateLastFmResponse(LastFmResponse lastFmResponse) {
+		if ((lastFmResponse != null) && (LASTFM_RESPONSE_STATUS_OK.equals(lastFmResponse.getStatus()))) {
+			return true;
+		} else {
+			LOG.error("Invalid LastFmResponse status: response = {}", lastFmResponse);
+			return false;
+		}
 	}
 
 }
