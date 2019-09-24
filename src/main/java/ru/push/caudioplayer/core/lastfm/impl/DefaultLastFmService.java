@@ -14,6 +14,8 @@ import ru.push.caudioplayer.core.lastfm.model.Track;
 import ru.push.caudioplayer.core.config.ApplicationConfigService;
 import ru.push.caudioplayer.core.lastfm.model.TrackInfo;
 import ru.push.caudioplayer.core.lastfm.model.UpdateNowPlayingResult;
+import ru.push.caudioplayer.core.playlist.model.MediaSourceType;
+import ru.push.caudioplayer.core.playlist.model.PlaylistTrack;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -32,6 +34,7 @@ public class DefaultLastFmService implements LastFmService {
   private static final int RECENT_TRACKS_INITIAL_PAGE_SIZE = 10;
 	private static final int RECENT_TRACKS_PAGE_STEP = 6;
 	private static final long SCROBBLE_MAX_DELAY_MS = 4 * 60 * 1000; 	// 4 minutes
+	private static final long SCROBBLE_DEFAULT_DELAY_MS = 2 * 60 * 1000; // 2 minutes
 
   @Autowired
 	private LastFmApiAdapter apiAdapter;
@@ -138,15 +141,22 @@ public class DefaultLastFmService implements LastFmService {
 	}
 
 	@Override
-	public long calculateScrobbleDelay(long trackLengthMs) {
-		if (trackLengthMs == 0) { // when playing from HTTP stream - length always 0
-			// TODO: modify calculation for HTTP stream source by request Last.fm TrackInfo that contain track length
-			return 10 * 1000;
-		} else {
-			return (trackLengthMs < SCROBBLE_MAX_DELAY_MS) ?
-					(trackLengthMs / 2) :
-					SCROBBLE_MAX_DELAY_MS;
+	public long calculateScrobbleDelay(PlaylistTrack track) {
+		long trackLengthMs = track.getLength();
+
+		// when playing from HTTP stream - length always 0, request length value from Last.fm
+		if (MediaSourceType.HTTP_STREAM.equals(track.getSourceType())) {
+			TrackInfo trackInfo = getTrackInfo(track.getArtist(), track.getTitle());
+			if ((trackInfo == null) || (trackInfo.getDuration() == 0)) {
+				// if on Last.fm also no information about track length - return default scrobble delay
+				return SCROBBLE_DEFAULT_DELAY_MS;
+			}
+			trackLengthMs = trackInfo.getDuration();
 		}
+
+		trackLengthMs = trackLengthMs / 2;
+		return (trackLengthMs < SCROBBLE_MAX_DELAY_MS) ?
+				trackLengthMs : SCROBBLE_MAX_DELAY_MS;
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package ru.push.caudioplayer.core.lastfm;
 
 import ru.push.caudioplayer.core.lastfm.model.Track;
 import ru.push.caudioplayer.core.lastfm.model.TrackInfo;
+import ru.push.caudioplayer.core.playlist.model.PlaylistTrack;
 
 import java.util.Date;
 import java.util.List;
@@ -26,7 +27,7 @@ public interface LastFmService {
 
   boolean updateNowPlaying(String artistName, String trackTitle, String albumName);
 
-  long calculateScrobbleDelay(long trackLengthMs);
+  long calculateScrobbleDelay(PlaylistTrack track);
 
   boolean scrobbleTrack(String artistName, String trackTitle, String albumName, Date timestamp, Boolean chosenByUser);
 }

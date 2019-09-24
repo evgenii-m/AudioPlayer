@@ -86,6 +86,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 	public void resumePlayingTrack() {
 		playlistService.getActivePlaylistTrack().ifPresent(o -> {
 			playerComponent.resume();
+			startPlayingNewTrack(o);
 		});
 	}
 
@@ -132,7 +133,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 	public void pauseCurrentTrack() {
 		playlistService.getActivePlaylistTrack().ifPresent(o -> {
 			playerComponent.pause();
-			// TODO: add scrobbler scheduler pause
+			cancelScrobbling();
 		});
 	}
 
@@ -150,7 +151,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 	private synchronized void startPlayingNewTrack(PlaylistTrack track) {
 		lastFmService.updateNowPlaying(track.getArtist(), track.getTitle(), track.getAlbum());
 		cancelScrobbling();
-		long taskDelay = lastFmService.calculateScrobbleDelay(track.getLength());
+		long taskDelay = lastFmService.calculateScrobbleDelay(track);
 		scrobblerScheduledFuture = scrobblerExecutor.schedule(new ScrobblerRunnable(track), taskDelay, TimeUnit.MILLISECONDS);
 	}
 
