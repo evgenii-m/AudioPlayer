@@ -31,6 +31,7 @@ public class DefaultLastFmService implements LastFmService {
 
   private static final int RECENT_TRACKS_INITIAL_PAGE_SIZE = 10;
 	private static final int RECENT_TRACKS_PAGE_STEP = 6;
+	private static final long SCROBBLE_MAX_DELAY_MS = 4 * 60 * 1000; 	// 4 minutes
 
   @Autowired
 	private LastFmApiAdapter apiAdapter;
@@ -134,6 +135,18 @@ public class DefaultLastFmService implements LastFmService {
 		Optional<UpdateNowPlayingResult> updateNowPlayingResult = apiAdapter.updateNowPlaying(
 				currentSessionData.getSessionKey(), artistName, trackTitle, albumName, null);
 		return updateNowPlayingResult.isPresent();
+	}
+
+	@Override
+	public long calculateScrobbleDelay(long trackLengthMs) {
+		if (trackLengthMs == 0) { // when playing from HTTP stream - length always 0
+			// TODO: modify calculation for HTTP stream source by request Last.fm TrackInfo that contain track length
+			return 10 * 1000;
+		} else {
+			return (trackLengthMs < SCROBBLE_MAX_DELAY_MS) ?
+					(trackLengthMs / 2) :
+					SCROBBLE_MAX_DELAY_MS;
+		}
 	}
 
 	@Override

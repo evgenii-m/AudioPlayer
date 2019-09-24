@@ -21,8 +21,13 @@ import uk.co.caprica.vlcj.player.MediaPlayerEventAdapter;
 import javax.annotation.PostConstruct;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -34,8 +39,11 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
   private static final Logger LOG = LoggerFactory.getLogger(DefaultAudioPlayerFacade.class);
 
   private final List<AudioPlayerEventListener> eventListeners;
+	private final ScheduledExecutorService scrobblerExecutor = Executors.newSingleThreadScheduledExecutor();
 
-  @Autowired
+	private ScheduledFuture<?> scrobblerScheduledFuture = null;
+
+	@Autowired
   private CustomAudioPlayerComponent playerComponent;
   @Autowired
 	private PlaylistService playlistService;
@@ -71,6 +79,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 	@Override
 	public void releaseAudioPlayer() {
 		playerComponent.releaseComponent();
+		scrobblerExecutor.shutdownNow();
 	}
 
 	@Override
@@ -104,8 +113,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 			String resourceUri = MediaSourceType.FILE.equals(track.getSourceType()) ?
 					Paths.get(track.getTrackPath()).toString() : track.getTrackPath();
 			playerComponent.playMedia(resourceUri);
-
-			lastFmService.updateNowPlaying(track.getArtist(), track.getTitle(), track.getAlbum());
+			startPlayingNewTrack(track);
 
 			TrackData trackData = dtoMapper.mapTrackData(track);
 			eventListeners.forEach(listener -> listener.changedNowPlayingTrack(trackData));
@@ -124,6 +132,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 	public void pauseCurrentTrack() {
 		playlistService.getActivePlaylistTrack().ifPresent(o -> {
 			playerComponent.pause();
+			// TODO: add scrobbler scheduler pause
 		});
 	}
 
@@ -132,13 +141,47 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 		playerComponent.stop();
 		playlistService.getActivePlaylistTrack().ifPresent(track -> {
 			playlistService.resetActivePlaylistTrack();
+			cancelScrobbling();
 			TrackData trackData = dtoMapper.mapTrackData(track);
 			eventListeners.forEach(listener -> listener.changedNowPlayingTrack(trackData));
 		});
 	}
 
+	private synchronized void startPlayingNewTrack(PlaylistTrack track) {
+		lastFmService.updateNowPlaying(track.getArtist(), track.getTitle(), track.getAlbum());
+		cancelScrobbling();
+		long taskDelay = lastFmService.calculateScrobbleDelay(track.getLength());
+		scrobblerScheduledFuture = scrobblerExecutor.schedule(new ScrobblerRunnable(track), taskDelay, TimeUnit.MILLISECONDS);
+	}
+
+	private void cancelScrobbling() {
+		if ((scrobblerScheduledFuture != null) && !scrobblerScheduledFuture.isDone()
+				&& !scrobblerScheduledFuture.isCancelled()) {
+			scrobblerScheduledFuture.cancel(true);
+		}
+	}
+
 	private void sendNotification(String messageText) {
 		eventListeners.forEach(l -> l.obtainedNotification(new NotificationData(messageText)));
+	}
+
+	private final class ScrobblerRunnable implements Runnable {
+		private PlaylistTrack trackForScrobble;
+
+  	private ScrobblerRunnable(PlaylistTrack trackForScrobble) {
+  		this.trackForScrobble = trackForScrobble;
+		}
+
+		@Override
+		public void run() {
+			Date currentDate = new Date();
+			boolean chosenByUser = !MediaSourceType.HTTP_STREAM.equals(trackForScrobble.getSourceType());
+			boolean result = lastFmService.scrobbleTrack(trackForScrobble.getArtist(), trackForScrobble.getTitle(),
+					trackForScrobble.getAlbum(), currentDate, chosenByUser);
+			if (result) {
+				LOG.info("Scrobbled track: track = {}, time = {}", trackForScrobble, currentDate);
+			}
+		}
 	}
 
   private class AudioPlayerFacadeEventListener extends MediaPlayerEventAdapter {
@@ -157,6 +200,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 						mediaInfoDataLoaderService.fillMediaInfoFromMediaMeta(track, mediaMeta, sourceType);
 						mediaMeta.release();
 
+						startPlayingNewTrack(track);
 						PlaylistData playlistData = dtoMapper.mapPlaylistData(track.getPlaylist());
 						TrackData trackData = dtoMapper.mapTrackData(track);
 						eventListeners.forEach(listener -> listener.changedTrackData(playlistData, trackData));

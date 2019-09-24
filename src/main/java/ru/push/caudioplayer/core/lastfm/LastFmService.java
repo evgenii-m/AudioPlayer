@@ -26,5 +26,7 @@ public interface LastFmService {
 
   boolean updateNowPlaying(String artistName, String trackTitle, String albumName);
 
+  long calculateScrobbleDelay(long trackLengthMs);
+
   boolean scrobbleTrack(String artistName, String trackTitle, String albumName, Date timestamp, Boolean chosenByUser);
 }

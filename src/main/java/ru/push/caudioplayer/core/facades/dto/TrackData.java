@@ -10,7 +10,7 @@ public class TrackData {
 	private String date;
 	private String title;
 	private String trackNumber;
-	private long length;
+	private long length;		// in milliseconds
 	private boolean nowPlaying;
 	private String playlistTitle;
 

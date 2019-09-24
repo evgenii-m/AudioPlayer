@@ -96,7 +96,7 @@ public class LastFmPanelController {
 	@Autowired
 	private PlaylistController playlistController;
 
-	private final ScheduledExecutorService updateRecentTracksScheduler = Executors.newSingleThreadScheduledExecutor();
+	private final ScheduledExecutorService updateRecentTracksExecutor = Executors.newSingleThreadScheduledExecutor();
 	private List<LastFmTrackData> currentRecentTracks;
 
 
@@ -112,7 +112,7 @@ public class LastFmPanelController {
 	public void init() {
 		LOG.debug("init bean {}", this.getClass().getName());
 
-		updateRecentTracksScheduler.scheduleAtFixedRate(new UpdateUiRunnable(), UPDATE_RECENT_TRACKS_PERIOD,
+		updateRecentTracksExecutor.scheduleAtFixedRate(new UpdateUiRunnable(), UPDATE_RECENT_TRACKS_PERIOD,
 				UPDATE_RECENT_TRACKS_PERIOD, UPDATE_RECENT_TRACKS_PERIOD_TIME_UNIT);
 
 		setRecentTracksContainerColumns();
@@ -152,7 +152,7 @@ public class LastFmPanelController {
 
 	@PreDestroy
 	public void stop() {
-		updateRecentTracksScheduler.shutdown();
+		updateRecentTracksExecutor.shutdown();
 	}
 
 	private void setRecentTracksContainerColumns() {
@@ -247,7 +247,7 @@ public class LastFmPanelController {
 		}
 	}
 
-	synchronized private void updateRecentTracksContainer(boolean fetchMore) {
+	private synchronized void updateRecentTracksContainer(boolean fetchMore) {
 		List<LastFmTrackData> recentTracks = musicLibraryLogicFacade.getRecentTracksFromLastFm(fetchMore);
 
 		// update only when the recent tracks list is changed
