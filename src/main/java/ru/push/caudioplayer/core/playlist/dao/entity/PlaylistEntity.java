@@ -1,49 +1,52 @@
 package ru.push.caudioplayer.core.playlist.dao.entity;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType
-@XmlRootElement(name = "playlist")
+@Entity
+@Table(name = "PLAYLIST")
 public class PlaylistEntity implements Serializable {
 
-	@XmlAttribute
+	@NotNull
+	@Id
+	@Column(nullable = false)
 	private String uid;
 
-	@XmlAttribute
+	@Column
 	private String title;
 
-	@XmlAttribute
+	@NotNull
+	@Column(nullable = false)
 	private String type;
 
-	@XmlAttribute
+	@Column
 	private String link;
 
-	@XmlAttribute
+	@Column
 	private boolean readOnly;
 
-	@XmlElement(name = "item")
+	@OneToMany(mappedBy = "playlist", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
 	private List<PlaylistItemEntity> items;
 
 
 	public PlaylistEntity() {
 	}
 
-	public PlaylistEntity(String uid, String title, String type, String link, boolean readOnly, List<PlaylistItemEntity> items) {
+	public PlaylistEntity(String uid, String title, String type, String link, boolean readOnly) {
 		this.uid = uid;
 		this.title = title;
 		this.type = type;
 		this.link = link;
 		this.readOnly = readOnly;
-		this.items = items;
 	}
 
 	public String getUid() {

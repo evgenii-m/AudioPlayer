@@ -2,7 +2,6 @@ package ru.push.caudioplayer.core.deezer.impl;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.annotation.ThreadSafe;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -48,7 +47,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
-@ThreadSafe
 @Component
 public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 

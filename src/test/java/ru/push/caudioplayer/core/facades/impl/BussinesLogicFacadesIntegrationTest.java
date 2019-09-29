@@ -127,7 +127,7 @@ public class BussinesLogicFacadesIntegrationTest extends AbstractTestNGSpringCon
    * This test affects:
    *  ru.push.caudioplayer.core.facades.AudioPlayerFacade#createNewPlaylist()
    *  ru.push.caudioplayer.core.facades.AudioPlayerFacade#renamePlaylist(java.lang.String, java.lang.String)
-   *  ru.push.caudioplayer.core.facades.AudioPlayerFacade#deletePlaylist(java.lang.String)
+   *  ru.push.caudioplayer.core.facades.AudioPlayerFacade#deleteByUid(java.lang.String)
    */
   @Test
   public void shouldCreateRenameAndDeletePlaylists() {
@@ -151,7 +151,7 @@ public class BussinesLogicFacadesIntegrationTest extends AbstractTestNGSpringCon
 //    assertEquals(musicLibraryLogicFacade.getPlaylist(playlistUid).getName(), newPlaylistName,
 //        "Unexpected playlist [" + playlistUid + "] name.");
 //
-//    boolean deletePlaylistResult = musicLibraryLogicFacade.deletePlaylist(playlistUid);
+//    boolean deletePlaylistResult = musicLibraryLogicFacade.deleteByUid(playlistUid);
 //    assertTrue(deletePlaylistResult, "Unexpected delete playlist result.");
 //    assertNull(musicLibraryLogicFacade.getPlaylist(playlistUid), "Playlist [" + playlistUid + "] must be deleted.");
 //    displayedPlaylist = musicLibraryLogicFacade.getDisplayedPlaylist();
@@ -162,12 +162,12 @@ public class BussinesLogicFacadesIntegrationTest extends AbstractTestNGSpringCon
 //
 //    verify(applicationConfigService, times(1)).savePlaylist(any(PlaylistData.class));
 //    verify(applicationConfigService, times(1)).renamePlaylist(any(PlaylistData.class));
-//    verify(applicationConfigService, times(1)).deletePlaylist(any(PlaylistData.class));
+//    verify(applicationConfigService, times(1)).deleteByUid(any(PlaylistData.class));
   }
 
   /**
    * This test affects:
-   *  ru.push.caudioplayer.core.facades.AudioPlayerFacade#deletePlaylist(java.lang.String)
+   *  ru.push.caudioplayer.core.facades.AudioPlayerFacade#deleteByUid(java.lang.String)
    */
   @Test
   public void shouldCreateNewPlaylistAfterDeleteLast() {
@@ -175,7 +175,7 @@ public class BussinesLogicFacadesIntegrationTest extends AbstractTestNGSpringCon
 //    assertTrue(CollectionUtils.isNotEmpty(playlists), "Playlists collection null or empty.");
 //
 //    List<String> playlistsUid = playlists.stream().map(PlaylistData::getUid).collect(Collectors.toList());
-//    playlistsUid.stream().forEach(playlistUid -> musicLibraryLogicFacade.deletePlaylist(playlistUid));
+//    playlistsUid.stream().forEach(playlistUid -> musicLibraryLogicFacade.deleteByUid(playlistUid));
 //
 //    playlists = musicLibraryLogicFacade.getPlaylists();
 //    assertTrue(CollectionUtils.isNotEmpty(playlists), "New playlist not created after delete last!");
@@ -186,7 +186,7 @@ public class BussinesLogicFacadesIntegrationTest extends AbstractTestNGSpringCon
 //    PlaylistData displayedPlaylist = musicLibraryLogicFacade.getDisplayedPlaylist();
 //    assertEquals(displayedPlaylist, createdPlaylist, "Created playlist must be displayed.");
 //
-//    verify(applicationConfigService, atLeastOnce()).deletePlaylist(any(PlaylistData.class));
+//    verify(applicationConfigService, atLeastOnce()).deleteByUid(any(PlaylistData.class));
 //    verify(applicationConfigService, times(1)).savePlaylist(any(PlaylistData.class));
 //    verify(eventListener, atLeastOnce()).changedPlaylist(any(PlaylistData.class));
   }

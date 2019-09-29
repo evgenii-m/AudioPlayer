@@ -38,8 +38,10 @@ class PlaylistMapper {
 	}
 
 	PlaylistEntity inverseMapPlaylist(Playlist o) {
-		return new PlaylistEntity(o.getUid(), o.getTitle(), o.getType().value(),
-				o.getLink(), o.isReadOnly(), inverseMapPlaylistItem(o.getItems()));
+		PlaylistEntity entity = new PlaylistEntity(o.getUid(), o.getTitle(), o.getType().value(), o.getLink(), o.isReadOnly());
+		List<PlaylistItemEntity> items = inverseMapPlaylistItem(o.getItems(), entity);
+		entity.setItems(items);
+		return entity;
 	}
 
 	List<Playlist> mapPlaylist(List<PlaylistEntity> list) {
@@ -108,15 +110,11 @@ class PlaylistMapper {
 		);
 	}
 
-	PlaylistItemEntity inverseMapPlaylistItem(PlaylistTrack o) {
-		MediaSourceType sourceType = o.getSourceType();
-		if (MediaSourceType.HTTP_STREAM.equals(sourceType)) {
-			return new PlaylistItemEntity(o.getUid(), sourceType.value(), o.getTrackPath());
-		} else {
-			return new PlaylistItemEntity(o.getUid(), sourceType.value(),
-					o.getArtist(), o.getAlbum(), o.getDate(), o.getTitle(),
-					o.getTrackNumber(), o.getLength(), o.getTrackPath());
-		}
+	PlaylistItemEntity inverseMapPlaylistItem(PlaylistTrack o, PlaylistEntity playlist) {
+		return new PlaylistItemEntity(
+				o.getUid(), o.getSourceType().value(), o.getArtist(), o.getAlbum(), o.getDate(), o.getTitle(),
+				o.getTrackNumber(), o.getLength(), o.getTrackPath(), playlist
+		);
 	}
 
 	List<PlaylistTrack> mapPlaylistItem(List<PlaylistItemEntity> list) {
@@ -131,9 +129,9 @@ class PlaylistMapper {
 				new ArrayList<>();
 	}
 
-	List<PlaylistItemEntity> inverseMapPlaylistItem(List<PlaylistTrack> list) {
+	List<PlaylistItemEntity> inverseMapPlaylistItem(List<PlaylistTrack> list, PlaylistEntity playlist) {
 		return (list != null) ?
-				list.stream().map(this::inverseMapPlaylistItem).collect(Collectors.toList()) :
+				list.stream().map(i -> inverseMapPlaylistItem(i, playlist)).collect(Collectors.toList()) :
 				new ArrayList<>();
 	}
 

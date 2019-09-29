@@ -1,57 +1,61 @@
 package ru.push.caudioplayer.core.playlist.dao.entity;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.XmlValue;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType
-@XmlRootElement(name = "item")
+@Entity
+@Table(name = "PLAYLIST_ITEM")
 public class PlaylistItemEntity implements Serializable {
 
-	@XmlAttribute
+	@NotNull
+	@Id
+	@Column(nullable = false)
 	private String uid;
 
-	@XmlAttribute
+	@NotNull
+	@Column(nullable = false)
 	private String sourceType;
 
-	@XmlAttribute
+	@NotNull
+	@Column
 	private String artist;
 
-	@XmlAttribute
+	@Column
 	private String album;
 
-	@XmlAttribute
+	@Column
 	private String date;
 
-	@XmlAttribute
+	@NotNull
+	@Column
 	private String title;
 
-	@XmlAttribute
+	@Column
 	private String trackNumber;
 
-	@XmlAttribute
+	@Column(nullable = false)
 	private long length;
 
-	@XmlValue
+	@Column
 	private String trackPath;
+
+	@NotNull
+	@ManyToOne
+	@JoinColumn(name = "PLAYLIST_UID", nullable = false)
+	private PlaylistEntity playlist;
 
 
 	public PlaylistItemEntity() {
 	}
 
-	public PlaylistItemEntity(String uid, String sourceType, String trackPath) {
-		this.uid = uid;
-		this.sourceType = sourceType;
-		this.trackPath = trackPath;
-	}
-
 	public PlaylistItemEntity(String uid, String sourceType, String artist, String album, String date, String title,
-														String trackNumber, long length, String trackPath) {
+														String trackNumber, long length, String trackPath, PlaylistEntity playlist) {
 		this.uid = uid;
 		this.sourceType = sourceType;
 		this.artist = artist;
@@ -61,6 +65,7 @@ public class PlaylistItemEntity implements Serializable {
 		this.trackNumber = trackNumber;
 		this.length = length;
 		this.trackPath = trackPath;
+		this.playlist = playlist;
 	}
 
 	public String getTrackPath() {
@@ -133,6 +138,14 @@ public class PlaylistItemEntity implements Serializable {
 
 	public void setSourceType(String sourceType) {
 		this.sourceType = sourceType;
+	}
+
+	public PlaylistEntity getPlaylist() {
+		return playlist;
+	}
+
+	public void setPlaylist(PlaylistEntity playlist) {
+		this.playlist = playlist;
 	}
 
 	@Override

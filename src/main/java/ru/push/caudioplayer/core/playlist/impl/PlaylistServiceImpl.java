@@ -1,6 +1,5 @@
 package ru.push.caudioplayer.core.playlist.impl;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +11,10 @@ import ru.push.caudioplayer.core.deezer.DeezerApiErrorException;
 import ru.push.caudioplayer.core.deezer.DeezerApiService;
 import ru.push.caudioplayer.core.deezer.model.Track;
 import ru.push.caudioplayer.core.medialoader.MediaInfoDataLoaderService;
+import ru.push.caudioplayer.core.playlist.dao.PlaylistItemRepository;
 import ru.push.caudioplayer.core.playlist.model.MediaSourceType;
 import ru.push.caudioplayer.core.playlist.PlaylistService;
-import ru.push.caudioplayer.core.playlist.dao.LocalPlaylistRepository;
+import ru.push.caudioplayer.core.playlist.dao.PlaylistRepository;
 import ru.push.caudioplayer.core.playlist.dao.entity.PlaylistEntity;
 import ru.push.caudioplayer.core.playlist.model.Playlist;
 import ru.push.caudioplayer.core.playlist.model.PlaylistTrack;
@@ -51,7 +51,9 @@ public class PlaylistServiceImpl implements PlaylistService {
 	@Autowired
 	private ApplicationConfigService applicationConfigService;
 	@Autowired
-	private LocalPlaylistRepository localPlaylistRepository;
+	private PlaylistRepository localPlaylistRepository;
+	@Autowired
+	private PlaylistItemRepository localPlaylistItemRepository;
 	@Autowired
 	private MediaInfoDataLoaderService mediaInfoDataLoaderService;
 	@Autowired
@@ -69,17 +71,12 @@ public class PlaylistServiceImpl implements PlaylistService {
 	}
 
 	private List<Playlist> loadLocalPlaylists() {
-		boolean localPlaylistRepositoryInitResult = localPlaylistRepository.refresh();
-		if (!localPlaylistRepositoryInitResult) {
-			LOG.error("Local playlist repository not initialized correctly");
-			return new ArrayList<>();
-		}
 
 		List<PlaylistItemData> playlistItemsData = applicationConfigService.getLocalPlaylistItemsData();
 		List<String> playlistsUid = playlistItemsData.stream()
 				.map(PlaylistItemData::getPlaylistUid)
 				.collect(Collectors.toList());
-		List<PlaylistEntity> playlistsEntity = localPlaylistRepository.findPlaylists(playlistsUid);
+		List<PlaylistEntity> playlistsEntity = localPlaylistRepository.findAllById(playlistsUid);
 		List<Playlist> playlists = playlistMapper.mapPlaylist(playlistsEntity, playlistItemsData);
 		return playlists;
 	}
@@ -243,13 +240,9 @@ public class PlaylistServiceImpl implements PlaylistService {
 				uid = UUID.randomUUID().toString();
 				newPlaylist = new Playlist(uid, playlistTitle, PlaylistType.LOCAL, null);
 				PlaylistEntity newPlaylistEntity = playlistMapper.inverseMapPlaylist(newPlaylist);
-				boolean saveResult = localPlaylistRepository.savePlaylist(newPlaylistEntity);
-				if (saveResult) {
-					playlistMap.put(uid, newPlaylist);
-					applicationConfigService.appendPlaylist(newPlaylist.getUid(), newPlaylist.getTitle());
-				} else {
-					newPlaylist = null;
-				}
+				localPlaylistRepository.save(newPlaylistEntity);
+				playlistMap.put(uid, newPlaylist);
+				applicationConfigService.appendPlaylist(newPlaylist.getUid(), newPlaylist.getTitle());
 				break;
 
 			case DEEZER:
@@ -285,10 +278,9 @@ public class PlaylistServiceImpl implements PlaylistService {
 		switch (playlist.getType()) {
 
 			case LOCAL:
-				deleteResult = localPlaylistRepository.deletePlaylist(playlistUid);
-				if (deleteResult) {
-					applicationConfigService.removePlaylist(playlistUid);
-				}
+				localPlaylistRepository.deleteById(playlistUid);
+				applicationConfigService.removePlaylist(playlistUid);
+				deleteResult = true;
 				break;
 
 			case DEEZER:
@@ -330,10 +322,9 @@ public class PlaylistServiceImpl implements PlaylistService {
 			case LOCAL:
 				PlaylistEntity playlistEntity = playlistMapper.inverseMapPlaylist(playlist);
 				playlistEntity.setTitle(newTitle);
-				renameResult = localPlaylistRepository.savePlaylist(playlistEntity);
-				if (renameResult) {
-					applicationConfigService.renamePlaylist(playlistEntity.getUid(), playlistEntity.getTitle());
-				}
+				localPlaylistRepository.save(playlistEntity);
+				applicationConfigService.renamePlaylist(playlistEntity.getUid(), playlistEntity.getTitle());
+				renameResult = true;
 				break;
 
 			case DEEZER:
@@ -391,9 +382,11 @@ public class PlaylistServiceImpl implements PlaylistService {
 				.map(File::getAbsolutePath)
 				.collect(Collectors.toList());
 		List<PlaylistTrack> newItems = mediaInfoDataLoaderService.load(playlist, mediaPaths, MediaSourceType.FILE);
+		localPlaylistItemRepository.saveAll(
+				playlistMapper.inverseMapPlaylistItem(newItems, playlistMapper.inverseMapPlaylist(playlist))
+		);
 
 		playlist.getItems().addAll(newItems);
-		localPlaylistRepository.savePlaylist(playlistMapper.inverseMapPlaylist(playlist));
 
 		LOG.info("New items added to playlist: playlist = {}", playlist);
 		return playlist;
@@ -435,9 +428,10 @@ public class PlaylistServiceImpl implements PlaylistService {
 			return null;
 		}
 
+		localPlaylistItemRepository.saveAll(
+				playlistMapper.inverseMapPlaylistItem(newItems, playlistMapper.inverseMapPlaylist(playlist))
+		);
 		playlist.getItems().addAll(newItems);
-		localPlaylistRepository.savePlaylist(playlistMapper.inverseMapPlaylist(playlist));
-
 		LOG.info("New items added to playlist: {}", playlist);
 		return playlist;
 	}
@@ -538,9 +532,10 @@ public class PlaylistServiceImpl implements PlaylistService {
 
 			case LOCAL:
 				PlaylistEntity playlistEntity = playlistMapper.inverseMapPlaylist(playlist);
+				localPlaylistItemRepository.deleteAll(playlistEntity.getItems());
 				playlistEntity.getItems().removeIf(o ->
 						deletedTracks.stream().anyMatch(t -> Objects.equals(o.getUid(), t.getUid())));
-				deleteResult = localPlaylistRepository.savePlaylist(playlistEntity);
+				deleteResult = true;
 				break;
 
 			case DEEZER:
