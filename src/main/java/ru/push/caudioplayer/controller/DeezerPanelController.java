@@ -2,38 +2,35 @@ package ru.push.caudioplayer.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SelectionMode;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
 import javafx.scene.layout.AnchorPane;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
 import ru.push.caudioplayer.core.facades.dto.PlaylistData;
 import ru.push.caudioplayer.core.facades.dto.TrackData;
 
 import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import java.io.File;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
- * @author push <mez.e.s@yandex.ru>
- * @date 2/12/17
  */
-@SuppressWarnings("unchecked")
-public class PlaylistController extends PlaylistComponentBaseController {
+public class DeezerPanelController extends PlaylistComponentBaseController {
 
-  private static final Logger LOG = LoggerFactory.getLogger(PlaylistController.class);
+  private static final Logger LOG = LoggerFactory.getLogger(DeezerPanelController.class);
 
-	@FXML
-	private AnchorPane playlistPanelContainer;
+  @FXML
+  private AnchorPane playlistPanelContainer;
 
 	@FXML
 	private ListView<PlaylistData> playlistBrowserContainer;
@@ -42,11 +39,11 @@ public class PlaylistController extends PlaylistComponentBaseController {
 	private TableView<TrackData> playlistContentContainer;
 
 
-	@FXML
+  @FXML
   public void initialize() {
 		LOG.debug("initialize FXML for {}", this.getClass().getName());
 
-    playlistBrowserContainer.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+		playlistBrowserContainer.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 		playlistContentContainer.setEditable(false);
 		playlistContentContainer.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
   }
@@ -68,26 +65,12 @@ public class PlaylistController extends PlaylistComponentBaseController {
 
 	@PostConstruct
   public void init() {
-		LOG.debug("init bean {}", this.getClass().getName());
-		super.init(musicLibraryLogicFacade.getLocalPlaylists(), new PlaylistAudioPlayerEventAdapter());
+    LOG.debug("init bean {}", this.getClass().getName());
+		super.init(musicLibraryLogicFacade.getDeezerPlaylists(), new PlaylistAudioPlayerEventAdapter());
   }
 
-	@PreDestroy
-	public void stop() {
-		// save active and displayed playlists UID
-		PlaylistData activePlaylist = musicLibraryLogicFacade.getActivePlaylist();
-		if (activePlaylist != null) {
-			applicationConfigService.saveActivePlaylist(activePlaylist.getUid());
-		}
-		if (displayedPlaylist != null) {
-			applicationConfigService.saveDisplayedPlaylist(displayedPlaylist.getUid());
-		}
 
-		// save view configuration
-		savePlaylistContainerViewConfiguration();
-	}
-
-  @Override
+	@Override
 	protected void setPlaylistBrowserContainerCellFactory(ListView<PlaylistData> playlistBrowserContainer) {
 		playlistBrowserContainer.setCellFactory(lv -> {
 			ListCell<PlaylistData> cell = new ListCell<PlaylistData>() {
@@ -106,6 +89,11 @@ public class PlaylistController extends PlaylistComponentBaseController {
 			ContextMenu contextMenu = new ContextMenu();
 			contextMenu.getItems().addAll(getCommonPlaylistBrowserContainerMenuItems(cell));
 
+			MenuItem openInWebBrowserMenuItem = new MenuItem("Open in web browser");
+			openInWebBrowserMenuItem.setOnAction(event -> openPlaylistInWebBrowserAction(event, cell));
+
+			contextMenu.getItems().addAll(openInWebBrowserMenuItem);
+
 			cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
 				if (isNowEmpty) {
 					cell.setContextMenu(null);
@@ -116,7 +104,6 @@ public class PlaylistController extends PlaylistComponentBaseController {
 			return cell;
 		});
 	}
-
 
 	@Override
 	protected void setPlaylistContentContainerRowFactory(TableView<TrackData> playlistContentContainer) {
@@ -150,54 +137,24 @@ public class PlaylistController extends PlaylistComponentBaseController {
 		});
 	}
 
-  @FXML
+	@FXML
 	public void createNewPlaylist(ActionEvent actionEvent) {
-		musicLibraryLogicFacade.createLocalPlaylist();
+		musicLibraryLogicFacade.createDeezerPlaylist();
 	}
 
 	@FXML
 	public void refreshPlaylists(ActionEvent actionEvent) {
 		musicLibraryLogicFacade.reloadPlaylists();
-		List<PlaylistData> localPlaylists = musicLibraryLogicFacade.getLocalPlaylists();
-		setPlaylistBrowserContainerItems(playlistBrowserContainer, localPlaylists);
+		List<PlaylistData> deezerPlaylists = musicLibraryLogicFacade.getDeezerPlaylists();
+		setPlaylistBrowserContainerItems(playlistBrowserContainer, deezerPlaylists);
 		setPlaylistContentContainerItems(displayedPlaylist);
-	}
-
-	@FXML
-	public void addFilesToPlaylist(ActionEvent actionEvent) {
-  	if ((displayedPlaylist != null) && (displayedPlaylist.isLocal())) {
-			FileChooser fileChooser = new FileChooser();
-			fileChooser.setTitle("Open file(s)");
-			// WARNING: if this code throws JVM crashing, need to add JVM option '-DVLCJ_INITX=no'
-			List<File> files = fileChooser.showOpenMultipleDialog(playlistPanelContainer.getScene().getWindow());
-			if (CollectionUtils.isNotEmpty(files)) {
-				musicLibraryLogicFacade.addFilesToPlaylist(displayedPlaylist.getUid(), files);
-			}
-		}
-	}
-
-	@FXML
-	public void addStreamToPlaylist(ActionEvent actionEvent) {
-		if ((displayedPlaylist != null) && (displayedPlaylist.isLocal())) {
-			Stage popupStage = createPopup("Add HTTP stream(s) source", new Scene(textInputActionPopupView.getView()));
-			Consumer<String> action = inputText -> {
-				String[] inputLines = inputText.split("\n");
-				musicLibraryLogicFacade.addLocationsToPlaylist(displayedPlaylist.getUid(), Arrays.asList(inputLines));
-			};
-			((TextInputActionPopupController) textInputActionPopupView.getController()).setAction(action);
-			popupStage.show();
-		}
-	}
-
-	Optional<PlaylistData> getDisplayedPlaylist() {
-  	return Optional.ofNullable(displayedPlaylist);
 	}
 
 
 	private final class PlaylistAudioPlayerEventAdapter extends BaseAudioPlayerEventAdapter {
 		@Override
 		public void changedPlaylist(PlaylistData playlistData) {
-			if (playlistData.isLocal()) {
+			if (playlistData.isDeezer()) {
 				updateContainerItemPlaylistData(playlistData);
 				if ((displayedPlaylist != null) && (displayedPlaylist.equals(playlistData))) {
 					setPlaylistContentContainerItems(playlistData);
@@ -207,7 +164,7 @@ public class PlaylistController extends PlaylistComponentBaseController {
 
 		@Override
 		public void createdNewPlaylist(PlaylistData playlistData) {
-			if (playlistData.isLocal()) {
+			if (playlistData.isDeezer()) {
 				playlistBrowserContainer.getItems().add(playlistData);
 				playlistBrowserContainer.getSelectionModel().select(playlistData);
 				setPlaylistContentContainerItems(playlistData);
@@ -216,7 +173,7 @@ public class PlaylistController extends PlaylistComponentBaseController {
 
 		@Override
 		public void changedTrackData(PlaylistData playlistData, TrackData trackData) {
-			if (playlistData.isLocal()) {
+			if (playlistData.isDeezer()) {
 				playlistBrowserContainer.getItems().stream()
 						.filter(o -> o.equals(playlistData)).findFirst()
 						.ifPresent(p -> {
@@ -235,14 +192,14 @@ public class PlaylistController extends PlaylistComponentBaseController {
 
 		@Override
 		public void renamedPlaylist(PlaylistData playlistData) {
-			if (playlistData.isLocal()) {
+			if (playlistData.isDeezer()) {
 				updateContainerItemPlaylistData(playlistData);
 			}
 		}
 
 		@Override
 		public void deletedPlaylist(PlaylistData playlistData) {
-			if (playlistData.isLocal()) {
+			if (playlistData.isDeezer()) {
 				playlistBrowserContainer.getItems().stream()
 						.filter(p -> p.getUid().equals(playlistData.getUid())).findFirst()
 						.ifPresent(p -> playlistBrowserContainer.getItems().remove(p));
@@ -261,5 +218,4 @@ public class PlaylistController extends PlaylistComponentBaseController {
 			}
 		}
 	}
-
 }

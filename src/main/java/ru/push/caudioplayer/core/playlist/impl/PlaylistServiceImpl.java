@@ -11,9 +11,9 @@ import ru.push.caudioplayer.core.deezer.DeezerApiErrorException;
 import ru.push.caudioplayer.core.deezer.DeezerApiService;
 import ru.push.caudioplayer.core.deezer.model.Track;
 import ru.push.caudioplayer.core.medialoader.MediaInfoDataLoaderService;
+import ru.push.caudioplayer.core.playlist.PlaylistService;
 import ru.push.caudioplayer.core.playlist.dao.PlaylistItemRepository;
 import ru.push.caudioplayer.core.playlist.model.MediaSourceType;
-import ru.push.caudioplayer.core.playlist.PlaylistService;
 import ru.push.caudioplayer.core.playlist.dao.PlaylistRepository;
 import ru.push.caudioplayer.core.playlist.dao.entity.PlaylistEntity;
 import ru.push.caudioplayer.core.playlist.model.Playlist;
@@ -106,7 +106,8 @@ public class PlaylistServiceImpl implements PlaylistService {
 	@Override
 	public void reloadPlaylists() {
 		List<Playlist> localPlaylists = loadLocalPlaylists();
-		List<Playlist> deezerPlalists = loadDeezerPlaylists();
+//		List<Playlist> deezerPlalists = loadDeezerPlaylists();
+		List<Playlist> deezerPlalists = new ArrayList<>();
 		playlistMap = Stream.of(localPlaylists, deezerPlalists)
 				.flatMap(Collection::stream)
 				.collect(Collectors.toMap(Playlist::getUid, o -> o));

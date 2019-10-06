@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
-import ru.push.caudioplayer.core.lastfm.LastFmApiAdapter;
+import ru.push.caudioplayer.core.lastfm.LastFmApiProvider;
 import ru.push.caudioplayer.core.lastfm.LastFmApiMethod;
 import ru.push.caudioplayer.core.lastfm.LastFmApiParam;
 import ru.push.caudioplayer.core.lastfm.LastFmSessionData;
@@ -51,8 +51,8 @@ import java.util.stream.Collectors;
  * WARNING: this adapter is not thread safe
  */
 @Component
-public class LastFmApiAdapterImpl implements LastFmApiAdapter {
-	private static final Logger LOG = LoggerFactory.getLogger(LastFmApiAdapterImpl.class);
+public class LastFmApiProviderImpl implements LastFmApiProvider {
+	private static final Logger LOG = LoggerFactory.getLogger(LastFmApiProviderImpl.class);
 
 	private static final String LASTFM_API_AUTH_BASE_URL = "https://www.last.fm/api/auth?api_key=%s&token=%s";
 	private static final String LASTFM_API_SCHEME = "https";
@@ -76,7 +76,7 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 	@Value("${lastfm.api.request.getsession.retry.count}")
 	private int getSessionRetryCount;
 
-	public LastFmApiAdapterImpl() {
+	public LastFmApiProviderImpl() {
 		this.xPathFactory = XPathFactory.newInstance();
 		this.baseApiUriBuilder = new URIBuilder()
 				.setScheme(LASTFM_API_SCHEME)
@@ -347,9 +347,9 @@ public class LastFmApiAdapterImpl implements LastFmApiAdapter {
 			for (; retryCount >= 0; retryCount--, Thread.sleep(retryTimeoutSeconds * 1000)) {
 				request = constructRequestFunction.apply(apiUri);
 				try {
-					LOG.info("api request: {}", request);
+					LOG.debug("api request: {}", request);
 					HttpResponse response = httpClient.execute(request);
-					LOG.info("api response: {}", response);
+					LOG.debug("api response: {}", response);
 					// process response
 					int statusCode = response.getStatusLine().getStatusCode();
 					if (HttpStatus.SC_OK == statusCode) {

@@ -7,10 +7,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import ru.push.caudioplayer.controller.ConfirmActionPopupController;
+import ru.push.caudioplayer.controller.DeezerPanelController;
 import ru.push.caudioplayer.controller.LastFmPanelController;
 import ru.push.caudioplayer.controller.MainController;
 import ru.push.caudioplayer.controller.AudioPlayerController;
+import ru.push.caudioplayer.controller.NotificationsPanelController;
 import ru.push.caudioplayer.controller.PlaylistController;
+import ru.push.caudioplayer.controller.RadioPanelController;
 import ru.push.caudioplayer.controller.RenamePopupController;
 import ru.push.caudioplayer.controller.TextInputActionPopupController;
 
@@ -94,6 +97,36 @@ public class ConfigurationControllers {
 	@Bean
 	public TextInputActionPopupController getTextInputActionPopupController() {
 		return (TextInputActionPopupController) getTextInputActionPopupView().getController();
+	}
+
+	@Bean(name = "radioPanelComponentView")
+	public View getRadioPanelComponentView() {
+		return loadView("view/radio-panel-component.fxml");
+	}
+
+	@Bean
+	public RadioPanelController getRadioPanelController() {
+		return (RadioPanelController) getRadioPanelComponentView().getController();
+	}
+
+	@Bean(name = "deezerPanelComponentView")
+	public View getDeezerPanelComponentView() {
+		return loadView("view/deezer-panel-component.fxml");
+	}
+
+	@Bean
+	public DeezerPanelController getDeezerPanelController() {
+		return (DeezerPanelController) getDeezerPanelComponentView().getController();
+	}
+
+	@Bean(name = "notificationsPanelComponentView")
+	public View getNotificationsPanelComponentView() {
+		return loadView("view/notifications-panel-component.fxml");
+	}
+
+	@Bean
+	public NotificationsPanelController getNotificationsPanelController() {
+		return (NotificationsPanelController) getNotificationsPanelComponentView().getController();
 	}
 
   protected View loadView(String url) {

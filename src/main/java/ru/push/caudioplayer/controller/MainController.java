@@ -1,8 +1,6 @@
 package ru.push.caudioplayer.controller;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
@@ -14,14 +12,11 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
-import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import ru.push.caudioplayer.AppMain;
 import ru.push.caudioplayer.ConfigurationControllers;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
@@ -30,17 +25,13 @@ import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
-import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * @author push <mez.e.s@yandex.ru>
@@ -58,13 +49,13 @@ public class MainController {
 	@FXML
 	public Pane audioPlayerComponentPane;
 	@FXML
-	public Pane playlistComponentPane;
+	public Tab playlistComponentTab;
 	@FXML
 	public Tab lastfmPanelTab;
 	@FXML
 	public Tab notificationsPanelTab;
 	@FXML
-	public TabPane extraPanelsTabPane;
+	public TabPane panelsTabPane;
 	@FXML
 	public TextArea notificationOutputTextArea;
   @FXML
@@ -100,7 +91,7 @@ public class MainController {
 		musicLibraryLogicFacade.addEventListener(eventAdapter);
 
 		audioPlayerComponentPane.getChildren().add(audioPlayerView.getView());
-		playlistComponentPane.getChildren().add(playlistView.getView());
+		playlistComponentTab.setContent(playlistView.getView());
 		lastfmPanelTab.setContent(lastfmPanelView.getView());
   }
 

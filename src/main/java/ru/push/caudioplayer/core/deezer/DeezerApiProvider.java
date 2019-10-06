@@ -8,7 +8,7 @@ import ru.push.caudioplayer.core.deezer.model.internal.PlaylistId;
 
 import java.util.List;
 
-public interface DeezerApiAdapter {
+public interface DeezerApiProvider {
 
 	String getUserAuthorizationPageUrl();
 

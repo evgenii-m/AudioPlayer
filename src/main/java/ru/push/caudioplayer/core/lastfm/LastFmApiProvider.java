@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.Optional;
 
-public interface LastFmApiAdapter {
+public interface LastFmApiProvider {
 
 	String getUserAuthorizationPageUrl(String token);
 

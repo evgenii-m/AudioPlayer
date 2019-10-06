@@ -7,38 +7,37 @@
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 
-<Pane stylesheets="/css/style.css" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1"
-	  fx:controller="ru.push.caudioplayer.controller.MainController">
+<Pane stylesheets="/css/style.css" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.push.caudioplayer.controller.MainController">
 	<children>
-		<VBox fx:id="mainContainer" prefHeight="630" prefWidth="1010">
+		<VBox fx:id="mainContainer" alignment="TOP_CENTER" prefHeight="630" prefWidth="1010">
 			<children>
 				<MenuBar fx:id="mainMenuBar">
 					<menus>
 						<Menu mnemonicParsing="false" text="Playlist">
 							<items>
-								<MenuItem mnemonicParsing="false" onAction="#createNewPlaylist" text="New playlist"/>
-								<MenuItem mnemonicParsing="false" onAction="#addFilesToPlaylist" text="Add file(s)"/>
-								<MenuItem mnemonicParsing="false" onAction="#addStreamToActivePlaylist"
-										  text="Add stream"/>
-								<MenuItem mnemonicParsing="false" onAction="#backupPlaylists" text="Backup playlists"/>
+								<MenuItem mnemonicParsing="false" onAction="#createNewPlaylist" text="New playlist" />
+								<MenuItem mnemonicParsing="false" onAction="#addFilesToPlaylist" text="Add file(s)" />
+								<MenuItem mnemonicParsing="false" onAction="#addStreamToActivePlaylist" text="Add stream" />
+								<MenuItem mnemonicParsing="false" onAction="#backupPlaylists" text="Backup playlists" />
 							</items>
 						</Menu>
 						<Menu mnemonicParsing="false" text="Last.fm">
 							<items>
-								<MenuItem mnemonicParsing="false" onAction="#connectLastFm" text="Connect"/>
+								<MenuItem mnemonicParsing="false" onAction="#connectLastFm" text="Connect" />
 							</items>
 						</Menu>
 						<Menu mnemonicParsing="false" text="Deezer">
 							<items>
-								<MenuItem mnemonicParsing="false" onAction="#connectDeezer" text="Connect"/>
+								<MenuItem mnemonicParsing="false" onAction="#connectDeezer" text="Connect" />
 							</items>
 						</Menu>
 						<Menu mnemonicParsing="false" text="Help">
 							<items>
-								<MenuItem mnemonicParsing="false" text="About"/>
+								<MenuItem mnemonicParsing="false" text="About" />
 							</items>
 						</Menu>
 					</menus>
@@ -46,33 +45,36 @@
 
 				<Pane fx:id="audioPlayerComponentPane" prefHeight="80.0" prefWidth="1010.0"/>
 
-				<Pane fx:id="playlistComponentPane" prefHeight="310.0" prefWidth="1010.0">
-					<VBox.margin>
-						<Insets top="5.0"/>
-					</VBox.margin>
-				</Pane>
+				<AnchorPane VBox.vgrow="ALWAYS">
+					<TabPane fx:id="panelsTabPane" prefHeight="500.0" prefWidth="1000.0" side="TOP" styleClass="panels-tab-pane" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+						<tabs>
+							<Tab fx:id="playlistComponentTab" styleClass="tab-pane-item" text="Playlist">
+							</Tab>
 
-				<TabPane fx:id="extraPanelsTabPane" prefHeight="220.0" prefWidth="1000.0" side="BOTTOM"
-						 styleClass="extra-panels-tab-pane" tabClosingPolicy="UNAVAILABLE">
-					<tabs>
-						<Tab fx:id="lastfmPanelTab" closable="false" styleClass="tab-pane-item" text="Last.m">
-						</Tab>
-						<Tab fx:id="notificationsPanelTab" closable="false" styleClass="tab-pane-item"
-							 text="Notifications">
-							<content>
-								<Pane pickOnBounds="false" prefHeight="180.0" prefWidth="1000.0">
-									<children>
-										<TextArea fx:id="notificationOutputTextArea" editable="false" layoutX="5.0" layoutY="5.0" prefHeight="170.0"
-												  prefWidth="980.0" styleClass="notification-output-area"/>
-									</children>
-								</Pane>
-							</content>
-						</Tab>
-					</tabs>
-					<VBox.margin>
-						<Insets left="10.0" right="10.0" top="10.0"/>
-					</VBox.margin>
-				</TabPane>
+							<Tab fx:id="lastfmPanelTab" closable="false" styleClass="tab-pane-item" text="Last.m">
+							</Tab>
+
+							<Tab fx:id="notificationsPanelTab" closable="false" styleClass="tab-pane-item" text="Notifications">
+								<content>
+									<AnchorPane>
+										<children>
+											<TextArea fx:id="notificationOutputTextArea" editable="false" layoutX="5.0" layoutY="5.0" styleClass="notification-output-area" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
+										</children>
+									</AnchorPane>
+								</content>
+							</Tab>
+						</tabs>
+						<VBox.margin>
+							<Insets bottom="5.0" left="5.0" right="7.0" top="5.0" />
+						</VBox.margin>
+					</TabPane>
+               <padding>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+               </padding>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+				</AnchorPane>
 
 			</children>
 		</VBox>

@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import ru.push.caudioplayer.core.lastfm.LastFmApiAdapter;
+import ru.push.caudioplayer.core.lastfm.LastFmApiProvider;
 import ru.push.caudioplayer.core.lastfm.LastFmService;
 import ru.push.caudioplayer.core.lastfm.LastFmSessionData;
 import ru.push.caudioplayer.core.lastfm.model.RecentTracks;
@@ -37,7 +37,7 @@ public class DefaultLastFmService implements LastFmService {
 	private static final long SCROBBLE_DEFAULT_DELAY_MS = 2 * 60 * 1000; // 2 minutes
 
   @Autowired
-	private LastFmApiAdapter apiAdapter;
+	private LastFmApiProvider apiAdapter;
 	@Autowired
 	private ApplicationConfigService applicationConfigService;
 

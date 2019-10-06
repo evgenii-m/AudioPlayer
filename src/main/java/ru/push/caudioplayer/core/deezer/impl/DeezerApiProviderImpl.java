@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
-import ru.push.caudioplayer.core.deezer.DeezerApiAdapter;
+import ru.push.caudioplayer.core.deezer.DeezerApiProvider;
 import ru.push.caudioplayer.core.deezer.DeezerApiConst;
 import ru.push.caudioplayer.core.deezer.DeezerApiErrorException;
 import ru.push.caudioplayer.core.deezer.DeezerApiMethod;
@@ -48,9 +48,9 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 
 @Component
-public class DeezerApiAdapterImpl implements DeezerApiAdapter {
+public class DeezerApiProviderImpl implements DeezerApiProvider {
 
-	private static final Logger LOG = LoggerFactory.getLogger(DeezerApiAdapterImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DeezerApiProviderImpl.class);
 
 	private final CloseableHttpClient httpClient;
 
@@ -60,7 +60,7 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 	private String deezerAppId;
 	private String deezerAppSecretKey;
 
-	public DeezerApiAdapterImpl() {
+	public DeezerApiProviderImpl() {
 		PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
 		cm.setMaxTotal(200);
 		cm.setDefaultMaxPerRoute(20);
@@ -82,11 +82,11 @@ public class DeezerApiAdapterImpl implements DeezerApiAdapter {
 	}
 
 	private String makeApiRequest(HttpRequestBase request) throws DeezerApiErrorException {
-		LOG.info("api request: {}", request);
+		LOG.debug("api request: {}", request);
 
 		try {
 			HttpResponse response = httpClient.execute(request);
-			LOG.info("api response: {}", response);
+			LOG.debug("api response: {}", response);
 			// process response
 			int statusCode = response.getStatusLine().getStatusCode();
 			if (HttpStatus.SC_OK == statusCode) {

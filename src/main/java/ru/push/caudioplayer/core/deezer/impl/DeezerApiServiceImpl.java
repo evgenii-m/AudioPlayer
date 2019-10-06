@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import ru.push.caudioplayer.core.deezer.DeezerApiAdapter;
+import ru.push.caudioplayer.core.deezer.DeezerApiProvider;
 import ru.push.caudioplayer.core.deezer.DeezerApiConst;
 import ru.push.caudioplayer.core.deezer.DeezerApiErrorException;
 import ru.push.caudioplayer.core.deezer.DeezerApiService;
@@ -42,7 +42,7 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 	private Properties properties;
 
 	@Autowired
-	private DeezerApiAdapter deezerApiAdapter;
+	private DeezerApiProvider deezerApiProvider;
 
 	@Autowired
 	private ApplicationConfigService applicationConfigService;
@@ -75,7 +75,7 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 
 	@Override
 	public String getUserAuthorizationPageUrl() {
-		return deezerApiAdapter.getUserAuthorizationPageUrl();
+		return deezerApiProvider.getUserAuthorizationPageUrl();
 	}
 
 	@Override
@@ -112,7 +112,7 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 			LOG.warn("Deezer access token already set in configuration, they will be overwritten: access token = {}", accessToken);
 		}
 
-		String newAccessToken = deezerApiAdapter.getAccessToken(code);
+		String newAccessToken = deezerApiProvider.getAccessToken(code);
 		if (newAccessToken != null) {
 			LOG.info("Set new Deezer access token: {}", newAccessToken);
 			currentAccessToken = newAccessToken;
@@ -128,7 +128,7 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 	public void getTrack(long trackId) throws DeezerApiErrorException {
 		checkAccessToken();
 		try {
-			Track track = deezerApiAdapter.getTrack(trackId, currentAccessToken);
+			Track track = deezerApiProvider.getTrack(trackId, currentAccessToken);
 			LOG.debug("Received deezer track: {}", track);
 		} catch (DeezerApiErrorException e) {
 			LOG.error("Deezer api error:", e);
@@ -144,7 +144,7 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 			Playlists playlistsResponse;
 			int index = 0;
 			do {
-				playlistsResponse = deezerApiAdapter.getPlaylists(currentAccessToken, index, PLAYLISTS_DEFAULT_LIMIT);
+				playlistsResponse = deezerApiProvider.getPlaylists(currentAccessToken, index, PLAYLISTS_DEFAULT_LIMIT);
 				playlists.addAll(playlistsResponse.getData());
 				index += PLAYLISTS_DEFAULT_LIMIT;
 			} while (playlistsResponse.getNext() != null);
@@ -198,7 +198,7 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 		int j = 0;
 		do {
 			try {
-				tracksResponse = deezerApiAdapter.getPlaylistTracks(playlistId, currentAccessToken, j, PLAYLISTS_DEFAULT_LIMIT);
+				tracksResponse = deezerApiProvider.getPlaylistTracks(playlistId, currentAccessToken, j, PLAYLISTS_DEFAULT_LIMIT);
 				playlistTracks.addAll(tracksResponse.getData());
 				j += PLAYLISTS_DEFAULT_LIMIT;
 			} catch (DeezerApiErrorException e) {
@@ -220,20 +220,20 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 	@Override
 	public Long createPlaylist(String title) throws DeezerApiErrorException {
 		checkAccessToken();
-		PlaylistId playlistId = deezerApiAdapter.createPlaylist(title, currentAccessToken);
+		PlaylistId playlistId = deezerApiProvider.createPlaylist(title, currentAccessToken);
 		return playlistId.getId();
 	}
 
 	@Override
 	public boolean deletePlaylist(long playlistId) throws DeezerApiErrorException {
 		checkAccessToken();
-		return deezerApiAdapter.deletePlaylist(playlistId, currentAccessToken);
+		return deezerApiProvider.deletePlaylist(playlistId, currentAccessToken);
 	}
 
 	@Override
 	public boolean renamePlaylist(long playlistId, String newTitle) throws DeezerApiErrorException {
 		checkAccessToken();
-		return deezerApiAdapter.renamePlaylist(playlistId, newTitle, currentAccessToken);
+		return deezerApiProvider.renamePlaylist(playlistId, newTitle, currentAccessToken);
 	}
 
 	@Override
@@ -244,7 +244,7 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 	@Override
 	public boolean addTracksToPlaylist(long playlistId, List<Long> trackIds) throws DeezerApiErrorException {
 		checkAccessToken();
-		return deezerApiAdapter.addTracksToPlaylist(playlistId, trackIds, currentAccessToken);
+		return deezerApiProvider.addTracksToPlaylist(playlistId, trackIds, currentAccessToken);
 	}
 
 	@Override
@@ -255,7 +255,7 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 	@Override
 	public boolean removeTracksFromPlaylist(long playlistId, List<Long> trackIds) throws DeezerApiErrorException {
 		checkAccessToken();
-		return deezerApiAdapter.removeTracksFromPlaylist(playlistId, trackIds, currentAccessToken);
+		return deezerApiProvider.removeTracksFromPlaylist(playlistId, trackIds, currentAccessToken);
 	}
 
 	@Override
@@ -264,10 +264,10 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 
 		Tracks tracksResult = null;
 		if (extendedQuery != null) {
-			tracksResult = deezerApiAdapter.searchTracksQuery(extendedQuery, currentAccessToken);
+			tracksResult = deezerApiProvider.searchTracksQuery(extendedQuery, currentAccessToken);
 		}
 		if ((tracksResult == null) || CollectionUtils.isEmpty(tracksResult.getData())) {
-			tracksResult = deezerApiAdapter.searchTracksQuery(shortQuery, currentAccessToken);
+			tracksResult = deezerApiProvider.searchTracksQuery(shortQuery, currentAccessToken);
 		}
 
 		if ((tracksResult != null) && !CollectionUtils.isEmpty(tracksResult.getData())) {
@@ -280,13 +280,13 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 	@Override
 	public boolean addTrackToFavorites(long trackId) throws DeezerApiErrorException {
 		checkAccessToken();
-		return deezerApiAdapter.addTrackToFavorites(trackId, currentAccessToken);
+		return deezerApiProvider.addTrackToFavorites(trackId, currentAccessToken);
 	}
 
 	@Override
 	public boolean removeTrackFromFavorites(long trackId) throws DeezerApiErrorException {
 		checkAccessToken();
-		return deezerApiAdapter.removeTrackFromFavorites(trackId, currentAccessToken);
+		return deezerApiProvider.removeTrackFromFavorites(trackId, currentAccessToken);
 	}
 
 	@Override
