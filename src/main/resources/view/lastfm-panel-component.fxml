@@ -10,87 +10,92 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.text.Font?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="180.0" prefWidth="990.0" stylesheets="/css/style.css" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.push.caudioplayer.controller.LastFmPanelController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="980.0" stylesheets="/css/style.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.push.caudioplayer.controller.LastFmPanelController">
 	<children>
-		<TableView fx:id="recentTracksContainer" layoutX="5.0" layoutY="5.0" prefHeight="140.0" prefWidth="490.0" styleClass="recent-tracks-container">
-		</TableView>
-		<Button layoutX="435.0" layoutY="150.0" mnemonicParsing="false" onAction="#loadMoreRecentTracks" prefHeight="12.0" prefWidth="60.0" text="More">
-			<font>
-				<Font name="System Bold" size="11.0" />
-			</font>
-		</Button>
-		<Button layoutX="370.0" layoutY="150.0" mnemonicParsing="false" onAction="#refreshRecentTracks" prefHeight="12.0" prefWidth="60.0" text="Refresh">
-			<font>
-				<Font name="System Bold" size="11.0" />
-			</font>
-		</Button>
-		<ScrollPane layoutX="500.0" layoutY="5.0" prefHeight="170.0" prefWidth="485.0">
+		<AnchorPane prefHeight="200.0" prefWidth="800.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="25.0" AnchorPane.topAnchor="5.0">
+			<TableView fx:id="recentTracksContainer" styleClass="recent-tracks-container" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="80.0" AnchorPane.topAnchor="5.0">
+			</TableView>
+			<Button mnemonicParsing="false" onAction="#refreshRecentTracks" prefHeight="12.0" prefWidth="60.0" text="Refresh" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+				<font>
+					<Font name="System Bold" size="11.0" />
+				</font>
+			</Button>
+			<Button mnemonicParsing="false" onAction="#loadMoreRecentTracks" prefHeight="12.0" prefWidth="60.0" text="More" AnchorPane.bottomAnchor="15.0" AnchorPane.rightAnchor="5.0">
+				<font>
+					<Font name="System Bold" size="11.0" />
+				</font>
+			</Button>
+		</AnchorPane>
+
+		<ScrollPane minWidth="500.0" prefWidth="485.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="205.0">
 			<content>
-				<Pane fx:id="trackInfoContainer" prefHeight="350.0" prefWidth="470.0" styleClass="lastfm-track-info-container">
+				<AnchorPane fx:id="trackInfoContainer" prefHeight="350.0" prefWidth="870.0" styleClass="lastfm-track-info-container">
 					<children>
-						<Label layoutX="10.0" layoutY="5.0" prefHeight="20.0" prefWidth="55.0" styleClass="track-info-label-for-link" text="Artist" />
-						<Label fx:id="artistLinkLabel" layoutX="70.0" layoutY="5.0" maxWidth="230.0" prefHeight="20.0" styleClass="track-info-link" text="artistLink">
+						<Label prefHeight="20.0" prefWidth="55.0" styleClass="track-info-label-for-link" text="Artist" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="5.0" />
+						<Label fx:id="artistLinkLabel" maxWidth="230.0" prefHeight="20.0" styleClass="track-info-link" text="artistLink" AnchorPane.leftAnchor="70.0" AnchorPane.topAnchor="5.0">
 							<cursor>
 								<Cursor fx:constant="HAND" />
 							</cursor>
 						</Label>
 
-						<Label layoutX="10.0" layoutY="28.0" prefHeight="20.0" prefWidth="55.0" styleClass="track-info-label-for-link" text="Album" />
-						<Label fx:id="albumLinkLabel" layoutX="70.0" layoutY="28.0" maxWidth="230.0" prefHeight="20.0" styleClass="track-info-link" text="albumLink">
+						<Label layoutX="10.0" layoutY="28.0" prefHeight="20.0" prefWidth="55.0" styleClass="track-info-label-for-link" text="Album" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="28.0" />
+						<Label fx:id="albumLinkLabel" maxWidth="230.0" prefHeight="20.0" styleClass="track-info-link" text="albumLink" AnchorPane.leftAnchor="70.0" AnchorPane.topAnchor="28.0">
 							<cursor>
 								<Cursor fx:constant="HAND" />
 							</cursor>
 						</Label>
 
-						<Label layoutX="10.0" layoutY="51.0" prefHeight="20.0" prefWidth="55.0" styleClass="track-info-label-for-link" text="Title" />
-						<Label fx:id="titleLinkLabel" layoutX="70.0" layoutY="51.0" maxWidth="230.0" prefHeight="20.0" styleClass="track-info-link" text="titleLink">
+						<Label prefHeight="20.0" prefWidth="55.0" styleClass="track-info-label-for-link" text="Title" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="51.0" />
+						<Label fx:id="titleLinkLabel" maxWidth="230.0" prefHeight="20.0" styleClass="track-info-link" text="titleLink" AnchorPane.leftAnchor="70.0" AnchorPane.topAnchor="51.0">
 							<cursor>
 								<Cursor fx:constant="HAND" />
 							</cursor>
 						</Label>
 
-						<Label layoutX="10.0" layoutY="80.0" prefHeight="17.0" prefWidth="95.0" styleClass="track-info-label" text="Listeners:" />
-						<Label fx:id="listenersCountLabel" alignment="CENTER_RIGHT" layoutX="110.0" layoutY="80.0" prefHeight="17.0" prefWidth="50.0" styleClass="track-info-label" text="value" />
+						<Label prefHeight="17.0" prefWidth="95.0" styleClass="track-info-label" text="Listeners:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="80.0" />
+						<Label fx:id="listenersCountLabel" alignment="CENTER_RIGHT" prefHeight="17.0" prefWidth="50.0" styleClass="track-info-label" text="value" AnchorPane.leftAnchor="110.0" AnchorPane.topAnchor="80.0" />
 
-						<Label layoutX="10.0" layoutY="100.0" prefHeight="17.0" prefWidth="95.0" styleClass="track-info-label" text="Total Scrobbles:" />
-						<Label fx:id="totalScrobblesLabel" alignment="CENTER_RIGHT" layoutX="110.0" layoutY="100.0" prefHeight="17.0" prefWidth="50.0" styleClass="track-info-label" text="value" />
+						<Label prefHeight="17.0" prefWidth="95.0" styleClass="track-info-label" text="Total Scrobbles:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="100.0" />
+						<Label fx:id="totalScrobblesLabel" alignment="CENTER_RIGHT" prefHeight="17.0" prefWidth="50.0" styleClass="track-info-label" text="value" AnchorPane.leftAnchor="110.0" AnchorPane.topAnchor="100.0" />
 
-						<Label layoutX="10.0" layoutY="120.0" prefHeight="17.0" prefWidth="95.0" styleClass="track-info-label" text="My Scrobbles:" />
-						<Label fx:id="userScrobblesLabel" alignment="CENTER_RIGHT" layoutX="110.0" layoutY="120.0" prefHeight="17.0" prefWidth="50.0" styleClass="track-info-label" text="value" />
+						<Label prefHeight="17.0" prefWidth="95.0" styleClass="track-info-label" text="My Scrobbles:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="120.0" />
+						<Label fx:id="userScrobblesLabel" alignment="CENTER_RIGHT" prefHeight="17.0" prefWidth="50.0" styleClass="track-info-label" text="value" AnchorPane.leftAnchor="110.0" AnchorPane.topAnchor="120.0" />
 
-						<Label layoutX="177.0" layoutY="80.0" prefHeight="17.0" prefWidth="50.0" styleClass="track-info-label" text="Length:" />
-						<Label fx:id="trackDurationLabel" layoutX="247.0" layoutY="80.0" prefHeight="17.0" prefWidth="30.0" text="00:00" />
+						<Label prefHeight="17.0" prefWidth="50.0" styleClass="track-info-label" text="Length:" AnchorPane.leftAnchor="177.0" AnchorPane.topAnchor="80.0" />
+						<Label fx:id="trackDurationLabel" prefHeight="17.0" prefWidth="30.0" text="00:00" AnchorPane.leftAnchor="247.0" AnchorPane.topAnchor="80.0" />
 
-						<Button fx:id="lovedTrackButton" layoutX="177.0" layoutY="121.0" mnemonicParsing="false" prefHeight="16.0" prefWidth="16.0" styleClass="loved-track-button">
+						<Button fx:id="lovedTrackButton" mnemonicParsing="false" prefHeight="16.0" prefWidth="16.0" styleClass="loved-track-button" AnchorPane.leftAnchor="177.0" AnchorPane.topAnchor="121.0">
 							<font>
 								<Font size="3.0" />
 							</font>
 						</Button>
-						<MenuButton fx:id="trackInfoActionsMenuButton" layoutX="210.0" layoutY="118.0" mnemonicParsing="false" popupSide="RIGHT" prefHeight="24.0" prefWidth="72.0" text="Actions">
+						<MenuButton fx:id="trackInfoActionsMenuButton" mnemonicParsing="false" popupSide="RIGHT" prefHeight="24.0" prefWidth="72.0" text="Actions" AnchorPane.leftAnchor="210.0" AnchorPane.topAnchor="118.0">
 							<items>
-								<MenuItem mnemonicParsing="false" text="Add to Deezer playlist" onAction="#addLastFmTrackDeezerPlaylistAction"/>
-								<MenuItem mnemonicParsing="false" text="Add to Deezer loved tracks" onAction="#addLastFmTrackToDeezerLovedTracksAction"/>
+								<MenuItem mnemonicParsing="false" onAction="#addLastFmTrackDeezerPlaylistAction" text="Add to Deezer playlist" />
+								<MenuItem mnemonicParsing="false" onAction="#addLastFmTrackToDeezerLovedTracksAction" text="Add to Deezer loved tracks" />
 							</items>
 							<font>
 								<Font size="11.0" />
 							</font>
 						</MenuButton>
 
-						<Pane layoutX="300.0" layoutY="3.0" prefHeight="162.0" prefWidth="162.0" styleClass="track-info-image-container">
-							<ImageView fx:id="trackInfoImage" fitHeight="160.0" fitWidth="160.0" layoutX="1.0" layoutY="1.0" pickOnBounds="true" preserveRatio="true" smooth="false" />
+
+						<Label layoutX="290.0" layoutY="20.0" prefHeight="17.0" prefWidth="95.0" styleClass="track-info-label" text="Description:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="150.0" />
+						<TextArea fx:id="trackInfoDescriptionTextArea" editable="false" prefHeight="150.0" prefWidth="490.0" wrapText="true" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="170.0" />
+
+						<Label layoutX="280.0" layoutY="170.0" prefHeight="17.0" prefWidth="95.0" styleClass="track-info-label" text="Tags:" AnchorPane.leftAnchor="320.0" AnchorPane.topAnchor="5.0" />
+						<ListView fx:id="trackInfoTagsContainer" layoutX="280.0" layoutY="190.0" prefHeight="130.0" prefWidth="180.0" AnchorPane.leftAnchor="320.0" AnchorPane.topAnchor="25.0" />
+
+						<Pane prefHeight="258.0" prefWidth="258.0" styleClass="track-info-image-container" AnchorPane.leftAnchor="520.0" AnchorPane.topAnchor="5.0">
+							<ImageView fx:id="trackInfoImage" fitHeight="256.0" fitWidth="256.0" layoutX="1.0" layoutY="1.0" pickOnBounds="true" preserveRatio="true" smooth="false" />
 						</Pane>
-
-						<Label layoutX="10.0" layoutY="150.0" prefHeight="17.0" prefWidth="95.0" styleClass="track-info-label" text="Description:" />
-						<TextArea fx:id="trackInfoDescriptionTextArea" editable="false" layoutX="10.0" layoutY="170.0" prefHeight="150.0" prefWidth="260.0" wrapText="true" />
-
-						<Label layoutX="280.0" layoutY="170.0" prefHeight="17.0" prefWidth="95.0" styleClass="track-info-label" text="Tags:" />
-						<ListView fx:id="trackInfoTagsContainer" layoutX="280.0" layoutY="190.0" prefHeight="130.0" prefWidth="180.0" />
 					</children>
-				</Pane>
+				</AnchorPane>
 			</content>
 		</ScrollPane>
 	</children>
-</Pane>
+</AnchorPane>

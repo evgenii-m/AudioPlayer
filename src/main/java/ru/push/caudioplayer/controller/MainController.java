@@ -8,6 +8,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebEngine;
@@ -43,9 +44,8 @@ public class MainController {
 
   private static final String DEFAULT_PLAYLIST_BACKUP_FOLDER_NAME = "export/backup_%s/";
   private static final String DEFAULT_PLAYLIST_BACKUP_FOLDER_TIMESTAMP_FORMAT = "yyyy-MM-dd_HH-mm-ss";
-
 	@FXML
-  private VBox mainContainer;
+  private AnchorPane mainContainer;
 	@FXML
 	public Pane audioPlayerComponentPane;
 	@FXML
@@ -58,7 +58,11 @@ public class MainController {
 	public TabPane panelsTabPane;
 	@FXML
 	public TextArea notificationOutputTextArea;
-  @FXML
+	@FXML
+	private AnchorPane playlistComponentPane;
+	@FXML
+	private AnchorPane lastFmPanelComponentPane;
+	@FXML
   @Resource(name = "audioPlayerView")
   private ConfigurationControllers.View audioPlayerView;
   @FXML
@@ -91,8 +95,8 @@ public class MainController {
 		musicLibraryLogicFacade.addEventListener(eventAdapter);
 
 		audioPlayerComponentPane.getChildren().add(audioPlayerView.getView());
-		playlistComponentTab.setContent(playlistView.getView());
-		lastfmPanelTab.setContent(lastfmPanelView.getView());
+		playlistComponentPane.getChildren().add(playlistView.getView());
+		lastFmPanelComponentPane.getChildren().add(lastfmPanelView.getView());
   }
 
   @FXML

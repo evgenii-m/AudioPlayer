@@ -7,13 +7,10 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 
-<AnchorPane fx:id="playlistPanelContainer" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-			minWidth="-Infinity" prefWidth="1000.0" stylesheets="/css/style.css"
-			xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1"
-			fx:controller="ru.push.caudioplayer.controller.PlaylistController">
+<AnchorPane fx:id="playlistPanelContainer" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" stylesheets="/css/style.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.push.caudioplayer.controller.PlaylistController">
 	<children>
-		<AnchorPane prefWidth="290.0">
-			<HBox prefHeight="25.0" prefWidth="290.0" spacing="7.0">
+		<AnchorPane prefWidth="290.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0">
+			<HBox prefHeight="25.0" prefWidth="290.0" spacing="7.0" AnchorPane.topAnchor="5.0">
 				<children>
 					<Button onAction="#createNewPlaylist" styleClass="playlist-browser-control-button">New</Button>
 					<Button onAction="#refreshPlaylists" styleClass="playlist-browser-control-button">Refresh</Button>
@@ -21,17 +18,14 @@
 					</Button>
 				</children>
 				<padding>
-					<Insets left="5.0" right="5.0"/>
+					<Insets left="5.0" right="5.0" />
 				</padding>
 			</HBox>
-			<ListView fx:id="playlistBrowserContainer" layoutY="30.0" styleClass="playlist-browser-container"
-					  AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-					  AnchorPane.topAnchor="30.0">
+			<ListView fx:id="playlistBrowserContainer" minHeight="200.0" styleClass="playlist-browser-container" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
 			</ListView>
 		</AnchorPane>
 
-		<TableView fx:id="playlistContentContainer" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="300.0"
-				   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+		<TableView fx:id="playlistContentContainer" minHeight="200.0" prefWidth="500.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
 			<columns>
 			</columns>
 		</TableView>
