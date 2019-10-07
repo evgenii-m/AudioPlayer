@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.AnchorPane?>
 
-<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="165.0"
-	  prefWidth="300.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1"
-	  fx:controller="ru.push.caudioplayer.controller.NotificationsPanelController">
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="165.0"
+			prefWidth="300.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1"
+			AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+			AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"
+			fx:controller="ru.push.caudioplayer.controller.NotificationsPanelController">
 	<children>
+		<TextArea fx:id="notificationOutputTextArea" editable="false" layoutX="5.0" layoutY="5.0"
+				  styleClass="notification-output-area" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0"
+				  AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0"/>
 	</children>
-</Pane>
+</AnchorPane>

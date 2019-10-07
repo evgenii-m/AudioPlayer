@@ -52,19 +52,30 @@
 						</content>
 					</Tab>
 
-					<Tab fx:id="lastfmPanelTab" closable="false" styleClass="tab-pane-item" text="Last.m">
+					<Tab fx:id="deezerPanelComponentTab" styleClass="tab-pane-item" text="Deezer">
+						<content>
+							<AnchorPane fx:id="deezerPanelComponentPane">
+							</AnchorPane>
+						</content>
+					</Tab>
+
+					<Tab fx:id="lastfmPanelTab" closable="false" styleClass="tab-pane-item" text="Last.fm">
 						<content>
 							<AnchorPane fx:id="lastFmPanelComponentPane" minHeight="200.0">
 							</AnchorPane>
 						</content>
 					</Tab>
 
+					<Tab fx:id="radioPanelComponentTab" styleClass="tab-pane-item" text="Radio">
+						<content>
+							<AnchorPane fx:id="radioPanelComponentPane">
+							</AnchorPane>
+						</content>
+					</Tab>
+
 					<Tab fx:id="notificationsPanelTab" closable="false" styleClass="tab-pane-item" text="Notifications">
 						<content>
-							<AnchorPane>
-								<children>
-									<TextArea fx:id="notificationOutputTextArea" editable="false" layoutX="5.0" layoutY="5.0" styleClass="notification-output-area" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0" />
-								</children>
+							<AnchorPane fx:id="notificationsPanelComponentPane">
 							</AnchorPane>
 						</content>
 					</Tab>

@@ -44,6 +44,7 @@ public class MainController {
 
   private static final String DEFAULT_PLAYLIST_BACKUP_FOLDER_NAME = "export/backup_%s/";
   private static final String DEFAULT_PLAYLIST_BACKUP_FOLDER_TIMESTAMP_FORMAT = "yyyy-MM-dd_HH-mm-ss";
+
 	@FXML
   private AnchorPane mainContainer;
 	@FXML
@@ -55,19 +56,36 @@ public class MainController {
 	@FXML
 	public Tab notificationsPanelTab;
 	@FXML
-	public TabPane panelsTabPane;
+	public Tab radioPanelComponentTab;
 	@FXML
-	public TextArea notificationOutputTextArea;
+	public Tab deezerPanelComponentTab;
+	@FXML
+	public TabPane panelsTabPane;
 	@FXML
 	private AnchorPane playlistComponentPane;
 	@FXML
 	private AnchorPane lastFmPanelComponentPane;
+	@FXML
+	public AnchorPane deezerPanelComponentPane;
+	@FXML
+	public AnchorPane radioPanelComponentPane;
+	@FXML
+	public AnchorPane notificationsPanelComponentPane;
 	@FXML
   @Resource(name = "audioPlayerView")
   private ConfigurationControllers.View audioPlayerView;
   @FXML
   @Resource(name = "playlistView")
   private ConfigurationControllers.View playlistView;
+	@FXML
+	@Resource(name = "deezerPanelComponentView")
+	private ConfigurationControllers.View deezerPanelComponentView;
+	@FXML
+	@Resource(name = "radioPanelComponentView")
+	private ConfigurationControllers.View radioPanelComponentView;
+	@FXML
+	@Resource(name = "notificationsPanelComponentView")
+	private ConfigurationControllers.View notificationsPanelComponentView;
 	@FXML
 	@Resource(name = "lastfmPanelView")
 	private ConfigurationControllers.View lastfmPanelView;
@@ -90,13 +108,12 @@ public class MainController {
 
 		System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
 
-		AudioPlayerEventAdapter eventAdapter = new AudioPlayerEventAdapter();
-		audioPlayerFacade.addEventListener(eventAdapter);
-		musicLibraryLogicFacade.addEventListener(eventAdapter);
-
 		audioPlayerComponentPane.getChildren().add(audioPlayerView.getView());
 		playlistComponentPane.getChildren().add(playlistView.getView());
+		deezerPanelComponentPane.getChildren().add(deezerPanelComponentView.getView());
 		lastFmPanelComponentPane.getChildren().add(lastfmPanelView.getView());
+		radioPanelComponentPane.getChildren().add(radioPanelComponentView.getView());
+		notificationsPanelComponentPane.getChildren().add(notificationsPanelComponentView.getView());
   }
 
   @FXML
@@ -193,13 +210,4 @@ public class MainController {
 		}
 	}
 
-	private final class AudioPlayerEventAdapter extends DefaultAudioPlayerEventAdapter {
-
-		@Override
-		public void obtainedNotification(NotificationData notificationData) {
-			Platform.runLater(() -> {
-				notificationOutputTextArea.appendText(notificationData.getMessage() + "\n");
-			});
-		}
-	}
 }
