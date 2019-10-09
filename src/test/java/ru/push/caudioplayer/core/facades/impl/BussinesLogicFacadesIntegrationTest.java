@@ -69,7 +69,6 @@ public class BussinesLogicFacadesIntegrationTest extends AbstractTestNGSpringCon
 
     eventListener = Mockito.spy(new TestAudioPlayerEventAdapter());
     audioPlayerFacade.addEventListener(eventListener);
-		musicLibraryLogicFacade.reloadPlaylists(); // refresh playlist component after each test
 
     doNothing().when(applicationConfigService).saveActivePlaylist(anyString());
     doNothing().when(applicationConfigService).saveDisplayedPlaylist(anyString());
@@ -98,7 +97,7 @@ public class BussinesLogicFacadesIntegrationTest extends AbstractTestNGSpringCon
    */
   @Test
   public void shouldGetPlaylistsFromAppConfig() {
-    List<PlaylistData> playlists = musicLibraryLogicFacade.getLocalPlaylists();
+    List<PlaylistData> playlists = musicLibraryLogicFacade.getPlaylists();
 
     assertTrue(CollectionUtils.isNotEmpty(playlists), "Playlists collection null or empty.");
     assertEquals(playlists.size(), PLAYLISTS_COUNT, "Unexpected count of playlists.");

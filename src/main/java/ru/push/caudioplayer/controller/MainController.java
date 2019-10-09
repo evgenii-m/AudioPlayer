@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.ConfigurationControllers;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
+import ru.push.caudioplayer.core.facades.DeezerLogicFacade;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
 import ru.push.caudioplayer.core.facades.dto.NotificationData;
 import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
@@ -95,6 +96,8 @@ public class MainController {
 	@Autowired
 	private MusicLibraryLogicFacade musicLibraryLogicFacade;
 	@Autowired
+	private DeezerLogicFacade deezerLogicFacade;
+	@Autowired
 	private PlaylistController playlistController;
 
   @FXML
@@ -142,8 +145,8 @@ public class MainController {
 
 	@FXML
 	public void connectDeezer(ActionEvent actionEvent) {
-		String webPageUrl = musicLibraryLogicFacade.getDeezerUserAuthorizationPageUrl();
-		Function<String, Boolean> actionHandler = (value) -> musicLibraryLogicFacade.processDeezerAuthorization(value);
+		String webPageUrl = deezerLogicFacade.getDeezerUserAuthorizationPageUrl();
+		Function<String, Boolean> actionHandler = (value) -> deezerLogicFacade.processDeezerAuthorization(value);
 		displayWebPageWindow(webPageUrl, "Deezer authorization", true, actionHandler);
 	}
 

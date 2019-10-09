@@ -4,12 +4,16 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
+import ru.push.caudioplayer.core.facades.PlaylistLogicFacade;
 import ru.push.caudioplayer.core.facades.dto.PlaylistData;
 import ru.push.caudioplayer.core.facades.dto.TrackData;
 
@@ -34,12 +38,13 @@ public class PlaylistController extends PlaylistComponentBaseController {
 
 	@FXML
 	private AnchorPane playlistPanelContainer;
-
 	@FXML
 	private ListView<PlaylistData> playlistBrowserContainer;
-
 	@FXML
 	private TableView<TrackData> playlistContentContainer;
+
+	@Autowired
+	private MusicLibraryLogicFacade musicLibraryLogicFacade;
 
 
 	@FXML
@@ -51,26 +56,26 @@ public class PlaylistController extends PlaylistComponentBaseController {
 		playlistContentContainer.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
   }
 
-	@Override
-	protected AnchorPane getPlaylistPanelContainer() {
-		return playlistPanelContainer;
-	}
-
-	@Override
-	protected ListView<PlaylistData> getPlaylistBrowserContainer() {
-		return playlistBrowserContainer;
-	}
-
-	@Override
-	protected TableView<TrackData> getPlaylistContentContainer() {
-		return playlistContentContainer;
-	}
-
 	@PostConstruct
-  public void init() {
+	public void init() {
 		LOG.debug("init bean {}", this.getClass().getName());
-		super.init(musicLibraryLogicFacade.getLocalPlaylists(), new PlaylistAudioPlayerEventAdapter());
-  }
+
+		PlaylistAudioPlayerEventAdapter eventAdapter = new PlaylistAudioPlayerEventAdapter();
+		audioPlayerFacade.addEventListener(eventAdapter);
+		musicLibraryLogicFacade.addEventListener(eventAdapter);
+
+		super.init();
+
+		// bind playlist container mouse click event to play track action
+		getPlaylistContentContainer().setOnMouseClicked(mouseEvent -> {
+			if (mouseEvent.getButton().equals(MouseButton.PRIMARY) && (mouseEvent.getClickCount() == 2)) {
+				if (displayedPlaylist != null) {
+					TrackData trackData = getPlaylistContentContainer().getFocusModel().getFocusedItem();
+					audioPlayerFacade.playTrack(displayedPlaylist.getUid(), trackData.getTrackUid());
+				}
+			}
+		});
+	}
 
 	@PreDestroy
 	public void stop() {
@@ -85,6 +90,26 @@ public class PlaylistController extends PlaylistComponentBaseController {
 
 		// save view configuration
 		savePlaylistContainerViewConfiguration();
+	}
+
+	@Override
+	protected PlaylistLogicFacade getPlaylistLogicFacade() {
+		return musicLibraryLogicFacade;
+	}
+
+	@Override
+	protected AnchorPane getPlaylistPanelContainer() {
+		return playlistPanelContainer;
+	}
+
+	@Override
+	protected ListView<PlaylistData> getPlaylistBrowserContainer() {
+		return playlistBrowserContainer;
+	}
+
+	@Override
+	protected TableView<TrackData> getPlaylistContentContainer() {
+		return playlistContentContainer;
 	}
 
   @Override
@@ -125,19 +150,7 @@ public class PlaylistController extends PlaylistComponentBaseController {
 
 			// prepare context menu
 			ContextMenu contextMenu = new ContextMenu();
-			MenuItem showLastFmTrackInfoMenuItem = new MenuItem("Show Last.fm track info");
-
-			MenuItem removeMenuItem = new MenuItem("Delete");
-			removeMenuItem.setOnAction(event -> {
-				if (displayedPlaylist != null) {
-					List<String> selectedTracksUid = playlistContentContainer.getSelectionModel().getSelectedItems().stream()
-							.map(TrackData::getTrackUid)
-							.collect(Collectors.toList());
-					musicLibraryLogicFacade.deleteItemsFromPlaylist(displayedPlaylist.getUid(), selectedTracksUid);
-				}
-			});
-
-			contextMenu.getItems().addAll(showLastFmTrackInfoMenuItem, removeMenuItem);
+			contextMenu.getItems().addAll(getCommonPlaylistContentContainerMenuItems(playlistContentContainer));
 
 			tableRow.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
 				if (isNowEmpty) {
@@ -148,19 +161,6 @@ public class PlaylistController extends PlaylistComponentBaseController {
 			});
 			return tableRow;
 		});
-	}
-
-  @FXML
-	public void createNewPlaylist(ActionEvent actionEvent) {
-		musicLibraryLogicFacade.createLocalPlaylist();
-	}
-
-	@FXML
-	public void refreshPlaylists(ActionEvent actionEvent) {
-		musicLibraryLogicFacade.reloadPlaylists();
-		List<PlaylistData> localPlaylists = musicLibraryLogicFacade.getLocalPlaylists();
-		setPlaylistBrowserContainerItems(playlistBrowserContainer, localPlaylists);
-		setPlaylistContentContainerItems(displayedPlaylist);
 	}
 
 	@FXML

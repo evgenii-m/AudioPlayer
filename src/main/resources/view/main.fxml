@@ -47,14 +47,14 @@
 				<tabs>
 					<Tab fx:id="playlistComponentTab" styleClass="tab-pane-item" text="Playlist">
 						<content>
-							<AnchorPane fx:id="playlistComponentPane">
+							<AnchorPane fx:id="playlistComponentPane" minHeight="200.0">
 							</AnchorPane>
 						</content>
 					</Tab>
 
 					<Tab fx:id="deezerPanelComponentTab" styleClass="tab-pane-item" text="Deezer">
 						<content>
-							<AnchorPane fx:id="deezerPanelComponentPane">
+							<AnchorPane fx:id="deezerPanelComponentPane" minHeight="200.0">
 							</AnchorPane>
 						</content>
 					</Tab>

@@ -12,7 +12,7 @@ import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
 import ru.push.caudioplayer.core.mediaplayer.components.CustomAudioPlayerComponent;
 import ru.push.caudioplayer.core.medialoader.MediaInfoDataLoaderService;
 import ru.push.caudioplayer.core.playlist.model.MediaSourceType;
-import ru.push.caudioplayer.core.playlist.PlaylistService;
+import ru.push.caudioplayer.core.playlist.LocalPlaylistService;
 import ru.push.caudioplayer.core.playlist.model.PlaylistTrack;
 import uk.co.caprica.vlcj.player.MediaMeta;
 import uk.co.caprica.vlcj.player.MediaPlayer;
@@ -46,7 +46,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 	@Autowired
   private CustomAudioPlayerComponent playerComponent;
   @Autowired
-	private PlaylistService playlistService;
+	private LocalPlaylistService localPlaylistService;
   @Autowired
   private MediaInfoDataLoaderService mediaInfoDataLoaderService;
 	@Autowired
@@ -84,7 +84,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 
 	@Override
 	public void resumePlayingTrack() {
-		playlistService.getActivePlaylistTrack().ifPresent(o -> {
+		localPlaylistService.getActivePlaylistTrack().ifPresent(o -> {
 			playerComponent.resume();
 			startPlayingNewTrack(o);
 		});
@@ -92,19 +92,19 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 
   @Override
   public void playTrack(String playlistUid, String trackUid) {
-		Optional<PlaylistTrack> playlistTrack = playlistService.setActivePlaylistTrack(playlistUid, trackUid);
+		Optional<PlaylistTrack> playlistTrack = localPlaylistService.setActivePlaylistTrack(playlistUid, trackUid);
     playTrack(playlistTrack);
   }
 
   @Override
   public void playNextTrack() {
-		Optional<PlaylistTrack> playlistTrack = playlistService.nextActivePlaylistTrack();
+		Optional<PlaylistTrack> playlistTrack = localPlaylistService.nextActivePlaylistTrack();
 		playTrack(playlistTrack);
   }
 
   @Override
 	public void playPrevTrack() {
-		Optional<PlaylistTrack> playlistTrack = playlistService.prevActivePlaylistTrack();
+		Optional<PlaylistTrack> playlistTrack = localPlaylistService.prevActivePlaylistTrack();
 		playTrack(playlistTrack);
   }
 
@@ -126,12 +126,12 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 
 	@Override
   public Optional<TrackData> getActivePlaylistTrack() {
-    return playlistService.getActivePlaylistTrack().map(o -> dtoMapper.mapTrackData(o));
+    return localPlaylistService.getActivePlaylistTrack().map(o -> dtoMapper.mapTrackData(o));
   }
 
 	@Override
 	public void pauseCurrentTrack() {
-		playlistService.getActivePlaylistTrack().ifPresent(o -> {
+		localPlaylistService.getActivePlaylistTrack().ifPresent(o -> {
 			playerComponent.pause();
 			cancelScrobbling();
 		});
@@ -140,8 +140,8 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
 	@Override
 	public void stopPlaying() {
 		playerComponent.stop();
-		playlistService.getActivePlaylistTrack().ifPresent(track -> {
-			playlistService.resetActivePlaylistTrack();
+		localPlaylistService.getActivePlaylistTrack().ifPresent(track -> {
+			localPlaylistService.resetActivePlaylistTrack();
 			cancelScrobbling();
 			TrackData trackData = dtoMapper.mapTrackData(track);
 			eventListeners.forEach(listener -> listener.changedNowPlayingTrack(trackData));
@@ -191,7 +191,7 @@ public class DefaultAudioPlayerFacade implements AudioPlayerFacade {
     public void mediaMetaChanged(MediaPlayer mediaPlayer, int metaType) {
       if (mediaPlayer.isPlaying()) {  // media changes actual only when playing media
         LOG.debug("mediaMetaChanged");
-				Optional<PlaylistTrack> playlistTrack = playlistService.getActivePlaylistTrack();
+				Optional<PlaylistTrack> playlistTrack = localPlaylistService.getActivePlaylistTrack();
 
 				playlistTrack.ifPresent(track -> {
 					MediaMeta mediaMeta = mediaPlayer.getMediaMeta();

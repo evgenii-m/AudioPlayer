@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.AppMain;
+import ru.push.caudioplayer.core.facades.DeezerLogicFacade;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
 import ru.push.caudioplayer.core.facades.dto.LastFmTrackData;
 import ru.push.caudioplayer.core.facades.dto.LastFmTrackInfoData;
@@ -93,6 +94,8 @@ public class LastFmPanelController {
 	private AppMain appMain;
 	@Autowired
 	private MusicLibraryLogicFacade musicLibraryLogicFacade;
+	@Autowired
+	private DeezerLogicFacade deezerLogicFacade;
 	@Autowired
 	private PlaylistController playlistController;
 
@@ -193,14 +196,14 @@ public class LastFmPanelController {
 				Optional<PlaylistData> displayedPlaylist = playlistController.getDisplayedPlaylist();
 				displayedPlaylist.ifPresent(playlist -> {
 					LastFmTrackData data = tableRow.getItem();
-					musicLibraryLogicFacade.addLastFmTrackDeezerPlaylist(playlist.getUid(), data);
+					deezerLogicFacade.addLastFmTrackDeezerPlaylist(playlist.getUid(), data);
 				});
 			});
 
 			MenuItem addToDeezerLovedTracksMenuItem = new MenuItem("Add to Deezer loved tracks");
 			addToDeezerLovedTracksMenuItem.setOnAction(event -> {
 				LastFmTrackData data = tableRow.getItem();
-				musicLibraryLogicFacade.addLastFmTrackToDeezerLovedTracksAndMonthlyPlaylist(data);
+				deezerLogicFacade.addLastFmTrackToDeezerLovedTracksAndMonthlyPlaylist(data);
 			});
 
 			contextMenu.getItems().addAll(
@@ -234,7 +237,7 @@ public class LastFmPanelController {
 			LastFmTrackInfoData trackInfoData = (LastFmTrackInfoData) trackInfoContainer.getUserData();
 			Optional<PlaylistData> displayedPlaylist = playlistController.getDisplayedPlaylist();
 			displayedPlaylist.ifPresent(playlist -> {
-				musicLibraryLogicFacade.addLastFmTrackDeezerPlaylist(playlist.getUid(), trackInfoData);
+				deezerLogicFacade.addLastFmTrackDeezerPlaylist(playlist.getUid(), trackInfoData);
 			});
 		}
 	}
@@ -243,7 +246,7 @@ public class LastFmPanelController {
 	public void addLastFmTrackToDeezerLovedTracksAction(ActionEvent actionEvent) {
 		if (trackInfoContainer.getUserData() != null) {
 			LastFmTrackInfoData trackInfoData = (LastFmTrackInfoData) trackInfoContainer.getUserData();
-			musicLibraryLogicFacade.addLastFmTrackToDeezerLovedTracksAndMonthlyPlaylist(trackInfoData);
+			deezerLogicFacade.addLastFmTrackToDeezerLovedTracksAndMonthlyPlaylist(trackInfoData);
 		}
 	}
 

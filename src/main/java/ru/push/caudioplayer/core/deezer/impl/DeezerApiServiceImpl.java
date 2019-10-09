@@ -160,6 +160,14 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 		}
 	}
 
+	@Override
+	public Playlist getPlaylist(long playlistId) throws DeezerApiErrorException {
+		checkAccessToken();
+		Playlist playlist = deezerApiProvider.getPlaylist(playlistId, currentAccessToken);
+		LOG.debug("Received deezer playlist: {}", playlist);
+		return playlist;
+	}
+
 	private void fetchPlaylistsTracks(List<Playlist> playlists) {
 		List<ru.push.caudioplayer.core.playlist.model.Playlist> playlistData = new ArrayList<>();
 		LOG.debug("Deezer fetching playlists tracks begin");
@@ -221,7 +229,7 @@ public class DeezerApiServiceImpl implements DeezerApiService {
 	public Long createPlaylist(String title) throws DeezerApiErrorException {
 		checkAccessToken();
 		PlaylistId playlistId = deezerApiProvider.createPlaylist(title, currentAccessToken);
-		return playlistId.getId();
+		return (playlistId != null) ? playlistId.getId() : null;
 	}
 
 	@Override

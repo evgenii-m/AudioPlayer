@@ -16,7 +16,6 @@ public interface DeezerApiService {
 	 * Method for checking authorization code in location URI
 	 *
 	 * @return authorization code if detected
-	 * @throws DeezerNeedAuthorizationException when error reason obtained
 	 */
 	String checkAuthorizationCode(String locationUri) throws DeezerApiErrorException;
 
@@ -38,6 +37,8 @@ public interface DeezerApiService {
 	 * See https://developers.deezer.com/api/user/playlists
 	 */
 	List<Playlist> getPlaylists() throws DeezerApiErrorException;
+
+	Playlist getPlaylist(long playlistId) throws DeezerApiErrorException;
 
 	List<Track> getPlaylistTracks(long playlistId) throws DeezerApiErrorException;
 

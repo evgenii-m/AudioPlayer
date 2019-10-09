@@ -25,6 +25,7 @@ import ru.push.caudioplayer.core.config.ApplicationConfigService;
 import ru.push.caudioplayer.core.config.dto.PlaylistContainerViewConfigurations;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
+import ru.push.caudioplayer.core.facades.PlaylistLogicFacade;
 import ru.push.caudioplayer.core.facades.dto.PlaylistData;
 import ru.push.caudioplayer.core.facades.dto.TrackData;
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
@@ -65,8 +66,6 @@ public abstract class PlaylistComponentBaseController {
 	@Autowired
 	protected AudioPlayerFacade audioPlayerFacade;
 	@Autowired
-	protected MusicLibraryLogicFacade musicLibraryLogicFacade;
-	@Autowired
 	protected ApplicationConfigService applicationConfigService;
 	@Autowired
 	protected RenamePopupController renamePopupController;
@@ -81,13 +80,10 @@ public abstract class PlaylistComponentBaseController {
 		LOG.debug("initialize FXML for {}", this.getClass().getName());
 	}
 
-	public void init(List<PlaylistData> playlistData, AudioPlayerEventListener eventListener) {
-		audioPlayerFacade.addEventListener(eventListener);
-		musicLibraryLogicFacade.addEventListener(eventListener);
-
+	public void init() {
 		// configure playlist browser container
 		setPlaylistBrowserContainerCellFactory(getPlaylistBrowserContainer());
-		setPlaylistBrowserContainerItems(getPlaylistBrowserContainer(), playlistData);
+		setPlaylistBrowserContainerItems(getPlaylistBrowserContainer(), getPlaylistLogicFacade().getPlaylists());
 
 		// configure playlist content container
 		setPlaylistContainerColumns(getPlaylistContentContainer(),
@@ -95,15 +91,6 @@ public abstract class PlaylistComponentBaseController {
 		setPlaylistContentContainerRowFactory(getPlaylistContentContainer());
 		setPlaylistContentContainerItems(displayedPlaylist);
 
-		// bind playlist container mouse click event to play track action
-		getPlaylistContentContainer().setOnMouseClicked(mouseEvent -> {
-			if (mouseEvent.getButton().equals(MouseButton.PRIMARY) && (mouseEvent.getClickCount() == 2)) {
-				if (displayedPlaylist != null) {
-					TrackData trackData = getPlaylistContentContainer().getFocusModel().getFocusedItem();
-					audioPlayerFacade.playTrack(displayedPlaylist.getUid(), trackData.getTrackUid());
-				}
-			}
-		});
 
 		// bind selected item of playlist browser changes to show playlist action
 		getPlaylistBrowserContainer().getSelectionModel().selectedItemProperty().addListener(
@@ -124,6 +111,8 @@ public abstract class PlaylistComponentBaseController {
 
 	}
 
+	protected abstract PlaylistLogicFacade getPlaylistLogicFacade();
+
 	protected abstract AnchorPane getPlaylistPanelContainer();
 
 	protected abstract ListView<PlaylistData> getPlaylistBrowserContainer();
@@ -133,6 +122,20 @@ public abstract class PlaylistComponentBaseController {
 	protected abstract void setPlaylistBrowserContainerCellFactory(ListView<PlaylistData> playlistBrowserContainer);
 
 	protected abstract void setPlaylistContentContainerRowFactory(TableView<TrackData> playlistContentContainer);
+
+	@FXML
+	public void createNewPlaylist(ActionEvent actionEvent) {
+		getPlaylistLogicFacade().createPlaylist();
+	}
+
+	@FXML
+	public void refreshPlaylists(ActionEvent actionEvent) {
+		List<PlaylistData> playlists = getPlaylistLogicFacade().getPlaylists();
+		displayedPlaylist = playlists.stream().findFirst().orElse(null);
+
+		setPlaylistBrowserContainerItems(getPlaylistBrowserContainer(), playlists);
+		setPlaylistContentContainerItems(displayedPlaylist);
+	}
 
 	protected List<MenuItem> getCommonPlaylistBrowserContainerMenuItems(ListCell<PlaylistData> cell) {
 		MenuItem removeMenuItem = new MenuItem("Delete");
@@ -147,7 +150,7 @@ public abstract class PlaylistComponentBaseController {
 		return Arrays.asList(removeMenuItem, renameMenuItem, exportMenuItem);
 	}
 
-	protected void renamePlaylistAction(ActionEvent event, ListCell<PlaylistData> cell) {
+	private void renamePlaylistAction(ActionEvent event, ListCell<PlaylistData> cell) {
 		PlaylistData playlistData = cell.getItem();
 		if (playlistData.isReadOnly()) {
 			LOG.warn("For read only playlists rename disabled");
@@ -159,13 +162,13 @@ public abstract class PlaylistComponentBaseController {
 		popupStage.show();
 	}
 
-	protected void removePlaylistAction(ActionEvent event, ListCell<PlaylistData> cell) {
+	private void removePlaylistAction(ActionEvent event, ListCell<PlaylistData> cell) {
 		PlaylistData playlistData = cell.getItem();
 
 		Stage popupStage = createPopup("Confirm action", new Scene(confirmActionPopupView.getView()));
 
 		Consumer<Void> action = (o) -> {
-			musicLibraryLogicFacade.deletePlaylist(playlistData.getUid());
+			getPlaylistLogicFacade().deletePlaylist(playlistData.getUid());
 		};
 		String message = String.format("Remove playlist \'%s\'?", playlistData.getTitle());
 		confirmActionPopupController.setAction(action, message);
@@ -173,7 +176,7 @@ public abstract class PlaylistComponentBaseController {
 
 	}
 
-	protected void exportPlaylistAction(ActionEvent event, ListCell<PlaylistData> cell) {
+	private void exportPlaylistAction(ActionEvent event, ListCell<PlaylistData> cell) {
 		PlaylistData playlist = cell.getItem();
 
 		try {
@@ -181,18 +184,27 @@ public abstract class PlaylistComponentBaseController {
 			if (Files.notExists(exportFolderPath) || !Files.isDirectory(exportFolderPath)) {
 				Files.createDirectories(exportFolderPath);
 			}
-			musicLibraryLogicFacade.exportPlaylistToFile(playlist.getUid(), DEFAULT_PLAYLIST_EXPORT_FOLDER);
+			getPlaylistLogicFacade().exportPlaylistToFile(playlist.getUid(), DEFAULT_PLAYLIST_EXPORT_FOLDER);
 		} catch (IOException e) {
 			LOG.error("Export playlist error", e);
 		}
 	}
 
-	protected void openPlaylistInWebBrowserAction(ActionEvent event, ListCell<PlaylistData> cell) {
-		PlaylistData playlistData = cell.getItem();
-		String webPageUrl = musicLibraryLogicFacade.getDeezerPlaylistWebPageUrl(playlistData.getUid());
-		if (StringUtils.isNotEmpty(webPageUrl)) {
-			appMain.openWebPage(webPageUrl);
-		}
+	protected List<MenuItem> getCommonPlaylistContentContainerMenuItems(TableView<TrackData> playlistContentContainer) {
+
+		MenuItem showLastFmTrackInfoMenuItem = new MenuItem("Show Last.fm track info");
+
+		MenuItem removeMenuItem = new MenuItem("Delete");
+		removeMenuItem.setOnAction(event -> {
+			if (displayedPlaylist != null) {
+				List<String> selectedTracksUid = playlistContentContainer.getSelectionModel().getSelectedItems().stream()
+						.map(TrackData::getTrackUid)
+						.collect(Collectors.toList());
+				getPlaylistLogicFacade().deleteItemsFromPlaylist(displayedPlaylist.getUid(), selectedTracksUid);
+			}
+		});
+
+		return Arrays.asList(showLastFmTrackInfoMenuItem, removeMenuItem);
 	}
 
 	protected void setPlaylistBrowserContainerItems(ListView<PlaylistData> container, List<PlaylistData> playlists) {

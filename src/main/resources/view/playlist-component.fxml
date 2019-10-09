@@ -25,13 +25,13 @@
 					<Insets left="5.0" right="5.0"/>
 				</padding>
 			</HBox>
-			<ListView fx:id="playlistBrowserContainer" minHeight="200.0" styleClass="playlist-browser-container"
+			<ListView fx:id="playlistBrowserContainer" minHeight="100.0" styleClass="playlist-browser-container"
 					  AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
 					  AnchorPane.topAnchor="40.0">
 			</ListView>
 		</AnchorPane>
 
-		<TableView fx:id="playlistContentContainer" minHeight="200.0" prefWidth="500.0" AnchorPane.bottomAnchor="5.0"
+		<TableView fx:id="playlistContentContainer" minHeight="100.0" AnchorPane.bottomAnchor="5.0"
 				   AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
 			<columns>
 			</columns>

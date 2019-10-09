@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
+import ru.push.caudioplayer.core.facades.DeezerLogicFacade;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
 import ru.push.caudioplayer.core.facades.dto.NotificationData;
 import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
@@ -24,9 +25,10 @@ public class NotificationsPanelController {
 
 	@Autowired
 	private AudioPlayerFacade audioPlayerFacade;
-
 	@Autowired
 	private MusicLibraryLogicFacade musicLibraryLogicFacade;
+	@Autowired
+	private DeezerLogicFacade deezerLogicFacade;
 
 
   @FXML
@@ -41,6 +43,7 @@ public class NotificationsPanelController {
 		AudioPlayerEventAdapter eventAdapter = new AudioPlayerEventAdapter();
 		audioPlayerFacade.addEventListener(eventAdapter);
 		musicLibraryLogicFacade.addEventListener(eventAdapter);
+		deezerLogicFacade.addEventListener(eventAdapter);
   }
 
 	private final class AudioPlayerEventAdapter extends DefaultAudioPlayerEventAdapter {

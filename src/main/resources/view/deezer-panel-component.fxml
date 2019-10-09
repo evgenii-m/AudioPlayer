@@ -1,37 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.HBox?>
 
 <AnchorPane fx:id="playlistPanelContainer" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-			minWidth="-Infinity" stylesheets="/css/style.css" AnchorPane.bottomAnchor="0.0"
-			AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"
-			xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1"
-			fx:controller="ru.push.caudioplayer.controller.DeezerPanelController">
+			minWidth="-Infinity" stylesheets="/css/style.css" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+			AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.121"
+			xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.push.caudioplayer.controller.DeezerPanelController">
 	<children>
 		<AnchorPane prefWidth="290.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0"
 					AnchorPane.topAnchor="5.0">
-			<HBox prefHeight="25.0" prefWidth="290.0" spacing="7.0" AnchorPane.leftAnchor="0.0"
-				  AnchorPane.topAnchor="5.0">
-				<children>
-					<Button onAction="#createNewPlaylist" styleClass="playlist-browser-control-button">New</Button>
-					<Button onAction="#refreshPlaylists" styleClass="playlist-browser-control-button">Refresh</Button>
-				</children>
-				<padding>
-					<Insets left="5.0" right="5.0"/>
-				</padding>
-			</HBox>
-			<ListView fx:id="playlistBrowserContainer" layoutY="30.0" minHeight="200.0"
+			<Button onAction="#createNewPlaylist" prefWidth="50.0" styleClass="playlist-browser-control-button"
+					AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="5.0">New
+			</Button>
+			<Button onAction="#refreshPlaylists" styleClass="playlist-browser-control-button"
+					AnchorPane.leftAnchor="60.0" AnchorPane.topAnchor="5.0">Refresh
+			</Button>
+			<ChoiceBox prefWidth="120.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0"/>
+			<ListView fx:id="playlistBrowserContainer" layoutY="30.0" minHeight="100.0"
 					  styleClass="playlist-browser-container" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-					  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
+					  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="70.0">
 			</ListView>
+			<TextField fx:id="searchQueryTextField" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="60.0" AnchorPane.topAnchor="40.0"/>
+			<Button onAction="#clearSearchQueryTextField" mnemonicParsing="false" prefWidth="55.0" text="Clear" AnchorPane.rightAnchor="0.0"
+					AnchorPane.topAnchor="40.0"/>
 		</AnchorPane>
 
-		<TableView fx:id="playlistContentContainer" minHeight="200.0" prefWidth="500.0" AnchorPane.bottomAnchor="5.0"
+		<TableView fx:id="playlistContentContainer" minHeight="100.0" AnchorPane.bottomAnchor="5.0"
 				   AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
 			<columns>
 			</columns>

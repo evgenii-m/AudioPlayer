@@ -20,14 +20,14 @@ public class PlaylistTrack {
 
 
 	public PlaylistTrack(String uid, Playlist playlist) {
-		this(uid, MediaSourceType.FILE, StringUtils.EMPTY);
-		this.playlist = playlist;
+		this(uid, MediaSourceType.FILE, StringUtils.EMPTY, playlist);
 	}
 
-	public PlaylistTrack(String uid, MediaSourceType sourceType, String trackPath) {
+	public PlaylistTrack(String uid, MediaSourceType sourceType, String trackPath, Playlist playlist) {
 		this.uid = uid;
 		this.sourceType = sourceType;
 		this.trackPath = trackPath;
+		this.playlist = playlist;
 		this.nowPlaying = false;
 	}
 

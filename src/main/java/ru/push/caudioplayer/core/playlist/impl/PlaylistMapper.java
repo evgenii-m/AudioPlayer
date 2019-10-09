@@ -16,10 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Component
+@Component("localPlaylistMapper")
 class PlaylistMapper {
-
-	private static final long DEEZER_DURATION_FACTOR = 1000;
 
 	@Autowired
 	private MediaInfoDataLoaderService mediaLoaderService;
@@ -30,11 +28,6 @@ class PlaylistMapper {
 	Playlist mapPlaylist(PlaylistEntity o) {
 		return new Playlist(o.getUid(), o.getTitle(), PlaylistType.fromValue(o.getType()),
 				o.getLink(), o.isReadOnly(), mapPlaylistItem(o.getItems()));
-	}
-
-	Playlist mapPlaylistDeezer(ru.push.caudioplayer.core.deezer.model.Playlist o) {
-		return new Playlist(String.valueOf(o.getId()), o.getTitle(), PlaylistType.DEEZER,
-				o.getLink(), o.getIs_loved_track(), mapPlaylistItemDeezer(o.getTracks().getData()));
 	}
 
 	PlaylistEntity inverseMapPlaylist(Playlist o) {
@@ -66,12 +59,6 @@ class PlaylistMapper {
 		}
 	}
 
-	List<Playlist> mapPlaylistDeezer(List<ru.push.caudioplayer.core.deezer.model.Playlist> list) {
-		return (list != null) ?
-				list.stream().map(this::mapPlaylistDeezer).collect(Collectors.toList()) :
-				new ArrayList<>();
-	}
-
 	List<PlaylistEntity> inverseMapPlaylist(List<Playlist> list) {
 		return (list != null) ?
 				list.stream().map(this::inverseMapPlaylist).collect(Collectors.toList()) :
@@ -81,33 +68,22 @@ class PlaylistMapper {
 
 	// PlaylistTrack mapping
 
-	PlaylistTrack mapPlaylistItem(PlaylistItemEntity o) {
+	PlaylistTrack mapPlaylistItem(Playlist playlist, PlaylistItemEntity o) {
 		MediaSourceType sourceType = MediaSourceType.valueOf(o.getSourceType());
 		if (MediaSourceType.HTTP_STREAM.equals(sourceType)) {
-			PlaylistTrack track = new PlaylistTrack(o.getUid(), sourceType, o.getTrackPath());
+			PlaylistTrack track = new PlaylistTrack(o.getUid(), sourceType, o.getTrackPath(), playlist);
 			mediaLoaderService.fillMediaInfoFromHttpStreamByDecoder(track, track.getTrackPath());
 			return track;
 		} else {
 			return new PlaylistTrack(
-					o.getUid(), sourceType, o.getTrackPath(), o.getArtist(),
+					o.getUid(), sourceType, o.getTrackPath(), playlist, o.getArtist(),
 					o.getAlbum(), o.getDate(), o.getTitle(), o.getTrackNumber(), o.getLength()
 			);
 		}
 	}
 
-	private PlaylistTrack mapPlaylistItemDeezer(ru.push.caudioplayer.core.deezer.model.Track o) {
-		return new PlaylistTrack(
-				String.valueOf(o.getId()), MediaSourceType.DEEZER_MEDIA, o.getPreview(), o.getArtist().getName(),
-				o.getAlbum().getTitle(), null, o.getTitle(), null, o.getDuration() * DEEZER_DURATION_FACTOR
-		);
-	}
-
-	PlaylistTrack mapPlaylistItemDeezer(Playlist playlist, ru.push.caudioplayer.core.deezer.model.Track track) {
-		long length = track.getDuration() * DEEZER_DURATION_FACTOR;
-		return new PlaylistTrack(
-				String.valueOf(track.getId()), MediaSourceType.DEEZER_MEDIA, track.getPreview(), playlist,
-				track.getArtist().getName(), track.getAlbum().getTitle(), null, track.getTitle(), null, length
-		);
+	PlaylistTrack mapPlaylistItem(PlaylistItemEntity o) {
+		return mapPlaylistItem(null, o);
 	}
 
 	PlaylistItemEntity inverseMapPlaylistItem(PlaylistTrack o, PlaylistEntity playlist) {
@@ -120,12 +96,6 @@ class PlaylistMapper {
 	List<PlaylistTrack> mapPlaylistItem(List<PlaylistItemEntity> list) {
 		return (list != null) ?
 				list.stream().map(this::mapPlaylistItem).collect(Collectors.toList()) :
-				new ArrayList<>();
-	}
-
-	List<PlaylistTrack> mapPlaylistItemDeezer(List<ru.push.caudioplayer.core.deezer.model.Track> list) {
-		return (list != null) ?
-				list.stream().map(this::mapPlaylistItemDeezer).collect(Collectors.toList()) :
 				new ArrayList<>();
 	}
 

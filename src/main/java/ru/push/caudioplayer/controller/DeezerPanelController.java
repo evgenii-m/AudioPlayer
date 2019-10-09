@@ -9,11 +9,15 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import ru.push.caudioplayer.core.facades.DeezerLogicFacade;
 import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
+import ru.push.caudioplayer.core.facades.PlaylistLogicFacade;
 import ru.push.caudioplayer.core.facades.dto.PlaylistData;
 import ru.push.caudioplayer.core.facades.dto.TrackData;
 
@@ -30,13 +34,16 @@ public class DeezerPanelController extends PlaylistComponentBaseController {
   private static final Logger LOG = LoggerFactory.getLogger(DeezerPanelController.class);
 
   @FXML
+  public TextField searchQueryTextField;
+	@FXML
   private AnchorPane playlistPanelContainer;
-
 	@FXML
 	private ListView<PlaylistData> playlistBrowserContainer;
-
 	@FXML
 	private TableView<TrackData> playlistContentContainer;
+
+	@Autowired
+	private DeezerLogicFacade deezerLogicFacade;
 
 
   @FXML
@@ -47,6 +54,11 @@ public class DeezerPanelController extends PlaylistComponentBaseController {
 		playlistContentContainer.setEditable(false);
 		playlistContentContainer.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
   }
+
+	@Override
+	protected PlaylistLogicFacade getPlaylistLogicFacade() {
+		return deezerLogicFacade;
+	}
 
 	@Override
 	protected AnchorPane getPlaylistPanelContainer() {
@@ -66,9 +78,17 @@ public class DeezerPanelController extends PlaylistComponentBaseController {
 	@PostConstruct
   public void init() {
     LOG.debug("init bean {}", this.getClass().getName());
-		super.init(musicLibraryLogicFacade.getDeezerPlaylists(), new PlaylistAudioPlayerEventAdapter());
-  }
 
+		PlaylistAudioPlayerEventAdapter eventAdapter = new PlaylistAudioPlayerEventAdapter();
+		audioPlayerFacade.addEventListener(eventAdapter);
+		deezerLogicFacade.addEventListener(eventAdapter);
+
+		super.init();
+
+		searchQueryTextField.textProperty().addListener((observable, oldValue, newValue) -> {
+			filterPlaylistsBySearchQuery(newValue);
+		});
+  }
 
 	@Override
 	protected void setPlaylistBrowserContainerCellFactory(ListView<PlaylistData> playlistBrowserContainer) {
@@ -105,6 +125,14 @@ public class DeezerPanelController extends PlaylistComponentBaseController {
 		});
 	}
 
+	protected void openPlaylistInWebBrowserAction(ActionEvent event, ListCell<PlaylistData> cell) {
+		PlaylistData playlistData = cell.getItem();
+		String webPageUrl = deezerLogicFacade.getDeezerPlaylistWebPageUrl(playlistData.getUid());
+		if (StringUtils.isNotEmpty(webPageUrl)) {
+			appMain.openWebPage(webPageUrl);
+		}
+	}
+
 	@Override
 	protected void setPlaylistContentContainerRowFactory(TableView<TrackData> playlistContentContainer) {
 		playlistContentContainer.setRowFactory(lv -> {
@@ -112,19 +140,10 @@ public class DeezerPanelController extends PlaylistComponentBaseController {
 
 			// prepare context menu
 			ContextMenu contextMenu = new ContextMenu();
-			MenuItem showLastFmTrackInfoMenuItem = new MenuItem("Show Last.fm track info");
 
-			MenuItem removeMenuItem = new MenuItem("Delete");
-			removeMenuItem.setOnAction(event -> {
-				if (displayedPlaylist != null) {
-					List<String> selectedTracksUid = playlistContentContainer.getSelectionModel().getSelectedItems().stream()
-							.map(TrackData::getTrackUid)
-							.collect(Collectors.toList());
-					musicLibraryLogicFacade.deleteItemsFromPlaylist(displayedPlaylist.getUid(), selectedTracksUid);
-				}
-			});
-
-			contextMenu.getItems().addAll(showLastFmTrackInfoMenuItem, removeMenuItem);
+			contextMenu.getItems().addAll(
+					getCommonPlaylistContentContainerMenuItems(playlistContentContainer)
+			);
 
 			tableRow.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
 				if (isNowEmpty) {
@@ -138,18 +157,15 @@ public class DeezerPanelController extends PlaylistComponentBaseController {
 	}
 
 	@FXML
-	public void createNewPlaylist(ActionEvent actionEvent) {
-		musicLibraryLogicFacade.createDeezerPlaylist();
+	public void clearSearchQueryTextField(ActionEvent actionEvent) {
+		searchQueryTextField.clear();
 	}
 
-	@FXML
-	public void refreshPlaylists(ActionEvent actionEvent) {
-		musicLibraryLogicFacade.reloadPlaylists();
-		List<PlaylistData> deezerPlaylists = musicLibraryLogicFacade.getDeezerPlaylists();
-		setPlaylistBrowserContainerItems(playlistBrowserContainer, deezerPlaylists);
-		setPlaylistContentContainerItems(displayedPlaylist);
+	private void filterPlaylistsBySearchQuery(String newValue) {
+//		List<PlaylistData> deezerPlaylists = deezerLogicFacade.getPlaylists();
+//		setPlaylistBrowserContainerItems(playlistBrowserContainer, deezerPlaylists);
+//		setPlaylistContentContainerItems(displayedPlaylist);
 	}
-
 
 	private final class PlaylistAudioPlayerEventAdapter extends BaseAudioPlayerEventAdapter {
 		@Override
