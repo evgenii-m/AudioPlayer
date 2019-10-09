@@ -26,8 +26,6 @@ public interface MusicLibraryLogicFacade extends PlaylistLogicFacade {
 
 	LastFmTrackInfoData getLastFmTrackInfo(LastFmTrackData trackData);
 
-	PlaylistData getActivePlaylist();
-
 	void addFilesToPlaylist(String playlistUid, List<File> files);
 
 	void addLocationsToPlaylist(String playlistUid, List<String> locations);

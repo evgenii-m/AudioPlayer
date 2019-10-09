@@ -7,9 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import ru.push.caudioplayer.core.config.ApplicationConfigService;
 import ru.push.caudioplayer.core.config.dto.PlaylistItemData;
-import ru.push.caudioplayer.core.deezer.DeezerApiErrorException;
 import ru.push.caudioplayer.core.deezer.DeezerApiService;
-import ru.push.caudioplayer.core.deezer.model.Track;
 import ru.push.caudioplayer.core.medialoader.MediaInfoDataLoaderService;
 import ru.push.caudioplayer.core.playlist.LocalPlaylistService;
 import ru.push.caudioplayer.core.playlist.dao.PlaylistItemRepository;
@@ -20,26 +18,18 @@ import ru.push.caudioplayer.core.playlist.dao.entity.PlaylistEntity;
 import ru.push.caudioplayer.core.playlist.model.Playlist;
 import ru.push.caudioplayer.core.playlist.model.PlaylistTrack;
 import ru.push.caudioplayer.core.playlist.model.PlaylistType;
-import ru.push.caudioplayer.core.playlist.dto.TrackData;
 import ru.push.caudioplayer.utils.DateTimeUtils;
-import ru.push.caudioplayer.utils.XmlUtils;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Component
 public class LocalPlaylistServiceImpl implements LocalPlaylistService {
@@ -89,7 +79,19 @@ public class LocalPlaylistServiceImpl implements LocalPlaylistService {
 
 	@Override
 	public Optional<Playlist> getPlaylist(String playlistUid) {
-		return localPlaylistRepository.findById(playlistUid).map(p -> playlistMapper.mapPlaylist(p));
+		return localPlaylistRepository.findById(playlistUid).map(p -> {
+			Playlist playlist = playlistMapper.mapPlaylist(p);
+			setNowPlayingTrack(playlist);
+			return playlist;
+		});
+	}
+
+	private void setNowPlayingTrack(Playlist playlist) {
+		if ((activePlaylistTrackUid != null) && playlist.getUid().equals(activePlaylistUid)) {
+			playlist.getItems().stream()
+					.filter(o -> o.getUid().equals(activePlaylistTrackUid)).findFirst()
+					.ifPresent(o -> o.setNowPlaying(true));
+		}
 	}
 
 	@Override
@@ -306,7 +308,6 @@ public class LocalPlaylistServiceImpl implements LocalPlaylistService {
 		);
 
 		playlist.getItems().addAll(newItems);
-
 		LOG.info("New items added to playlist: playlist = {}", playlist);
 		return playlist;
 	}

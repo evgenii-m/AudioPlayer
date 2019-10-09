@@ -10,6 +10,7 @@ import ru.push.caudioplayer.core.deezer.DeezerPlaylistService;
 import ru.push.caudioplayer.core.facades.DeezerLogicFacade;
 import ru.push.caudioplayer.core.facades.dto.LastFmTrackData;
 import ru.push.caudioplayer.core.facades.dto.LastFmTrackInfoData;
+import ru.push.caudioplayer.core.facades.dto.PlaylistData;
 import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
 import ru.push.caudioplayer.core.playlist.PlaylistService;
 import ru.push.caudioplayer.core.playlist.dto.TrackData;
@@ -184,5 +185,10 @@ public class DeezerLogicFacadeImpl extends AbstractPlaylistLogicFacadeImpl imple
 				);
 			}
 		}
+	}
+
+	@Override
+	public PlaylistData getActivePlaylist() {
+		return null;
 	}
 }

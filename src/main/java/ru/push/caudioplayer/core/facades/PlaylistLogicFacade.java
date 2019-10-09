@@ -24,4 +24,6 @@ public interface PlaylistLogicFacade {
 	void exportPlaylistToFile(String playlistUid, String folderPath);
 
 	void deleteItemsFromPlaylist(String playlistUid, List<String> tracksUid);
+
+	PlaylistData getActivePlaylist();
 }

@@ -97,7 +97,7 @@ public class LastFmPanelController {
 	@Autowired
 	private DeezerLogicFacade deezerLogicFacade;
 	@Autowired
-	private PlaylistController playlistController;
+	private DeezerPanelController deezerPanelController;
 
 	private final ScheduledExecutorService updateRecentTracksExecutor = Executors.newSingleThreadScheduledExecutor();
 	private List<LastFmTrackData> currentRecentTracks;
@@ -193,7 +193,7 @@ public class LastFmPanelController {
 
 			MenuItem addToDeezerPlaylistMenuItem = new MenuItem("Add to Deezer playlist");
 			addToDeezerPlaylistMenuItem.setOnAction(event -> {
-				Optional<PlaylistData> displayedPlaylist = playlistController.getDisplayedPlaylist();
+				Optional<PlaylistData> displayedPlaylist = deezerPanelController.getDisplayedPlaylist();
 				displayedPlaylist.ifPresent(playlist -> {
 					LastFmTrackData data = tableRow.getItem();
 					deezerLogicFacade.addLastFmTrackDeezerPlaylist(playlist.getUid(), data);
@@ -235,7 +235,7 @@ public class LastFmPanelController {
 	public void addLastFmTrackDeezerPlaylistAction(ActionEvent actionEvent) {
 		if (trackInfoContainer.getUserData() != null) {
 			LastFmTrackInfoData trackInfoData = (LastFmTrackInfoData) trackInfoContainer.getUserData();
-			Optional<PlaylistData> displayedPlaylist = playlistController.getDisplayedPlaylist();
+			Optional<PlaylistData> displayedPlaylist = deezerPanelController.getDisplayedPlaylist();
 			displayedPlaylist.ifPresent(playlist -> {
 				deezerLogicFacade.addLastFmTrackDeezerPlaylist(playlist.getUid(), trackInfoData);
 			});
