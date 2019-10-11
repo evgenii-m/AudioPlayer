@@ -11,15 +11,12 @@ import ru.push.caudioplayer.core.facades.DeezerLogicFacade;
 import ru.push.caudioplayer.core.facades.dto.LastFmTrackData;
 import ru.push.caudioplayer.core.facades.dto.LastFmTrackInfoData;
 import ru.push.caudioplayer.core.facades.dto.PlaylistData;
-import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
 import ru.push.caudioplayer.core.playlist.PlaylistService;
 import ru.push.caudioplayer.core.playlist.dto.TrackData;
 import ru.push.caudioplayer.core.playlist.model.Playlist;
 import ru.push.caudioplayer.utils.DateTimeUtils;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -27,8 +24,6 @@ import java.util.Properties;
 public class DeezerLogicFacadeImpl extends AbstractPlaylistLogicFacadeImpl implements DeezerLogicFacade {
 
 	private static final Logger LOG = LoggerFactory.getLogger(DeezerLogicFacadeImpl.class);
-
-	private final List<AudioPlayerEventListener> eventListeners;
 
 	@Autowired
 	private DeezerApiService deezerApiService;
@@ -43,7 +38,7 @@ public class DeezerLogicFacadeImpl extends AbstractPlaylistLogicFacadeImpl imple
 
 
 	public DeezerLogicFacadeImpl() {
-		this.eventListeners = new ArrayList<>();
+		super();
 	}
 
 	@Override
