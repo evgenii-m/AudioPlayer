@@ -76,7 +76,6 @@ public class PlaylistData {
 
 	@Override
 	public int hashCode() {
-
 		return Objects.hash(uid);
 	}
 

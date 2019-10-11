@@ -9,7 +9,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
@@ -24,11 +23,9 @@ import ru.push.caudioplayer.ConfigurationControllers;
 import ru.push.caudioplayer.core.config.ApplicationConfigService;
 import ru.push.caudioplayer.core.config.dto.PlaylistContainerViewConfigurations;
 import ru.push.caudioplayer.core.facades.AudioPlayerFacade;
-import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
 import ru.push.caudioplayer.core.facades.PlaylistLogicFacade;
 import ru.push.caudioplayer.core.facades.dto.PlaylistData;
 import ru.push.caudioplayer.core.facades.dto.TrackData;
-import ru.push.caudioplayer.core.mediaplayer.AudioPlayerEventListener;
 import ru.push.caudioplayer.core.mediaplayer.DefaultAudioPlayerEventAdapter;
 import ru.push.caudioplayer.utils.TrackTimeLabelBuilder;
 
@@ -38,11 +35,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class PlaylistComponentBaseController {
 
@@ -72,6 +71,7 @@ public abstract class PlaylistComponentBaseController {
 	@Autowired
 	protected ConfirmActionPopupController confirmActionPopupController;
 
+	protected List<PlaylistData> playlists;
 	protected PlaylistData displayedPlaylist;
 
 
@@ -82,8 +82,10 @@ public abstract class PlaylistComponentBaseController {
 
 	public void init() {
 		// configure playlist browser container
+		playlists = getPlaylistLogicFacade().getPlaylists();
+		displayedPlaylist = playlists.stream().findFirst().orElse(null);
 		setPlaylistBrowserContainerCellFactory(getPlaylistBrowserContainer());
-		setPlaylistBrowserContainerItems(getPlaylistBrowserContainer(), getPlaylistLogicFacade().getPlaylists());
+		setPlaylistBrowserContainerItems(getPlaylistBrowserContainer(), playlists);
 
 		// configure playlist content container
 		setPlaylistContainerColumns(getPlaylistContentContainer(),
@@ -130,7 +132,7 @@ public abstract class PlaylistComponentBaseController {
 
 	@FXML
 	public void refreshPlaylists(ActionEvent actionEvent) {
-		List<PlaylistData> playlists = getPlaylistLogicFacade().getPlaylists();
+		playlists = getPlaylistLogicFacade().getPlaylists();
 		displayedPlaylist = playlists.stream().findFirst().orElse(null);
 
 		setPlaylistBrowserContainerItems(getPlaylistBrowserContainer(), playlists);
@@ -208,12 +210,19 @@ public abstract class PlaylistComponentBaseController {
 	}
 
 	protected void setPlaylistBrowserContainerItems(ListView<PlaylistData> container, List<PlaylistData> playlists) {
-		if (CollectionUtils.isNotEmpty(playlists)) {
-			container.getItems().clear();
+		container.getItems().clear();
+		if (playlists != null) {
 			container.getItems().addAll(playlists);
 			if ((displayedPlaylist != null) && playlists.contains(displayedPlaylist)) {
 				container.getSelectionModel().select(displayedPlaylist);
 			}
+		}
+	}
+
+	protected void setPlaylistContentContainerItems(PlaylistData playlistData) {
+		getPlaylistContentContainer().getItems().clear();
+		if (playlistData != null) {
+			getPlaylistContentContainer().getItems().addAll(playlistData.getTracks());
 		}
 	}
 
@@ -273,13 +282,6 @@ public abstract class PlaylistComponentBaseController {
 		playlistContainer.getColumns().addAll(nowPlayingCol, numberCol, artistCol, albumCol, titleCol, lengthCol);
 	}
 
-	protected void setPlaylistContentContainerItems(PlaylistData playlistData) {
-		if (playlistData != null) {
-			getPlaylistContentContainer().getItems().clear();
-			getPlaylistContentContainer().getItems().addAll(playlistData.getTracks());
-		}
-	}
-
 	protected void savePlaylistContainerViewConfiguration() {
 		List<PlaylistContainerViewConfigurations.PlaylistContainerColumn> columns = getPlaylistContentContainer().getColumns().stream()
 				.map(tc ->
@@ -311,7 +313,94 @@ public abstract class PlaylistComponentBaseController {
 		return Optional.ofNullable(displayedPlaylist);
 	}
 
+	protected void filterPlaylistsBySearchQuery(String searchQuery) {
+		List<String> searchQueryWords = Stream.of(searchQuery.trim().split("\\s+"))
+				.map(String::trim)
+				.collect(Collectors.toList());
+
+		ListView<PlaylistData> playlistBrowserContainer = getPlaylistBrowserContainer();
+		List<PlaylistData> filteredPlaylists = CollectionUtils.isNotEmpty(searchQueryWords) ?
+				playlists.stream()
+						.filter(o -> searchQueryWords.stream().allMatch(s -> o.getTitle().toLowerCase().contains(s.toLowerCase())))
+						.collect(Collectors.toList()) :
+				playlists;
+		setPlaylistBrowserContainerItems(playlistBrowserContainer, filteredPlaylists);
+	}
+
 	protected abstract class BaseAudioPlayerEventAdapter extends DefaultAudioPlayerEventAdapter {
+
+		@Override
+		public void changedPlaylist(PlaylistData playlistData) {
+			updatePlaylistData(playlistData);
+			updateContainerItemPlaylistData(playlistData);
+			if ((displayedPlaylist != null) && (displayedPlaylist.equals(playlistData))) {
+				setPlaylistContentContainerItems(playlistData);
+			}
+		}
+
+		@Override
+		public void createdNewPlaylist(PlaylistData playlistData) {
+			playlists.add(playlistData);
+			getPlaylistBrowserContainer().getItems().add(playlistData);
+			getPlaylistBrowserContainer().getSelectionModel().select(playlistData);
+			setPlaylistContentContainerItems(playlistData);
+		}
+
+		@Override
+		public void changedTrackData(PlaylistData playlistData, TrackData trackData) {
+			updatePlaylistData(playlistData);
+			getPlaylistBrowserContainer().getItems().stream()
+					.filter(o -> o.equals(playlistData)).findFirst()
+					.ifPresent(p -> {
+						p.getTracks().stream()
+								.filter(o -> o.equals(trackData)).findFirst()
+								.ifPresent(t -> {
+									int trackIndex = p.getTracks().indexOf(t);
+									p.getTracks().set(trackIndex, trackData);
+								});
+					});
+			if ((displayedPlaylist != null) && (displayedPlaylist.equals(playlistData))) {
+				updateContainerItemTrackData(trackData);
+			}
+		}
+
+		@Override
+		public void renamedPlaylist(PlaylistData playlistData) {
+			updatePlaylistData(playlistData);
+			updateContainerItemPlaylistData(playlistData);
+		}
+
+		@Override
+		public void deletedPlaylist(PlaylistData playlistData) {
+			playlists.remove(playlistData);
+			getPlaylistBrowserContainer().getItems().stream()
+					.filter(p -> p.getUid().equals(playlistData.getUid())).findFirst()
+					.ifPresent(p -> getPlaylistBrowserContainer().getItems().remove(p));
+			getPlaylistBrowserContainer().refresh();
+		}
+
+		@Override
+		public void changedNowPlayingTrack(TrackData trackData) {
+			getPlaylistBrowserContainer().getItems().stream()
+					.map(PlaylistData::getTracks)
+					.flatMap(Collection::stream)
+					.forEach(o -> o.setNowPlaying(o.equals(trackData) && trackData.isNowPlaying()));
+			if ((displayedPlaylist != null) && (displayedPlaylist.getUid().equals(trackData.getPlaylistUid()))) {
+				getPlaylistBrowserContainer().refresh();
+			}
+		}
+
+		protected void updatePlaylistData(PlaylistData playlistData) {
+			int playlistIndex = playlists.indexOf(playlistData);
+			if (playlistIndex >= 0) {
+				playlists.set(playlistIndex, playlistData);
+				if (displayedPlaylist.equals(playlistData)) {
+					displayedPlaylist = playlistData;
+				}
+			} else {
+				LOG.warn("Playlist not found in controller: playlistData = {}", playlistData);
+			}
+		}
 
 		protected void updateContainerItemPlaylistData(PlaylistData playlistData) {
 			getPlaylistBrowserContainer().getItems().stream()

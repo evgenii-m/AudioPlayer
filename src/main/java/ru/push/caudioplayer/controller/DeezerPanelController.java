@@ -16,16 +16,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.push.caudioplayer.core.facades.DeezerLogicFacade;
-import ru.push.caudioplayer.core.facades.MusicLibraryLogicFacade;
 import ru.push.caudioplayer.core.facades.PlaylistLogicFacade;
 import ru.push.caudioplayer.core.facades.dto.PlaylistData;
 import ru.push.caudioplayer.core.facades.dto.TrackData;
 
 import javax.annotation.PostConstruct;
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  */
@@ -161,68 +157,7 @@ public class DeezerPanelController extends PlaylistComponentBaseController {
 		searchQueryTextField.clear();
 	}
 
-	private void filterPlaylistsBySearchQuery(String newValue) {
-//		List<PlaylistData> deezerPlaylists = deezerLogicFacade.getPlaylists();
-//		setPlaylistBrowserContainerItems(playlistBrowserContainer, deezerPlaylists);
-//		setPlaylistContentContainerItems(displayedPlaylist);
-	}
 
 	private final class PlaylistAudioPlayerEventAdapter extends BaseAudioPlayerEventAdapter {
-
-		@Override
-		public void changedPlaylist(PlaylistData playlistData) {
-			updateContainerItemPlaylistData(playlistData);
-			if ((displayedPlaylist != null) && (displayedPlaylist.equals(playlistData))) {
-				setPlaylistContentContainerItems(playlistData);
-			}
-		}
-
-		@Override
-		public void createdNewPlaylist(PlaylistData playlistData) {
-			playlistBrowserContainer.getItems().add(playlistData);
-			playlistBrowserContainer.getSelectionModel().select(playlistData);
-			setPlaylistContentContainerItems(playlistData);
-		}
-
-		@Override
-		public void changedTrackData(PlaylistData playlistData, TrackData trackData) {
-			playlistBrowserContainer.getItems().stream()
-					.filter(o -> o.equals(playlistData)).findFirst()
-					.ifPresent(p -> {
-						p.getTracks().stream()
-								.filter(o -> o.equals(trackData)).findFirst()
-								.ifPresent(t -> {
-									int trackIndex = p.getTracks().indexOf(t);
-									p.getTracks().set(trackIndex, trackData);
-								});
-					});
-			if ((displayedPlaylist != null) && (displayedPlaylist.equals(playlistData))) {
-				updateContainerItemTrackData(trackData);
-			}
-		}
-
-		@Override
-		public void renamedPlaylist(PlaylistData playlistData) {
-			updateContainerItemPlaylistData(playlistData);
-		}
-
-		@Override
-		public void deletedPlaylist(PlaylistData playlistData) {
-			playlistBrowserContainer.getItems().stream()
-					.filter(p -> p.getUid().equals(playlistData.getUid())).findFirst()
-					.ifPresent(p -> playlistBrowserContainer.getItems().remove(p));
-			playlistBrowserContainer.refresh();
-		}
-
-		@Override
-		public void changedNowPlayingTrack(TrackData trackData) {
-			playlistBrowserContainer.getItems().stream()
-					.map(PlaylistData::getTracks)
-					.flatMap(Collection::stream)
-					.forEach(o -> o.setNowPlaying(o.equals(trackData) && trackData.isNowPlaying()));
-			if ((displayedPlaylist != null) && (displayedPlaylist.getUid().equals(trackData.getPlaylistUid()))) {
-				playlistContentContainer.refresh();
-			}
-		}
 	}
 }
