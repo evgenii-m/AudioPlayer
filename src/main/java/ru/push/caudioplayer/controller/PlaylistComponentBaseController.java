@@ -305,6 +305,9 @@ public abstract class PlaylistComponentBaseController {
 	}
 
 	Optional<PlaylistData> getDisplayedPlaylist() {
+		if (displayedPlaylist == null) {
+			LOG.warn("Displayed playlist not set");
+		}
 		return Optional.ofNullable(displayedPlaylist);
 	}
 

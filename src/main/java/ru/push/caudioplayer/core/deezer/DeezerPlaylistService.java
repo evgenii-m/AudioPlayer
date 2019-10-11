@@ -10,4 +10,6 @@ public interface DeezerPlaylistService extends PlaylistService {
 	Playlist addTrackToDeezerPlaylist(String playlistUid, TrackData trackData);
 
 	Playlist addTrackToDeezerFavoritesPlaylist(TrackData trackData);
+
+	Playlist addTrackToDeezerPlaylist(Playlist playlist, TrackData trackData);
 }

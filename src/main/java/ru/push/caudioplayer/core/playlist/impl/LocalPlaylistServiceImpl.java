@@ -39,8 +39,6 @@ public class LocalPlaylistServiceImpl implements LocalPlaylistService {
 	private static final String DEFAULT_PLAYLIST_TITLE = "New playlist";
 
 	@Autowired
-	private DeezerApiService deezerApiService;
-	@Autowired
 	private ApplicationConfigService applicationConfigService;
 	@Autowired
 	private PlaylistRepository localPlaylistRepository;
@@ -254,7 +252,7 @@ public class LocalPlaylistServiceImpl implements LocalPlaylistService {
 			return null;
 		}
 		if (playlist.isReadOnly()) {
-			LOG.warn("Read only playlist cannot be deleted: uid = {}", playlistUid);
+			LOG.warn("Read only playlist cannot be renamed: uid = {}", playlistUid);
 			return null;
 		}
 
@@ -295,7 +293,7 @@ public class LocalPlaylistServiceImpl implements LocalPlaylistService {
 			return null;
 		}
 		if (playlist.isReadOnly()) {
-			LOG.warn("Read only playlist cannot be deleted: uid = {}", playlistUid);
+			LOG.warn("Cannot add items to read only playlist: uid = {}", playlistUid);
 			return null;
 		}
 
@@ -320,7 +318,7 @@ public class LocalPlaylistServiceImpl implements LocalPlaylistService {
 			return null;
 		}
 		if (playlist.isReadOnly()) {
-			LOG.warn("Read only playlist cannot be deleted: uid = {}", playlistUid);
+			LOG.warn("Cannot add items to read only playlist: uid = {}", playlistUid);
 			return null;
 		}
 
@@ -359,7 +357,7 @@ public class LocalPlaylistServiceImpl implements LocalPlaylistService {
 			return null;
 		}
 		if (playlist.isReadOnly()) {
-			LOG.warn("Read only playlist cannot be deleted: uid = {}", playlistUid);
+			LOG.warn("Cannot delete items from read only playlist: uid = {}", playlistUid);
 			return null;
 		}
 

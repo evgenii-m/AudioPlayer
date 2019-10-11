@@ -168,59 +168,50 @@ public class DeezerPanelController extends PlaylistComponentBaseController {
 	}
 
 	private final class PlaylistAudioPlayerEventAdapter extends BaseAudioPlayerEventAdapter {
-		@Override
-		public void changedPlaylist(PlaylistData playlistData) {
-			if (playlistData.isDeezer()) {
-				updateContainerItemPlaylistData(playlistData);
-				if ((displayedPlaylist != null) && (displayedPlaylist.equals(playlistData))) {
-					setPlaylistContentContainerItems(playlistData);
-				}
-			}
-		}
 
 		@Override
-		public void createdNewPlaylist(PlaylistData playlistData) {
-			if (playlistData.isDeezer()) {
-				playlistBrowserContainer.getItems().add(playlistData);
-				playlistBrowserContainer.getSelectionModel().select(playlistData);
+		public void changedPlaylist(PlaylistData playlistData) {
+			updateContainerItemPlaylistData(playlistData);
+			if ((displayedPlaylist != null) && (displayedPlaylist.equals(playlistData))) {
 				setPlaylistContentContainerItems(playlistData);
 			}
 		}
 
 		@Override
+		public void createdNewPlaylist(PlaylistData playlistData) {
+			playlistBrowserContainer.getItems().add(playlistData);
+			playlistBrowserContainer.getSelectionModel().select(playlistData);
+			setPlaylistContentContainerItems(playlistData);
+		}
+
+		@Override
 		public void changedTrackData(PlaylistData playlistData, TrackData trackData) {
-			if (playlistData.isDeezer()) {
-				playlistBrowserContainer.getItems().stream()
-						.filter(o -> o.equals(playlistData)).findFirst()
-						.ifPresent(p -> {
-							p.getTracks().stream()
-									.filter(o -> o.equals(trackData)).findFirst()
-									.ifPresent(t -> {
-										int trackIndex = p.getTracks().indexOf(t);
-										p.getTracks().set(trackIndex, trackData);
-									});
-						});
-				if ((displayedPlaylist != null) && (displayedPlaylist.equals(playlistData))) {
-					updateContainerItemTrackData(trackData);
-				}
+			playlistBrowserContainer.getItems().stream()
+					.filter(o -> o.equals(playlistData)).findFirst()
+					.ifPresent(p -> {
+						p.getTracks().stream()
+								.filter(o -> o.equals(trackData)).findFirst()
+								.ifPresent(t -> {
+									int trackIndex = p.getTracks().indexOf(t);
+									p.getTracks().set(trackIndex, trackData);
+								});
+					});
+			if ((displayedPlaylist != null) && (displayedPlaylist.equals(playlistData))) {
+				updateContainerItemTrackData(trackData);
 			}
 		}
 
 		@Override
 		public void renamedPlaylist(PlaylistData playlistData) {
-			if (playlistData.isDeezer()) {
-				updateContainerItemPlaylistData(playlistData);
-			}
+			updateContainerItemPlaylistData(playlistData);
 		}
 
 		@Override
 		public void deletedPlaylist(PlaylistData playlistData) {
-			if (playlistData.isDeezer()) {
-				playlistBrowserContainer.getItems().stream()
-						.filter(p -> p.getUid().equals(playlistData.getUid())).findFirst()
-						.ifPresent(p -> playlistBrowserContainer.getItems().remove(p));
-				playlistBrowserContainer.refresh();
-			}
+			playlistBrowserContainer.getItems().stream()
+					.filter(p -> p.getUid().equals(playlistData.getUid())).findFirst()
+					.ifPresent(p -> playlistBrowserContainer.getItems().remove(p));
+			playlistBrowserContainer.refresh();
 		}
 
 		@Override

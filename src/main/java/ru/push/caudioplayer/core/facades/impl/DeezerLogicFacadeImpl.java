@@ -168,7 +168,7 @@ public class DeezerLogicFacadeImpl extends AbstractPlaylistLogicFacadeImpl imple
 		}
 
 		if (monthlyPlaylist != null) {
-			Playlist resultPlaylist = deezerPlaylistService.addTrackToDeezerPlaylist(monthlyPlaylist.getUid(), trackData);
+			Playlist resultPlaylist = deezerPlaylistService.addTrackToDeezerPlaylist(monthlyPlaylist, trackData);
 			if (resultPlaylist != null) {
 				eventListeners.forEach(listener -> listener.changedPlaylist(dtoMapper.mapPlaylistData(resultPlaylist)));
 				sendNotification(

@@ -80,6 +80,7 @@ public class PlaylistController extends PlaylistComponentBaseController {
 	@PreDestroy
 	public void stop() {
 		// save active and displayed playlists UID
+		// TODO: think about delete this fragment
 		PlaylistData activePlaylist = musicLibraryLogicFacade.getActivePlaylist();
 		if (activePlaylist != null) {
 			applicationConfigService.saveActivePlaylist(activePlaylist.getUid());
@@ -189,65 +190,51 @@ public class PlaylistController extends PlaylistComponentBaseController {
 		}
 	}
 
-	Optional<PlaylistData> getDisplayedPlaylist() {
-  	return Optional.ofNullable(displayedPlaylist);
-	}
-
-
 	private final class PlaylistAudioPlayerEventAdapter extends BaseAudioPlayerEventAdapter {
+
 		@Override
 		public void changedPlaylist(PlaylistData playlistData) {
-			if (playlistData.isLocal()) {
-				updateContainerItemPlaylistData(playlistData);
-				if ((displayedPlaylist != null) && (displayedPlaylist.equals(playlistData))) {
-					setPlaylistContentContainerItems(playlistData);
-				}
-			}
-		}
-
-		@Override
-		public void createdNewPlaylist(PlaylistData playlistData) {
-			if (playlistData.isLocal()) {
-				playlistBrowserContainer.getItems().add(playlistData);
-				playlistBrowserContainer.getSelectionModel().select(playlistData);
+			updateContainerItemPlaylistData(playlistData);
+			if ((displayedPlaylist != null) && (displayedPlaylist.equals(playlistData))) {
 				setPlaylistContentContainerItems(playlistData);
 			}
 		}
 
 		@Override
+		public void createdNewPlaylist(PlaylistData playlistData) {
+			playlistBrowserContainer.getItems().add(playlistData);
+			playlistBrowserContainer.getSelectionModel().select(playlistData);
+			setPlaylistContentContainerItems(playlistData);
+		}
+
+		@Override
 		public void changedTrackData(PlaylistData playlistData, TrackData trackData) {
-			if (playlistData.isLocal()) {
-				playlistBrowserContainer.getItems().stream()
-						.filter(o -> o.equals(playlistData)).findFirst()
-						.ifPresent(p -> {
-							p.getTracks().stream()
-									.filter(o -> o.equals(trackData)).findFirst()
-									.ifPresent(t -> {
-										int trackIndex = p.getTracks().indexOf(t);
-										p.getTracks().set(trackIndex, trackData);
-									});
-						});
-				if ((displayedPlaylist != null) && (displayedPlaylist.equals(playlistData))) {
-					updateContainerItemTrackData(trackData);
-				}
+			playlistBrowserContainer.getItems().stream()
+					.filter(o -> o.equals(playlistData)).findFirst()
+					.ifPresent(p -> {
+						p.getTracks().stream()
+								.filter(o -> o.equals(trackData)).findFirst()
+								.ifPresent(t -> {
+									int trackIndex = p.getTracks().indexOf(t);
+									p.getTracks().set(trackIndex, trackData);
+								});
+					});
+			if ((displayedPlaylist != null) && (displayedPlaylist.equals(playlistData))) {
+				updateContainerItemTrackData(trackData);
 			}
 		}
 
 		@Override
 		public void renamedPlaylist(PlaylistData playlistData) {
-			if (playlistData.isLocal()) {
-				updateContainerItemPlaylistData(playlistData);
-			}
+			updateContainerItemPlaylistData(playlistData);
 		}
 
 		@Override
 		public void deletedPlaylist(PlaylistData playlistData) {
-			if (playlistData.isLocal()) {
-				playlistBrowserContainer.getItems().stream()
-						.filter(p -> p.getUid().equals(playlistData.getUid())).findFirst()
-						.ifPresent(p -> playlistBrowserContainer.getItems().remove(p));
-				playlistBrowserContainer.refresh();
-			}
+			playlistBrowserContainer.getItems().stream()
+					.filter(p -> p.getUid().equals(playlistData.getUid())).findFirst()
+					.ifPresent(p -> playlistBrowserContainer.getItems().remove(p));
+			playlistBrowserContainer.refresh();
 		}
 
 		@Override

@@ -16,10 +16,13 @@ import ru.push.caudioplayer.utils.DateTimeUtils;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class DeezerPlaylistServiceImpl implements DeezerPlaylistService {
@@ -33,14 +36,23 @@ public class DeezerPlaylistServiceImpl implements DeezerPlaylistService {
 	@Resource(name = "deezerPlaylistMapper")
 	private PlaylistMapper playlistMapper;
 
-	private Playlist deezerFavoritesPlaylist;
+	private final Map<String, String> playlistsTitleCache;	// <playlist uid, playlist title>
+	private String deezerFavoritesPlaylistUid;
 
+
+	public DeezerPlaylistServiceImpl() {
+		playlistsTitleCache = new HashMap<>();
+	}
 
 	@Override
 	public Optional<Playlist> getPlaylist(String playlistUid) {
 		try {
 			return Optional.ofNullable(deezerApiService.getPlaylist(Long.valueOf(playlistUid)))
-					.map(p -> playlistMapper.mapPlaylist(p));
+					.map(p -> {
+						Playlist playlist = playlistMapper.mapPlaylist(p);
+						updatePlaylistsTitleCache(playlist);
+						return playlist;
+					});
 		} catch (DeezerApiErrorException e) {
 			LOG.error("Deezer playlist repository not initialized correctly");
 			return Optional.empty();
@@ -49,27 +61,37 @@ public class DeezerPlaylistServiceImpl implements DeezerPlaylistService {
 
 	@Override
 	public List<Playlist> getPlaylistByTitle(String title) {
-		return getPlaylists().stream()
-				.filter(p -> p.getTitle().equals(title))
+		List<String> playlistsUid = playlistsTitleCache.entrySet().stream()
+				.filter(e -> e.getValue().equals(title))
+				.map(Map.Entry::getKey)
 				.collect(Collectors.toList());
+
+		if (!CollectionUtils.isEmpty(playlistsUid)) {
+			return playlistsUid.stream()
+					.map(this::getPlaylist)
+					.filter(Optional::isPresent)
+					.map(Optional::get)
+					.collect(Collectors.toList());
+
+		} else {
+			LOG.debug("Title not found in playlists cache, all user playlists will need to be loaded: title = {}", title);
+			return getPlaylists().stream()
+					.filter(p -> p.getTitle().equals(title))
+					.collect(Collectors.toList());
+		}
 	}
 
 	@Override
 	public List<Playlist> getPlaylists() {
 		try {
 			List<ru.push.caudioplayer.core.deezer.model.Playlist> playlistsDeezer = deezerApiService.getPlaylists();
-			Optional<Long> favoritesPlaylistId = playlistsDeezer.stream()
+			playlistsDeezer.stream()
 					.filter(p -> p.getIs_loved_track())
-					.map(p -> p.getId()).findFirst();
+					.map(p -> String.valueOf(p.getId()))
+					.findFirst()
+					.ifPresent(uid -> deezerFavoritesPlaylistUid = uid);
 			List<Playlist> playlists = playlistMapper.mapPlaylist(playlistsDeezer);
-
-			favoritesPlaylistId.ifPresent(
-					id -> playlists.stream()
-							.filter(p -> p.getUid().equals(String.valueOf(id)))
-							.findFirst().ifPresent(
-									p -> deezerFavoritesPlaylist = p
-							)
-			);
+			setPlaylistsTitleCache(playlists);
 			return playlists;
 		} catch (DeezerApiErrorException e) {
 			LOG.error("Deezer playlist repository not initialized correctly");
@@ -91,6 +113,7 @@ public class DeezerPlaylistServiceImpl implements DeezerPlaylistService {
 			if (newPlaylistId != null) {
 				ru.push.caudioplayer.core.deezer.model.Playlist playlist = deezerApiService.getPlaylist(newPlaylistId);
 				Playlist newPlaylist = playlistMapper.mapPlaylist(playlist);
+				updatePlaylistsTitleCache(newPlaylist);
 				return newPlaylist;
 			}
 		} catch (DeezerApiErrorException e) {
@@ -118,6 +141,7 @@ public class DeezerPlaylistServiceImpl implements DeezerPlaylistService {
 
 			boolean deleteResult = deezerApiService.deletePlaylist(playlistId);
 			if (deleteResult) {
+				deleteFromPlaylistsTitleCache(playlistUid);
 				return playlist;
 			} else {
 				LOG.error("Deezer playlist delete fails: {}", playlistUid);
@@ -142,12 +166,14 @@ public class DeezerPlaylistServiceImpl implements DeezerPlaylistService {
 				return null;
 			}
 			if (playlist.isReadOnly()) {
-				LOG.warn("Read only playlist cannot be deleted: uid = {}", playlistUid);
+				LOG.warn("Read only playlist cannot be renamed: uid = {}", playlistUid);
 				return null;
 			}
 
 			boolean renameResult = deezerApiService.renamePlaylist(playlistId, newTitle);
 			if (renameResult) {
+				playlist.setTitle(newTitle);
+				updatePlaylistsTitleCache(playlist);
 				return playlist;
 			} else {
 				LOG.error("Deezer playlist rename fails: uid = {}, new title = {}", playlistUid, newTitle);
@@ -178,7 +204,7 @@ public class DeezerPlaylistServiceImpl implements DeezerPlaylistService {
 				return null;
 			}
 			if (playlist.isReadOnly()) {
-				LOG.warn("Read only playlist cannot be deleted: uid = {}", playlistUid);
+				LOG.warn("Cannot delete items from read only playlist: uid = {}", playlistUid);
 				return null;
 			}
 
@@ -226,9 +252,14 @@ public class DeezerPlaylistServiceImpl implements DeezerPlaylistService {
 
 	@Override
 	public Playlist addTrackToDeezerFavoritesPlaylist(TrackData trackData) {
-		return deezerFavoritesPlaylist != null ?
-				addTrackToDeezerPlaylist(deezerFavoritesPlaylist.getUid(), trackData, true) :
+		return deezerFavoritesPlaylistUid != null ?
+				addTrackToDeezerPlaylist(deezerFavoritesPlaylistUid, trackData, true) :
 				null;
+	}
+
+	@Override
+	public Playlist addTrackToDeezerPlaylist(Playlist playlist, TrackData trackData) {
+		return addTrackToDeezerPlaylist(playlist, trackData, false);
 	}
 
 	private Playlist addTrackToDeezerPlaylist(String playlistUid, TrackData trackData, boolean force) {
@@ -243,32 +274,8 @@ public class DeezerPlaylistServiceImpl implements DeezerPlaylistService {
 				LOG.error("Deezer playlist not found: {}", playlistUid);
 				return null;
 			}
-			if (playlist.isReadOnly()) {
-				LOG.warn("Read only playlist cannot be deleted: uid = {}", playlistUid);
-				return null;
-			}
 
-
-			List<Track> searchedTracksResult = deezerApiService.searchTracksQuery(
-					formShortSearchQuery(trackData), formExtendedSearchQuery(trackData));
-			LOG.info("Searched {} tracks: {}", searchedTracksResult.size(), searchedTracksResult);
-
-			if (!CollectionUtils.isEmpty(searchedTracksResult)) {
-				Track searchedTrack = searchedTracksResult.get(0);
-				Long trackId = searchedTrack.getId();
-				boolean result = deezerApiService.addTrackToPlaylist(playlistId, trackId);
-				if (result) {
-					PlaylistTrack newItem = playlistMapper.mapPlaylistItem(playlist, searchedTrack);
-					playlist.getItems().add(newItem);
-					LOG.info("New items added to playlist: uid = {}, item = {}", playlistUid, newItem);
-				} else {
-					LOG.error("New item could not be added to Deezer playlist: playlist = {}", playlist);
-					playlist = null;
-				}
-			} else {
-				LOG.error("Track not found on Deezer: trackData = {}", trackData);
-				playlist = null;
-			}
+			return addTrackToDeezerPlaylist(playlist, trackData, force);
 
 		} catch (DeezerApiErrorException e) {
 			LOG.error("Deezer api error", e);
@@ -277,11 +284,70 @@ public class DeezerPlaylistServiceImpl implements DeezerPlaylistService {
 		return playlist;
 	}
 
+	private Playlist addTrackToDeezerPlaylist(Playlist playlist, TrackData trackData, boolean force) {
+		if (playlist.isReadOnly() && !force) {
+			LOG.warn("Cannot add items to read only playlist: uid = {}", playlist.getUid());
+			return null;
+		}
+
+		try {
+			List<Track> searchedTracksResult = deezerApiService.searchTracksQuery(
+					formShortSearchQuery(trackData), formExtendedSearchQuery(trackData));
+			LOG.info("Searched {} tracks: {}", searchedTracksResult.size(), searchedTracksResult);
+
+			if (!CollectionUtils.isEmpty(searchedTracksResult)) {
+				Track searchedTrack = searchedTracksResult.get(0);
+				Long trackId = searchedTrack.getId();
+				Long playlistId = Long.valueOf(playlist.getUid());
+				boolean result = deezerApiService.addTrackToPlaylist(playlistId, trackId);
+				if (result) {
+					PlaylistTrack newItem = playlistMapper.mapPlaylistItem(playlist, searchedTrack);
+					playlist.getItems().add(newItem);
+					LOG.info("New items added to playlist: uid = {}, item = {}", playlist.getUid(), newItem);
+				} else {
+					LOG.error("New item could not be added to Deezer playlist: playlist = {}", playlist);
+					playlist = null;
+				}
+			} else {
+				LOG.error("Track not found on Deezer: trackData = {}", trackData);
+				playlist = null;
+			}
+		} catch (DeezerApiErrorException e) {
+			LOG.error("Deezer api error", e);
+		}
+
+		return null;
+	}
+
 	private String formShortSearchQuery(TrackData trackData) {
 		return trackData.getArtist() + " " + trackData.getTitle();
 	}
 
 	private String formExtendedSearchQuery(TrackData trackData) {
 		return trackData.getArtist() + " " + trackData.getTitle() + " " + trackData.getAlbum();
+	}
+
+	private void setPlaylistsTitleCache(List<Playlist> playlists) {
+		playlistsTitleCache.clear();
+		playlistsTitleCache.putAll(
+				playlists.stream()
+						.collect(Collectors.toMap(Playlist::getUid, Playlist::getTitle))
+		);
+		LOG.debug("Playlists title cache was set: cache content = {}", playlistsTitleCache);
+	}
+
+	private void updatePlaylistsTitleCache(Playlist playlist) {
+		boolean updateEntry = playlistsTitleCache.containsKey(playlist.getUid());
+		playlistsTitleCache.put(playlist.getUid(), playlist.getTitle());
+		LOG.debug(updateEntry ?
+						"Playlists title cache entry was updated: playlist uid = {}, cache content = {}" :
+						"Playlists title cache entry was added: playlist uid = {}, cache content = {}",
+				playlist.getUid(), playlistsTitleCache);
+	}
+
+	private void deleteFromPlaylistsTitleCache(String playlistUid) {
+		playlistsTitleCache.remove(playlistUid);
+		LOG.debug("Playlists title cache entry was deleted: playlist uid = {}, cache content = {}",
+				playlistUid, playlistsTitleCache);
 	}
 }
